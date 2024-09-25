@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# TIP: Press `c-p` for previous history.
+file="$(basename "$(ls app/*.hs | fzf --history .fzf-history)")"
+./.venv/bin/oj-verify run "app/$file" # -j 8
+
