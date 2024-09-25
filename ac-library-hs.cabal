@@ -145,6 +145,7 @@ library
 
   -- Modules exported by the library.
   exposed-modules:
+    AtCoder.DSU
 
   -- Modules included in this library but not exported.
   -- other-modules:
