@@ -142,15 +142,11 @@ library
   hs-source-dirs:  src
 
 executable aclp-a
-  import:        dependencies
-  main-is:       aclp-a.hs
-  build-depends:
-    , base    ^>=4.17.1.0
-    , verify
+  import:         dependencies
+  main-is:        aclp-a.hs
+  build-depends: verify
 
 executable aclp-b
-  import:        dependencies
-  main-is:       aclp-b.hs
-  build-depends:
-    , base    ^>=4.17.1.0
-    , verify
+  import:         dependencies
+  main-is:        aclp-b.hs
+  build-depends: verify

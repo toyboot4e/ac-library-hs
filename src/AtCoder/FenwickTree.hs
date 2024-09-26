@@ -19,7 +19,6 @@ data FenwickTree s a = FenwickTree
 -- | \(O(n)\) Creates `FenwickTree`.
 new :: (PrimMonad m, Num a, VU.Unbox a) => Int -> m (FenwickTree (PrimState m) a)
 new nFT = do
-  -- TODO: fromInteger is faster?
   dataFT <- VUM.replicate nFT 0
   return FenwickTree {..}
 
