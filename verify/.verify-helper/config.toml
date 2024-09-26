@@ -1,0 +1,14 @@
+# https://online-judge-tools.github.io/verification-helper/document.ja.html
+#
+# - `{basedir}`
+#   Expands to the root directroy.
+#
+# - '{path}'
+#   Expands to the source file path relative to the root directroy, like `graph/shortest_paths.hs`.
+
+[languages.haskell]
+compile = "./compile {path}"
+execute = "./execute {path}"
+
+verification_file_suffix = ".hs"
+
