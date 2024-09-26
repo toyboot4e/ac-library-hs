@@ -147,6 +147,8 @@ library
   exposed-modules:
     AtCoder.DSU
     AtCoder.FenwickTree
+    AtCoder.Internal.Math
+    AtCoder.Math
 
   -- Modules included in this library but not exported.
   -- other-modules:

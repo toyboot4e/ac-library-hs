@@ -150,3 +150,8 @@ executable aclp-b
   import:         dependencies
   main-is:        aclp-b.hs
   build-depends: verify
+
+executable aclp-c
+  import:         dependencies
+  main-is:        aclp-c.hs
+  build-depends: verify

@@ -1,5 +1,5 @@
 -- | Minimum parse/print with @bytestring@.
-module Util (ints2, ints3, ints, unlinesBSB, unwordsBSB, putBSB, printBSB) where
+module Util (int, ints2, ints3, ints4, ints, unlinesBSB, unwordsBSB, putBSB, printBSB) where
 
 import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Char8 as BS
@@ -15,6 +15,13 @@ type Parser = StateT BS.ByteString Maybe
 -- | Parses an `Int`.
 intP :: Parser Int
 intP = StateT $ BS.readInt . BS.dropSpace
+
+-- | Parses @a@.
+int :: IO Int
+int = do
+  line <- BS.getLine
+  return . fromMaybe (error "int") . (`evalStateT` line) $ do
+    intP
 
 -- | Parses @a b@.
 ints2 :: IO (Int, Int)
@@ -34,6 +41,17 @@ ints3 = do
     x2 <- intP
     x3 <- intP
     return (x1, x2, x3)
+
+-- | Parses @a b c d@.
+ints4 :: IO (Int, Int, Int, Int)
+ints4 = do
+  line <- BS.getLine
+  return . fromMaybe (error "ints4") . (`evalStateT` line) $ do
+    x1 <- intP
+    x2 <- intP
+    x3 <- intP
+    x4 <- intP
+    return (x1, x2, x3, x4)
 
 -- | Parses @a b c ..@.
 ints :: IO (VU.Vector Int)
