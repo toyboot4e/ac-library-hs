@@ -147,3 +147,10 @@ executable aclp-a
   build-depends:
     , base    ^>=4.17.1.0
     , verify
+
+executable aclp-b
+  import:        dependencies
+  main-is:       aclp-b.hs
+  build-depends:
+    , base    ^>=4.17.1.0
+    , verify

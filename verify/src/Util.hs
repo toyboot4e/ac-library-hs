@@ -1,5 +1,5 @@
 -- | Minimum parse/print with @bytestring@.
-module Util (ints2, ints3, unlinesBSB, unwordsBSB, putBSB, printBSB) where
+module Util (ints2, ints3, ints, unlinesBSB, unwordsBSB, putBSB, printBSB) where
 
 import qualified Data.ByteString.Builder as BSB
 import qualified Data.ByteString.Char8 as BS
@@ -34,6 +34,10 @@ ints3 = do
     x2 <- intP
     x3 <- intP
     return (x1, x2, x3)
+
+-- | Parses @a b c ..@.
+ints :: IO (VU.Vector Int)
+ints = VU.unfoldr (BS.readInt . BS.dropSpace) <$> BS.getLine
 
 {-# INLINE wsBSB #-}
 wsBSB :: BSB.Builder
