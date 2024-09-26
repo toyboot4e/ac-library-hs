@@ -7,14 +7,13 @@ TODO: Windows サポート
 ## セットアップ (仮)
 
 ```sh
-$ cd verify/                                                                                main ⬆ ✖ ✱ ◼
-$ python3 -m venv .venv                                                                   main ⬆ ✖ ✱ ◼
-$ python3 -m venv .venv                                                                   main ⬆ ✖ ✱ ◼
+$ cd verify/
+$ python3 -m venv .venv
 $ source .venv/bin/activate
 $ # source .venv/bin/activate.fish # on fish shell
 (.venv) $ which pip3
 /home/tbm/dev/hs/acl-hs/verify/.venv/bin/pip3
-(.venv) ❯❯❯ pip3 install online-judge-verify-helper
+(.venv) $ pip3 install online-judge-verify-helper
 (略)
 ```
 

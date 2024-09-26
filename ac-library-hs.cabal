@@ -188,5 +188,4 @@ test-suite ac-library-hs-test
   main-is:          Main.hs
 
   -- Test dependencies.
-  build-depends:
-    , ac-library-hs
+  build-depends:    ac-library-hs
