@@ -147,8 +147,11 @@ library
   exposed-modules:
     AtCoder.DSU
     AtCoder.FenwickTree
+    AtCoder.Internal.Buffer
     AtCoder.Internal.Math
+    AtCoder.Internal.Queue
     AtCoder.Math
+    AtCoder.MaxFlow
 
   -- Modules included in this library but not exported.
   -- other-modules:

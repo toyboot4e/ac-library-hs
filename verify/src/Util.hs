@@ -1,9 +1,9 @@
 -- | Minimum parse/print with @bytestring@.
-module Util (int, ints2, ints3, ints4, ints, unlinesBSB, unwordsBSB, putBSB, printBSB) where
+module Util (int, ints2, ints3, ints4, ints, unlinesBSB, unlinesWithBSB, unwordsBSB, putBSB, printBSB) where
 
-import qualified Data.ByteString.Builder as BSB
-import qualified Data.ByteString.Char8 as BS
-import Control.Monad.Trans.State.Strict (evalStateT, StateT(..))
+import Control.Monad.Trans.State.Strict (StateT (..), evalStateT)
+import Data.ByteString.Builder qualified as BSB
+import Data.ByteString.Char8 qualified as BS
 import Data.Maybe (fromMaybe)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
@@ -16,14 +16,16 @@ type Parser = StateT BS.ByteString Maybe
 intP :: Parser Int
 intP = StateT $ BS.readInt . BS.dropSpace
 
--- | Parses @a@.
+-- * Line getter
+
+-- | Gets @a@.
 int :: IO Int
 int = do
   line <- BS.getLine
   return . fromMaybe (error "int") . (`evalStateT` line) $ do
     intP
 
--- | Parses @a b@.
+-- | Gets @a b@.
 ints2 :: IO (Int, Int)
 ints2 = do
   line <- BS.getLine
@@ -32,7 +34,7 @@ ints2 = do
     x2 <- intP
     return (x1, x2)
 
--- | Parses @a b c@.
+-- | Gets @a b c@.
 ints3 :: IO (Int, Int, Int)
 ints3 = do
   line <- BS.getLine
@@ -42,7 +44,7 @@ ints3 = do
     x3 <- intP
     return (x1, x2, x3)
 
--- | Parses @a b c d@.
+-- | Gets @a b c d@.
 ints4 :: IO (Int, Int, Int, Int)
 ints4 = do
   line <- BS.getLine
@@ -53,9 +55,11 @@ ints4 = do
     x4 <- intP
     return (x1, x2, x3, x4)
 
--- | Parses @a b c ..@.
+-- | Gets @a b c ..@.
 ints :: IO (VU.Vector Int)
 ints = VU.unfoldr (BS.readInt . BS.dropSpace) <$> BS.getLine
+
+-- * Handy bytestirng @Builder@
 
 {-# INLINE wsBSB #-}
 wsBSB :: BSB.Builder
@@ -65,19 +69,23 @@ wsBSB = BSB.char7 ' '
 endlBSB :: BSB.Builder
 endlBSB = BSB.char7 '\n'
 
-{-# INLINE intersperseBSB #-}
-intersperseBSB :: (VG.Vector v Int) => BSB.Builder -> v Int -> BSB.Builder
-intersperseBSB del vec
+{-# INLINE intersperseWithBSB #-}
+intersperseWithBSB :: (VG.Vector v a) => (a -> BSB.Builder) -> BSB.Builder -> v a -> BSB.Builder
+intersperseWithBSB showF del vec
   | VG.null vec = mempty
-  | otherwise = BSB.intDec (VG.head vec) <> VG.foldMap ((del <>) . BSB.intDec) (VG.tail vec)
+  | otherwise = showF (VG.head vec) <> VG.foldMap ((del <>) . showF) (VG.tail vec)
 
 {-# INLINE unwordsBSB #-}
 unwordsBSB :: VU.Vector Int -> BSB.Builder
-unwordsBSB = intersperseBSB wsBSB
+unwordsBSB = intersperseWithBSB BSB.intDec wsBSB
 
 {-# INLINE unlinesBSB #-}
 unlinesBSB :: VU.Vector Int -> BSB.Builder
-unlinesBSB = intersperseBSB endlBSB
+unlinesBSB = intersperseWithBSB BSB.intDec endlBSB
+
+{-# INLINE unlinesWithBSB #-}
+unlinesWithBSB :: (VG.Vector v a) => (a -> BSB.Builder) -> v a -> BSB.Builder
+unlinesWithBSB showF = intersperseWithBSB showF endlBSB
 
 {-# INLINE putBSB #-}
 putBSB :: BSB.Builder -> IO ()
@@ -86,4 +94,3 @@ putBSB = BSB.hPutBuilder stdout
 {-# INLINE printBSB #-}
 printBSB :: BSB.Builder -> IO ()
 printBSB = putBSB . (<> endlBSB)
-
