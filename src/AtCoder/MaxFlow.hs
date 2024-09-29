@@ -1,12 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Maximum flow.
-module AtCoder.MaxFlow (MfGraph, new, new', addEdge, addEdge_, getEdge, edges, changeEdge, flow, flow') where
+module AtCoder.MaxFlow (MfGraph, new, new', addEdge, addEdge_, getEdge, edges, changeEdge, flow, flow', minCut) where
 
 import AtCoder.Internal.Assert
 import AtCoder.Internal.GrowVec qualified as ACGV
 import AtCoder.Internal.Queue qualified as ACQ
-import Control.Monad (when)
+import Control.Monad (unless, when)
 import Control.Monad.Extra (whenJustM)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
@@ -196,4 +196,20 @@ flow' MfGraph {..} s t flowLimit = do
               then return flow_
               else loop $! flow_ + f
 
--- TODO: minCut
+-- | \(O(n + m)\)
+minCut :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (VU.Vector Bool)
+minCut MfGraph {..} s = do
+  visited <- VUM.replicate nG False
+  que <- ACQ.new nG -- we could use a growable queue here
+  ACQ.pushBack que s
+  fix $ \loop -> do
+    whenJustM (ACQ.popFront que) $ \p -> do
+      VGM.write visited p True
+      es <- ACGV.unsafeFreeze (gG VG.! p)
+      VU.forM_ es $ \(!to, !_, !cap) -> do
+        when (cap /= 0) $ do
+          b <- VGM.exchange visited to True
+          unless b $ do
+            ACQ.pushBack que to
+      loop
+  VU.unsafeFreeze visited

@@ -1,6 +1,7 @@
 module Tests.MaxFlow (tests) where
 
 import AtCoder.MaxFlow qualified as MF
+import Data.Vector.Unboxed qualified as VU
 import System.IO.Unsafe (unsafePerformIO)
 import Test.Hspec
 import Test.Tasty
@@ -33,8 +34,7 @@ simple = testCase "simple" $ do
   (@?= (2, 3, 1, 1)) =<< MF.getEdge g 3
   (@?= (1, 2, 1, 0)) =<< MF.getEdge g 4
 
-  -- TODO: test min cut
-  return ()
+  (@?= VU.fromList [True, False, False, False]) =<< MF.minCut g 0
 
 notSimple :: TestTree
 notSimple = testCase "notSimple" $ do
@@ -55,10 +55,19 @@ notSimple = testCase "notSimple" $ do
   (@?= (0, 1, 4, 4)) =<< MF.getEdge g 3
   (@?= (0, 1, 5, 5)) =<< MF.getEdge g 4
 
-  -- TODO: test min cut
-  return ()
+  (@?= VU.fromList [True, False]) =<< MF.minCut g 0
 
--- TODO: test min cut
+minCut :: TestTree
+minCut = testCase "minCut" $ do
+  g <- MF.new 3
+  (@?= 0) =<< MF.addEdge g 0 1 (2 :: Int)
+  (@?= 1) =<< MF.addEdge g 1 2 1
+  (@?= 1) =<< MF.flow g 0 2
+
+  (@?= (0, 1, 2, 1)) =<< MF.getEdge g 0
+  (@?= (1, 2, 1, 1)) =<< MF.getEdge g 1
+
+  (@?= VU.fromList [True, True, False]) =<< MF.minCut g 0
 
 twice :: TestTree
 twice = testCase "twice" $ do
@@ -126,6 +135,7 @@ tests =
     -- assign,
     simple,
     notSimple,
+    minCut,
     twice,
     maxFlowBound,
     -- maxFlowBoundUInt
