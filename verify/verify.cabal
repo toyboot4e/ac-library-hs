@@ -160,3 +160,8 @@ executable aclp-d
   import:        dependencies
   main-is:       aclp-d.hs
   build-depends: verify
+
+executable aclp-d-grow
+  import:        dependencies
+  main-is:       aclp-d-grow.hs
+  build-depends: verify
