@@ -149,8 +149,10 @@ library
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
     AtCoder.Internal.Buffer
+    AtCoder.Internal.CSR
     AtCoder.Internal.GrowVec
     AtCoder.Internal.Math
+    AtCoder.Internal.MutCSR
     AtCoder.Internal.Queue
     AtCoder.Math
     AtCoder.MaxFlow
