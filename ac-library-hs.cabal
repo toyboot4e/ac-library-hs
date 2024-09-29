@@ -147,6 +147,7 @@ library
   exposed-modules:
     AtCoder.DSU
     AtCoder.FenwickTree
+    AtCoder.Internal.Assert
     AtCoder.Internal.Buffer
     AtCoder.Internal.Math
     AtCoder.Internal.Queue

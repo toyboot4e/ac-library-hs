@@ -5,9 +5,9 @@
 -- The graph cannot be modified after run
 module AtCoder.MaxFlow (Builder, new, new', addEdge, build, Graph, getEdge, edges, flow, flow') where
 
+import AtCoder.Internal.Assert
 import AtCoder.Internal.Buffer qualified as ACB
 import AtCoder.Internal.Queue qualified as ACQ
-import Control.Exception (assert)
 import Control.Monad (when)
 import Control.Monad.Extra (whenJustM)
 import Control.Monad.Fix (fix)
@@ -48,9 +48,9 @@ new' nB nEdges = do
 -- | \(O(1)\)
 addEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => Builder (PrimState m) cap -> Int -> Int -> cap -> m ()
 addEdge Builder {..} from to cap = do
-  let !_ = assert (0 <= from && from < nB) ()
-  let !_ = assert (0 <= to && to < nB) ()
-  let !_ = assert (0 <= cap) ()
+  let !_ = runtimeAssert (0 <= from && from < nB) "from vertex out of bounds"
+  let !_ = runtimeAssert (0 <= to && to < nB) "to vertex out of bounds"
+  let !_ = runtimeAssert (0 <= cap) "capacity has to bigger than or equal to 0"
   VGM.modify degB (+ 1) from
   VGM.modify degB (+ 1) to -- reverse edge
   ACB.pushBack esB (from, to, cap)
@@ -86,7 +86,7 @@ data Graph s cap = Graph
 -- | \(O(1)\) Retrieves ith edge: @(from, to, capacity, flow)@.
 getEdge :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => Graph (PrimState m) cap -> Int -> m (Int, Int, cap, cap)
 getEdge Graph {..} i = do
-  let !_ = assert (0 <= i && i < VU.length posG) ()
+  let !_ = runtimeAssert (0 <= i && i < VU.length posG) "edge index out of bounds"
   let (!from, !iEdge) = posG VG.! i
   (!to, !iRevEdge, !cap) <- VGM.read (gG VG.! from) iEdge
   revCap <- VGM.read ((\(VUM.MV_3 _ _ _ c) -> c) (gG VG.! to)) iRevEdge
@@ -105,9 +105,9 @@ flow gr s t = do
 
 flow' :: (HasCallStack, Show cap, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => Graph (PrimState m) cap -> Int -> Int -> cap -> m cap
 flow' Graph {..} s t flowLimit = do
-  let !_ = assert (0 <= s && s < nG) ()
-  let !_ = assert (0 <= t && t < nG) ()
-  let !_ = assert (s /= t) ()
+  let !_ = runtimeAssert (0 <= s && s < nG) "source vertex out of bounds"
+  let !_ = runtimeAssert (0 <= t && t < nG) "destination vertex out of bounds"
+  let !_ = runtimeAssert (s /= t) "source and destination vertex has to be distinct"
 
   level <- VUM.unsafeNew nG
   que <- ACQ.new nG

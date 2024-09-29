@@ -3,7 +3,7 @@
 -- | Disjoint set union.
 module AtCoder.DSU (DSU, new, merge, merge_, same, size, groups) where
 
-import Control.Exception (assert)
+import AtCoder.Internal.Assert
 import Control.Monad (when)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Vector qualified as V
@@ -27,8 +27,8 @@ new nDSU = do
 -- | Amortized \(O(\alpha(n))\).
 merge :: (PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m Int
 merge dsu@DSU {..} a b = do
-  let !_ = assert (0 <= a && a < nDSU) ()
-  let !_ = assert (0 <= b && b < nDSU) ()
+  let !_ = runtimeAssert (0 <= a && a < nDSU) "merge: vertex out of bounds"
+  let !_ = runtimeAssert (0 <= b && b < nDSU) "merge: vertex out of bounds"
   x <- leader dsu a
   y <- leader dsu b
   if x == y
@@ -54,8 +54,8 @@ merge_ dsu a b = do
 -- | Amortized \(O(\alpha(n))\).
 same :: (PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m Bool
 same dsu@DSU {..} a b = do
-  let !_ = assert (0 <= a && a < nDSU) ()
-  let !_ = assert (0 <= b && b < nDSU) ()
+  let !_ = runtimeAssert (0 <= a && a < nDSU) "same: vertex out of bounds"
+  let !_ = runtimeAssert (0 <= b && b < nDSU) "same: vertex out of bounds"
   la <- leader dsu a
   lb <- leader dsu b
   return $ la == lb
@@ -63,7 +63,7 @@ same dsu@DSU {..} a b = do
 -- | Amortized \(O(\alpha(n))\).
 leader :: (PrimMonad m) => DSU (PrimState m) -> Int -> m Int
 leader dsu@DSU {..} a = do
-  let !_ = assert (0 <= a && a < nDSU) ()
+  let !_ = runtimeAssert (0 <= a && a < nDSU) "leader: vertex out of bounds"
   pa <- VGM.read parentOrSizeDSU a
   if pa < 0
     then return a
@@ -75,7 +75,7 @@ leader dsu@DSU {..} a = do
 -- | Amortized \(O(\alpha(n))\).
 size :: (PrimMonad m) => DSU (PrimState m) -> Int -> m Int
 size dsu@DSU {..} a = do
-  let !_ = assert (0 <= a && a < nDSU) ()
+  let !_ = runtimeAssert (0 <= a && a < nDSU) "size: vertex out of bounds"
   la <- leader dsu a
   pla <- VGM.read parentOrSizeDSU la
   return (-pla)
