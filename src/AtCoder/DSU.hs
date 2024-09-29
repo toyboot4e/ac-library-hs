@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Disjoint set union.
-module AtCoder.DSU (DSU, new, merge, same, size, groups) where
+module AtCoder.DSU (DSU, new, merge, merge_, same, size, groups) where
 
 import Control.Exception (assert)
 import Control.Monad (when)
@@ -42,6 +42,14 @@ merge dsu@DSU {..} a b = do
       sizeY <- VGM.exchange parentOrSizeDSU y x
       VGM.modify parentOrSizeDSU (+ sizeY) x
       return x
+
+-- | Amortized \(O(\alpha(n))\).
+--
+-- This function is not in the original ac-library. It's useful for suppressing warnings.
+merge_ :: (PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m ()
+merge_ dsu a b = do
+  _ <- merge dsu a b
+  return ()
 
 -- | Amortized \(O(\alpha(n))\).
 same :: (PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m Bool

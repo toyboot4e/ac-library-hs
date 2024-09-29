@@ -13,7 +13,7 @@ main = do
   dsu <- DSU.new n
   res <- (`VU.mapMaybeM` tuvs) $ \case
     (0, !u, !v) -> do
-      DSU.merge dsu u v
+      DSU.merge_ dsu u v
       return Nothing
     (1, !u, !v) -> do
       b <- DSU.same dsu u v
