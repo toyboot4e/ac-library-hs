@@ -142,21 +142,21 @@ library
   hs-source-dirs:  src
 
 executable aclp-a
-  import:         dependencies
-  main-is:        aclp-a.hs
+  import:        dependencies
+  main-is:       aclp-a.hs
   build-depends: verify
 
 executable aclp-b
-  import:         dependencies
-  main-is:        aclp-b.hs
+  import:        dependencies
+  main-is:       aclp-b.hs
   build-depends: verify
 
 executable aclp-c
-  import:         dependencies
-  main-is:        aclp-c.hs
+  import:        dependencies
+  main-is:       aclp-c.hs
   build-depends: verify
 
 executable aclp-d
-  import:         dependencies
-  main-is:        aclp-d.hs
+  import:        dependencies
+  main-is:       aclp-d.hs
   build-depends: verify

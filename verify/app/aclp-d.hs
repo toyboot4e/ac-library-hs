@@ -11,6 +11,7 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Util
 
+-- TODO: Verify locally. The test fails because the answer is not unique.
 -- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_d
 main :: IO ()
 main = do
@@ -27,8 +28,8 @@ main = do
       unless (BS.index (grid VG.! y) x == '#') $ do
         let v = w * y + x
         if even (y + x)
-          then MF.addEdge builder s v (1 :: Int)
-          else MF.addEdge builder v t (1 :: Int)
+          then MF.addEdge_ builder s v (1 :: Int)
+          else MF.addEdge_ builder v t (1 :: Int)
 
   -- even -> odd
   for_ [0 .. h - 1] $ \y -> do
@@ -38,7 +39,7 @@ main = do
         for_ [(y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)] $ \(!y', !x') -> do
           when (0 <= y' && y' < h && 0 <= x' && x' < w && BS.index (grid VG.! y') x' == '.') $ do
             let v' = w * y' + x'
-            MF.addEdge builder v v' (1 :: Int)
+            MF.addEdge_ builder v v' (1 :: Int)
           return ()
 
   graph <- MF.build builder

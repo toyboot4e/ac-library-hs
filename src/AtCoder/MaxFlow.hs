@@ -3,7 +3,7 @@
 -- | Maximum flow. The API is different from the original ACL.
 --
 -- The graph cannot be modified after run
-module AtCoder.MaxFlow (Builder, new, new', addEdge, build, Graph, getEdge, edges, flow, flow') where
+module AtCoder.MaxFlow (Builder, new, new', addEdge, addEdge_, build, Graph, getEdge, edges, flow, flow') where
 
 import AtCoder.Internal.Assert
 import AtCoder.Internal.Buffer qualified as ACB
@@ -32,28 +32,40 @@ data Builder s cap = Builder
     esB :: !(ACB.Buffer s (Int, Int, cap))
   }
 
--- | \(O(n^2)\) Creates a `Builder` of the max flow `Graph`.
-new :: (PrimMonad m, VU.Unbox cap) => Int -> m (Builder (PrimState m) cap)
+-- | \(O(n^2)\) Creates a `Builder` of the max flow `Graph`. WARNING: Unlike the original ACL, this
+-- function assumes the number of edges is up to \(n^2 + n\). If you need more edges, be sure to
+-- call `new'` instead.
+new :: (VU.Unbox cap, PrimMonad m) => Int -> m (Builder (PrimState m) cap)
 new nB = do
   -- FIXME: Better edge size assumption.
   new' nB (nB * nB + nB)
 
 -- | \(O(n + e)\)
-new' :: (PrimMonad m, VU.Unbox cap) => Int -> Int -> m (Builder (PrimState m) cap)
+new' :: (VU.Unbox cap, PrimMonad m) => Int -> Int -> m (Builder (PrimState m) cap)
 new' nB nEdges = do
   degB <- VUM.replicate nB 0
   esB <- ACB.new nEdges
   return Builder {..}
 
 -- | \(O(1)\)
-addEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => Builder (PrimState m) cap -> Int -> Int -> cap -> m ()
+addEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => Builder (PrimState m) cap -> Int -> Int -> cap -> m Int
 addEdge Builder {..} from to cap = do
   let !_ = runtimeAssert (0 <= from && from < nB) "from vertex out of bounds"
   let !_ = runtimeAssert (0 <= to && to < nB) "to vertex out of bounds"
   let !_ = runtimeAssert (0 <= cap) "capacity has to bigger than or equal to 0"
   VGM.modify degB (+ 1) from
   VGM.modify degB (+ 1) to -- reverse edge
+  res <- ACB.length esB
   ACB.pushBack esB (from, to, cap)
+  return res
+
+-- | \(O(1)\)
+--
+-- This function is not in the original ac-library.
+addEdge_ :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => Builder (PrimState m) cap -> Int -> Int -> cap -> m ()
+addEdge_ builder from to cap = do
+  _ <- addEdge builder from to cap
+  return ()
 
 -- | \(O(n)\) Creates a maximum from `Graph` from a `Builder`. NOTE: The `Builder` is consumed and
 -- cannot be reused.
@@ -84,7 +96,7 @@ data Graph s cap = Graph
   }
 
 -- | \(O(1)\) Retrieves ith edge: @(from, to, capacity, flow)@.
-getEdge :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => Graph (PrimState m) cap -> Int -> m (Int, Int, cap, cap)
+getEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => Graph (PrimState m) cap -> Int -> m (Int, Int, cap, cap)
 getEdge Graph {..} i = do
   let !_ = runtimeAssert (0 <= i && i < VU.length posG) "edge index out of bounds"
   let (!from, !iEdge) = posG VG.! i

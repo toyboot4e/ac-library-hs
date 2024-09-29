@@ -180,7 +180,7 @@ test-suite ac-library-hs-test
   default-language: GHC2021
 
   -- Modules included in this executable, other than Main.
-  -- other-modules:
+  other-modules:    Tests.MaxFlow
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
@@ -195,4 +195,10 @@ test-suite ac-library-hs-test
   main-is:          Main.hs
 
   -- Test dependencies.
-  build-depends:    ac-library-hs
+  build-depends:
+    , ac-library-hs
+    , hspec
+    , tasty
+    , tasty-hspec
+    , tasty-hunit
+    , tasty-quickcheck
