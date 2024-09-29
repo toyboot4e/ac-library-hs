@@ -1,3 +1,4 @@
+-- | Max flow tests.
 module Tests.MaxFlow (tests) where
 
 import AtCoder.MaxFlow qualified as MF
