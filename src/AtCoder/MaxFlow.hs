@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Maximum flow.
-module AtCoder.MaxFlow (MfGraph, new, new', addEdge, addEdge_, getEdge, edges, flow, flow') where
+module AtCoder.MaxFlow (MfGraph, new, new', addEdge, addEdge_, getEdge, edges, changeEdge, flow, flow') where
 
 import AtCoder.Internal.Assert
 import AtCoder.Internal.GrowVec qualified as ACGV
@@ -64,12 +64,30 @@ addEdge_ graph from to cap = do
   _ <- addEdge graph from to cap
   return ()
 
+-- | \(O(1)\) Wrie edge capactiy and flow.
+changeEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> cap -> cap -> m ()
+changeEdge MfGraph {..} i newCap newFlow = do
+  m <- ACGV.length posG
+  let !_ = runtimeAssert (0 <= i && i < m) "changeEdge: vertex out of bounds"
+  let !_ = runtimeAssert (0 <= newFlow && newFlow <= newCap) "changeEdge: invalid flow and capacity"
+  (!from, !iEdge) <- ACGV.read posG i
+  (!to, !iRevEdge, !_) <- ACGV.read (gG VG.! from) iEdge
+  writeCapacity gG from iEdge $! newCap - newFlow
+  writeCapacity gG to iRevEdge $! newFlow
+
 -- | \(O(1)\) Internal helper.
 {-# INLINE readCapacity #-}
 readCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACGV.GrowVec (PrimState m) (Int, Int, cap)) -> Int -> Int -> m cap
 readCapacity gvs v i = do
   (VUM.MV_3 _ _ _ c) <- readMutVar $ ACGV.vecGV $ gvs VG.! v
   VGM.read c i
+
+-- | \(O(1)\) Internal helper.
+{-# INLINE writeCapacity #-}
+writeCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACGV.GrowVec (PrimState m) (Int, Int, cap)) -> Int -> Int -> cap -> m ()
+writeCapacity gvs v i cap = do
+  (VUM.MV_3 _ _ _ c) <- readMutVar $ ACGV.vecGV $ gvs VG.! v
+  VGM.write c i cap
 
 -- | \(O(1)\) Internal helper.
 {-# INLINE modifyCapacity #-}

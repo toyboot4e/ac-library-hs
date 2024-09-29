@@ -7,6 +7,14 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.Hspec
 
+zero :: TestTree
+zero = testCase "zero" $ do
+  g <- MF.new @Int 0
+  h <- MF.new @Double 0
+  return ()
+
+-- Assign is skipped
+
 simple :: TestTree
 simple = testCase "simple" $ do
   g <- MF.new 4
@@ -47,12 +55,42 @@ notSimple = testCase "notSimple" $ do
   (@?= (0, 1, 4, 4)) =<< MF.getEdge g 3
   (@?= (0, 1, 5, 5)) =<< MF.getEdge g 4
 
+  -- TODO: test min cut
   return ()
 
--- TODO: flow twice
+-- TODO: test min cut
 
-flowMax :: TestTree
-flowMax = testCase "flowMax" $ do
+twice :: TestTree
+twice = testCase "twice" $ do
+  g <- MF.new 3
+  (@?= 0) =<< MF.addEdge g 0 1 (1 :: Int)
+  (@?= 1) =<< MF.addEdge g 0 2 1
+  (@?= 2) =<< MF.addEdge g 1 2 1
+
+  (@?= 2) =<< MF.flow g 0 2
+
+  (@?= (0, 1, 1, 1)) =<< MF.getEdge g 0
+  (@?= (0, 2, 1, 1)) =<< MF.getEdge g 1
+  (@?= (1, 2, 1, 1)) =<< MF.getEdge g 2
+
+  MF.changeEdge g 0 100 10
+  (@?= (0, 1, 100, 10)) =<< MF.getEdge g 0
+
+  (@?= 0) =<< MF.flow g 0 2
+  (@?= 90) =<< MF.flow g 0 1
+
+  (@?= (0, 1, 100, 100)) =<< MF.getEdge g 0
+  (@?= (0, 2, 1, 1)) =<< MF.getEdge g 1
+  (@?= (1, 2, 1, 1)) =<< MF.getEdge g 2
+
+  (@?= 2) =<< MF.flow g 2 0
+
+  (@?= (0, 1, 100, 99)) =<< MF.getEdge g 0
+  (@?= (0, 2, 1, 0)) =<< MF.getEdge g 1
+  (@?= (1, 2, 1, 0)) =<< MF.getEdge g 2
+
+maxFlowBound :: TestTree
+maxFlowBound = testCase "maxFlowBound" $ do
   g <- MF.new 3
   (@?= 0) =<< MF.addEdge g 0 1 (maxBound :: Int)
   (@?= 1) =<< MF.addEdge g 1 0 maxBound
@@ -63,6 +101,14 @@ flowMax = testCase "flowMax" $ do
   (@?= (0, 1, maxBound, 0)) =<< MF.getEdge g 0
   (@?= (1, 0, maxBound, 0)) =<< MF.getEdge g 1
   (@?= (0, 2, maxBound, maxBound)) =<< MF.getEdge g 2
+
+-- BoundUInt is skipped
+
+selfLoop :: TestTree
+selfLoop = testCase "selfLoop" $ do
+  g <- MF.new 3
+  (@?= 0) =<< MF.addEdge g 0 0 (100 :: Int)
+  (@?= (0, 0, 100, 0)) =<< MF.getEdge g 0
 
 invalidFlow :: IO TestTree
 invalidFlow = testSpec "invalidFlow" $ do
@@ -76,8 +122,14 @@ invalidFlow = testSpec "invalidFlow" $ do
 
 tests :: [TestTree]
 tests =
-  [ simple,
+  [ zero,
+    -- assign,
+    simple,
     notSimple,
-    flowMax,
+    twice,
+    maxFlowBound,
+    -- maxFlowBoundUInt
+    selfLoop,
     unsafePerformIO invalidFlow
+    -- stress
   ]
