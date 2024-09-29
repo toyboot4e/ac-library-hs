@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module AtCoder.FenwickTree (FenwickTree, new, add, sumIn) where
+module AtCoder.FenwickTree (FenwickTree, new, add, sum) where
 
 import Control.Exception (assert)
 import Control.Monad (when)
@@ -10,6 +10,7 @@ import Data.Bits
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import Prelude hiding (sum)
 
 data FenwickTree s a = FenwickTree
   { nFT :: {-# UNPACK #-} !Int,
@@ -33,9 +34,9 @@ add FenwickTree {..} p0 x = do
       VGM.modify dataFT (+ x) (p - 1)
       loop $! p + (p .&. (-p))
 
--- | \(O(\log n)\)
-_sum :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> m a
-_sum FenwickTree {..} = inner 0
+-- | \(O(\log n)\) Calculates the sum in half-open range @[0, r)@.
+prefixSum :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> m a
+prefixSum FenwickTree {..} = inner 0
   where
     inner !acc !r
       | r <= 0 = return acc
@@ -44,9 +45,9 @@ _sum FenwickTree {..} = inner 0
           inner (acc + dx) (r - r .&. (-r))
 
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
-sumIn :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
-sumIn ft@FenwickTree {..} l r = do
+sum :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
+sum ft@FenwickTree {..} l r = do
   let !_ = assert (0 <= l && l <= r && r <= nFT) ()
-  xr <- _sum ft r
-  xl <- _sum ft l
+  xr <- prefixSum ft r
+  xl <- prefixSum ft l
   return $! xr - xl

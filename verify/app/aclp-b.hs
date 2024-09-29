@@ -20,7 +20,7 @@ main = do
       FT.add ft p x
       return Nothing
     (1, !l, !r) -> do
-      x <- FT.sumIn ft l r
+      x <- FT.sum ft l r
       return $ Just x
     _ -> error "unreachable"
 
