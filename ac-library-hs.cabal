@@ -154,7 +154,6 @@ library
     AtCoder.Internal.Queue
     AtCoder.Math
     AtCoder.MaxFlow
-    AtCoder.MaxFlowGrow
 
   -- Modules included in this library but not exported.
   -- other-modules:

@@ -18,7 +18,7 @@ main = do
   (!h, !w) <- ints2
   grid <- V.replicateM h BS.getLine
 
-  builder <- MF.new (h * w + 2)
+  graph <- MF.new (h * w + 2)
   let s = h * w
   let t = h * w + 1
 
@@ -28,8 +28,8 @@ main = do
       unless (BS.index (grid VG.! y) x == '#') $ do
         let v = w * y + x
         if even (y + x)
-          then MF.addEdge_ builder s v (1 :: Int)
-          else MF.addEdge_ builder v t (1 :: Int)
+          then MF.addEdge_ graph s v (1 :: Int)
+          else MF.addEdge_ graph v t (1 :: Int)
 
   -- even -> odd
   for_ [0 .. h - 1] $ \y -> do
@@ -39,10 +39,9 @@ main = do
         for_ [(y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)] $ \(!y', !x') -> do
           when (0 <= y' && y' < h && 0 <= x' && x' < w && BS.index (grid VG.! y') x' == '.') $ do
             let v' = w * y' + x'
-            MF.addEdge_ builder v v' (1 :: Int)
+            MF.addEdge_ graph v v' (1 :: Int)
           return ()
 
-  graph <- MF.build builder
   maxFlow <- MF.flow graph s t
   printBSB $ BSB.intDec maxFlow
 
