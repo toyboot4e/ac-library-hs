@@ -1,14 +1,12 @@
 module AtCoder.Internal.Math (floorSumUnsigned) where
 
-import Control.Exception (assert)
-
 -- | \(O(\log m)\)
 --
 -- = Input constraints
 -- - \(n \lt 2^32\)
 -- - \(1 \le m \lt 2^32\)
 floorSumUnsigned :: Int -> Int -> Int -> Int -> Int
-floorSumUnsigned n0 m0 a0 b0 = inner 0 n0 m0 a0 b0
+floorSumUnsigned = inner 0
   where
     inner acc n m a b
       | yMax < m = acc'

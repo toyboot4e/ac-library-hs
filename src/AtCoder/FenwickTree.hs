@@ -1,8 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
+-- | Fenwick tree.
 module AtCoder.FenwickTree (FenwickTree, new, add, sum) where
 
-import AtCoder.Internal.Assert
+import AtCoder.Internal.Assert (runtimeAssert)
 import Control.Monad (when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
@@ -12,8 +13,11 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import Prelude hiding (sum)
 
+-- | Fenwick tree.
 data FenwickTree s a = FenwickTree
-  { nFT :: {-# UNPACK #-} !Int,
+  { -- | The number of vertices.
+    nFT :: {-# UNPACK #-} !Int,
+    -- | The data storage.
     dataFT :: !(VUM.MVector s a)
   }
 

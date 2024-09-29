@@ -6,7 +6,6 @@ import Test.Hspec
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.Hspec
-import Control.Monad.IO.Class (liftIO)
 
 simple :: TestTree
 simple = testCase "simple" $ do
@@ -71,12 +70,12 @@ flowMax = testCase "flowMax" $ do
 
 invalidFlow :: IO TestTree
 invalidFlow = testSpec "invalidFlow" $ do
-  g <- runIO $ liftIO $ MF.new @Int 2
-  gr <- runIO $ liftIO $ MF.build g
+  g <- runIO $ MF.new @Int 2
+  gr <- runIO $ MF.build g
   it "throws error" $ do
-    liftIO (MF.flow gr 0 0) `shouldThrow` anyException
+    MF.flow gr 0 0 `shouldThrow` anyException
   it "throws error" $ do
-    liftIO (MF.flow' gr 0 0 0) `shouldThrow` anyException
+    MF.flow' gr 0 0 0 `shouldThrow` anyException
 
 -- TODO: stress test
 

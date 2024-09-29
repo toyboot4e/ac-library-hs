@@ -3,7 +3,7 @@
 -- | Disjoint set union.
 module AtCoder.DSU (DSU, new, merge, merge_, same, size, groups) where
 
-import AtCoder.Internal.Assert
+import AtCoder.Internal.Assert (runtimeAssert)
 import Control.Monad (when)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Vector qualified as V
@@ -14,7 +14,10 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 
 -- | Disjoint set union.
 data DSU s = DSU
-  { nDSU :: {-# UNPACK #-} !Int,
+  { -- | The number of nodes.
+    nDSU :: {-# UNPACK #-} !Int,
+    -- | For root (leader) nodes it stores their size as a negative number. For child nodes it
+    -- stores their parent node index.
     parentOrSizeDSU :: !(VUM.MVector s Int)
   }
 
@@ -77,8 +80,8 @@ size :: (PrimMonad m) => DSU (PrimState m) -> Int -> m Int
 size dsu@DSU {..} a = do
   let !_ = runtimeAssert (0 <= a && a < nDSU) "size: vertex out of bounds"
   la <- leader dsu a
-  pla <- VGM.read parentOrSizeDSU la
-  return (-pla)
+  sizeLa <- VGM.read parentOrSizeDSU la
+  return (-sizeLa)
 
 -- | \(O(n)\)
 groups :: (PrimMonad m) => DSU (PrimState m) -> m (V.Vector (VU.Vector Int))

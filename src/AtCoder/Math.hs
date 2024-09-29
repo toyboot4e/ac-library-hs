@@ -3,8 +3,8 @@
 
 module AtCoder.Math (floorSum) where
 
+import AtCoder.Internal.Assert (runtimeAssert)
 import AtCoder.Internal.Math (floorSumUnsigned)
-import Control.Exception (assert)
 import Data.Bits (bit)
 
 -- | \(O(\log m)\) Returns \(\sum_{i=0}^{j-1} \lfloor \frac {a \cross i + b} {m} \rfloor\).
@@ -15,8 +15,8 @@ import Data.Bits (bit)
 floorSum :: Int -> Int -> Int -> Int -> Int
 floorSum n m a b = floorSumUnsigned n m a' b' - da - db
   where
-    !_ = assert (0 <= n && n < bit 32) ()
-    !_ = assert (1 <= m && m < bit 32) ()
+    !_ = runtimeAssert (0 <= n && n < bit 32) "floorSum: invalid n"
+    !_ = runtimeAssert (1 <= m && m < bit 32) "floorSum: invalid m"
     a'
       | a < 0 = a `mod` m
       | otherwise = a

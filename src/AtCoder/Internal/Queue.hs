@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | ac-library-hs only.
+-- | Queue with fixed size capacity.
 module AtCoder.Internal.Queue (Queue (..), new, pushBack, popFront, length, clear, unsafeFreeze) where
 
 import Control.Monad.Primitive (PrimMonad, PrimState)
