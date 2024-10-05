@@ -152,7 +152,7 @@ library
     AtCoder.Internal.CSR
     AtCoder.Internal.GrowVec
     AtCoder.Internal.Math
-    AtCoder.Internal.MutCSR
+    AtCoder.Internal.McfCSR
     AtCoder.Internal.Queue
     AtCoder.Math
     AtCoder.MaxFlow
