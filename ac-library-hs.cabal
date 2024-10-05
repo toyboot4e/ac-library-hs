@@ -183,7 +183,10 @@ test-suite ac-library-hs-test
   default-language: GHC2021
 
   -- Modules included in this executable, other than Main.
-  other-modules:    Tests.MaxFlow
+  other-modules:
+    Tests.DSU
+    Tests.FenwickTree
+    Tests.MaxFlow
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
