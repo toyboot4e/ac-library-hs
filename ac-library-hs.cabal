@@ -157,6 +157,7 @@ library
     AtCoder.Internal.Queue
     AtCoder.Math
     AtCoder.MaxFlow
+    AtCoder.MinCostFlow
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -188,6 +189,7 @@ test-suite ac-library-hs-test
     Tests.DSU
     Tests.FenwickTree
     Tests.MaxFlow
+    Tests.MinCostFlow
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:

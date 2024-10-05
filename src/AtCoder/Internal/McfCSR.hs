@@ -1,10 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | CSR for min cost flow.
-module AtCoder.Internal.McfCSR (CSR (..), build) where
+module AtCoder.Internal.McfCSR (CSR (..), build, adj) where
 
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Foldable (for_)
+import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Base qualified as VU
@@ -68,3 +69,11 @@ build n edges = do
   revCSR <- VU.unsafeFreeze toVec
   costCSR <- VU.unsafeFreeze costVec
   return (edgeIdx', CSR {..})
+
+-- | \(O(1)\)
+adj :: (Num cap, VU.Unbox cap, VU.Unbox cost) => CSR s cap cost -> Int -> VU.Vector (Int, Int, cost)
+adj CSR {..} v = VU.unsafeSlice offset len vec
+  where
+    offset = startCSR VG.! v
+    len = startCSR VG.! (v + 1) - offset
+    vec = VU.zip3 toCSR revCSR costCSR
