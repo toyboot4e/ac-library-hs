@@ -188,6 +188,7 @@ test-suite ac-library-hs-test
   other-modules:
     Tests.DSU
     Tests.FenwickTree
+    Tests.Math
     Tests.MaxFlow
     Tests.MinCostFlow
 
