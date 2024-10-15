@@ -1,24 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Immutable Compresed Sparse Row.
-module AtCoder.Internal.CSR (CSR(..), adj) where
+module AtCoder.Internal.CSR (CSR(..), build, adj) where
 
-import AtCoder.Internal.Assert
-import AtCoder.Internal.GrowVec qualified as ACGV
-import AtCoder.Internal.Queue qualified as ACQ
 import Data.Foldable (for_)
 import Control.Monad.ST (runST)
-import Control.Monad.Extra (whenJustM)
-import Control.Monad.Fix (fix)
-import Control.Monad.Primitive (PrimMonad, PrimState)
-import Data.Primitive.MutVar (readMutVar)
-import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Base qualified as VU -- V_2
 import Data.Vector.Unboxed.Mutable qualified as VUM
-import GHC.Stack (HasCallStack)
 
 -- | Immutable Comperssed Sparse Row.
 data CSR e = CSR
@@ -26,6 +17,7 @@ data CSR e = CSR
     elistCSR :: !(VU.Vector e)
   }
 
+-- | \(O(n + m)\)
 build :: (VU.Unbox e) => Int -> VU.Vector (Int, e) -> CSR e
 build n edges = runST $ do
   start <- VUM.replicate (n + 1) (0 :: Int)
@@ -45,12 +37,12 @@ build n edges = runST $ do
     c <- VGM.read counter from
     VGM.write elist c e
     VGM.write counter from (c + 1)
-  VU.unsafeFreeze elist
 
   startCSR <- VU.unsafeFreeze start
   elistCSR <- VU.unsafeFreeze elist
   return CSR {..}
 
+-- | \(O(1)\)
 adj :: (VU.Unbox e) => CSR e -> Int -> VU.Vector e
 adj CSR {..} i =
   let il = startCSR VG.! i

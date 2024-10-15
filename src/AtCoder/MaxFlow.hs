@@ -3,7 +3,7 @@
 -- | Maximum flow.
 module AtCoder.MaxFlow (MfGraph, new, new', addEdge, addEdge_, getEdge, edges, changeEdge, flow, flow', minCut) where
 
-import AtCoder.Internal.Assert
+import AtCoder.Internal.Assert (runtimeAssert)
 import AtCoder.Internal.GrowVec qualified as ACGV
 import AtCoder.Internal.Queue qualified as ACQ
 import Control.Monad (unless, when)

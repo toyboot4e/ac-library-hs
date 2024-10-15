@@ -151,11 +151,13 @@ library
     AtCoder.Internal.Buffer
     AtCoder.Internal.CSR
     AtCoder.Internal.GrowVec
+    AtCoder.Internal.Heap
     AtCoder.Internal.Math
-    AtCoder.Internal.MutCSR
+    AtCoder.Internal.McfCSR
     AtCoder.Internal.Queue
     AtCoder.Math
     AtCoder.MaxFlow
+    AtCoder.MinCostFlow
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -183,7 +185,14 @@ test-suite ac-library-hs-test
   default-language: GHC2021
 
   -- Modules included in this executable, other than Main.
-  other-modules:    Tests.MaxFlow
+  other-modules:
+    Tests.DSU
+    Tests.FenwickTree
+    Tests.Internal.Heap
+    Tests.Internal.McfCSR
+    Tests.Math
+    Tests.MaxFlow
+    Tests.MinCostFlow
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:

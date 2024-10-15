@@ -1,14 +1,24 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | ac-library-hs only.
-module AtCoder.Internal.Buffer (Buffer (..), new, pushBack, popBack, length, clear, unsafeFreeze) where
+module AtCoder.Internal.Buffer
+  ( Buffer (..),
+    new,
+    pushBack,
+    popBack,
+    length,
+    null,
+    clear,
+    unsafeFreeze,
+  )
+where
 
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
-import Prelude hiding (length)
+import Prelude hiding (length, null)
 
 -- | Pushable vector with fixed size capacity.
 data Buffer s a = Buffer
@@ -45,6 +55,10 @@ popBack Buffer {..} = do
 length :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m Int
 length Buffer {..} = do
   VGM.read lenB 0
+
+-- | \(O(1)\)
+null :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m Bool
+null = fmap (== 0) . length
 
 -- | \(O(1)\)
 clear :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m ()

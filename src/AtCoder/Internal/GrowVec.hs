@@ -1,8 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Growable vector with indirection and runtime overhead.
-module AtCoder.Internal.GrowVec (GrowVec (..), new, read, pushBack, length, unsafeFreeze) where
+module AtCoder.Internal.GrowVec (GrowVec (..), new, read, pushBack, popBack_, length, unsafeFreeze, freeze) where
 
+import AtCoder.Internal.Assert (runtimeAssert)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Primitive.MutVar (MutVar, newMutVar, readMutVar, writeMutVar)
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -52,6 +53,13 @@ pushBack GrowVec {..} e = do
     )
     0
 
+-- | \(O(1)\).
+popBack_ :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m ()
+popBack_ GrowVec {..} = do
+  pos <- VGM.read posGV 0
+  let !_ = runtimeAssert (pos > 0) "tried to delete from empty GrowVec"
+  VGM.write posGV 0 $ pos - 1
+
 -- | \(O(1)\)
 length :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Int
 length GrowVec {posGV} = do
@@ -63,3 +71,10 @@ unsafeFreeze GrowVec {..} = do
   len <- VGM.read posGV 0
   vec <- readMutVar vecGV
   VU.unsafeFreeze $ VUM.take len vec
+
+-- | \(O(n)\)
+freeze :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m (VU.Vector a)
+freeze GrowVec {..} = do
+  len <- VGM.read posGV 0
+  vec <- readMutVar vecGV
+  VU.freeze $ VUM.take len vec
