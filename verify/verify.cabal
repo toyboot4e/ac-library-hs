@@ -165,3 +165,38 @@ executable aclp-e
   import:        dependencies
   main-is:       aclp-e.hs
   build-depends: verify
+
+executable aclp-f
+  import:        dependencies
+  main-is:       aclp-f.hs
+  build-depends: verify
+
+executable aclp-g
+  import:        dependencies
+  main-is:       aclp-g.hs
+  build-depends: verify
+
+executable aclp-h
+  import:        dependencies
+  main-is:       aclp-h.hs
+  build-depends: verify
+
+executable aclp-i
+  import:        dependencies
+  main-is:       aclp-i.hs
+  build-depends: verify
+
+executable aclp-j
+  import:        dependencies
+  main-is:       aclp-j.hs
+  build-depends: verify
+
+executable aclp-k
+  import:        dependencies
+  main-is:       aclp-k.hs
+  build-depends: verify
+
+executable aclp-l
+  import:        dependencies
+  main-is:       aclp-l.hs
+  build-depends: verify
