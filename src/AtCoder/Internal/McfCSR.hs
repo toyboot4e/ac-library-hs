@@ -68,7 +68,7 @@ build n edges = do
   costCSR <- VU.unsafeFreeze costVec
   return (edgeIdx, CSR {..})
 
--- | \(O(1)\)
+-- | \(O(1)\) Returns a vector of @(to, rev, cost)@.
 adj :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost) => CSR s cap cost -> Int -> VU.Vector (Int, Int, cost)
 adj CSR {..} v = VU.slice offset len vec
   where
