@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Disjoint set union.
-module AtCoder.DSU (DSU, new, merge, merge_, same, size, groups) where
+module AtCoder.DSU (DSU, new, merge, merge_, leader, same, size, groups) where
 
 import AtCoder.Internal.Assert (runtimeAssert)
 import Control.Monad (when)
@@ -83,7 +83,7 @@ size dsu@DSU {..} a = do
   sizeLa <- VGM.read parentOrSizeDSU la
   return (-sizeLa)
 
--- | \(O(n)\)
+-- | \(O(n \alpha(n))\)
 groups :: (PrimMonad m) => DSU (PrimState m) -> m (V.Vector (VU.Vector Int))
 groups dsu@DSU {..} = do
   groupSize <- VUM.replicate nDSU (0 :: Int)
@@ -91,9 +91,11 @@ groups dsu@DSU {..} = do
     li <- leader dsu i
     VGM.modify groupSize (+ 1) li
     return li
-  result <- V.mapM VUM.unsafeNew $ VU.convert leaders
+  result <- do
+    groupSize' <- VU.unsafeFreeze groupSize
+    V.mapM VUM.unsafeNew $ VU.convert groupSize'
   VU.iforM_ leaders $ \i li -> do
-    sizeLI <- VGM.read groupSize li
-    VGM.write (result VG.! i) (sizeLI - 1) i
-    VGM.write groupSize li (sizeLI - 1)
+    i' <- subtract 1 <$> VGM.read groupSize li
+    VGM.write (result VG.! li) i' i
+    VGM.write groupSize li i'
   V.filter (not . VU.null) <$> V.mapM VU.unsafeFreeze result
