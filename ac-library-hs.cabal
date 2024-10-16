@@ -151,7 +151,7 @@ library
     AtCoder.Internal.Buffer
     AtCoder.Internal.CSR
     AtCoder.Internal.GrowVec
-    AtCoder.Internal.Heap
+    AtCoder.Internal.MinHeap
     AtCoder.Internal.Math
     AtCoder.Internal.McfCSR
     AtCoder.Internal.Queue
@@ -188,7 +188,7 @@ test-suite ac-library-hs-test
   other-modules:
     Tests.DSU
     Tests.FenwickTree
-    Tests.Internal.Heap
+    Tests.Internal.MinHeap
     Tests.Internal.McfCSR
     Tests.Math
     Tests.MaxFlow

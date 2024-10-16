@@ -1,12 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Minimu cot flow.
+-- | Minimum cost flow.
 module AtCoder.MinCostFlow (McfGraph, new, new', addEdge, addEdge_, getEdge, unsafeFreezeEdges, freezeEdges, flow, slope) where
 
 import AtCoder.Internal.Assert (runtimeAssert)
 import AtCoder.Internal.Buffer qualified as ACB
 import AtCoder.Internal.GrowVec qualified as ACGV
-import AtCoder.Internal.Heap qualified as ACH
+import AtCoder.Internal.MinHeap qualified as ACMH
 import AtCoder.Internal.McfCSR qualified as McfCSR
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
@@ -153,27 +153,27 @@ internalSlopeMCF csr@McfCSR.CSR {..} n s t flowLimit = do
   -- FIXME: maximum capacity?
   let nEdges = VU.length toCSR
   queMin <- ACB.new nEdges :: m (ACB.Buffer (PrimState m) Int)
-  heap <- ACH.new nEdges :: m (ACH.Heap (PrimState m) (cost, Int))
+  heap <- ACMH.new nEdges :: m (ACMH.Heap (PrimState m) (cost, Int))
 
   let dualRef = do
         VGM.set dists $ maxBound @cost
         VGM.set vis False
         ACB.clear queMin
         -- TODO: compare with the first element only, so make up custom Q data type
-        ACH.clear heap
+        ACMH.clear heap
 
         VGM.write dists s 0
         ACB.pushBack queMin s
         fix $ \loop -> do
           b1 <- ACB.null queMin
-          b2 <- ACH.null heap
+          b2 <- ACMH.null heap
           when (not b1 || not b2) $ do
             v <-
               if not b1
                 then do
                   fromJust <$> ACB.popBack queMin
                 else do
-                  (!_, !to) <- fromJust <$> ACH.pop heap
+                  (!_, !to) <- fromJust <$> ACMH.pop heap
                   return to
 
             visV <- VGM.exchange vis v True
@@ -201,7 +201,7 @@ internalSlopeMCF csr@McfCSR.CSR {..} n s t flowLimit = do
                       VGM.write prevE to rev
                       if distTo' == distV
                         then ACB.pushBack queMin to
-                        else ACH.push heap (distTo', to)
+                        else ACMH.push heap (distTo', to)
 
               loop
         visT <- VGM.read vis t

@@ -1,9 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Maximum binary heap. Mutable and fixed-sized.
+-- | Minimum binary heap. Mutable and fixed-sized.
 --
 -- <https://en.wikipedia.org/wiki/Binary_heap>
-module AtCoder.Internal.Heap (Heap, new, length, null, clear, push, peek, pop) where
+module AtCoder.Internal.MinHeap (Heap, new, length, null, clear, push, peek, pop) where
 
 import Control.Monad
 import Control.Monad.Primitive (PrimMonad, PrimState)

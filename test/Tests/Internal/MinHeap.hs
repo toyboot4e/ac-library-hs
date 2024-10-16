@@ -1,6 +1,6 @@
-module Tests.Internal.Heap (tests) where
+module Tests.Internal.MinHeap (tests) where
 
-import AtCoder.Internal.Heap qualified as ACH
+import AtCoder.Internal.MinHeap qualified as ACMH
 import Control.Monad
 import Control.Monad.ST (runST)
 import Data.List qualified as L
@@ -16,9 +16,9 @@ ordered =
         n <- QC.chooseInt (1, 16)
         xs <- QC.vectorOf n (QC.chooseInt (-10, 10))
         let result = runST $ do
-              heap <- ACH.new n
-              forM_ xs (ACH.push heap)
-              replicateM n (fromJust <$> ACH.pop heap)
+              heap <- ACMH.new n
+              forM_ xs (ACMH.push heap)
+              replicateM n (fromJust <$> ACMH.pop heap)
         let expected = L.sort xs
         return . QC.counterexample (show xs) $ result QC.=== expected
     ]
