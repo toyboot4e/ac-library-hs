@@ -23,10 +23,12 @@ data FenwickTree s a = FenwickTree
   }
 
 -- | \(O(n)\) Creates `FenwickTree`.
-new :: (Num a, VU.Unbox a, PrimMonad m) => Int -> m (FenwickTree (PrimState m) a)
-new nFT = do
-  dataFT <- VUM.replicate nFT 0
-  return FenwickTree {..}
+new :: (HasCallStack, Num a, VU.Unbox a, PrimMonad m) => Int -> m (FenwickTree (PrimState m) a)
+new nFT
+  | nFT >= 0 = do
+    dataFT <- VUM.replicate nFT 0
+    return FenwickTree {..}
+  | otherwise = error $ "new: given negative size (`" ++ show nFT ++ "`)"
 
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
 add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()

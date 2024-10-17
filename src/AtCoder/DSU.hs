@@ -24,9 +24,11 @@ data DSU s = DSU
 
 -- | \(O(n)\)
 new :: (PrimMonad m) => Int -> m (DSU (PrimState m))
-new nDSU = do
-  parentOrSizeDSU <- VUM.replicate nDSU (-1)
-  return DSU {..}
+new nDSU
+  | nDSU >= 0 = do
+    parentOrSizeDSU <- VUM.replicate nDSU (-1)
+    return DSU {..}
+  | otherwise = error $ "new: given negative size (`" ++ show nDSU ++ "`)"
 
 -- | Amortized \(O(\alpha(n))\).
 merge :: (HasCallStack, PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m Int
