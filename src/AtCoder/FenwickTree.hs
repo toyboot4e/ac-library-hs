@@ -22,7 +22,7 @@ data FenwickTree s a = FenwickTree
   }
 
 -- | \(O(n)\) Creates `FenwickTree`.
-new :: (PrimMonad m, Num a, VU.Unbox a) => Int -> m (FenwickTree (PrimState m) a)
+new :: (Num a, VU.Unbox a, PrimMonad m) => Int -> m (FenwickTree (PrimState m) a)
 new nFT = do
   dataFT <- VUM.replicate nFT 0
   return FenwickTree {..}
