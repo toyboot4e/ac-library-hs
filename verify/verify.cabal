@@ -141,62 +141,62 @@ library
   exposed-modules: Util
   hs-source-dirs:  src
 
-executable aclp-a
+executable alpc-a
   import:        dependencies
-  main-is:       aclp-a.hs
+  main-is:       alpc-a.hs
   build-depends: verify
 
-executable aclp-b
+executable alpc-b
   import:        dependencies
-  main-is:       aclp-b.hs
+  main-is:       alpc-b.hs
   build-depends: verify
 
-executable aclp-c
+executable alpc-c
   import:        dependencies
-  main-is:       aclp-c.hs
+  main-is:       alpc-c.hs
   build-depends: verify
 
-executable aclp-d
+executable alpc-d
   import:        dependencies
-  main-is:       aclp-d.hs
+  main-is:       alpc-d.hs
   build-depends: verify
 
-executable aclp-e
+executable alpc-e
   import:        dependencies
-  main-is:       aclp-e.hs
+  main-is:       alpc-e.hs
   build-depends: verify
 
-executable aclp-f
+executable alpc-f
   import:        dependencies
-  main-is:       aclp-f.hs
+  main-is:       alpc-f.hs
   build-depends: verify
 
-executable aclp-g
+executable alpc-g
   import:        dependencies
-  main-is:       aclp-g.hs
+  main-is:       alpc-g.hs
   build-depends: verify
 
-executable aclp-h
+executable alpc-h
   import:        dependencies
-  main-is:       aclp-h.hs
+  main-is:       alpc-h.hs
   build-depends: verify
 
-executable aclp-i
+executable alpc-i
   import:        dependencies
-  main-is:       aclp-i.hs
+  main-is:       alpc-i.hs
   build-depends: verify
 
-executable aclp-j
+executable alpc-j
   import:        dependencies
-  main-is:       aclp-j.hs
+  main-is:       alpc-j.hs
   build-depends: verify
 
-executable aclp-k
+executable alpc-k
   import:        dependencies
-  main-is:       aclp-k.hs
+  main-is:       alpc-k.hs
   build-depends: verify
 
-executable aclp-l
+executable alpc-l
   import:        dependencies
-  main-is:       aclp-l.hs
+  main-is:       alpc-l.hs
   build-depends: verify
