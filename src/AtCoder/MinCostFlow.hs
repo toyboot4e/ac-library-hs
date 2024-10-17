@@ -51,10 +51,10 @@ addEdge ::
   cost ->
   m Int
 addEdge McfGraph {..} from to cap cost = do
-  let !_ = runtimeAssert (0 <= from && from < nG) "from vertex out of bounds"
-  let !_ = runtimeAssert (0 <= to && to < nG) "to vertex out of bounds"
-  let !_ = runtimeAssert (0 <= cap) "edge capacity has to bigger than or equal to 0"
-  let !_ = runtimeAssert (0 <= cost) "edge cost has to bigger than or equal to 0"
+  let !_ = runtimeAssert (0 <= from && from < nG) $ "addEdge: `from` vertex out of bounds (`" ++ show from ++ "` over the number of vertices `" ++ show nG ++ "`)"
+  let !_ = runtimeAssert (0 <= to && to < nG) $ "addEdge: `to` vertex out of bounds (`" ++ show to ++ "` over the number of vertices `" ++ show nG ++ "`)"
+  let !_ = runtimeAssert (0 <= cap) "addEdge: edge capacity has to bigger than or equal to 0"
+  let !_ = runtimeAssert (0 <= cost) $ "addEdge: edge cost has to bigger than or equal to 0"
   m <- ACGV.length edgesG
   ACGV.pushBack edgesG (from, to, cap, 0, cost)
   return m

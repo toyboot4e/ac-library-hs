@@ -31,7 +31,7 @@ new nFT = do
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
 add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()
 add FenwickTree {..} p0 x = do
-  let !_ = runtimeAssert (0 <= p0 && p0 < nFT) "add: vertex out of bounds"
+  let !_ = runtimeAssert (0 <= p0 && p0 < nFT) $ "add: vertex out of bounds (`" ++ show p0 ++ "` over the number of vertices `" ++ show nFT ++ "`)"
   let p1 = p0 + 1
   flip fix p1 $ \loop p -> do
     when (p <= nFT) $ do
@@ -52,7 +52,7 @@ prefixSum FenwickTree {..} = inner 0
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
 sum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
 sum ft@FenwickTree {..} l r = do
-  let !_ = runtimeAssert (0 <= l && l <= r && r <= nFT) "sum: invalid vertices"
+  let !_ = runtimeAssert (0 <= l && l <= r && r <= nFT) $ "sum: invalid range `" ++ show (l, r) ++ "` over the number of vertices `" ++ show nFT ++ "`)"
   xr <- prefixSum ft r
   xl <- prefixSum ft l
   return $! xr - xl

@@ -31,8 +31,8 @@ new nDSU = do
 -- | Amortized \(O(\alpha(n))\).
 merge :: (HasCallStack, PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m Int
 merge dsu@DSU {..} a b = do
-  let !_ = runtimeAssert (0 <= a && a < nDSU) "merge: vertex out of bounds"
-  let !_ = runtimeAssert (0 <= b && b < nDSU) "merge: vertex out of bounds"
+  let !_ = runtimeAssert (0 <= a && a < nDSU) $ "merge: vertex out of bounds (`" ++ show a ++ "` over the number of vertices `" ++ show nDSU ++ "`)"
+  let !_ = runtimeAssert (0 <= b && b < nDSU) $ "merge: vertex out of bounds (`" ++ show b ++ "` over the number of vertices `" ++ show nDSU ++ "`)"
   x <- leader dsu a
   y <- leader dsu b
   if x == y
@@ -58,8 +58,8 @@ merge_ dsu a b = do
 -- | Amortized \(O(\alpha(n))\).
 same :: (HasCallStack, PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m Bool
 same dsu@DSU {..} a b = do
-  let !_ = runtimeAssert (0 <= a && a < nDSU) "same: vertex out of bounds"
-  let !_ = runtimeAssert (0 <= b && b < nDSU) "same: vertex out of bounds"
+  let !_ = runtimeAssert (0 <= a && a < nDSU) $ "same: vertex out of bounds (`" ++ show a ++ "` over the number of vertices `" ++ show nDSU ++ "`)"
+  let !_ = runtimeAssert (0 <= b && b < nDSU) $ "same: vertex out of bounds (`" ++ show b ++ "` over the number of vertices `" ++ show nDSU ++ "`)"
   la <- leader dsu a
   lb <- leader dsu b
   return $ la == lb
@@ -67,7 +67,7 @@ same dsu@DSU {..} a b = do
 -- | Amortized \(O(\alpha(n))\).
 leader :: (HasCallStack, PrimMonad m) => DSU (PrimState m) -> Int -> m Int
 leader dsu@DSU {..} a = do
-  let !_ = runtimeAssert (0 <= a && a < nDSU) "leader: vertex out of bounds"
+  let !_ = runtimeAssert (0 <= a && a < nDSU) $ "leader: vertex out of bounds (`" ++ show a ++ "` over the number of vertices `" ++ show nDSU ++ "`)"
   pa <- VGM.read parentOrSizeDSU a
   if pa < 0
     then return a
@@ -79,7 +79,7 @@ leader dsu@DSU {..} a = do
 -- | Amortized \(O(\alpha(n))\).
 size :: (HasCallStack, PrimMonad m) => DSU (PrimState m) -> Int -> m Int
 size dsu@DSU {..} a = do
-  let !_ = runtimeAssert (0 <= a && a < nDSU) "size: vertex out of bounds"
+  let !_ = runtimeAssert (0 <= a && a < nDSU) $ "size: vertex out of bounds (`" ++ show a ++ "` over the number of vertices `" ++ show nDSU ++ "`)"
   la <- leader dsu a
   sizeLa <- VGM.read parentOrSizeDSU la
   return (-sizeLa)

@@ -43,9 +43,9 @@ new' nG nEdges = do
 -- | Amortized \(O(1)\)
 addEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m Int
 addEdge MfGraph {..} from to cap = do
-  let !_ = runtimeAssert (0 <= from && from < nG) "from vertex out of bounds"
-  let !_ = runtimeAssert (0 <= to && to < nG) "to vertex out of bounds"
-  let !_ = runtimeAssert (0 <= cap) "capacity has to bigger than or equal to 0"
+  let !_ = runtimeAssert (0 <= from && from < nG) $ "addEdge: `from` vertex out of bounds (`" ++ show from ++ "` over the number of vertices `" ++ show nG ++ "`)"
+  let !_ = runtimeAssert (0 <= to && to < nG) $ "addEdge: `to` vertex out of bounds (`" ++ show to ++ "` over the number of vertices `" ++ show nG ++ "`)"
+  let !_ = runtimeAssert (0 <= cap) "addEdge: `capacity` has to bigger than or equal to `0`" -- not Show
   m <- ACGV.length posG
   iEdge <- ACGV.length (gG VG.! from)
   ACGV.pushBack posG (from, iEdge)
@@ -68,8 +68,8 @@ addEdge_ graph from to cap = do
 changeEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> cap -> cap -> m ()
 changeEdge MfGraph {..} i newCap newFlow = do
   m <- ACGV.length posG
-  let !_ = runtimeAssert (0 <= i && i < m) "changeEdge: vertex out of bounds"
-  let !_ = runtimeAssert (0 <= newFlow && newFlow <= newCap) "changeEdge: invalid flow and capacity"
+  let !_ = runtimeAssert (0 <= i && i < m) $ "changeEdge: vertex out of bounds (`" ++ show i ++ "` over the number of edges `" ++ show m ++ "`)"
+  let !_ = runtimeAssert (0 <= newFlow && newFlow <= newCap) "changeEdge: invalid flow and capacity" -- not Show
   (!from, !iEdge) <- ACGV.read posG i
   (!to, !iRevEdge, !_) <- ACGV.read (gG VG.! from) iEdge
   writeCapacity gG from iEdge $! newCap - newFlow
@@ -99,8 +99,8 @@ modifyCapacity gv f i = do
 -- | \(O(1)\) Retrieves ith edge: @(from, to, capacity, flow)@.
 getEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (Int, Int, cap, cap)
 getEdge MfGraph {..} i = do
-  len <- ACGV.length posG
-  let !_ = runtimeAssert (0 <= i && i < len) "edge index out of bounds"
+  m <- ACGV.length posG
+  let !_ = runtimeAssert (0 <= i && i < m) $ "getEdge: edge index out of bounds (`" ++ show i ++ "` over the number of edges `" ++ show m ++ "`)"
   (!from, !iEdge) <- ACGV.read posG i
   (!to, !iRevEdge, !cap) <- ACGV.read (gG VG.! from) iEdge
   revCap <- readCapacity gG to iRevEdge
@@ -122,9 +122,9 @@ flow gr s t = do
 
 flow' :: (HasCallStack, Show cap, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m cap
 flow' MfGraph {..} s t flowLimit = do
-  let !_ = runtimeAssert (0 <= s && s < nG) "source vertex out of bounds"
-  let !_ = runtimeAssert (0 <= t && t < nG) "destination vertex out of bounds"
-  let !_ = runtimeAssert (s /= t) "source and destination vertex has to be distinct"
+  let !_ = runtimeAssert (0 <= s && s < nG) $ "flow': source vertex out of bounds (`" ++ show s ++ "` over the number of vertices `" ++ show nG ++ "`)"
+  let !_ = runtimeAssert (0 <= t && t < nG) $ "flow': destination vertex out of bounds (`" ++ show t ++ "` over the number of vertices `" ++ show nG ++ "`)"
+  let !_ = runtimeAssert (s /= t) $ "flow': source and destination vertex has to be distinct (`" ++ show s ++ "`)"
 
   level <- VUM.unsafeNew nG
   que <- ACQ.new nG

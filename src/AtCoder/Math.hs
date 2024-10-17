@@ -16,8 +16,8 @@ import GHC.Stack (HasCallStack)
 floorSum :: (HasCallStack) => Int -> Int -> Int -> Int -> Int
 floorSum n m a b = floorSumUnsigned n m a' b' - da - db
   where
-    !_ = runtimeAssert (0 <= n && n < bit 32) "floorSum: invalid n"
-    !_ = runtimeAssert (1 <= m && m < bit 32) "floorSum: invalid m"
+    !_ = runtimeAssert (0 <= n && n < bit 32) $ "floorSum: invalid `n` (`" ++ show n ++ "`)"
+    !_ = runtimeAssert (1 <= m && m < bit 32) $ "floorSum: invalid `m` (`" ++ show m ++ "`)"
     a'
       | a < 0 = a `mod` m
       | otherwise = a
