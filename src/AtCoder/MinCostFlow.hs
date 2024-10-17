@@ -72,7 +72,7 @@ addEdge_ graph from to cap cost = do
   _ <- addEdge graph from to cap cost
   return ()
 
--- | \(O(1)\)
+-- | \(O(1)\). Returns @(from, to, cap, flow, cost)@.
 getEdge ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->

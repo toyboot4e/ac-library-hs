@@ -2,9 +2,9 @@
 module Tests.DSU (tests) where
 
 import AtCoder.DSU qualified as DSU
+import AtCoder.FenwickTree qualified as FT
 import Data.Foldable
 import Data.Vector qualified as V
-import Data.Vector.Unboxed qualified as VU
 import System.IO.Unsafe (unsafePerformIO)
 import Test.Hspec
 import Test.Tasty
@@ -47,6 +47,11 @@ lineReverse = testCase "lineReverse" $ do
   (@?= n) =<< DSU.size uf 0
   (@?= 1) . V.length =<< DSU.groups uf
 
+invalid :: IO TestTree
+invalid = testSpec "invalid" $ do
+  it "throws error" $ do
+    DSU.new (-1) `shouldThrow` anyException
+
 tests :: [TestTree]
 tests =
-  [zero, simple, line, lineReverse]
+  [zero, simple, line, lineReverse, unsafePerformIO invalid]

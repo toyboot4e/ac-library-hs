@@ -11,8 +11,8 @@ import Test.Tasty.Hspec
 
 zero :: TestTree
 zero = testCase "zero" $ do
-  g <- MF.new @Int 0
-  h <- MF.new @Double 0
+  _ <- MF.new @Int 0
+  _ <- MF.new @Double 0
   return ()
 
 -- Assign is skipped
