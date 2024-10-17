@@ -11,6 +11,7 @@ import Data.Bits
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import GHC.Stack (HasCallStack)
 import Prelude hiding (sum)
 
 -- | Fenwick tree.
@@ -28,7 +29,7 @@ new nFT = do
   return FenwickTree {..}
 
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
-add :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()
+add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()
 add FenwickTree {..} p0 x = do
   let !_ = runtimeAssert (0 <= p0 && p0 < nFT) "add: vertex out of bounds"
   let p1 = p0 + 1
@@ -49,7 +50,7 @@ prefixSum FenwickTree {..} = inner 0
           inner (acc + dx) (r - r .&. (-r))
 
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
-sum :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
+sum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
 sum ft@FenwickTree {..} l r = do
   let !_ = runtimeAssert (0 <= l && l <= r && r <= nFT) "sum: invalid vertices"
   xr <- prefixSum ft r

@@ -11,6 +11,7 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import GHC.Stack (HasCallStack)
 
 -- | Disjoint set union.
 data DSU s = DSU
@@ -28,7 +29,7 @@ new nDSU = do
   return DSU {..}
 
 -- | Amortized \(O(\alpha(n))\).
-merge :: (PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m Int
+merge :: (HasCallStack, PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m Int
 merge dsu@DSU {..} a b = do
   let !_ = runtimeAssert (0 <= a && a < nDSU) "merge: vertex out of bounds"
   let !_ = runtimeAssert (0 <= b && b < nDSU) "merge: vertex out of bounds"
@@ -55,7 +56,7 @@ merge_ dsu a b = do
   return ()
 
 -- | Amortized \(O(\alpha(n))\).
-same :: (PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m Bool
+same :: (HasCallStack, PrimMonad m) => DSU (PrimState m) -> Int -> Int -> m Bool
 same dsu@DSU {..} a b = do
   let !_ = runtimeAssert (0 <= a && a < nDSU) "same: vertex out of bounds"
   let !_ = runtimeAssert (0 <= b && b < nDSU) "same: vertex out of bounds"
@@ -64,7 +65,7 @@ same dsu@DSU {..} a b = do
   return $ la == lb
 
 -- | Amortized \(O(\alpha(n))\).
-leader :: (PrimMonad m) => DSU (PrimState m) -> Int -> m Int
+leader :: (HasCallStack, PrimMonad m) => DSU (PrimState m) -> Int -> m Int
 leader dsu@DSU {..} a = do
   let !_ = runtimeAssert (0 <= a && a < nDSU) "leader: vertex out of bounds"
   pa <- VGM.read parentOrSizeDSU a
@@ -76,7 +77,7 @@ leader dsu@DSU {..} a = do
       return lpa
 
 -- | Amortized \(O(\alpha(n))\).
-size :: (PrimMonad m) => DSU (PrimState m) -> Int -> m Int
+size :: (HasCallStack, PrimMonad m) => DSU (PrimState m) -> Int -> m Int
 size dsu@DSU {..} a = do
   let !_ = runtimeAssert (0 <= a && a < nDSU) "size: vertex out of bounds"
   la <- leader dsu a

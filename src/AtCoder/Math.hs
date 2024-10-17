@@ -6,13 +6,14 @@ module AtCoder.Math (floorSum) where
 import AtCoder.Internal.Assert (runtimeAssert)
 import AtCoder.Internal.Math (floorSumUnsigned)
 import Data.Bits (bit)
+import GHC.Stack (HasCallStack)
 
 -- | \(O(\log m)\) Returns \(\sum_{i=0}^{j-1} \lfloor \frac {a \cross i + b} {m} \rfloor\).
 --
 -- = Input constraints
 -- - \(0 \le n \lt 2^32\)
 -- - \(1 \le m \lt 2^32\)
-floorSum :: Int -> Int -> Int -> Int -> Int
+floorSum :: (HasCallStack) => Int -> Int -> Int -> Int -> Int
 floorSum n m a b = floorSumUnsigned n m a' b' - da - db
   where
     !_ = runtimeAssert (0 <= n && n < bit 32) "floorSum: invalid n"
