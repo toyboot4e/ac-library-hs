@@ -4,8 +4,9 @@ import Test.Tasty (testGroup)
 import Test.Tasty.Ingredients.Rerun
 import Tests.DSU qualified
 import Tests.FenwickTree qualified
-import Tests.Internal.MinHeap qualified
+import Tests.Internal.Buffer qualified
 import Tests.Internal.McfCSR qualified
+import Tests.Internal.MinHeap qualified
 import Tests.Math qualified
 import Tests.MaxFlow qualified
 import Tests.MinCostFlow qualified
@@ -16,6 +17,7 @@ main =
     . testGroup "toplevel"
     $ [ testGroup "Tests.DSU" Tests.DSU.tests,
         testGroup "Tests.FenwickTree" Tests.FenwickTree.tests,
+        testGroup "Tests.Internal.Buffer" Tests.Internal.Buffer.tests,
         testGroup "Tests.Internal.MinHeap" Tests.Internal.MinHeap.tests,
         testGroup "Tests.Internal.McfCSR" Tests.Internal.McfCSR.tests,
         testGroup "Tests.Math" Tests.Math.tests,
