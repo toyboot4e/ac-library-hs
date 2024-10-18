@@ -213,4 +213,5 @@ test-suite ac-library-hs-test
     , tasty
     , tasty-hspec
     , tasty-hunit
+    , tasty-rerun
     , tasty-quickcheck
