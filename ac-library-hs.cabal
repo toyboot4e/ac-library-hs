@@ -158,6 +158,7 @@ library
     AtCoder.Math
     AtCoder.MaxFlow
     AtCoder.MinCostFlow
+    AtCoder.ModInt
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -196,6 +197,7 @@ test-suite ac-library-hs-test
     Tests.Math
     Tests.MaxFlow
     Tests.MinCostFlow
+    Tests.ModInt
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
