@@ -4,11 +4,14 @@
 module AtCoder.Internal.Buffer
   ( Buffer (..),
     new,
+    build,
     pushBack,
     popBack,
+    capacity,
     length,
     null,
     clear,
+    freeze,
     unsafeFreeze,
   )
 where
@@ -28,9 +31,16 @@ data Buffer s a = Buffer
 
 -- | \(O(n)\)
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (Buffer (PrimState m) a)
-new capacity = do
+new n = do
   lenB <- VUM.replicate 1 (0 :: Int)
-  vecB <- VUM.unsafeNew capacity
+  vecB <- VUM.unsafeNew n
+  return Buffer {..}
+
+-- | \(O(n)\)
+build :: (PrimMonad m, VU.Unbox a) => VU.Vector a -> m (Buffer (PrimState m) a)
+build xs = do
+  lenB <- VUM.replicate 1 $ VU.length xs
+  vecB <- VU.thaw xs
   return Buffer {..}
 
 -- | \(O(1)\)
@@ -52,6 +62,10 @@ popBack Buffer {..} = do
       return $ Just x
 
 -- | \(O(1)\)
+capacity :: (VU.Unbox a) => Buffer s a -> Int
+capacity = VUM.length . vecB
+
+-- | \(O(1)\)
 length :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m Int
 length Buffer {..} = do
   VGM.read lenB 0
@@ -64,6 +78,12 @@ null = fmap (== 0) . length
 clear :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m ()
 clear Buffer {..} = do
   VGM.write lenB 0 0
+
+-- | \(O(1)\)
+freeze :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (VU.Vector a)
+freeze Buffer {..} = do
+  len <- VGM.read lenB 0
+  VU.freeze $ VUM.take len vecB
 
 -- | \(O(1)\)
 unsafeFreeze :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (VU.Vector a)

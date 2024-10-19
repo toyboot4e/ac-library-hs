@@ -3,7 +3,7 @@
 -- | Minimum binary heap. Mutable and fixed-sized.
 --
 -- <https://en.wikipedia.org/wiki/Binary_heap>
-module AtCoder.Internal.MinHeap (Heap, new, length, null, clear, push, peek, pop) where
+module AtCoder.Internal.MinHeap (Heap(..), new, capacity, length, null, clear, push, peek, pop) where
 
 import Control.Monad
 import Control.Monad.Primitive (PrimMonad, PrimState)
@@ -39,6 +39,10 @@ new n = do
   sizeBH_ <- VUM.replicate 1 0
   dataBH <- VUM.unsafeNew n
   return Heap {..}
+
+-- | \(O(1)\)
+capacity :: (VU.Unbox a) => Heap s a -> Int
+capacity = VUM.length . dataBH
 
 -- | \(O(1)\)
 length :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m Int

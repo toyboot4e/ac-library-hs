@@ -189,8 +189,10 @@ test-suite ac-library-hs-test
     Tests.DSU
     Tests.FenwickTree
     Tests.Internal.Buffer
+    Tests.Internal.GrowVec
     Tests.Internal.MinHeap
     Tests.Internal.McfCSR
+    Tests.Internal.Queue
     Tests.Math
     Tests.MaxFlow
     Tests.MinCostFlow
