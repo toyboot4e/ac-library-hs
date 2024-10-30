@@ -9,13 +9,13 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.Hspec
 
-zero :: TestTree
-zero = testCase "zero" $ do
+unit_zero :: TestTree
+unit_zero = testCase "zero" $ do
   _g <- MCF.new @Int @Int 0
   return ()
 
-simple :: TestTree
-simple = testCase "simple" $ do
+unit_simple :: TestTree
+unit_simple = testCase "simple" $ do
   g <- MCF.new @Int 4
   (@?= 0) =<< MCF.addEdge g 0 1 (1 :: Int) (1 :: Int)
   (@?= 1) =<< MCF.addEdge g 0 2 (1 :: Int) (1 :: Int)
@@ -33,8 +33,8 @@ simple = testCase "simple" $ do
   ((2, 3, 1, 1, 1) @?=) =<< MCF.getEdge g 3
   ((1, 2, 1, 0, 1) @?=) =<< MCF.getEdge g 4
 
-usage :: TestTree
-usage = testCase "simple" $ do
+unit_usage :: TestTree
+unit_usage = testCase "usage" $ do
   do
     g <- MCF.new @Int 2
     (@?= 0) =<< MCF.addEdge g 0 1 (1 :: Int) (2 :: Int)
@@ -47,22 +47,22 @@ usage = testCase "simple" $ do
 
 -- assign is skipped
 
-outOfRange :: IO TestTree
-outOfRange = testSpec "outOfRange" $ do
+spec_outOfRange :: IO TestTree
+spec_outOfRange = testSpec "outOfRange" $ do
   g <- runIO $ MCF.new @Int @Int 10
   it "throws error" $ do
     MCF.slope g (-1) 3 maxBound `shouldThrow` anyException
   it "throws error" $ do
     MCF.slope g 3 3 maxBound `shouldThrow` anyException
 
-selfLoop :: TestTree
-selfLoop = testCase "selfLoop" $ do
+unit_selfLoop :: TestTree
+unit_selfLoop = testCase "selfLoop" $ do
   g <- MCF.new @Int 3
   (@?= 0) =<< MCF.addEdge g 0 0 (100 :: Int) (123 :: Int)
   (@?= (0, 0, 100, 0, 123)) =<< MCF.getEdge g 0
 
-sameCostPaths :: TestTree
-sameCostPaths = testCase "sameCostPaths" $ do
+unit_sameCostPaths :: TestTree
+unit_sameCostPaths = testCase "sameCostPaths" $ do
   g <- MCF.new @Int @Int 3
   (0 @?=) =<< MCF.addEdge g 0 1 1 1
   (1 @?=) =<< MCF.addEdge g 1 2 1 0
@@ -70,8 +70,8 @@ sameCostPaths = testCase "sameCostPaths" $ do
   let expected = VU.fromList [(0, 0), (3, 3)]
   (@?= expected) =<< MCF.slope g 0 2 maxBound
 
-invalid :: IO TestTree
-invalid = testSpec "invalid" $ do
+spec_invalid :: IO TestTree
+spec_invalid = testSpec "invalid" $ do
   g <- runIO $ MCF.new @Int @Int 2
   it "throws error" $ do
     MCF.addEdge g 0 0 (-1) 0 `shouldThrow` anyException
@@ -82,11 +82,11 @@ invalid = testSpec "invalid" $ do
 
 tests :: [TestTree]
 tests =
-  [ zero,
-    simple,
-    usage,
-    unsafePerformIO outOfRange,
-    selfLoop,
-    sameCostPaths,
-    unsafePerformIO invalid
+  [ unit_zero,
+    unit_simple,
+    unit_usage,
+    unsafePerformIO spec_outOfRange,
+    unit_selfLoop,
+    unit_sameCostPaths,
+    unsafePerformIO spec_invalid
   ]

@@ -9,8 +9,8 @@ import Data.Vector.Unboxed qualified as VU
 import Test.Tasty
 import Test.Tasty.QuickCheck as QC
 
-zeroNew :: [Int] -> Bool
-zeroNew xs =
+prop_zeroNew :: [Int] -> Bool
+prop_zeroNew xs =
   let ys = VU.fromList xs
       zs = runST $ do
         buf <- ACGV.new 0
@@ -18,8 +18,8 @@ zeroNew xs =
         ACGV.unsafeFreeze buf
    in ys == zs
 
-zeroBuild :: [Int] -> Bool
-zeroBuild xs =
+prop_zeroBuild :: [Int] -> Bool
+prop_zeroBuild xs =
   let ys = VU.fromList xs
       zs = runST $ do
         buf <- ACGV.build VU.empty
@@ -27,8 +27,8 @@ zeroBuild xs =
         ACGV.unsafeFreeze buf
    in ys == zs
 
-pushPop :: [Int] -> Bool
-pushPop xs =
+prop_pushPop :: [Int] -> Bool
+prop_pushPop xs =
   let ys = runST $ do
         buf <- ACGV.new $ length xs
         for_ xs $ ACGV.pushBack buf
@@ -39,8 +39,8 @@ tests :: [TestTree]
 tests =
   [ testGroup
       "AtCoder.Internal.GrowVec"
-      [ QC.testProperty "zeroNew" zeroNew,
-        QC.testProperty "zeroBuild" zeroBuild,
-        QC.testProperty "pushPop" pushPop
+      [ QC.testProperty "zeroNew" prop_zeroNew,
+        QC.testProperty "zeroBuild" prop_zeroBuild,
+        QC.testProperty "pushPop" prop_pushPop
       ]
   ]

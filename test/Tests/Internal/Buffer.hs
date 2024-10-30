@@ -9,16 +9,16 @@ import Data.Vector.Unboxed qualified as VU
 import Test.Tasty
 import Test.Tasty.QuickCheck as QC
 
-build :: [Int] -> Bool
-build xs =
+prop_build :: [Int] -> Bool
+prop_build xs =
   let ys = VU.fromList xs
       zs = runST $ do
         buf <- ACB.build $ VU.fromList xs
         ACB.unsafeFreeze buf
    in ys == zs
 
-push :: [Int] -> Bool
-push xs =
+prop_push :: [Int] -> Bool
+prop_push xs =
   let ys = VU.fromList xs
       zs = runST $ do
         buf <- ACB.new $ length xs
@@ -26,8 +26,8 @@ push xs =
         ACB.unsafeFreeze buf
    in ys == zs
 
-pushPop :: [Int] -> Bool
-pushPop xs =
+prop_pushPop :: [Int] -> Bool
+prop_pushPop xs =
   let ys = runST $ do
         buf <- ACB.new $ length xs
         for_ xs $ ACB.pushBack buf
@@ -38,8 +38,8 @@ tests :: [TestTree]
 tests =
   [ testGroup
       "AtCoder.Internal.Buffer"
-      [ QC.testProperty "build" build,
-        QC.testProperty "push" push,
-        QC.testProperty "pushPop" pushPop
+      [ QC.testProperty "build" prop_build,
+        QC.testProperty "push" prop_push,
+        QC.testProperty "pushPop" prop_pushPop
       ]
   ]

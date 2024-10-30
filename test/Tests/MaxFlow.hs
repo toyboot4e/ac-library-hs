@@ -9,16 +9,16 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.Hspec
 
-zero :: TestTree
-zero = testCase "zero" $ do
+unit_zero :: TestTree
+unit_zero = testCase "zero" $ do
   _ <- MF.new @Int 0
   _ <- MF.new @Double 0
   return ()
 
 -- Assign is skipped
 
-simple :: TestTree
-simple = testCase "simple" $ do
+unit_simple :: TestTree
+unit_simple = testCase "simple" $ do
   g <- MF.new 4
   (@?= 0) =<< MF.addEdge g 0 1 (1 :: Int)
   (@?= 1) =<< MF.addEdge g 0 2 1
@@ -37,8 +37,8 @@ simple = testCase "simple" $ do
 
   (@?= VU.fromList [True, False, False, False]) =<< MF.minCut g 0
 
-notSimple :: TestTree
-notSimple = testCase "notSimple" $ do
+unit_notSimple :: TestTree
+unit_notSimple = testCase "notSimple" $ do
   g <- MF.new 2
   (@?= 0) =<< MF.addEdge g 0 1 (1 :: Int)
   (@?= 1) =<< MF.addEdge g 0 1 2
@@ -58,8 +58,8 @@ notSimple = testCase "notSimple" $ do
 
   (@?= VU.fromList [True, False]) =<< MF.minCut g 0
 
-minCut :: TestTree
-minCut = testCase "minCut" $ do
+unit_minCut :: TestTree
+unit_minCut = testCase "minCut" $ do
   g <- MF.new 3
   (@?= 0) =<< MF.addEdge g 0 1 (2 :: Int)
   (@?= 1) =<< MF.addEdge g 1 2 1
@@ -70,8 +70,8 @@ minCut = testCase "minCut" $ do
 
   (@?= VU.fromList [True, True, False]) =<< MF.minCut g 0
 
-twice :: TestTree
-twice = testCase "twice" $ do
+unit_twice :: TestTree
+unit_twice = testCase "twice" $ do
   g <- MF.new 3
   (@?= 0) =<< MF.addEdge g 0 1 (1 :: Int)
   (@?= 1) =<< MF.addEdge g 0 2 1
@@ -99,8 +99,8 @@ twice = testCase "twice" $ do
   (@?= (0, 2, 1, 0)) =<< MF.getEdge g 1
   (@?= (1, 2, 1, 0)) =<< MF.getEdge g 2
 
-maxFlowBound :: TestTree
-maxFlowBound = testCase "maxFlowBound" $ do
+unit_maxFlowBound :: TestTree
+unit_maxFlowBound = testCase "maxFlowBound" $ do
   g <- MF.new 3
   (@?= 0) =<< MF.addEdge g 0 1 (maxBound :: Int)
   (@?= 1) =<< MF.addEdge g 1 0 maxBound
@@ -114,14 +114,14 @@ maxFlowBound = testCase "maxFlowBound" $ do
 
 -- BoundUInt is skipped
 
-selfLoop :: TestTree
-selfLoop = testCase "selfLoop" $ do
+unit_selfLoop :: TestTree
+unit_selfLoop = testCase "selfLoop" $ do
   g <- MF.new 3
   (@?= 0) =<< MF.addEdge g 0 0 (100 :: Int)
   (@?= (0, 0, 100, 0)) =<< MF.getEdge g 0
 
-invalidFlow :: IO TestTree
-invalidFlow = testSpec "invalidFlow" $ do
+spec_invalidFlow :: IO TestTree
+spec_invalidFlow = testSpec "invalidFlow" $ do
   g <- runIO $ MF.new @Int 2
   it "throws error" $ do
     MF.flow g 0 0 `shouldThrow` anyException
@@ -132,15 +132,15 @@ invalidFlow = testSpec "invalidFlow" $ do
 
 tests :: [TestTree]
 tests =
-  [ zero,
+  [ unit_zero,
     -- assign,
-    simple,
-    notSimple,
-    minCut,
-    twice,
-    maxFlowBound,
+    unit_simple,
+    unit_notSimple,
+    unit_minCut,
+    unit_twice,
+    unit_maxFlowBound,
     -- maxFlowBoundUInt
-    selfLoop,
-    unsafePerformIO invalidFlow
+    unit_selfLoop,
+    unsafePerformIO spec_invalidFlow
     -- stress
   ]

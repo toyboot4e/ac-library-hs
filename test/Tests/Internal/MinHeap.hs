@@ -8,8 +8,8 @@ import Data.Maybe
 import Test.Tasty
 import Test.Tasty.QuickCheck as QC
 
-ordered :: TestTree
-ordered =
+prop_ordered :: TestTree
+prop_ordered =
   testGroup
     "Ordering"
     [ QC.testProperty "max heap ordering" $ do
@@ -24,4 +24,4 @@ ordered =
     ]
 
 tests :: [TestTree]
-tests = [testGroup "AtCoder.Internal.Heap" [ordered]]
+tests = [testGroup "AtCoder.Internal.Heap" [prop_ordered]]

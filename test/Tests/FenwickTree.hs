@@ -12,8 +12,8 @@ import Test.Tasty.Hspec
 -- empty
 -- assign
 
-zero :: TestTree
-zero = testCase "zero" $ do
+unit_zero :: TestTree
+unit_zero = testCase "zero" $ do
   fw <- FT.new @Int 0
   (@?= 0) =<< FT.sum fw 0 0
 
@@ -32,8 +32,8 @@ zero = testCase "zero" $ do
 --       result <- FT.sum fw i j
 --       result @?= expected
 
-naive :: TestTree
-naive = testCase "naive" $ do
+unit_naive :: TestTree
+unit_naive = testCase "naive" $ do
   for_ [0 .. 50] $ \n -> do
     fw <- FT.new @Int n
     for_ [0 .. n - 1] $ \i -> do
@@ -46,8 +46,8 @@ naive = testCase "naive" $ do
 -- TODO: smint
 -- TODO: mint
 
-invalid :: IO TestTree
-invalid = testSpec "invalid" $ do
+spec_invalid :: IO TestTree
+spec_invalid = testSpec "invalid" $ do
   it "throws error" $ do
     FT.new @Int (-1) `shouldThrow` anyException
   s <- runIO $ FT.new @Int 10
@@ -66,4 +66,4 @@ invalid = testSpec "invalid" $ do
 
 tests :: [TestTree]
 tests =
-  [zero {- overFlowInt -}, naive, unsafePerformIO invalid]
+  [unit_zero {- overFlowInt -}, unit_naive, unsafePerformIO spec_invalid]

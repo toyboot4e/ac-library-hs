@@ -7,8 +7,8 @@ import Data.Vector.Unboxed qualified as VU
 import Test.Tasty
 import Test.Tasty.QuickCheck as QC
 
-push :: [Int] -> Bool
-push xs =
+prop_push :: [Int] -> Bool
+prop_push xs =
   let ys = VU.fromList xs
       zs = runST $ do
         buf <- ACQ.new $ length xs
@@ -20,6 +20,6 @@ tests :: [TestTree]
 tests =
   [ testGroup
       "AtCoder.Internal.Queue"
-      [ QC.testProperty "push" push
+      [ QC.testProperty "push" prop_push
       ]
   ]
