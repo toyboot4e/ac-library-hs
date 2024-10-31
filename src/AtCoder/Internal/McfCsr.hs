@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | CSR for min cost flow.
-module AtCoder.Internal.McfCSR (CSR (..), build, adj) where
+module AtCoder.Internal.McfCsr (Csr (..), build, adj) where
 
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Vector.Generic qualified as VG
@@ -12,21 +12,21 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
 -- | CSR for min cost flow.
-data CSR s cap cost = CSR
-  { startCSR :: !(VU.Vector Int),
-    toCSR :: !(VU.Vector Int),
-    revCSR :: !(VU.Vector Int),
+data Csr s cap cost = Csr
+  { startCsr :: !(VU.Vector Int),
+    toCsr :: !(VU.Vector Int),
+    revCsr :: !(VU.Vector Int),
     -- | Mutable
-    capCSR :: !(VUM.MVector s cap),
-    costCSR :: !(VU.Vector cost)
+    capCsr :: !(VUM.MVector s cap),
+    costCsr :: !(VU.Vector cost)
   }
 
 -- | \(O(n + m)\)
-build :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost, PrimMonad m) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> m (VU.Vector Int, CSR (PrimState m) cap cost)
+build :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost, PrimMonad m) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> m (VU.Vector Int, Csr (PrimState m) cap cost)
 build n edges = do
   let m = VU.length edges
   -- craete the offsets first (this is a different step from ac-librar)
-  let startCSR = VU.create $ do
+  let startCsr = VU.create $ do
         start <- VUM.replicate (n + 1) (0 :: Int)
         -- count degrees
         let (VU.V_5 _ froms tos _ _ _) = edges
@@ -40,11 +40,11 @@ build n edges = do
 
   toVec <- VUM.unsafeNew $ 2 * m
   revVec <- VUM.unsafeNew $ 2 * m
-  capCSR <- VUM.unsafeNew $ 2 * m
+  capCsr <- VUM.unsafeNew $ 2 * m
   costVec <- VUM.unsafeNew $ 2 * m
 
   -- build CSR
-  counter <- VU.thaw startCSR
+  counter <- VU.thaw startCsr
   edgeIdx <- VU.forM edges $ \(!from, !to, !cap, !flow, !cost) -> do
     i1 <- VGM.read counter from
     VGM.modify counter (+ 1) from
@@ -53,25 +53,25 @@ build n edges = do
     -- write forward edge
     VGM.write toVec i1 to
     VGM.write revVec i1 i2
-    VGM.write capCSR i1 $! cap - flow
+    VGM.write capCsr i1 $! cap - flow
     VGM.write costVec i1 cost
     -- write backward edge
     VGM.write toVec i2 from
     VGM.write revVec i2 i1
-    VGM.write capCSR i2 flow
+    VGM.write capCsr i2 flow
     VGM.write costVec i2 (-cost)
     -- remember forward edge index
     return i1
 
-  toCSR <- VU.unsafeFreeze toVec
-  revCSR <- VU.unsafeFreeze revVec
-  costCSR <- VU.unsafeFreeze costVec
-  return (edgeIdx, CSR {..})
+  toCsr <- VU.unsafeFreeze toVec
+  revCsr <- VU.unsafeFreeze revVec
+  costCsr <- VU.unsafeFreeze costVec
+  return (edgeIdx, Csr {..})
 
 -- | \(O(1)\) Returns a vector of @(to, rev, cost)@.
-adj :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost) => CSR s cap cost -> Int -> VU.Vector (Int, Int, cost)
-adj CSR {..} v = VU.slice offset len vec
+adj :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost) => Csr s cap cost -> Int -> VU.Vector (Int, Int, cost)
+adj Csr {..} v = VU.slice offset len vec
   where
-    offset = startCSR VG.! v
-    len = startCSR VG.! (v + 1) - offset
-    vec = VU.zip3 toCSR revCSR costCSR
+    offset = startCsr VG.! v
+    len = startCsr VG.! (v + 1) - offset
+    vec = VU.zip3 toCsr revCsr costCsr

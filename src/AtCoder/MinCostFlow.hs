@@ -7,7 +7,7 @@ import AtCoder.Internal.Assert (runtimeAssert)
 import AtCoder.Internal.Buffer qualified as ACB
 import AtCoder.Internal.GrowVec qualified as ACGV
 import AtCoder.Internal.MinHeap qualified as ACMH
-import AtCoder.Internal.McfCSR qualified as McfCSR
+import AtCoder.Internal.McfCsr qualified as McfCsr
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
@@ -125,12 +125,12 @@ slope McfGraph {..} s t flowLimit = do
   let !_ = runtimeAssert (s /= t) "start and end vertex have to be distict"
 
   edges@(VU.V_5 _ _ _ caps _ _) <- ACGV.unsafeFreeze edgesG
-  (!edgeIdx, !g) <- McfCSR.build nG edges
+  (!edgeIdx, !g) <- McfCsr.build nG edges
   result <- internalSlopeMCF g nG s t flowLimit
 
   (VUM.MV_5 _ _ _ _ flows _) <- readMutVar $ ACGV.vecGV edgesG
   VU.iforM_ (VU.zip caps edgeIdx) $ \v (!cap1, !iEdge) -> do
-    cap2 <- VGM.read (McfCSR.capCSR g) iEdge
+    cap2 <- VGM.read (McfCsr.capCsr g) iEdge
     VGM.write flows v $! cap1 - cap2
 
   return result
@@ -138,20 +138,20 @@ slope McfGraph {..} s t flowLimit = do
 internalSlopeMCF ::
   forall cap cost m.
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Integral cost, Ord cost, Bounded cost, VU.Unbox cost) =>
-  McfCSR.CSR (PrimState m) cap cost ->
+  McfCsr.Csr (PrimState m) cap cost ->
   Int ->
   Int ->
   Int ->
   cap ->
   m (VU.Vector (cap, cost))
-internalSlopeMCF csr@McfCSR.CSR {..} n s t flowLimit = do
+internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
   duals <- VUM.replicate n 0
   dists <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) cost)
   prevE <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) Int)
   vis <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) Bool)
 
   -- FIXME: maximum capacity?
-  let nEdges = VU.length toCSR
+  let nEdges = VU.length toCsr
   queMin <- ACB.new nEdges :: m (ACB.Buffer (PrimState m) Int)
   heap <- ACMH.new nEdges :: m (ACMH.Heap (PrimState m) (cost, Int))
 
@@ -184,9 +184,9 @@ internalSlopeMCF csr@McfCSR.CSR {..} n s t flowLimit = do
                 -- dist[v] <= (n-1)C
                 dualV <- VGM.read duals v
                 distV <- VGM.read dists v
-                let start = startCSR VG.! v
-                VU.iforM_ (McfCSR.adj csr v) $ \di (!to, !rev, !cost) -> do
-                  cap <- VGM.read capCSR $ start + di
+                let start = startCsr VG.! v
+                VU.iforM_ (McfCsr.adj csr v) $ \di (!to, !rev, !cost) -> do
+                  cap <- VGM.read capCsr $ start + di
 
                   unless (cap == 0) $ do
                     -- \|-dual[e.to] + dual[v]| <= (n-1)C
@@ -229,16 +229,16 @@ internalSlopeMCF csr@McfCSR.CSR {..} n s t flowLimit = do
                   | v == s = return acc
                   | otherwise = do
                       let iPrev = prevE' VG.! v
-                      cap <- VGM.read capCSR $ revCSR VG.! iPrev
-                      minC (min acc cap) $ toCSR VG.! iPrev
+                      cap <- VGM.read capCsr $ revCsr VG.! iPrev
+                      minC (min acc cap) $ toCsr VG.! iPrev
             c <- minC (flowLimit - flow_) t
 
             let subC :: Int -> m ()
                 subC v = when (v /= s) $ do
                   let iPrev = prevE' VG.! v
-                  VGM.modify capCSR (+ c) iPrev
-                  VGM.modify capCSR (subtract c) $ revCSR VG.! iPrev
-                  subC $ toCSR VG.! iPrev
+                  VGM.modify capCsr (+ c) iPrev
+                  VGM.modify capCsr (subtract c) $ revCsr VG.! iPrev
+                  subC $ toCsr VG.! iPrev
             subC t
 
             d <- negate <$> VGM.read duals s

@@ -149,15 +149,17 @@ library
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
     AtCoder.Internal.Buffer
-    AtCoder.Internal.CSR
+    AtCoder.Internal.Csr
     AtCoder.Internal.GrowVec
     AtCoder.Internal.MinHeap
     AtCoder.Internal.Math
-    AtCoder.Internal.McfCSR
+    AtCoder.Internal.McfCsr
     AtCoder.Internal.Queue
+    AtCoder.Internal.Scc
     AtCoder.Math
     AtCoder.MaxFlow
     AtCoder.MinCostFlow
+    AtCoder.Scc
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -191,11 +193,12 @@ test-suite ac-library-hs-test
     Tests.Internal.Buffer
     Tests.Internal.GrowVec
     Tests.Internal.MinHeap
-    Tests.Internal.McfCSR
+    Tests.Internal.McfCsr
     Tests.Internal.Queue
     Tests.Math
     Tests.MaxFlow
     Tests.MinCostFlow
+    Tests.Scc
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:

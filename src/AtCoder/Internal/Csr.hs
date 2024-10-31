@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Immutable Compresed Sparse Row.
-module AtCoder.Internal.CSR (CSR(..), build, adj) where
+module AtCoder.Internal.Csr (Csr(..), build, adj) where
 
 import Data.Foldable (for_)
 import Control.Monad.ST (runST)
@@ -11,20 +11,20 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Base qualified as VU -- V_2
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- | Immutable Comperssed Sparse Row.
-data CSR e = CSR
-  { startCSR :: !(VU.Vector Int),
-    elistCSR :: !(VU.Vector e)
+-- | Comperssed Sparse Row.
+data Csr e = Csr
+  { startCsr :: !(VU.Vector Int),
+    elistCsr :: !(VU.Vector e)
   }
 
 -- | \(O(n + m)\)
-build :: (VU.Unbox e) => Int -> VU.Vector (Int, e) -> CSR e
+build :: (VU.Unbox e) => Int -> VU.Vector (Int, e) -> Csr e
 build n edges = runST $ do
   start <- VUM.replicate (n + 1) (0 :: Int)
 
-  let (VU.V_2 _ is _) = edges
-  VU.forM_ is $ \i -> do
-    VGM.modify start (+ 1) (i + 1)
+  let (VU.V_2 _ froms _) = edges
+  VU.forM_ froms $ \from -> do
+    VGM.modify start (+ 1) (from + 1)
 
   for_ [1 .. n] $ \i -> do
     prev <- VGM.read start (i - 1)
@@ -38,13 +38,13 @@ build n edges = runST $ do
     VGM.write elist c e
     VGM.write counter from (c + 1)
 
-  startCSR <- VU.unsafeFreeze start
-  elistCSR <- VU.unsafeFreeze elist
-  return CSR {..}
+  startCsr <- VU.unsafeFreeze start
+  elistCsr <- VU.unsafeFreeze elist
+  return Csr {..}
 
 -- | \(O(1)\)
-adj :: (VU.Unbox e) => CSR e -> Int -> VU.Vector e
-adj CSR {..} i =
-  let il = startCSR VG.! i
-      ir = startCSR VG.! (i + 1)
-   in VU.slice il (ir - il) elistCSR
+adj :: (VU.Unbox e) => Csr e -> Int -> VU.Vector e
+adj Csr {..} i =
+  let il = startCsr VG.! i
+      ir = startCsr VG.! (i + 1)
+   in VU.slice il (ir - il) elistCsr

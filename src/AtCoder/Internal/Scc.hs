@@ -1,0 +1,118 @@
+{-# LANGUAGE RecordWildCards #-}
+
+module AtCoder.Internal.Scc (SccGraph (nScc), new, addEdge, sccIds, scc) where
+
+import AtCoder.Internal.Csr qualified as ACICSR
+import AtCoder.Internal.GrowVec qualified as ACGV
+import Control.Monad (unless, when)
+import Control.Monad.Fix (fix)
+import Control.Monad.Primitive (PrimMonad, PrimState)
+import Data.Foldable (for_)
+import Data.Maybe (fromJust)
+import Data.Vector qualified as V
+import Data.Vector.Generic qualified as VG
+import Data.Vector.Generic.Mutable qualified as VGM
+import Data.Vector.Unboxed qualified as VU
+import Data.Vector.Unboxed.Mutable qualified as VUM
+
+data SccGraph s = SccGraph
+  { nScc :: {-# UNPACK #-} !Int,
+    edgesScc :: !(ACGV.GrowVec s (Int, Int))
+  }
+
+new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
+new nScc = do
+  edgesScc <- ACGV.new 0
+  return SccGraph {..}
+
+addEdge :: (PrimMonad m) => SccGraph (PrimState m) -> (Int, Int) -> m ()
+addEdge SccGraph {edgesScc} e@(!_, !_) = do
+  ACGV.pushBack edgesScc e
+
+-- | \(O(n + m)\) Returns a pair of @(# of scc, scc id)@.
+sccIds :: (PrimMonad m) => SccGraph (PrimState m) -> m (Int, VU.Vector Int)
+sccIds SccGraph {..} = do
+  -- see also the Wikipedia: https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm#The_algorithm_in_pseudocode
+  g <- ACICSR.build nScc <$> ACGV.unsafeFreeze edgesScc
+  -- next SCC ID
+  groupNum <- VUM.replicate 1 (0 :: Int)
+  -- stack of vertices
+  visited <- ACGV.new nScc
+  -- vertex -> low-link: the smallest index of any node on the stack known to be reachable from
+  -- v through v's DFS subtree, including v itself.
+  low <- VUM.replicate nScc (0 :: Int)
+  -- vertex -> order of the visit (0, 1, ..)
+  ord <- VUM.replicate nScc (-1 :: Int)
+  -- vertex -> scc id
+  ids <- VUM.replicate nScc (0 :: Int)
+
+  let dfs v ord0 = do
+        VGM.write low v ord0
+        VGM.write ord v ord0
+        ACGV.pushBack visited v
+        -- look around @v@, folding their low-link onto the low-link of @v@.
+        ord' <-
+          VU.foldM'
+            ( \curOrd to -> do
+                ordTo <- VGM.read ord to
+                if ordTo == -1
+                  then do
+                    -- not visited yet.
+                    nextOrd <- dfs to $ curOrd
+                    lowTo <- VGM.read low to
+                    VGM.modify low (min lowTo) v
+                    return nextOrd
+                  else do
+                    -- lookup back and update the low-link.
+                    VGM.modify low (min ordTo) v
+                    return curOrd
+            )
+            (ord0 + 1)
+            (g `ACICSR.adj` v)
+
+        lowV <- VGM.read low v
+        ordV <- VGM.read ord v
+        when (lowV == ordV) $ do
+          -- it's the root of a SCC, no more to look back
+          sccId <- VGM.unsafeRead groupNum 0
+          fix $ \loop -> do
+            u <- fromJust <$> ACGV.popBack visited
+            VGM.write ord u nScc
+            VGM.write ids u sccId
+            unless (u == v) loop
+          VGM.unsafeWrite groupNum 0 $ sccId + 1
+        return ord'
+
+  VU.foldM'_
+    ( \curOrd i -> do
+        o <- VGM.read ord i
+        if o == -1
+          then dfs i curOrd
+          else return curOrd
+    )
+    (0 :: Int)
+    (VU.generate nScc id)
+
+  num <- VGM.unsafeRead groupNum 0
+  for_ [0 .. nScc - 1] $ \i -> do
+    VGM.modify ids ((num - 1) -) i
+
+  ids' <- VU.unsafeFreeze ids
+  return (num, ids')
+
+-- | \(O(n + m)\)
+scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
+scc g = do
+  (!groupNum, !ids) <- sccIds g
+  let counts = VU.create $ do
+        vec <- VUM.replicate groupNum (0 :: Int)
+        VU.forM_ ids $ \x -> do
+          VGM.modify vec (+ 1) x
+        return vec
+  groups <- V.mapM VUM.unsafeNew $ VU.convert counts
+  is <- VUM.replicate groupNum (0 :: Int)
+  VU.iforM_ ids $ \v sccId -> do
+    i <- VGM.read is sccId
+    VGM.write is sccId $ i + 1
+    VGM.write (groups VG.! sccId) i v
+  V.mapM VU.unsafeFreeze groups

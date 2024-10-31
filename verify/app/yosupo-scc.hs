@@ -4,7 +4,7 @@ import AtCoder.Scc qualified as Scc
 import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as VU
 
--- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_g
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/scc
 main :: IO ()
 main = do
   (!n, !m) <- ints2

@@ -1,8 +1,8 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Tests.Internal.McfCSR (tests) where
+module Tests.Internal.McfCsr (tests) where
 
-import AtCoder.Internal.McfCSR qualified as McfCSR
+import AtCoder.Internal.McfCsr qualified as McfCsr
 import Data.Foldable
 import Data.Vector.Unboxed qualified as VU
 import Test.QuickCheck.Monadic as QC
@@ -23,7 +23,7 @@ edgeGen n m = QC.vectorOf m $ do
 -- TODO: monadic gen?
 -- TODO: Deduplicate graph generation code. Implement Arbitrary?
 
--- genGraph :: (PrimMonad m) => Int -> Int -> m (Gen (McfCSR.CSR (PrimState m) Int Int))
+-- genGraph :: (PrimMonad m) => Int -> Int -> m (Gen (McfCsr.Csr (PrimState m) Int Int))
 -- genGraph n m = monadicIO $ do
 
 props :: TestTree
@@ -34,13 +34,13 @@ props =
         n <- QC.pick $ QC.chooseInt (1, 16)
         m <- QC.pick $ QC.chooseInt (0, 128)
         edges <- QC.pick $ edgeGen n m
-        (!_, csr@McfCSR.CSR {..}) <- QC.run $ McfCSR.build n (VU.fromList edges)
+        (!_, csr@McfCsr.Csr {..}) <- QC.run $ McfCsr.build n (VU.fromList edges)
         for_ [0 .. n - 1] $ \from -> do
-          VU.forM_ (McfCSR.adj csr from) $ \(!_to, !rev, !cost) -> do
+          VU.forM_ (McfCsr.adj csr from) $ \(!_to, !rev, !cost) -> do
             -- test reverse edge direction
-            assert $ toCSR VU.! rev == from
+            assert $ toCsr VU.! rev == from
             -- test reverse edge cost
-            assert $ -costCSR VU.! rev == cost
+            assert $ -costCsr VU.! rev == cost
     ]
 
 tests :: [TestTree]

@@ -200,3 +200,9 @@ executable alpc-l
   import:        dependencies
   main-is:       alpc-l.hs
   build-depends: verify
+
+executable yosupo-scc
+  import:        dependencies
+  main-is:       yosupo-scc.hs
+  build-depends: verify
+
