@@ -94,6 +94,8 @@ sccIds SccGraph {..} = do
     (VU.generate nScc id)
 
   num <- VGM.unsafeRead groupNum 0
+  -- The SCCs are reverse topologically sorted, e.g., [0, 1] <- [2] <- [3]
+  -- Now reverse the SCC IDs so that they will be topologically sorted: [3] -> [2] -> [0, 1]
   for_ [0 .. nScc - 1] $ \i -> do
     VGM.modify ids ((num - 1) -) i
 

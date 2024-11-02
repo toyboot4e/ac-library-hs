@@ -57,17 +57,19 @@ unit_order = testCase "order" $ do
   scc <- Scc.scc graph
   scc @?= V.singleton (VU.fromList [0, 1, 2, 3])
 
-unit_selfLoop2 :: TestTree
-unit_selfLoop2 = testCase "selfLoop2" $ do
-  graph <- Scc.new 2
+unit_sccOrder :: TestTree
+unit_sccOrder = testCase "sccOrder" $ do
+  graph <- Scc.new 4
+  Scc.addEdge graph (0, 1)
   Scc.addEdge graph (1, 0)
-  Scc.addEdge graph (1, 1)
-  Scc.addEdge graph (0, 0)
+  Scc.addEdge graph (2, 1)
+  Scc.addEdge graph (3, 2)
   scc <- Scc.scc graph
-  scc @?= V.fromList [VU.singleton 1, VU.singleton 0]
+  -- The SCCs are topologically sorted
+  scc @?= V.fromList [VU.singleton 3, VU.singleton 2, VU.fromList [0, 1]]
 
-unit_selfLoop3 :: TestTree
-unit_selfLoop3 = testCase "selfLoop3" $ do
+unit_multipleSelfLoops :: TestTree
+unit_multipleSelfLoops = testCase "multipleSelfLoops" $ do
   graph <- Scc.new 2
   Scc.addEdge graph (1, 0)
   Scc.addEdge graph (1, 1)
@@ -84,7 +86,7 @@ tests =
     unit_simple,
     unit_selfLoop,
     unsafePerformIO spec_invalid,
-    unit_selfLoop2,
-    unit_selfLoop3,
-    unit_order
+    unit_order,
+    unit_sccOrder,
+    unit_multipleSelfLoops
   ]
