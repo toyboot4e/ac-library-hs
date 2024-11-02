@@ -44,6 +44,8 @@ build xs = do
   vecGV <- newMutVar =<< VU.thaw xs
   return GrowVec {..}
 
+-- TODO: reserve
+
 -- | \(O(1)\)
 read :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> m a
 read GrowVec {..} i = do

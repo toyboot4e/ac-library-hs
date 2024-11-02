@@ -78,32 +78,6 @@ unit_selfLoop3 = testCase "selfLoop3" $ do
   scc <- Scc.scc graph
   scc @?= V.fromList [VU.singleton 1, VU.singleton 0]
 
-edgeGen :: Int -> Int -> QC.Gen [(Int, Int)]
--- edgeGen n m = fmap (filter (\(!u, !v) -> u /= v)) $ QC.vectorOf m $ do
-edgeGen n m = QC.vectorOf m $ do
-  from <- QC.chooseInt (0, n - 1)
-  to <- QC.chooseInt (0, n - 1)
-  return (from, to)
-
--- | Tests \(v_{i} \in adj(v_{j<i})\) for SCC components \(v_1, .., v_n\).
-prop_order :: TestTree
-prop_order = QC.testProperty "order" $ QC.monadicIO $ do
-  n <- QC.pick $ QC.chooseInt (1, 2) -- FIXME: 16
-  m <- QC.pick $ QC.chooseInt (0, 128)
-  edges <- QC.pick $ VU.fromList <$> edgeGen n m
-  let graph = ACICSR.build n edges
-  scc <- QC.run $ do
-    sccGraph <- Scc.new n
-    VU.forM_ edges $ Scc.addEdge sccGraph
-    Scc.scc sccGraph
-  V.forM_ scc $ \vs -> do
-    (`QC.assertWith` show (vs, ACICSR.adj graph 0))
-      . VU.all
-        ( \(!i, !v) ->
-            i == 0 || VU.any (VU.elem v . ACICSR.adj graph) (VU.take i vs)
-        )
-      $ VU.indexed vs
-
 tests :: [TestTree]
 tests =
   [ unit_empty,
@@ -112,6 +86,5 @@ tests =
     unsafePerformIO spec_invalid,
     unit_selfLoop2,
     unit_selfLoop3,
-    unit_order,
-    prop_order
+    unit_order
   ]

@@ -5,13 +5,13 @@ module Tests.Internal.McfCsr (tests) where
 import AtCoder.Internal.McfCsr qualified as McfCsr
 import Data.Foldable
 import Data.Vector.Unboxed qualified as VU
-import Test.QuickCheck.Monadic as QC
+import Test.QuickCheck.Monadic qualified as QC
 import Test.Tasty
-import Test.Tasty.QuickCheck as QC
+import Test.Tasty.QuickCheck qualified as QC
 
 -- TODO: test reverse edge direction
 
-edgeGen :: Int -> Int -> Gen [(Int, Int, Int, Int, Int)]
+edgeGen :: Int -> Int -> QC.Gen [(Int, Int, Int, Int, Int)]
 edgeGen n m = QC.vectorOf m $ do
   from <- QC.chooseInt (0, n - 1)
   to <- QC.chooseInt (0, n - 1)
@@ -38,9 +38,9 @@ props =
         for_ [0 .. n - 1] $ \from -> do
           VU.forM_ (McfCsr.adj csr from) $ \(!_to, !rev, !cost) -> do
             -- test reverse edge direction
-            assert $ toCsr VU.! rev == from
+            QC.assert $ toCsr VU.! rev == from
             -- test reverse edge cost
-            assert $ -costCsr VU.! rev == cost
+            QC.assert $ -costCsr VU.! rev == cost
     ]
 
 tests :: [TestTree]

@@ -7,6 +7,7 @@ module AtCoder.Internal.Buffer
     build,
     pushBack,
     popBack,
+    back,
     capacity,
     length,
     null,
@@ -59,6 +60,16 @@ popBack Buffer {..} = do
     else do
       x <- VGM.read vecB (len - 1)
       VGM.write lenB 0 (len - 1)
+      return $ Just x
+
+-- | \(O(1)\)
+back :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (Maybe a)
+back Buffer {..} = do
+  len <- VGM.read lenB 0
+  if len == 0
+    then return Nothing
+    else do
+      x <- VGM.read vecB (len - 1)
       return $ Just x
 
 -- | \(O(1)\)
