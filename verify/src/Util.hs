@@ -16,44 +16,44 @@ type Parser = StateT BS.ByteString Maybe
 intP :: Parser Int
 intP = StateT $ BS.readInt . BS.dropSpace
 
+int2P :: Parser (Int, Int)
+int2P = do
+  x1 <- intP
+  x2 <- intP
+  return (x1, x2)
+
+int3P :: Parser (Int, Int, Int)
+int3P = do
+  x1 <- intP
+  x2 <- intP
+  x3 <- intP
+  return (x1, x2, x3)
+
+int4P :: Parser (Int, Int, Int, Int)
+int4P = do
+  x1 <- intP
+  x2 <- intP
+  x3 <- intP
+  x4 <- intP
+  return (x1, x2, x3, x4)
+
 -- * Line getter
 
 -- | Gets @a@.
 int :: IO Int
-int = do
-  line <- BS.getLine
-  return . fromMaybe (error "int") . (`evalStateT` line) $ do
-    intP
+int = fromMaybe (error "int") . evalStateT intP <$> BS.getLine
 
 -- | Gets @a b@.
 ints2 :: IO (Int, Int)
-ints2 = do
-  line <- BS.getLine
-  return . fromMaybe (error "ints2") . (`evalStateT` line) $ do
-    x1 <- intP
-    x2 <- intP
-    return (x1, x2)
+ints2 = fromMaybe (error "ints2") . evalStateT int2P <$> BS.getLine
 
 -- | Gets @a b c@.
 ints3 :: IO (Int, Int, Int)
-ints3 = do
-  line <- BS.getLine
-  return . fromMaybe (error "ints3") . (`evalStateT` line) $ do
-    x1 <- intP
-    x2 <- intP
-    x3 <- intP
-    return (x1, x2, x3)
+ints3 = fromMaybe (error "ints3") . evalStateT int3P <$> BS.getLine
 
 -- | Gets @a b c d@.
 ints4 :: IO (Int, Int, Int, Int)
-ints4 = do
-  line <- BS.getLine
-  return . fromMaybe (error "ints4") . (`evalStateT` line) $ do
-    x1 <- intP
-    x2 <- intP
-    x3 <- intP
-    x4 <- intP
-    return (x1, x2, x3, x4)
+ints4 = fromMaybe (error "ints4") . evalStateT int4P <$> BS.getLine
 
 -- | Gets @a b c ..@.
 ints :: IO (VU.Vector Int)
