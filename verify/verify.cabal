@@ -206,3 +206,8 @@ executable yosupo-scc
   main-is:       yosupo-scc.hs
   build-depends: verify
 
+executable yosupo-two-sat
+  import:        dependencies
+  main-is:       yosupo-two-sat.hs
+  build-depends: verify
+

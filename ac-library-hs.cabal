@@ -160,6 +160,7 @@ library
     AtCoder.MaxFlow
     AtCoder.MinCostFlow
     AtCoder.Scc
+    AtCoder.TwoSat
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -199,6 +200,7 @@ test-suite ac-library-hs-test
     Tests.MaxFlow
     Tests.MinCostFlow
     Tests.Scc
+    Tests.TwoSat
 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
