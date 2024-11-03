@@ -1,6 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-import AtCoder.DSU qualified as DSU
+import AtCoder.Dsu qualified as Dsu
 import Data.Vector.Unboxed qualified as VU
 import Util
 
@@ -10,13 +10,13 @@ main = do
   (!n, !q) <- ints2
   tuvs <- VU.replicateM q ints3
 
-  dsu <- DSU.new n
+  dsu <- Dsu.new n
   res <- (`VU.mapMaybeM` tuvs) $ \case
     (0, !u, !v) -> do
-      DSU.merge_ dsu u v
+      Dsu.merge_ dsu u v
       return Nothing
     (1, !u, !v) -> do
-      b <- DSU.same dsu u v
+      b <- Dsu.same dsu u v
       return . Just $ if b then 1 else 0
     _ -> error "unreachable"
 

@@ -17,28 +17,28 @@ import Prelude hiding (sum)
 -- | Fenwick tree.
 data FenwickTree s a = FenwickTree
   { -- | The number of vertices.
-    nFT :: {-# UNPACK #-} !Int,
+    nFt :: {-# UNPACK #-} !Int,
     -- | The data storage.
-    dataFT :: !(VUM.MVector s a)
+    dataFt :: !(VUM.MVector s a)
   }
 
 -- | \(O(n)\) Creates `FenwickTree`.
 new :: (HasCallStack, Num a, VU.Unbox a, PrimMonad m) => Int -> m (FenwickTree (PrimState m) a)
-new nFT
-  | nFT >= 0 = do
-    dataFT <- VUM.replicate nFT 0
+new nFt
+  | nFt >= 0 = do
+    dataFt <- VUM.replicate nFt 0
     return FenwickTree {..}
-  | otherwise = error $ "new: given negative size (`" ++ show nFT ++ "`)"
+  | otherwise = error $ "new: given negative size (`" ++ show nFt ++ "`)"
 
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
 add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()
 add FenwickTree {..} p0 x = do
-  let !_ = runtimeAssert (0 <= p0 && p0 < nFT) $ "add: vertex out of bounds (`" ++ show p0 ++ "` over the number of vertices `" ++ show nFT ++ "`)"
+  let !_ = runtimeAssert (0 <= p0 && p0 < nFt) $ "add: vertex out of bounds (`" ++ show p0 ++ "` over the number of vertices `" ++ show nFt ++ "`)"
   let p1 = p0 + 1
   flip fix p1 $ \loop p -> do
-    when (p <= nFT) $ do
+    when (p <= nFt) $ do
       -- FIXME: to unsigned?
-      VGM.modify dataFT (+ x) (p - 1)
+      VGM.modify dataFt (+ x) (p - 1)
       loop $! p + (p .&. (-p))
 
 -- | \(O(\log n)\) Calculates the sum in half-open range @[0, r)@.
@@ -48,13 +48,13 @@ prefixSum FenwickTree {..} = inner 0
     inner !acc !r
       | r <= 0 = return acc
       | otherwise = do
-          dx <- VGM.read dataFT (r - 1)
+          dx <- VGM.read dataFt (r - 1)
           inner (acc + dx) (r - r .&. (-r))
 
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
 sum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
 sum ft@FenwickTree {..} l r = do
-  let !_ = runtimeAssert (0 <= l && l <= r && r <= nFT) $ "sum: invalid range `" ++ show (l, r) ++ "` over the number of vertices `" ++ show nFT ++ "`)"
+  let !_ = runtimeAssert (0 <= l && l <= r && r <= nFt) $ "sum: invalid range `" ++ show (l, r) ++ "` over the number of vertices `" ++ show nFt ++ "`)"
   xr <- prefixSum ft r
   xl <- prefixSum ft l
   return $! xr - xl

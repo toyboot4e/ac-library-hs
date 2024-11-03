@@ -145,7 +145,7 @@ library
 
   -- Modules exported by the library.
   exposed-modules:
-    AtCoder.DSU
+    AtCoder.Dsu
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
     AtCoder.Internal.Buffer
@@ -188,7 +188,7 @@ test-suite ac-library-hs-test
 
   -- Modules included in this executable, other than Main.
   other-modules:
-    Tests.DSU
+    Tests.Dsu
     Tests.FenwickTree
     Tests.Internal.Buffer
     Tests.Internal.GrowVec

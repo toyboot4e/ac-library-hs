@@ -2,7 +2,7 @@ module Main (main) where
 
 import Test.Tasty (testGroup)
 import Test.Tasty.Ingredients.Rerun
-import Tests.DSU qualified
+import Tests.Dsu qualified
 import Tests.FenwickTree qualified
 import Tests.Internal.Buffer qualified
 import Tests.Internal.GrowVec qualified
@@ -18,7 +18,7 @@ main :: IO ()
 main =
   defaultMainWithRerun
     . testGroup "toplevel"
-    $ [ testGroup "Tests.DSU" Tests.DSU.tests,
+    $ [ testGroup "Tests.Dsu" Tests.Dsu.tests,
         testGroup "Tests.FenwickTree" Tests.FenwickTree.tests,
         testGroup "Tests.Internal.Buffer" Tests.Internal.Buffer.tests,
         testGroup "Tests.Internal.GrowVec" Tests.Internal.GrowVec.tests,
