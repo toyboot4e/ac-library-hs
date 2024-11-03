@@ -10,6 +10,7 @@ import Control.Monad (unless, when)
 import Control.Monad.Extra (whenJustM)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
+import Data.Bit (Bit(..))
 import Data.Primitive.MutVar (readMutVar)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
@@ -197,18 +198,18 @@ flow' MfGraph {..} s t flowLimit = do
               else loop $! flow_ + f
 
 -- | \(O(n + m)\)
-minCut :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (VU.Vector Bool)
+minCut :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (VU.Vector Bit)
 minCut MfGraph {..} s = do
-  visited <- VUM.replicate nG False
+  visited <- VUM.replicate nG $ Bit False
   que <- ACQ.new nG -- we could use a growable queue here
   ACQ.pushBack que s
   fix $ \loop -> do
     whenJustM (ACQ.popFront que) $ \p -> do
-      VGM.write visited p True
+      VGM.write visited p $ Bit True
       es <- ACGV.unsafeFreeze (gG VG.! p)
       VU.forM_ es $ \(!to, !_, !cap) -> do
         when (cap /= 0) $ do
-          b <- VGM.exchange visited to True
+          Bit b <- VGM.exchange visited to $ Bit True
           unless b $ do
             ACQ.pushBack que to
       loop

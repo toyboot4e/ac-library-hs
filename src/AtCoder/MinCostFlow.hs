@@ -11,6 +11,7 @@ import AtCoder.Internal.McfCsr qualified as McfCsr
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
+import Data.Bit (Bit(..))
 import Data.Maybe (fromJust)
 import Data.Primitive.MutVar (readMutVar)
 import Data.Vector.Generic qualified as VG
@@ -148,7 +149,7 @@ internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
   duals <- VUM.replicate n 0
   dists <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) cost)
   prevE <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) Int)
-  vis <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) Bool)
+  vis <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) Bit)
 
   -- FIXME: maximum capacity?
   let nEdges = VU.length toCsr
@@ -157,7 +158,7 @@ internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
 
   let dualRef = do
         VGM.set dists $ maxBound @cost
-        VGM.set vis False
+        VGM.set vis $ Bit False
         ACB.clear queMin
         -- TODO: compare with the first element only, so make up custom Q data type
         ACMH.clear heap
@@ -176,7 +177,7 @@ internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
                   (!_, !to) <- fromJust <$> ACMH.pop heap
                   return to
 
-            visV <- VGM.exchange vis v True
+            Bit visV <- VGM.exchange vis v $ Bit True
             unless (v == t) $ do
               unless visV $ do
                 -- dist[v] = shortest(s, v) + dual[s] - dual[v]
@@ -204,12 +205,12 @@ internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
                         else ACMH.push heap (distTo', to)
 
               loop
-        visT <- VGM.read vis t
+        Bit visT <- VGM.read vis t
         when visT $ do
           distT <- VGM.read dists t
           vis' <- VU.unsafeFreeze vis
           dists' <- VU.unsafeFreeze dists
-          VU.iforM_ (VU.zip vis' dists') $ \v (!visV, !distV) -> do
+          VU.iforM_ (VU.zip vis' dists') $ \v (Bit !visV, !distV) -> do
             when visV $ do
               VGM.modify duals (subtract (distT - distV)) v
         return visT
