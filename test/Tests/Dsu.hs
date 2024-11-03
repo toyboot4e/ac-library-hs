@@ -2,7 +2,6 @@
 module Tests.Dsu (tests) where
 
 import AtCoder.Dsu qualified as Dsu
-import AtCoder.FenwickTree qualified as FT
 import Data.Foldable
 import Data.Vector qualified as V
 import System.IO.Unsafe (unsafePerformIO)

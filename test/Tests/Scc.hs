@@ -2,17 +2,14 @@
 
 module Tests.Scc (tests) where
 
-import AtCoder.Internal.Csr qualified as ACICSR
 import AtCoder.Scc qualified as Scc
 import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as VU
 import System.IO.Unsafe (unsafePerformIO)
 import Test.Hspec
-import Test.QuickCheck.Monadic qualified as QC
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.Hspec
-import Test.Tasty.QuickCheck as QC
 
 unit_empty :: TestTree
 unit_empty = testCase "empty" $ do

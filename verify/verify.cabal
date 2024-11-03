@@ -54,7 +54,6 @@ extra-doc-files: CHANGELOG.md
 common dependencies
   default-language: GHC2021
   ghc-options:      -Wall
-  hs-source-dirs:   app
   build-depends:
     , ac-library-hs
     , adjunctions                    ^>=4.4.2
@@ -136,78 +135,99 @@ common dependencies
     , vector-th-unbox                ^>=0.2.2
     , xhtml                          ^>=3000.2.2.1
 
+common app-local
+  import:         dependencies
+  hs-source-dirs: app
+
+common app-online
+  import:         dependencies
+  hs-source-dirs: app-online
+
 library
   import:          dependencies
   exposed-modules: Util
   hs-source-dirs:  src
 
+-- local judges
+
 executable alpc-a
-  import:        dependencies
+  import:        app-local
   main-is:       alpc-a.hs
   build-depends: verify
 
 executable alpc-b
-  import:        dependencies
+  import:        app-local
   main-is:       alpc-b.hs
   build-depends: verify
 
 executable alpc-c
-  import:        dependencies
+  import:        app-local
   main-is:       alpc-c.hs
   build-depends: verify
 
-executable alpc-d
-  import:        dependencies
-  main-is:       alpc-d.hs
-  build-depends: verify
-
-executable alpc-e
-  import:        dependencies
-  main-is:       alpc-e.hs
-  build-depends: verify
-
 executable alpc-f
-  import:        dependencies
+  import:        app-local
   main-is:       alpc-f.hs
   build-depends: verify
 
-executable alpc-g
-  import:        dependencies
-  main-is:       alpc-g.hs
-  build-depends: verify
-
-executable alpc-h
-  import:        dependencies
-  main-is:       alpc-h.hs
-  build-depends: verify
-
 executable alpc-i
-  import:        dependencies
+  import:        app-local
   main-is:       alpc-i.hs
   build-depends: verify
 
 executable alpc-j
-  import:        dependencies
+  import:        app-local
   main-is:       alpc-j.hs
   build-depends: verify
 
 executable alpc-k
-  import:        dependencies
+  import:        app-local
   main-is:       alpc-k.hs
   build-depends: verify
 
 executable alpc-l
-  import:        dependencies
+  import:        app-local
   main-is:       alpc-l.hs
   build-depends: verify
 
+executable aoj-GRL_6_A
+  import:        app-local
+  main-is:       aoj-GRL_6_A.hs
+  build-depends: verify
+
+executable aoj-GRL_6_B
+  import:        app-local
+  main-is:       aoj-GRL_6_B.hs
+  build-depends: verify
+
 executable yosupo-scc
-  import:        dependencies
+  import:        app-local
   main-is:       yosupo-scc.hs
   build-depends: verify
 
 executable yosupo-two-sat
-  import:        dependencies
+  import:        app-local
   main-is:       yosupo-two-sat.hs
   build-depends: verify
 
+-- online judges
+
+executable alpc-d
+  import:        app-online
+  main-is:       alpc-d.hs
+  build-depends: verify
+
+executable alpc-e
+  import:        app-online
+  main-is:       alpc-e.hs
+  build-depends: verify
+
+executable alpc-g
+  import:        app-online
+  main-is:       alpc-g.hs
+  build-depends: verify
+
+executable alpc-h
+  import:        app-online
+  main-is:       alpc-h.hs
+  build-depends: verify
