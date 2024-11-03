@@ -148,6 +148,7 @@ library
     AtCoder.Dsu
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
+    AtCoder.Internal.Bit
     AtCoder.Internal.Buffer
     AtCoder.Internal.Csr
     AtCoder.Internal.GrowVec
@@ -191,6 +192,7 @@ test-suite ac-library-hs-test
   other-modules:
     Tests.Dsu
     Tests.FenwickTree
+    Tests.Internal.Bit
     Tests.Internal.Buffer
     Tests.Internal.GrowVec
     Tests.Internal.MinHeap
