@@ -36,10 +36,7 @@ prop_pushPop xs =
 
 tests :: [TestTree]
 tests =
-  [ testGroup
-      "AtCoder.Internal.Buffer"
-      [ QC.testProperty "build" prop_build,
-        QC.testProperty "push" prop_push,
-        QC.testProperty "pushPop" prop_pushPop
-      ]
+  [ QC.testProperty "build" prop_build,
+    QC.testProperty "push" prop_push,
+    QC.testProperty "pushPop" prop_pushPop
   ]

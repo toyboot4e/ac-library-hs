@@ -18,8 +18,5 @@ prop_push xs =
 
 tests :: [TestTree]
 tests =
-  [ testGroup
-      "AtCoder.Internal.Queue"
-      [ QC.testProperty "push" prop_push
-      ]
+  [ QC.testProperty "push" prop_push
   ]
