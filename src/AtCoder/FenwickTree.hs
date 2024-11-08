@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Fenwick tree.
-module AtCoder.FenwickTree (FenwickTree, new, add, sum) where
+module AtCoder.FenwickTree (FenwickTree, new, build, add, sum) where
 
 import AtCoder.Internal.Assert (runtimeAssert)
 import Control.Monad (when)
@@ -29,6 +29,13 @@ new nFt
     dataFt <- VUM.replicate nFt 0
     return FenwickTree {..}
   | otherwise = error $ "new: given negative size (`" ++ show nFt ++ "`)"
+
+-- | \(O(n)\) Creates `FenwickTree` from a vector of monoids. Mostly a shorthand.
+build :: (Num a, VU.Unbox a, PrimMonad m) => VU.Vector a -> m (FenwickTree (PrimState m) a)
+build xs = do
+  ft <- new $ VU.length xs
+  VU.iforM_ xs $ add ft
+  return ft
 
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
 add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()

@@ -11,9 +11,10 @@ main = do
   xs <- ints
   qs <- VU.replicateM q ints3
 
-  ft <- FT.new n
-  VU.iforM_ xs $ \i x -> do
-    FT.add ft i x
+  ft <- FT.build xs
+  -- ft <- FT.new n
+  -- VU.iforM_ xs $ \i x -> do
+  --   FT.add ft i x
 
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !p, !x) -> do
