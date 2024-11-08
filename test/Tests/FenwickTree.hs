@@ -14,34 +14,34 @@ import Test.Tasty.Hspec
 
 unit_zero :: TestTree
 unit_zero = testCase "zero" $ do
-  fw <- FT.new @Int 0
-  (@?= 0) =<< FT.sum fw 0 0
+  ft <- FT.new @Int 0
+  (@?= 0) =<< FT.sum ft 0 0
 
 -- TODO: add modint test
 
 -- FIXME: it's uint test and not works with Int
 -- overFlowInt :: TestTree
 -- overFlowInt = testCase "overFlowInt" $ do
---   fw <- FT.new @Int 10
+--   ft <- FT.new @Int 10
 --   for_ [0 .. 10 - 1] $ \i -> do
---     FT.add fw i (bit 63 + i)
+--     FT.add ft i (bit 63 + i)
 --   for_ [0 .. 10] $ \i -> do
 --     for_ [0 .. 10] $ \j -> do
 --       let s = sum [i .. j - 1]
 --       let expected = if (j - i) `mod` 2 == 1 then bit 63 + s else s
---       result <- FT.sum fw i j
+--       result <- FT.sum ft i j
 --       result @?= expected
 
 unit_naive :: TestTree
 unit_naive = testCase "naive" $ do
   for_ [0 .. 50] $ \n -> do
-    fw <- FT.new @Int n
+    ft <- FT.new @Int n
     for_ [0 .. n - 1] $ \i -> do
-      FT.add fw i (i * i)
+      FT.add ft i (i * i)
     for_ [0 .. n] $ \l -> do
       for_ [l .. n] $ \r -> do
         let s = sum [i * i | i <- [l .. r - 1]]
-        (@?= s) =<< FT.sum fw l r
+        (@?= s) =<< FT.sum ft l r
 
 -- TODO: smint
 -- TODO: mint
