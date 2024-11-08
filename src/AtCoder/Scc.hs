@@ -7,6 +7,7 @@ import AtCoder.Internal.Scc qualified as ACISCC
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as VU
+import GHC.Stack (HasCallStack)
 
 newtype SccGraph s = SccGraph (ACISCC.SccGraph s)
 
@@ -16,7 +17,7 @@ nScc (SccGraph g) = ACISCC.nScc g
 new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
 new n = SccGraph <$> ACISCC.new n
 
-addEdge :: (PrimMonad m) => SccGraph (PrimState m) -> (Int, Int) -> m ()
+addEdge :: (HasCallStack, PrimMonad m) => SccGraph (PrimState m) -> (Int, Int) -> m ()
 addEdge (SccGraph gr) e@(!from, !to) = do
   let n = ACISCC.nScc gr
   let !_ = runtimeAssert (0 <= from && from < n) $ "addEdge: `from` vertex out of bounds (`" ++ show from ++ "` over the number of vertices `" ++ show n ++ "`)"
