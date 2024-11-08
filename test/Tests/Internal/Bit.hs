@@ -2,17 +2,9 @@
 
 module Tests.Internal.Bit (tests) where
 
-import Test.Tasty.QuickCheck as QC
-import AtCoder.SegTree qualified as ST
 import AtCoder.Internal.Bit qualified as ACIBIT
-import Data.Vector qualified as V
-import Data.Vector.Unboxed qualified as VU
-import System.IO.Unsafe (unsafePerformIO)
-import Test.Hspec
 import Test.Tasty
 import Test.Tasty.HUnit
-import Test.Tasty.Hspec
-import Control.Monad.ST
 import Data.Bits ((.<<.), countTrailingZeros)
 
 unit_bitCeil :: TestTree
