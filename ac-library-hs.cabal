@@ -157,6 +157,7 @@ library
     AtCoder.Internal.McfCsr
     AtCoder.Internal.Queue
     AtCoder.Internal.Scc
+    AtCoder.LazySegTree
     AtCoder.Math
     AtCoder.MaxFlow
     AtCoder.MinCostFlow
@@ -199,6 +200,7 @@ test-suite ac-library-hs-test
     Tests.Internal.MinHeap
     Tests.Internal.McfCsr
     Tests.Internal.Queue
+    Tests.LazySegTree
     Tests.Math
     Tests.MaxFlow
     Tests.MinCostFlow

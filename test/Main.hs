@@ -10,6 +10,7 @@ import Tests.Internal.GrowVec qualified
 import Tests.Internal.McfCsr qualified
 import Tests.Internal.MinHeap qualified
 import Tests.Internal.Queue qualified
+import Tests.LazySegTree qualified
 import Tests.Math qualified
 import Tests.MaxFlow qualified
 import Tests.MinCostFlow qualified
@@ -29,6 +30,7 @@ main =
         testGroup "Tests.Internal.MinHeap" Tests.Internal.MinHeap.tests,
         testGroup "Tests.Internal.McfCsr" Tests.Internal.McfCsr.tests,
         testGroup "Tests.Internal.Queue" Tests.Internal.Queue.tests,
+        testGroup "Tests.LazySegTree" Tests.LazySegTree.tests,
         testGroup "Tests.Math" Tests.Math.tests,
         testGroup "Tests.MaxFlow" Tests.MaxFlow.tests,
         testGroup "Tests.MinCostFlow" Tests.MinCostFlow.tests,
