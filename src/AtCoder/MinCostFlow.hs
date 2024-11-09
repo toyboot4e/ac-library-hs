@@ -4,10 +4,10 @@
 module AtCoder.MinCostFlow (McfGraph, new, new', addEdge, addEdge_, getEdge, unsafeFreezeEdges, freezeEdges, flow, slope) where
 
 import AtCoder.Internal.Assert qualified as ACIA
-import AtCoder.Internal.Buffer qualified as ACB
-import AtCoder.Internal.GrowVec qualified as ACGV
-import AtCoder.Internal.McfCsr qualified as McfCsr
-import AtCoder.Internal.MinHeap qualified as ACMH
+import AtCoder.Internal.Buffer qualified as ACIB
+import AtCoder.Internal.GrowVec qualified as ACIGV
+import AtCoder.Internal.McfCsr qualified as ACIMCSR
+import AtCoder.Internal.MinHeap qualified as ACIMH
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
@@ -26,7 +26,7 @@ data McfGraph s cap cost = McfGraph
   { -- | The number of vertices.
     nG :: {-# UNPACK #-} !Int,
     -- | fromVertex -> vector of @(from, to, cap, flow, cost)@.
-    edgesG :: !(ACGV.GrowVec s (Int, Int, cap, cap, cost))
+    edgesG :: !(ACIGV.GrowVec s (Int, Int, cap, cap, cost))
   }
 
 -- | \(O(n)\) `McfGraph` with initial edge storage size `0`.
@@ -37,7 +37,7 @@ new nG = do
 -- | \(O(n + e)\)
 new' :: (VU.Unbox cap, VU.Unbox cost, PrimMonad m) => Int -> Int -> m (McfGraph (PrimState m) cap cost)
 new' nG nEdges = do
-  edgesG <- ACGV.new nEdges
+  edgesG <- ACIGV.new nEdges
   return McfGraph {..}
 
 -- | Amortized \(O(1)\)
@@ -54,8 +54,8 @@ addEdge McfGraph {..} from to cap cost = do
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.addEdge" "`to` vertex" to "the number of vertices" nG
   let !_ = ACIA.runtimeAssert (0 <= cap) "AtCoder.MinCostFlow.addEdge: given invalid edge `capacity` less than `0`"
   let !_ = ACIA.runtimeAssert (0 <= cost) "AtCoder.MinCostFlow.addEdge: given invalid edge `cost` less than `0`"
-  m <- ACGV.length edgesG
-  ACGV.pushBack edgesG (from, to, cap, 0, cost)
+  m <- ACIGV.length edgesG
+  ACIGV.pushBack edgesG (from, to, cap, 0, cost)
   return m
 
 -- | Amortized \(O(1)\)
@@ -78,9 +78,9 @@ getEdge ::
   Int ->
   m (Int, Int, cap, cap, cost)
 getEdge McfGraph {..} i = do
-  m <- ACGV.length edgesG
+  m <- ACIGV.length edgesG
   let !_ = ACIA.checkEdge "AtCoder.MinCostFlow.getEdge" i m
-  ACGV.read edgesG i
+  ACIGV.read edgesG i
 
 -- | \(O(1)\) Returns a vector of @(from, to, cap, flow, cost)@.
 unsafeFreezeEdges ::
@@ -88,7 +88,7 @@ unsafeFreezeEdges ::
   McfGraph (PrimState m) cap cost ->
   m (VU.Vector (Int, Int, cap, cap, cost))
 unsafeFreezeEdges McfGraph {..} = do
-  ACGV.unsafeFreeze edgesG
+  ACIGV.unsafeFreeze edgesG
 
 -- | \(O(m)\) Returns a vector of @(from, to, cap, flow, cost)@.
 freezeEdges ::
@@ -96,7 +96,7 @@ freezeEdges ::
   McfGraph (PrimState m) cap cost ->
   m (VU.Vector (Int, Int, cap, cap, cost))
 freezeEdges McfGraph {..} = do
-  ACGV.freeze edgesG
+  ACIGV.freeze edgesG
 
 -- | FIXME: \(O(n^2 m)\)
 flow ::
@@ -123,13 +123,13 @@ slope McfGraph {..} s t flowLimit = do
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.slope" "`sink` vertex" t "the number of vertices" nG
   let !_ = ACIA.runtimeAssert (s /= t) "AtCoder.MinCostFlow.slope: `source` and `sink` vertex have to be distict"
 
-  edges@(VU.V_5 _ _ _ caps _ _) <- ACGV.unsafeFreeze edgesG
-  (!edgeIdx, !g) <- McfCsr.build nG edges
+  edges@(VU.V_5 _ _ _ caps _ _) <- ACIGV.unsafeFreeze edgesG
+  (!edgeIdx, !g) <- ACIMCSR.build nG edges
   result <- internalSlopeMCF g nG s t flowLimit
 
-  (VUM.MV_5 _ _ _ _ flows _) <- readMutVar $ ACGV.vecGV edgesG
+  (VUM.MV_5 _ _ _ _ flows _) <- readMutVar $ ACIGV.vecGV edgesG
   VU.iforM_ (VU.zip caps edgeIdx) $ \v (!cap1, !iEdge) -> do
-    cap2 <- VGM.read (McfCsr.capCsr g) iEdge
+    cap2 <- VGM.read (ACIMCSR.capCsr g) iEdge
     VGM.write flows v $! cap1 - cap2
 
   return result
@@ -137,13 +137,13 @@ slope McfGraph {..} s t flowLimit = do
 internalSlopeMCF ::
   forall cap cost m.
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Integral cost, Ord cost, Bounded cost, VU.Unbox cost) =>
-  McfCsr.Csr (PrimState m) cap cost ->
+  ACIMCSR.Csr (PrimState m) cap cost ->
   Int ->
   Int ->
   Int ->
   cap ->
   m (VU.Vector (cap, cost))
-internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
+internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
   duals <- VUM.replicate n 0
   dists <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) cost)
   prevE <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) Int)
@@ -151,28 +151,28 @@ internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
 
   -- FIXME: maximum capacity?
   let nEdges = VU.length toCsr
-  queMin <- ACB.new nEdges :: m (ACB.Buffer (PrimState m) Int)
-  heap <- ACMH.new nEdges :: m (ACMH.Heap (PrimState m) (cost, Int))
+  queMin <- ACIB.new nEdges :: m (ACIB.Buffer (PrimState m) Int)
+  heap <- ACIMH.new nEdges :: m (ACIMH.Heap (PrimState m) (cost, Int))
 
   let dualRef = do
         VGM.set dists $ maxBound @cost
         VGM.set vis $ Bit False
-        ACB.clear queMin
+        ACIB.clear queMin
         -- TODO: compare with the first element only, so make up custom Q data type
-        ACMH.clear heap
+        ACIMH.clear heap
 
         VGM.write dists s 0
-        ACB.pushBack queMin s
+        ACIB.pushBack queMin s
         fix $ \loop -> do
-          b1 <- ACB.null queMin
-          b2 <- ACMH.null heap
+          b1 <- ACIB.null queMin
+          b2 <- ACIMH.null heap
           when (not b1 || not b2) $ do
             v <-
               if not b1
                 then do
-                  fromJust <$> ACB.popBack queMin
+                  fromJust <$> ACIB.popBack queMin
                 else do
-                  (!_, !to) <- fromJust <$> ACMH.pop heap
+                  (!_, !to) <- fromJust <$> ACIMH.pop heap
                   return to
 
             Bit visV <- VGM.exchange vis v $ Bit True
@@ -184,7 +184,7 @@ internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
                 dualV <- VGM.read duals v
                 distV <- VGM.read dists v
                 let start = startCsr VG.! v
-                VU.iforM_ (McfCsr.adj csr v) $ \di (!to, !rev, !cost) -> do
+                VU.iforM_ (ACIMCSR.adj csr v) $ \di (!to, !rev, !cost) -> do
                   cap <- VGM.read capCsr $ start + di
 
                   unless (cap == 0) $ do
@@ -199,8 +199,8 @@ internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
                       VGM.write dists to distTo'
                       VGM.write prevE to rev
                       if distTo' == distV
-                        then ACB.pushBack queMin to
-                        else ACMH.push heap (distTo', to)
+                        then ACIB.pushBack queMin to
+                        else ACIMH.push heap (distTo', to)
 
               loop
         Bit visT <- VGM.read vis t
@@ -213,8 +213,8 @@ internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
               VGM.modify duals (subtract (distT - distV)) v
         return visT
 
-  result <- ACGV.new 16
-  ACGV.pushBack result (0 :: cap, 0 :: cost)
+  result <- ACIGV.new 16
+  ACIGV.pushBack result (0 :: cap, 0 :: cost)
 
   let inner :: cap -> cost -> cost -> m ()
       inner flow_ cost prevCostPerFlow =
@@ -244,9 +244,9 @@ internalSlopeMCF csr@McfCsr.Csr {..} n s t flowLimit = do
             let !flow' = flow_ + c
             let !cost' = cost + fromIntegral c * d -- TODO: minimize the type boundary
             when (prevCostPerFlow == d) $ do
-              ACGV.popBack_ result
-            ACGV.pushBack result (flow', cost')
+              ACIGV.popBack_ result
+            ACIGV.pushBack result (flow', cost')
             inner flow' cost' d
 
   inner 0 0 (-1)
-  ACGV.unsafeFreeze result
+  ACIGV.unsafeFreeze result

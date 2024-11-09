@@ -3,7 +3,7 @@
 module AtCoder.Internal.Scc (SccGraph (nScc), new, addEdge, sccIds, scc) where
 
 import AtCoder.Internal.Csr qualified as ACICSR
-import AtCoder.Internal.GrowVec qualified as ACGV
+import AtCoder.Internal.GrowVec qualified as ACIGV
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
@@ -17,27 +17,27 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 
 data SccGraph s = SccGraph
   { nScc :: {-# UNPACK #-} !Int,
-    edgesScc :: !(ACGV.GrowVec s (Int, Int))
+    edgesScc :: !(ACIGV.GrowVec s (Int, Int))
   }
 
 new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
 new nScc = do
-  edgesScc <- ACGV.new 0
+  edgesScc <- ACIGV.new 0
   return SccGraph {..}
 
 addEdge :: (PrimMonad m) => SccGraph (PrimState m) -> (Int, Int) -> m ()
 addEdge SccGraph {edgesScc} e@(!_, !_) = do
-  ACGV.pushBack edgesScc e
+  ACIGV.pushBack edgesScc e
 
 -- | \(O(n + m)\) Returns a pair of @(# of scc, scc id)@.
 sccIds :: (PrimMonad m) => SccGraph (PrimState m) -> m (Int, VU.Vector Int)
 sccIds SccGraph {..} = do
   -- see also the Wikipedia: https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm#The_algorithm_in_pseudocode
-  g <- ACICSR.build nScc <$> ACGV.unsafeFreeze edgesScc
+  g <- ACICSR.build nScc <$> ACIGV.unsafeFreeze edgesScc
   -- next SCC ID
   groupNum <- VUM.replicate 1 (0 :: Int)
   -- stack of vertices
-  visited <- ACGV.new nScc
+  visited <- ACIGV.new nScc
   -- vertex -> low-link: the smallest index of any node on the stack known to be reachable from
   -- v through v's DFS subtree, including v itself.
   low <- VUM.replicate nScc (0 :: Int)
@@ -49,7 +49,7 @@ sccIds SccGraph {..} = do
   let dfs v ord0 = do
         VGM.write low v ord0
         VGM.write ord v ord0
-        ACGV.pushBack visited v
+        ACIGV.pushBack visited v
         -- look around @v@, folding their low-link onto the low-link of @v@.
         ord' <-
           VU.foldM'
@@ -76,7 +76,7 @@ sccIds SccGraph {..} = do
           -- it's the root of a SCC, no more to look back
           sccId <- VGM.unsafeRead groupNum 0
           fix $ \loop -> do
-            u <- fromJust <$> ACGV.popBack visited
+            u <- fromJust <$> ACIGV.popBack visited
             VGM.write ord u nScc
             VGM.write ids u sccId
             unless (u == v) loop

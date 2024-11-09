@@ -1,6 +1,6 @@
 module Tests.Internal.GrowVec (tests) where
 
-import AtCoder.Internal.GrowVec qualified as ACGV
+import AtCoder.Internal.GrowVec qualified as ACIGV
 import Control.Monad
 import Control.Monad.ST (runST)
 import Data.Foldable
@@ -13,26 +13,26 @@ prop_zeroNew :: [Int] -> Bool
 prop_zeroNew xs =
   let ys = VU.fromList xs
       zs = runST $ do
-        buf <- ACGV.new 0
-        for_ xs $ ACGV.pushBack buf
-        ACGV.unsafeFreeze buf
+        buf <- ACIGV.new 0
+        for_ xs $ ACIGV.pushBack buf
+        ACIGV.unsafeFreeze buf
    in ys == zs
 
 prop_zeroBuild :: [Int] -> Bool
 prop_zeroBuild xs =
   let ys = VU.fromList xs
       zs = runST $ do
-        buf <- ACGV.build VU.empty
-        for_ xs $ ACGV.pushBack buf
-        ACGV.unsafeFreeze buf
+        buf <- ACIGV.build VU.empty
+        for_ xs $ ACIGV.pushBack buf
+        ACIGV.unsafeFreeze buf
    in ys == zs
 
 prop_pushPop :: [Int] -> Bool
 prop_pushPop xs =
   let ys = runST $ do
-        buf <- ACGV.new $ length xs
-        for_ xs $ ACGV.pushBack buf
-        replicateM (length xs) $ fromJust <$> ACGV.popBack buf
+        buf <- ACIGV.new $ length xs
+        for_ xs $ ACIGV.pushBack buf
+        replicateM (length xs) $ fromJust <$> ACIGV.popBack buf
    in xs == reverse ys
 
 tests :: [TestTree]

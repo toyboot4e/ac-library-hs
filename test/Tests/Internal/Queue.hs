@@ -1,6 +1,6 @@
 module Tests.Internal.Queue (tests) where
 
-import AtCoder.Internal.Queue qualified as ACQ
+import AtCoder.Internal.Queue qualified as ACIQ
 import Control.Monad.ST (runST)
 import Data.Foldable
 import Data.Vector.Unboxed qualified as VU
@@ -11,9 +11,9 @@ prop_push :: [Int] -> Bool
 prop_push xs =
   let ys = VU.fromList xs
       zs = runST $ do
-        buf <- ACQ.new $ length xs
-        for_ xs $ ACQ.pushBack buf
-        ACQ.unsafeFreeze buf
+        buf <- ACIQ.new $ length xs
+        for_ xs $ ACIQ.pushBack buf
+        ACIQ.unsafeFreeze buf
    in ys == zs
 
 tests :: [TestTree]

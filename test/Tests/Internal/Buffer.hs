@@ -1,6 +1,6 @@
 module Tests.Internal.Buffer (tests) where
 
-import AtCoder.Internal.Buffer qualified as ACB
+import AtCoder.Internal.Buffer qualified as ACIB
 import Control.Monad
 import Control.Monad.ST (runST)
 import Data.Foldable
@@ -13,25 +13,25 @@ prop_build :: [Int] -> Bool
 prop_build xs =
   let ys = VU.fromList xs
       zs = runST $ do
-        buf <- ACB.build $ VU.fromList xs
-        ACB.unsafeFreeze buf
+        buf <- ACIB.build $ VU.fromList xs
+        ACIB.unsafeFreeze buf
    in ys == zs
 
 prop_push :: [Int] -> Bool
 prop_push xs =
   let ys = VU.fromList xs
       zs = runST $ do
-        buf <- ACB.new $ length xs
-        for_ xs $ ACB.pushBack buf
-        ACB.unsafeFreeze buf
+        buf <- ACIB.new $ length xs
+        for_ xs $ ACIB.pushBack buf
+        ACIB.unsafeFreeze buf
    in ys == zs
 
 prop_pushPop :: [Int] -> Bool
 prop_pushPop xs =
   let ys = runST $ do
-        buf <- ACB.new $ length xs
-        for_ xs $ ACB.pushBack buf
-        replicateM (length xs) $ fromJust <$> ACB.popBack buf
+        buf <- ACIB.new $ length xs
+        for_ xs $ ACIB.pushBack buf
+        replicateM (length xs) $ fromJust <$> ACIB.popBack buf
    in xs == reverse ys
 
 tests :: [TestTree]
