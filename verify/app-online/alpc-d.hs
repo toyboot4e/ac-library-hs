@@ -11,7 +11,6 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Util
 
--- TODO: Verify locally. The test fails because the answer is not unique.
 -- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_d
 main :: IO ()
 main = do

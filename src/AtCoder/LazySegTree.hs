@@ -26,11 +26,11 @@ import AtCoder.Internal.Bit qualified as ACIBIT
 import Control.Monad (unless, when)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Bits (countTrailingZeros, testBit, (.&.), (.<<.), (.>>.))
-import Data.Foldable
+import Data.Foldable (for_)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
-import GHC.Stack
+import GHC.Stack (HasCallStack)
 
 -- | Consatrained semigroup action defined around `LazySegmentTree`.
 class (Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => SegAct f a where

@@ -22,11 +22,11 @@ import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Bits (countTrailingZeros, testBit, (.&.), (.>>.))
-import Data.Foldable
+import Data.Foldable (for_)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
-import GHC.Stack
+import GHC.Stack (HasCallStack)
 
 data SegTree s a = SegTree
   { -- | Valid length.

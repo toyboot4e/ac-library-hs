@@ -9,3 +9,5 @@ bitCeil n = inner 1
       | x >= n = x
       | otherwise = inner $ 2 * x
 
+-- countTrailingZeros from Data.Bits
+

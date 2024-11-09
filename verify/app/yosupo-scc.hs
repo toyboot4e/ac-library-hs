@@ -1,8 +1,7 @@
-import Util
-
 import AtCoder.Scc qualified as Scc
 import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as VU
+import Util
 
 -- verification-helper: PROBLEM https://judge.yosupo.jp/problem/scc
 main :: IO ()

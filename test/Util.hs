@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | For compatibility. TODO: Remove on language update
+-- | For compatibility. FIXME: Remove with latest vector
 module Util (DoNotUnboxLazy (..)) where
 
 import Data.Coerce (coerce)

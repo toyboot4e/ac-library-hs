@@ -3,12 +3,10 @@
 -- | Minimum binary heap. Mutable and fixed-sized.
 --
 -- <https://en.wikipedia.org/wiki/Binary_heap>
-module AtCoder.Internal.MinHeap (Heap(..), new, capacity, length, null, clear, push, peek, pop) where
+module AtCoder.Internal.MinHeap (Heap (..), new, capacity, length, null, clear, push, peek, pop) where
 
-import Control.Monad
+import Control.Monad (when)
 import Control.Monad.Primitive (PrimMonad, PrimState)
-import Data.Function
-import Data.Ord
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM

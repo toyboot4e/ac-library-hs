@@ -18,8 +18,6 @@ runtimeAssert p s
   | p = ()
   | otherwise = error s
 
--- TODO: see also vector.
-
 {-# INLINE checkIndex #-}
 checkIndex :: String -> Int -> Int -> ()
 checkIndex funcName i n
