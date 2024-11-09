@@ -3,7 +3,7 @@
 -- | Maximum flow.
 module AtCoder.MaxFlow (MfGraph, new, new', addEdge, addEdge_, getEdge, edges, changeEdge, flow, flow', minCut) where
 
-import AtCoder.Internal.Assert (runtimeAssert)
+import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.GrowVec qualified as ACGV
 import AtCoder.Internal.Queue qualified as ACQ
 import Control.Monad (unless, when)
@@ -44,9 +44,9 @@ new' nG nEdges = do
 -- | Amortized \(O(1)\)
 addEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m Int
 addEdge MfGraph {..} from to cap = do
-  let !_ = runtimeAssert (0 <= from && from < nG) $ "addEdge: `from` vertex out of bounds (`" ++ show from ++ "` over the number of vertices `" ++ show nG ++ "`)"
-  let !_ = runtimeAssert (0 <= to && to < nG) $ "addEdge: `to` vertex out of bounds (`" ++ show to ++ "` over the number of vertices `" ++ show nG ++ "`)"
-  let !_ = runtimeAssert (0 <= cap) "addEdge: `capacity` has to bigger than or equal to `0`" -- not Show
+  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdge" "`from` vertex" from "the number of vertices" nG
+  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdge" "`to` vertex" to "the number of vertices" nG
+  let !_ = ACIA.runtimeAssert (0 <= cap) "AtCoder.MaxFlow.addEdge: given invalid `capacity` less than `0`" -- not `Show cap`
   m <- ACGV.length posG
   iEdge <- ACGV.length (gG VG.! from)
   ACGV.pushBack posG (from, iEdge)
@@ -69,8 +69,8 @@ addEdge_ graph from to cap = do
 changeEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> cap -> cap -> m ()
 changeEdge MfGraph {..} i newCap newFlow = do
   m <- ACGV.length posG
-  let !_ = runtimeAssert (0 <= i && i < m) $ "changeEdge: vertex out of bounds (`" ++ show i ++ "` over the number of edges `" ++ show m ++ "`)"
-  let !_ = runtimeAssert (0 <= newFlow && newFlow <= newCap) "changeEdge: invalid flow and capacity" -- not Show
+  let !_ = ACIA.checkEdge "AtCoder.MaxFlow.changeEdge" i m
+  let !_ = ACIA.runtimeAssert (0 <= newFlow && newFlow <= newCap) "AtCoder.MaxFlow.changeEdge: invalid flow or capacity" -- not Show
   (!from, !iEdge) <- ACGV.read posG i
   (!to, !iRevEdge, !_) <- ACGV.read (gG VG.! from) iEdge
   writeCapacity gG from iEdge $! newCap - newFlow
@@ -101,7 +101,7 @@ modifyCapacity gv f i = do
 getEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (Int, Int, cap, cap)
 getEdge MfGraph {..} i = do
   m <- ACGV.length posG
-  let !_ = runtimeAssert (0 <= i && i < m) $ "getEdge: edge index out of bounds (`" ++ show i ++ "` over the number of edges `" ++ show m ++ "`)"
+  let !_ = ACIA.checkEdge "AtCoder.MaxFlow.getEdge" i m
   (!from, !iEdge) <- ACGV.read posG i
   (!to, !iRevEdge, !cap) <- ACGV.read (gG VG.! from) iEdge
   revCap <- readCapacity gG to iRevEdge
@@ -123,9 +123,9 @@ flow gr s t = do
 
 flow' :: (HasCallStack, Show cap, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m cap
 flow' MfGraph {..} s t flowLimit = do
-  let !_ = runtimeAssert (0 <= s && s < nG) $ "flow': source vertex out of bounds (`" ++ show s ++ "` over the number of vertices `" ++ show nG ++ "`)"
-  let !_ = runtimeAssert (0 <= t && t < nG) $ "flow': destination vertex out of bounds (`" ++ show t ++ "` over the number of vertices `" ++ show nG ++ "`)"
-  let !_ = runtimeAssert (s /= t) $ "flow': source and destination vertex has to be distinct (`" ++ show s ++ "`)"
+  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow'" "`source` vertex" s "the number of vertices" nG
+  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow'" "`sink` vertex" t "the number of vertices" nG
+  let !_ = ACIA.runtimeAssert (s /= t) $ "AtCoder.MaxFlow.flow': `source` and `sink` vertex have to be distinct: `" ++ show s ++ "`"
 
   level <- VUM.unsafeNew nG
   que <- ACQ.new nG

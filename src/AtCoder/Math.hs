@@ -3,8 +3,8 @@
 
 module AtCoder.Math (floorSum) where
 
-import AtCoder.Internal.Assert (runtimeAssert)
-import AtCoder.Internal.Math (floorSumUnsigned)
+import AtCoder.Internal.Assert qualified as ACIA
+import AtCoder.Internal.Math qualified as ACIM
 import Data.Bits (bit)
 import GHC.Stack (HasCallStack)
 
@@ -14,10 +14,10 @@ import GHC.Stack (HasCallStack)
 -- - \(0 \le n \lt 2^32\)
 -- - \(1 \le m \lt 2^32\)
 floorSum :: (HasCallStack) => Int -> Int -> Int -> Int -> Int
-floorSum n m a b = floorSumUnsigned n m a' b' - da - db
+floorSum n m a b = ACIM.floorSumUnsigned n m a' b' - da - db
   where
-    !_ = runtimeAssert (0 <= n && n < bit 32) $ "floorSum: invalid `n` (`" ++ show n ++ "`)"
-    !_ = runtimeAssert (1 <= m && m < bit 32) $ "floorSum: invalid `m` (`" ++ show m ++ "`)"
+    !_ = ACIA.runtimeAssert (0 <= n && n < bit 32) $ "AtCoder.Math.floorSum: given invalid `n` (`" ++ show n ++ "`)"
+    !_ = ACIA.runtimeAssert (1 <= m && m < bit 32) $ "AtCoder.Math.floorSum: given invalid `m` (`" ++ show m ++ "`)"
     a'
       | a < 0 = a `mod` m
       | otherwise = a

@@ -1,11 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module AtCoder.TwoSat (TwoSat(..), new, addClause, satisfiable, answer) where
+module AtCoder.TwoSat (TwoSat (..), new, addClause, satisfiable, answer) where
 
 import AtCoder.Internal.Assert (runtimeAssert)
 import AtCoder.Internal.Scc qualified as ACISCC
 import Control.Monad.Primitive (PrimMonad, PrimState)
-import Data.Bit (Bit(..))
+import Data.Bit (Bit (..))
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -24,7 +24,7 @@ new nTs = do
   sccTs <- ACISCC.new $ 2 * nTs
   return TwoSat {..}
 
-addClause :: (HasCallStack,PrimMonad m) => TwoSat (PrimState m) -> Int -> Bool -> Int -> Bool -> m ()
+addClause :: (HasCallStack, PrimMonad m) => TwoSat (PrimState m) -> Int -> Bool -> Int -> Bool -> m ()
 addClause TwoSat {..} i f j g = do
   let !_ = runtimeAssert (0 <= i && i < nTs) $ "addClause: `i` vertex out of bounds (`" ++ show i ++ "` over the number of vertices `" ++ show nTs ++ "`)"
   let !_ = runtimeAssert (0 <= j && j < nTs) $ "addClause: `j` vertex out of bounds (`" ++ show j ++ "` over the number of vertices `" ++ show nTs ++ "`)"

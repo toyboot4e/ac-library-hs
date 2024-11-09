@@ -3,15 +3,15 @@
 -- | Minimum cost flow.
 module AtCoder.MinCostFlow (McfGraph, new, new', addEdge, addEdge_, getEdge, unsafeFreezeEdges, freezeEdges, flow, slope) where
 
-import AtCoder.Internal.Assert (runtimeAssert)
+import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Buffer qualified as ACB
 import AtCoder.Internal.GrowVec qualified as ACGV
-import AtCoder.Internal.MinHeap qualified as ACMH
 import AtCoder.Internal.McfCsr qualified as McfCsr
+import AtCoder.Internal.MinHeap qualified as ACMH
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
-import Data.Bit (Bit(..))
+import Data.Bit (Bit (..))
 import Data.Maybe (fromJust)
 import Data.Primitive.MutVar (readMutVar)
 import Data.Vector.Generic qualified as VG
@@ -21,8 +21,6 @@ import Data.Vector.Unboxed.Base qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- TODO: write more error context for runtimeAssert
-
 -- | Max flow graph.
 data McfGraph s cap cost = McfGraph
   { -- | The number of vertices.
@@ -31,7 +29,7 @@ data McfGraph s cap cost = McfGraph
     edgesG :: !(ACGV.GrowVec s (Int, Int, cap, cap, cost))
   }
 
--- | \(O(n)\)
+-- | \(O(n)\) `McfGraph` with initial edge storage size `0`.
 new :: (VU.Unbox cap, VU.Unbox cost, PrimMonad m) => Int -> m (McfGraph (PrimState m) cap cost)
 new nG = do
   new' nG 0
@@ -52,10 +50,10 @@ addEdge ::
   cost ->
   m Int
 addEdge McfGraph {..} from to cap cost = do
-  let !_ = runtimeAssert (0 <= from && from < nG) $ "addEdge: `from` vertex out of bounds (`" ++ show from ++ "` over the number of vertices `" ++ show nG ++ "`)"
-  let !_ = runtimeAssert (0 <= to && to < nG) $ "addEdge: `to` vertex out of bounds (`" ++ show to ++ "` over the number of vertices `" ++ show nG ++ "`)"
-  let !_ = runtimeAssert (0 <= cap) "addEdge: edge capacity has to bigger than or equal to 0"
-  let !_ = runtimeAssert (0 <= cost) $ "addEdge: edge cost has to bigger than or equal to 0"
+  let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.addEdge" "`from` vertex" from "the number of vertices" nG
+  let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.addEdge" "`to` vertex" to "the number of vertices" nG
+  let !_ = ACIA.runtimeAssert (0 <= cap) "AtCoder.MinCostFlow.addEdge: given invalid edge `capacity` less than `0`"
+  let !_ = ACIA.runtimeAssert (0 <= cost) "AtCoder.MinCostFlow.addEdge: given invalid edge `cost` less than `0`"
   m <- ACGV.length edgesG
   ACGV.pushBack edgesG (from, to, cap, 0, cost)
   return m
@@ -81,7 +79,7 @@ getEdge ::
   m (Int, Int, cap, cap, cost)
 getEdge McfGraph {..} i = do
   m <- ACGV.length edgesG
-  let !_ = runtimeAssert (0 <= i && i < m) "edge index out of bounds"
+  let !_ = ACIA.checkEdge "AtCoder.MinCostFlow.getEdge" i m
   ACGV.read edgesG i
 
 -- | \(O(1)\) Returns a vector of @(from, to, cap, flow, cost)@.
@@ -121,9 +119,9 @@ slope ::
   cap ->
   m (VU.Vector (cap, cost))
 slope McfGraph {..} s t flowLimit = do
-  let !_ = runtimeAssert (0 <= s && s < nG) "start vertex out of bounds"
-  let !_ = runtimeAssert (0 <= t && t < nG) "end vertex out of bounds"
-  let !_ = runtimeAssert (s /= t) "start and end vertex have to be distict"
+  let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.slope" "`source` vertex" s "the number of vertices" nG
+  let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.slope" "`sink` vertex" t "the number of vertices" nG
+  let !_ = ACIA.runtimeAssert (s /= t) "AtCoder.MinCostFlow.slope: `source` and `sink` vertex have to be distict"
 
   edges@(VU.V_5 _ _ _ caps _ _) <- ACGV.unsafeFreeze edgesG
   (!edgeIdx, !g) <- McfCsr.build nG edges

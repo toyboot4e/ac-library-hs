@@ -3,7 +3,7 @@
 -- | Fenwick tree.
 module AtCoder.FenwickTree (FenwickTree, new, build, add, sum) where
 
-import AtCoder.Internal.Assert (runtimeAssert)
+import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
@@ -28,7 +28,7 @@ new nFt
   | nFt >= 0 = do
     dataFt <- VUM.replicate nFt 0
     return FenwickTree {..}
-  | otherwise = error $ "new: given negative size (`" ++ show nFt ++ "`)"
+  | otherwise = error $ "AtCoder.FenwickTree.new: given negative size `" ++ show nFt ++ "`"
 
 -- | \(O(n)\) Creates `FenwickTree` from a vector of monoids. Mostly a shorthand.
 build :: (Num a, VU.Unbox a, PrimMonad m) => VU.Vector a -> m (FenwickTree (PrimState m) a)
@@ -40,7 +40,7 @@ build xs = do
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
 add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()
 add FenwickTree {..} p0 x = do
-  let !_ = runtimeAssert (0 <= p0 && p0 < nFt) $ "add: vertex out of bounds (`" ++ show p0 ++ "` over the number of vertices `" ++ show nFt ++ "`)"
+  let !_ = ACIA.checkIndex "AtCoder.FenwickTree.add" p0 nFt
   let p1 = p0 + 1
   flip fix p1 $ \loop p -> do
     when (p <= nFt) $ do
@@ -61,7 +61,7 @@ prefixSum FenwickTree {..} = inner 0
 -- | \(O(\log n)\) Calculates the sum in half-open range @[l, r)@.
 sum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
 sum ft@FenwickTree {..} l r = do
-  let !_ = runtimeAssert (0 <= l && l <= r && r <= nFt) $ "sum: invalid range `" ++ show (l, r) ++ "` over the number of vertices `" ++ show nFt ++ "`)"
+  let !_ = ACIA.checkInterval "AtCoder.FenwickTree.sum" l r nFt
   xr <- prefixSum ft r
   xl <- prefixSum ft l
   return $! xr - xl

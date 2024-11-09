@@ -21,7 +21,7 @@ module AtCoder.LazySegTree
   )
 where
 
-import AtCoder.Internal.Assert (runtimeAssert)
+import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
 import Control.Monad (unless, when)
 import Control.Monad.Primitive (PrimMonad, PrimState)
@@ -75,9 +75,7 @@ build vs = do
 
 set :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> a -> m ()
 set self@LazySegTree {..} p x = do
-  let !_ =
-        runtimeAssert (0 <= p && p < nLst) $
-          "set: index out of bounds (`" ++ show p ++ "` over the number of vertices `" ++ show nLst ++ "`)"
+  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.set" p nLst
   let p' = p + sizeLst
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
     push self $ p' .>>. i
@@ -87,9 +85,7 @@ set self@LazySegTree {..} p x = do
 
 get :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> m a
 get self@LazySegTree {..} p = do
-  let !_ =
-        runtimeAssert (0 <= p && p < nLst) $
-          "get: index out of bounds (`" ++ show p ++ "` over the number of vertices `" ++ show nLst ++ "`)"
+  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.get" p nLst
   let p' = p + sizeLst
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
     push self $ p' .>>. i
@@ -106,9 +102,7 @@ prod self@LazySegTree {..} l0 r0
         when (((r .>>. i) .<<. i) /= r) $ push self $ (r - 1) .>>. i
       inner l (r - 1) mempty mempty
   where
-    !_ =
-      runtimeAssert (0 <= l0 && l0 <= r0 && r0 <= nLst) $
-        "prod: invalid range `[" ++ show l0 ++ ", " ++ show r0 ++ ")` over the number of vertices `" ++ show nLst ++ "`"
+    !_ = ACIA.checkInterval "AtCoder.LazySegTree.prod" l0 r0 nLst
     -- NOTE: we're using inclusive range [l, r] for simplicity
     inner l r !smL !smR
       | l > r = return $! smL <> smR
@@ -129,6 +123,7 @@ allProd LazySegTree {..} = VGM.read dLst 1
 -- | \(O(\log n)\) Applies `SegAct` to an index.
 applyAt :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
 applyAt self@LazySegTree {..} p f = do
+  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.applyAt" p nLst
   let p' = p + sizeLst
   -- propagate
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
@@ -137,10 +132,6 @@ applyAt self@LazySegTree {..} p f = do
   -- evaluate
   for_ [1 .. logLst] $ \i -> do
     update self $ p' .>>. i
-  where
-    !_ =
-      runtimeAssert (0 <= p && p < nLst) $
-        "applyAt: index out of bounds (`" ++ show p ++ "` over the number of vertices `" ++ show nLst ++ "`)"
 
 -- | \(O(\log n)\) Applies `SegAct` to a half-open range @[l, r)@.
 applyIn :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
@@ -159,9 +150,7 @@ applyIn self@LazySegTree {..} l0 r0 f
         when (((l .>>. i) .<<. i) /= l) $ update self (l .>>. i)
         when (((r .>>. i) .<<. i) /= r) $ update self ((r - 1) .>>. i)
   where
-    !_ =
-      runtimeAssert (0 <= l0 && l0 <= r0 && r0 <= nLst) $
-        "applyIn: invalid range `[" ++ show l0 ++ ", " ++ show r0 ++ ")` over the number of vertices `" ++ show nLst ++ "`"
+    !_ = ACIA.checkInterval "AtCoder.LazySegTree.applyIn" l0 r0 nLst
     -- NOTE: we're using inclusive range [l, r] for simplicity
     inner l r
       | l > r = return ()
@@ -181,10 +170,9 @@ maxRight self@LazySegTree {..} l0 g
         push self (l .>>. i)
       inner l mempty
   where
-    !_ =
-      runtimeAssert (0 <= l0 && l0 <= nLst) $
-        "maxRight: left index out of bounds (`" ++ show l0 ++ "`) over the number of vertices `" ++ show nLst ++ "`"
-    !_ = runtimeAssert (g mempty) "maxRight: `g mempty` returned `False`"
+    -- NOTE: Not ordinary bounds check!
+    !_ = ACIA.runtimeAssert (0 <= l0 && l0 <= nLst) $ "AtCoder.LazySegTree.maxRight: given invalid `left` index `" ++ show l0 ++ "` over length `" ++ show nLst ++ "`"
+    !_ = ACIA.runtimeAssert (g mempty) "AtCoder.LazySegTree.maxRight: `g mempty` returned `False`"
     inner l !sm = do
       let l' = chooseBit l
       !sm' <- (sm <>) <$> VGM.read dLst l'
@@ -219,10 +207,9 @@ minLeft self@LazySegTree {..} r0 g
         push self $ (r - 1) .>>. i
       inner r mempty
   where
-    !_ =
-      runtimeAssert (0 <= r0 && r0 <= nLst) $
-        "minLeft: right index out of bounds (`" ++ show r0 ++ "`) over the number of vertices `" ++ show nLst ++ "`"
-    !_ = runtimeAssert (g mempty) "minLeft: `g empty` returned `False`"
+    -- NOTE: Not ordinary bounds check!
+    !_ = ACIA.runtimeAssert (0 <= r0 && r0 <= nLst) $ "AtCoder.LazySegTree.minLeft: given invalid `right` index `" ++ show r0 ++ "` over length `" ++ show nLst ++ "`"
+    !_ = ACIA.runtimeAssert (g mempty) "AtCoder.LazySegTree.minLeft: `g empty` returned `False`"
     inner r !sm = do
       let r' = chooseBit $ r - 1
       !sm' <- (<> sm) <$> VGM.read dLst r'

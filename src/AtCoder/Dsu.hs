@@ -3,7 +3,7 @@
 -- | Disjoint set union.
 module AtCoder.Dsu (Dsu, new, merge, merge_, leader, same, size, groups) where
 
-import AtCoder.Internal.Assert (runtimeAssert)
+import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Vector qualified as V
@@ -33,8 +33,8 @@ new nDsu
 -- | Amortized \(O(\alpha(n))\).
 merge :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Int
 merge dsu@Dsu {..} a b = do
-  let !_ = runtimeAssert (0 <= a && a < nDsu) $ "merge: vertex out of bounds (`" ++ show a ++ "` over the number of vertices `" ++ show nDsu ++ "`)"
-  let !_ = runtimeAssert (0 <= b && b < nDsu) $ "merge: vertex out of bounds (`" ++ show b ++ "` over the number of vertices `" ++ show nDsu ++ "`)"
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" a nDsu
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" b nDsu
   x <- leader dsu a
   y <- leader dsu b
   if x == y
@@ -60,8 +60,8 @@ merge_ dsu a b = do
 -- | Amortized \(O(\alpha(n))\).
 same :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Bool
 same dsu@Dsu {..} a b = do
-  let !_ = runtimeAssert (0 <= a && a < nDsu) $ "same: vertex out of bounds (`" ++ show a ++ "` over the number of vertices `" ++ show nDsu ++ "`)"
-  let !_ = runtimeAssert (0 <= b && b < nDsu) $ "same: vertex out of bounds (`" ++ show b ++ "` over the number of vertices `" ++ show nDsu ++ "`)"
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.same" a nDsu
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.same" b nDsu
   la <- leader dsu a
   lb <- leader dsu b
   return $ la == lb
@@ -69,7 +69,7 @@ same dsu@Dsu {..} a b = do
 -- | Amortized \(O(\alpha(n))\).
 leader :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 leader dsu@Dsu {..} a = do
-  let !_ = runtimeAssert (0 <= a && a < nDsu) $ "leader: vertex out of bounds (`" ++ show a ++ "` over the number of vertices `" ++ show nDsu ++ "`)"
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.leader" a nDsu
   pa <- VGM.read parentOrSizeDsu a
   if pa < 0
     then return a
@@ -81,7 +81,7 @@ leader dsu@Dsu {..} a = do
 -- | Amortized \(O(\alpha(n))\).
 size :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 size dsu@Dsu {..} a = do
-  let !_ = runtimeAssert (0 <= a && a < nDsu) $ "size: vertex out of bounds (`" ++ show a ++ "` over the number of vertices `" ++ show nDsu ++ "`)"
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.size" a nDsu
   la <- leader dsu a
   sizeLa <- VGM.read parentOrSizeDsu la
   return (-sizeLa)
