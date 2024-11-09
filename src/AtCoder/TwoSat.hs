@@ -2,7 +2,7 @@
 
 module AtCoder.TwoSat (TwoSat (..), new, addClause, satisfiable, answer) where
 
-import AtCoder.Internal.Assert (runtimeAssert)
+import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Scc qualified as ACISCC
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Bit (Bit (..))
@@ -26,8 +26,8 @@ new nTs = do
 
 addClause :: (HasCallStack, PrimMonad m) => TwoSat (PrimState m) -> Int -> Bool -> Int -> Bool -> m ()
 addClause TwoSat {..} i f j g = do
-  let !_ = runtimeAssert (0 <= i && i < nTs) $ "addClause: `i` vertex out of bounds (`" ++ show i ++ "` over the number of vertices `" ++ show nTs ++ "`)"
-  let !_ = runtimeAssert (0 <= j && j < nTs) $ "addClause: `j` vertex out of bounds (`" ++ show j ++ "` over the number of vertices `" ++ show nTs ++ "`)"
+  let !_ = ACIA.checkVertex "AtCoder.TwoSat.addClause" i nTs
+  let !_ = ACIA.checkVertex "AtCoder.TwoSat.addClause" j nTs
   ACISCC.addEdge sccTs (2 * i + if f then 0 else 1, 2 * j + if g then 1 else 0)
   ACISCC.addEdge sccTs (2 * j + if g then 0 else 1, 2 * i + if f then 1 else 0)
 
