@@ -1,10 +1,10 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Immutable Compresed Sparse Row.
-module AtCoder.Internal.Csr (Csr(..), build, adj) where
+module AtCoder.Internal.Csr (Csr (..), build, adj) where
 
-import Data.Foldable (for_)
 import Control.Monad.ST (runST)
+import Data.Foldable (for_)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -17,8 +17,8 @@ data Csr e = Csr
     elistCsr :: !(VU.Vector e)
   }
 
--- | \(O(n + m)\)
 build :: (VU.Unbox e) => Int -> VU.Vector (Int, e) -> Csr e
+-- | \(O(n + m)\) Creates `Csr`.
 build n edges = runST $ do
   start <- VUM.replicate (n + 1) (0 :: Int)
 
@@ -42,8 +42,8 @@ build n edges = runST $ do
   elistCsr <- VU.unsafeFreeze elist
   return Csr {..}
 
--- | \(O(1)\)
 adj :: (VU.Unbox e) => Csr e -> Int -> VU.Vector e
+-- | \(O(1)\) Returns adjacent vertices.
 adj Csr {..} i =
   let il = startCsr VG.! i
       ir = startCsr VG.! (i + 1)

@@ -1,10 +1,26 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Lazily propagted egment tree.
+-- | Lazily propagted segment tree. It is the data structure for the pair of a [monoid](https://en.wikipedia.org/wiki/Monoid)
+-- \((S, \cdot: S \times S \to S, e \in S)\) and a set \(F\) of \(S \to S\) mappings that satisfies
+-- the following properties.
+--
+-- - \(F\) contains the identity map \(\mathrm{id}\), where the identity map is the map that
+--   satisfies \(\mathrm{id}(x) = x\) for all \(x \in S\).
+-- - \(F\) is closed under composition, i.e., \(f \circ g \in F\) holds for all \(f, g \in F\).
+-- - \(f(x \cdot y) = f(x) \cdot f(y)\) holds for all \(f \in F\) and \(x, y \in S\).
+--
+-- Given an array \(S\) of length \(N\), it processes the following queries in \(O(\log N)\) time.
+--
+-- - Acting the map \(f\in F\) (cf. \(x = f(x)\)) on all the elements of an interval
+-- - Calculating the product of the elements of an interval
+--
+-- For simplicity, in this document, we assume that the oracles @op@, @e@, @mapping@, @composition@,
+-- and @id@ work in constant time. If these oracles work in \(O(T)\) time, each time complexity
+-- appear in this document is multipled by \(O(T)\).
 --
 -- = Storing boxed types
 -- If you really need to store boxed type to `LazySegTree`, wrap them in a newtype that implements
--- @Unbox@ typeclass via boxed vector, such as [@DoNotUnboxLstrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxLstrict).
+-- @Unbox@ typeclass via a boxed vector, such as [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict).
 module AtCoder.LazySegTree
   ( SegAct (..),
     LazySegTree (..),
@@ -32,11 +48,24 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | Consatrained semigroup action defined around `LazySegmentTree`.
+-- | Haskell reprentation of the above properties.
+--
+-- = Tips
+--
+-- == Defining custom monoids
+--
+-- [@Unbox@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html) instance
+--
+-- FIXME: TODO
+--
+-- == Storing boxed types
+-- If you really need to store boxed type to `LazySegTree`, wrap them in a newtype  such as
+-- [@DoNotUnboxLstrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxLstrict).
 class (Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => SegAct f a where
   -- | Lazy segment tree action.
   --
   -- = Constraints
+  --
   -- - Left monoid action: @(f2 <> f1) a = f2 (f1 a)@
   -- - Endomorphism: @f (a1 <> a2) = (f a1) <> (f a2)@
   segAct :: f -> a -> a
@@ -54,11 +83,25 @@ data LazySegTree s f a = LazySegTree
     lzLst :: !(VUM.MVector s f)
   }
 
+-- | Creates an array of length @n@. All the elements are initialized to `mempty`.
+--
+-- = Constraints
+-- - \(0 \leq n\)
+--
+-- = Complexity
+-- - \(O(n)\)
 new :: (HasCallStack, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a, PrimMonad m) => Int -> m (LazySegTree (PrimState m) f a)
 new nLst
   | nLst >= 0 = build $ VU.replicate nLst mempty
   | otherwise = error $ "new: given negative size `" ++ show nLst ++ "`"
 
+-- | Creates an array with initial values @vs@.
+--
+-- = Constraints
+-- - \(0 \leq n\)
+--
+-- = Complexity
+-- - \(O(n)\)
 build :: (Monoid f, VU.Unbox f, Monoid a, VU.Unbox a, PrimMonad m) => VU.Vector a -> m (LazySegTree (PrimState m) f a)
 build vs = do
   let nLst = VU.length vs
@@ -73,6 +116,13 @@ build vs = do
     update segtree i
   return segtree
 
+-- | Sets \(p\)-th value of the array to \(x\).
+--
+-- = Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 set :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> a -> m ()
 set self@LazySegTree {..} p x = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.set" p nLst
@@ -83,6 +133,13 @@ set self@LazySegTree {..} p x = do
   for_ [1 .. logLst] $ \i -> do
     update self $ p' .>>. i
 
+-- | Returns \(p\)-th value of the array.
+--
+-- = Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 get :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> m a
 get self@LazySegTree {..} p = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.get" p nLst
@@ -91,6 +148,14 @@ get self@LazySegTree {..} p = do
     push self $ p' .>>. i
   VGM.read dLst p'
 
+-- | Returns the product of \([a[l], ..., a[r - 1]]\), assuming the properties of the monoid. It
+-- returns `mempty` if \(l = r\).
+--
+-- = Constraints
+-- - \(0 \leq l \leq r \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 prod :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
 prod self@LazySegTree {..} l0 r0
   | l0 == r0 = return mempty
@@ -117,10 +182,21 @@ prod self@LazySegTree {..} l0 r0
               else return smR
           inner ((l + 1) .>>. 1) ((r - 1) .>>. 1) smL' smR'
 
+-- | Returns the product of \([op(a[0], ..., a[n - 1])]\), assuming the properties of the monoid. It
+-- returns `mempty` if \(n = 0\).
+--
+-- = Complexity
+-- - \(O(1)\)
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m a
 allProd LazySegTree {..} = VGM.read dLst 1
 
--- | \(O(\log n)\) Applies `SegAct` to an index.
+-- | Applies @segAct f@ to an index @p@.
+--
+-- = Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 applyAt :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
 applyAt self@LazySegTree {..} p f = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.applyAt" p nLst
@@ -133,7 +209,13 @@ applyAt self@LazySegTree {..} p f = do
   for_ [1 .. logLst] $ \i -> do
     update self $ p' .>>. i
 
--- | \(O(\log n)\) Applies `SegAct` to a half-open range @[l, r)@.
+-- | Applies @segAct f@ to an interval @[l, r)@.
+--
+-- = Constraints
+-- - \(0 \leq l \leq r \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 applyIn :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
 applyIn self@LazySegTree {..} l0 r0 f
   | l0 == r0 = return ()
@@ -161,6 +243,21 @@ applyIn self@LazySegTree {..} l0 r0 f
             allApply self r f
           inner ((l + 1) .>>. 1) ((r - 1) .>>. 1)
 
+-- | Applies a binary search on the segment tree. It returns an index @r@ that satisfies both of the
+-- followings.
+--
+-- - @r = l@ or @g(a[l] <> a[l + 1] <> ... <> a[r - 1])) == True@
+-- - @r = n@ or @g(a[l] <> a[l + 1] <> ... <> a[r])) == False@
+--
+-- If @g@ is monotone, this is the maximum @r@ that satisfies @g(a[l] <> a[l + 1] <> ... <> a[r - 1]) == True@.
+--
+-- = Constraints
+--
+-- - @g mempty == True@
+-- - \(0 \leq l \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 maxRight :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 maxRight self@LazySegTree {..} l0 g
   | l0 == nLst = return nLst
@@ -198,6 +295,21 @@ maxRight self@LazySegTree {..} l0 g
             else inner2 l' sm
       | otherwise = return $ l - sizeLst
 
+-- | Applies a binary search on the segment tree. It returns an index @l@ that satisfies both of the
+-- following.
+--
+-- - @l = r@ or @g(a[l] <> a[l + 1] <> ... <> a[r - 1]) == True@
+-- - @l = 0@ or @g(a[l - 1] <> a[l] <> ... <> a[r - 1]) == False@
+--
+-- If @g@ is monotone, this is the minimum @l@ that satisfies @g(a[l] <> a[l + 1] <> ... <> a[r - 1]) == True@.
+--
+-- = Constraints
+--
+-- - @g mempty == True@
+-- - \(0 \leq r \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 minLeft :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 minLeft self@LazySegTree {..} r0 g
   | r0 == 0 = return 0
@@ -233,18 +345,21 @@ minLeft self@LazySegTree {..} r0 g
             else inner2 r' sm
       | otherwise = return $ r + 1 - sizeLst
 
+-- | \(O(1)\)
 update :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a, Monoid f, VU.Unbox f) => LazySegTree (PrimState m) f a -> Int -> m ()
 update LazySegTree {..} k = do
   opL <- VGM.read dLst $ 2 * k
   opR <- VGM.read dLst $ 2 * k + 1
   VGM.write dLst k $! opL <> opR
 
+-- | \(O(1)\)
 allApply :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a, Monoid f, VU.Unbox f, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
 allApply LazySegTree {..} k f = do
   VGM.modify dLst (f `segAct`) k
   when (k < sizeLst) $ do
     VGM.modify lzLst (f <>) k
 
+-- | \(O(1)\)
 push :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a, Monoid f, VU.Unbox f, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> m ()
 push self@LazySegTree {..} k = do
   lzK <- VGM.read lzLst k

@@ -8,11 +8,17 @@ import AtCoder.Internal.Math qualified as ACIM
 import Data.Bits (bit)
 import GHC.Stack (HasCallStack)
 
--- | \(O(\log m)\) Returns \(\sum_{i=0}^{j-1} \lfloor \frac {a \cross i + b} {m} \rfloor\).
+-- TODO: check if it's also the case with Haskell port:
+-- > It returns the answer in $\bmod 2^{\mathrm{64}}$, if overflowed.
+
+-- | returns \(\sum\limits_{i = 0}^{n - 1} \left\lfloor \frac{a \times i + b}{m} \right\rfloor\)
 --
--- = Input constraints
+-- = Constraints
 -- - \(0 \le n \lt 2^32\)
 -- - \(1 \le m \lt 2^32\)
+--
+-- = Complexity
+-- - \(O(\log m)\)
 floorSum :: (HasCallStack) => Int -> Int -> Int -> Int -> Int
 floorSum n m a b = ACIM.floorSumUnsigned n m a' b' - da - db
   where

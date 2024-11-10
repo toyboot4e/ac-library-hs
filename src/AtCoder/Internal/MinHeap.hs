@@ -31,30 +31,30 @@ data Heap s a = Heap
     dataBH :: !(VUM.MVector s a)
   }
 
--- | \(O(n)\)
+-- | \(O(n)\) Creates `Heap` with capacity \(n\).
 new :: (VU.Unbox a, PrimMonad m) => Int -> m (Heap (PrimState m) a)
 new n = do
   sizeBH_ <- VUM.replicate 1 0
   dataBH <- VUM.unsafeNew n
   return Heap {..}
 
--- | \(O(1)\)
+-- | \(O(1)\) Returns the number of elements the heap can hold.
 capacity :: (VU.Unbox a) => Heap s a -> Int
 capacity = VUM.length . dataBH
 
--- | \(O(1)\)
+-- | \(O(1)\) Returns the number of elements in the heap.
 length :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m Int
 length Heap {sizeBH_} = VGM.unsafeRead sizeBH_ 0
 
--- | \(O(1)\)
+-- | \(O(1)\) Returns `True` if the heap is empty.
 null :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m Bool
 null = fmap (== 0) . length
 
--- | \(O(1)\)
+-- | \(O(1)\) Sets the `length` to zero.
 clear :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
 clear Heap {sizeBH_} = VGM.unsafeWrite sizeBH_ 0 0
 
--- | \(O(\log n)\)
+-- | \(O(\log n)\) Inserts an element to the heap.
 push :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> a -> m ()
 push Heap {..} x = do
   i0 <- VGM.unsafeRead sizeBH_ 0
@@ -68,7 +68,7 @@ push Heap {..} x = do
           siftUp iParent
   siftUp i0
 
--- | \(O(1)\)
+-- | \(O(1)\) Returns the smallest value in the heap, or `Nothing` if it is empty.
 peek :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
 peek heap = do
   isNull <- null heap
@@ -76,7 +76,8 @@ peek heap = do
     then return Nothing
     else Just <$> VGM.read (dataBH heap) 0
 
--- | \(O(\log n)\)
+-- | \(O(\log n)\) Removes the last element from the heap and returns it, or `Nothing` if it is
+-- empty.
 pop :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
 pop heap@Heap {..} = do
   len <- length heap

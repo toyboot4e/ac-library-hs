@@ -1,7 +1,25 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Disjoint set union.
-module AtCoder.Dsu (Dsu, new, merge, merge_, leader, same, size, groups) where
+-- | Disjoint set union (also known as Union-Find tree). It processes the following queries in
+-- amortized \(O(\alpha(n))\) time.
+--
+-- - Edge addition
+-- - Deciding whether given two vertices are in the same connected component
+--
+-- Each connected component internally has a representative vertex. When two connected components
+-- are merged by edge addition, one of the two representatives of these connected components
+-- becomes the representative of the new connected component.
+module AtCoder.Dsu
+  ( Dsu,
+    new,
+    merge,
+    merge_,
+    leader,
+    same,
+    size,
+    groups,
+  )
+where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
@@ -22,15 +40,30 @@ data Dsu s = Dsu
     parentOrSizeDsu :: !(VUM.MVector s Int)
   }
 
--- | \(O(n)\)
+-- | Creates an undirected graph with \(n\) vertices and \(0\) edges.
+--
+-- = Constraints
+-- - \(0 \le n\)
+--
+-- = Complexity
+-- - \(O(n)\)
 new :: (PrimMonad m) => Int -> m (Dsu (PrimState m))
 new nDsu
   | nDsu >= 0 = do
-    parentOrSizeDsu <- VUM.replicate nDsu (-1)
-    return Dsu {..}
+      parentOrSizeDsu <- VUM.replicate nDsu (-1)
+      return Dsu {..}
   | otherwise = error $ "new: given negative size (`" ++ show nDsu ++ "`)"
 
--- | Amortized \(O(\alpha(n))\).
+-- | Adds an edge @(a, b)@. the vertices @a@ and @b@ were in the same connected component, it
+-- returns the representative of this connected component. Otherwise, it returns the
+-- representative of the new connected component.
+--
+-- = Constraints
+-- - \(0 \leq a < n\)
+-- - \(0 \leq b < n\)
+--
+-- = Complexity
+-- - \(O(\alpha(n))\) amortized
 merge :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Int
 merge dsu@Dsu {..} a b = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" a nDsu
@@ -49,15 +82,27 @@ merge dsu@Dsu {..} a b = do
       VGM.modify parentOrSizeDsu (+ sizeY) x
       return x
 
--- | Amortized \(O(\alpha(n))\).
+-- | `merge` with return value discarded.
 --
--- This function is not in the original ac-library. It's useful for suppressing warnings.
+-- = Constraints
+-- - \(0 \leq a < n\)
+-- - \(0 \leq b < n\)
+--
+-- = Complexity
+-- - \(O(\alpha(n))\) amortized
 merge_ :: (PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m ()
 merge_ dsu a b = do
   _ <- merge dsu a b
   return ()
 
--- | Amortized \(O(\alpha(n))\).
+-- | Returns whether the vertices @a@ and @b@ are in the same connected component.
+--
+-- = Constraints
+-- - \(0 \leq a < n\)
+-- - \(0 \leq b < n\)
+--
+-- = Complexity
+-- - \(O(\alpha(n))\) amortized
 same :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Bool
 same dsu@Dsu {..} a b = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.same" a nDsu
@@ -66,7 +111,13 @@ same dsu@Dsu {..} a b = do
   lb <- leader dsu b
   return $ la == lb
 
--- | Amortized \(O(\alpha(n))\).
+-- | Returns the representative of the connected component that contains the vertex @a@.
+--
+-- = Constraints
+-- - \(0 \leq a \lt n\)
+--
+-- = Complexity
+-- - \(O(\alpha(n))\)
 leader :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 leader dsu@Dsu {..} a = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.leader" a nDsu
@@ -78,7 +129,13 @@ leader dsu@Dsu {..} a = do
       VGM.write parentOrSizeDsu a lpa
       return lpa
 
--- | Amortized \(O(\alpha(n))\).
+-- | Returns the size of the connected component that contains the vertex @a@.
+--
+-- = Constraints
+-- -  \(0 \leq a < n\)
+--
+-- = Complexity
+-- - \(O(\alpha(n))\)
 size :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 size dsu@Dsu {..} a = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.size" a nDsu
@@ -86,7 +143,13 @@ size dsu@Dsu {..} a = do
   sizeLa <- VGM.read parentOrSizeDsu la
   return (-sizeLa)
 
--- | \(O(n \alpha(n))\)
+-- | Divides the graph into connected components and returns the list of them.
+--
+-- More precisely, it returns a vector of the "vector of the vertices in a connected component".
+-- Both of the orders of the connected components and the vertices are undefined.
+--
+-- = Complexity
+-- - \(O(n)\)
 groups :: (PrimMonad m) => Dsu (PrimState m) -> m (V.Vector (VU.Vector Int))
 groups dsu@Dsu {..} = do
   groupSize <- VUM.replicate nDsu (0 :: Int)

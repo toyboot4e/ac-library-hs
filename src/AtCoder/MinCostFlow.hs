@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Minimum cost flow.
-module AtCoder.MinCostFlow (McfGraph, new, new', addEdge, addEdge_, getEdge, unsafeFreezeEdges, freezeEdges, flow, slope) where
+-- | It solves [Minimum-cost flow problem](https://en.wikipedia.org/wiki/Minimum-cost_flow_problem).
+module AtCoder.MinCostFlow (McfGraph, new, new', addEdge, addEdge_, getEdge, edges, unsafeEdges, flow, slope) where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Buffer qualified as ACIB
@@ -21,7 +21,7 @@ import Data.Vector.Unboxed.Base qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | Max flow graph.
+-- | Min cost flow graph.
 data McfGraph s cap cost = McfGraph
   { -- | The number of vertices.
     nG :: {-# UNPACK #-} !Int,
@@ -58,7 +58,14 @@ addEdge McfGraph {..} from to cap cost = do
   ACIGV.pushBack edgesG (from, to, cap, 0, cost)
   return m
 
--- | Amortized \(O(1)\)
+-- | `addEdge` with return value discarded.
+--
+-- = Constraints
+-- - \(0 \leq \mathrm{from}, \mathrm{to} \lt n\)
+-- - \(0 \leq \mathrm{cap}, \mathrm{cost}\)
+--
+-- = Complexity
+-- - \(O(1)\) amortized
 addEdge_ ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
@@ -71,7 +78,14 @@ addEdge_ graph from to cap cost = do
   _ <- addEdge graph from to cap cost
   return ()
 
--- | \(O(1)\). Returns @(from, to, cap, flow, cost)@.
+-- | Returns the current internal state of the edges: @(from, to, cap, flow, cost)@. The edges are
+-- ordered in the same order as added by `addEdge`.
+--
+-- = Constraints
+-- - \(0 \leq i \lt m\)
+--
+-- = Complexity
+-- - \(O(1)\)
 getEdge ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->

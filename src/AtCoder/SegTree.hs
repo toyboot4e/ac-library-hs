@@ -1,10 +1,25 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Segment tree.
+-- | It is the data structure for [monoids](https://en.wikipedia.org/wiki/Monoid)
+-- \((S, \cdot: S \times S \to S, e \in S)\), i.e., the algebraic structure that satisfies the
+-- following properties.
+--
+-- - associativity: \((a \cdot b) \cdot c\) = \(a \cdot (b \cdot c)\) for all \(a, b, c \in S\)
+-- - existence of the identity element: \(a \cdot e\) = \(e \cdot a\) = \(a\) for all \(a \in S\)
+--
+-- Given an array \(S\) of length \(N\), it processes the following queries in \(O(\log N)\) time
+-- (see [Appendix](./appendix.html) for further details).
+--
+-- - Updating an element
+-- - Calculating the product of the elements of an interval
+--
+-- For simplicity, in this document, we assume that the oracles @op@ and @e@ work in constant time.
+-- If these oracles work in \(O(T)\) time, each time complexity appear in this document is
+-- multipled by \(O(T)\).
 --
 -- = Storing boxed types
 -- If you really need to store boxed type to `SegTree`, wrap them in a newtype that implements
--- @Unbox@ typeclass via boxed vector, such as [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict).
+-- @Unbox@ typeclass via a boxed vector, such as [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict).
 module AtCoder.SegTree
   ( SegTree (..),
     new,
@@ -39,11 +54,22 @@ data SegTree s a = SegTree
     dSt :: !(VUM.MVector s a)
   }
 
+-- | Creates an array @a@ of length @n@. All the elements are initialized to `mempty`.
+--
+-- = Constraints
+-- - \(0 \leq n \)
+--
+-- = Complexity
+-- - \(O(n)\)
 new :: (HasCallStack, Monoid a, VU.Unbox a, PrimMonad m) => Int -> m (SegTree (PrimState m) a)
 new nSt
   | nSt >= 0 = build $ VU.replicate nSt mempty
   | otherwise = error $ "new: given negative size (`" ++ show nSt ++ "`)"
 
+-- | Creates an array with initial values.
+--
+-- = Complexity
+-- - \(O(n)\)
 build :: (Monoid a, VU.Unbox a, PrimMonad m) => VU.Vector a -> m (SegTree (PrimState m) a)
 build vs = do
   let nSt = VU.length vs
@@ -57,6 +83,13 @@ build vs = do
     update segtree i
   return segtree
 
+-- | Sets \(p\)-th value of the array to \(x\).
+--
+-- = Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- = Complexity
+-- - \(O(1)\)
 set :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m ()
 set self@SegTree {..} p x = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.set" p nSt
@@ -64,11 +97,26 @@ set self@SegTree {..} p x = do
   for_ [1 .. logSt] $ \i -> do
     update self ((p + sizeSt) .>>. i)
 
+-- | Returns \(p\)-th value of the array.
+--
+-- = Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 get :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m a
 get SegTree {..} p = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.get" p nSt
   VGM.read dSt $ p + sizeSt
 
+-- | Returns @a[l] <> ... <> a[r - 1]@, assuming the properties of the monoid. It returns `mempty`
+-- if \(l = r\).
+--
+-- = Constraints
+-- - \(0 \leq l \leq r \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 prod :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m a
 prod SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
   where
@@ -87,9 +135,30 @@ prod SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
               else return smR
           inner ((l + 1) .>>. 1) ((r - 1) .>>. 1) smL' smR'
 
+-- | Returns @a[0] <> ... <> a[n - 1]@, assuming the properties of the monoid. It returns `mempty`
+-- if \(n = 0\).
+--
+-- = Complexity
+-- - \(O(1)\)
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> m a
 allProd SegTree {..} = VGM.read dSt 1
 
+-- | Applies binary search on the segment tree. It returns an index @r@ that satisfies both of the
+-- following.
+--
+-- - @r == l@ or @a[l] <> a[l + 1] <> ... <> a[r - 1] == True@
+-- - @r == n@ or @a[l] <> a[l + 1] <> ... <> a[r]) == False@
+--
+-- If @f@ is monotone, this is the maximum @r@ that satisfies
+-- @f(a[l] <> a[l + 1] <> ... <> a[r - 1]) == True@.
+--
+-- = Constraints
+-- - if @f@ is called with the same argument, it returns the same value, i.e., @f@ has no side effect.
+-- - @f mempty == True@
+-- - \(0 \leq l \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 maxRight :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
 maxRight SegTree {..} l0 f
   | l0 == nSt = return nSt
@@ -122,6 +191,21 @@ maxRight SegTree {..} l0 f
             else inner2 l' sm
       | otherwise = return $ l - sizeSt
 
+-- | It applies binary search on the segment tree. It returns an index @l@ that satisfies both of
+-- the following.
+--
+-- - @l == r@ or @f(a[l] <> a[l + 1] <> ... <> a[r - 1]) == True@
+-- - @l == 0@ or @f(a[l - 1] <> a[l] <> ... <> a[r - 1]) == False@
+--
+-- = Constraints
+--
+-- - if @f@ is called with the same argument, it returns the same value, i.e., @f@ has no side
+--   effect.
+-- - @f mempty == True@
+-- - \(0 \leq r \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 minLeft :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
 minLeft SegTree {..} r0 f
   | r0 == 0 = return 0
@@ -152,6 +236,7 @@ minLeft SegTree {..} r0 f
             else inner2 r' sm
       | otherwise = return $ r + 1 - sizeSt
 
+-- | \(O(1)\)
 update :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m ()
 update SegTree {..} k = do
   opL <- VGM.read dSt $ 2 * k

@@ -2,7 +2,7 @@ module AtCoder.Internal.Math (floorSumUnsigned) where
 
 -- | \(O(\log m)\)
 --
--- = Input constraints
+-- = Constraints
 -- - \(n \lt 2^32\)
 -- - \(1 \le m \lt 2^32\)
 floorSumUnsigned :: Int -> Int -> Int -> Int -> Int
