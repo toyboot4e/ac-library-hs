@@ -49,18 +49,6 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
 -- | Haskell reprentation of the above properties.
---
--- = Tips
---
--- == Defining custom monoids
---
--- [@Unbox@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html) instance
---
--- FIXME: TODO
---
--- == Storing boxed types
--- If you really need to store boxed type to `LazySegTree`, wrap them in a newtype  such as
--- [@DoNotUnboxLstrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxLstrict).
 class (Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => SegAct f a where
   -- | Lazy segment tree action.
   --

@@ -117,7 +117,7 @@ same dsu@Dsu {..} a b = do
 -- - \(0 \leq a \lt n\)
 --
 -- = Complexity
--- - \(O(\alpha(n))\)
+-- - \(O(\alpha(n))\) amortized
 leader :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 leader dsu@Dsu {..} a = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.leader" a nDsu

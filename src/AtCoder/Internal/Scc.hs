@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
+-- | Strongly connected components.
 module AtCoder.Internal.Scc (SccGraph (nScc), new, addEdge, sccIds, scc) where
 
 import AtCoder.Internal.Csr qualified as ACICSR
@@ -15,16 +16,19 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
+-- | Graph for collecting strongly connected components.
 data SccGraph s = SccGraph
   { nScc :: {-# UNPACK #-} !Int,
     edgesScc :: !(ACIGV.GrowVec s (Int, Int))
   }
 
+-- | \(O(n)\) Creates `SccGraph` of \(n\) vertices.
 new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
 new nScc = do
   edgesScc <- ACIGV.new 0
   return SccGraph {..}
 
+-- | \(O(1)\) amortized. Adds an edge to the graph.
 addEdge :: (PrimMonad m) => SccGraph (PrimState m) -> (Int, Int) -> m ()
 addEdge SccGraph {edgesScc} e@(!_, !_) = do
   ACIGV.pushBack edgesScc e
@@ -102,7 +106,7 @@ sccIds SccGraph {..} = do
   ids' <- VU.unsafeFreeze ids
   return (num, ids')
 
--- | \(O(n + m)\)
+-- | \(O(n + m)\) Returns the strongly connected components.
 scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
 scc g = do
   (!groupNum, !ids) <- sccIds g

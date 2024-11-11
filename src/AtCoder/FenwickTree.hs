@@ -49,7 +49,7 @@ build xs = do
   VU.iforM_ xs $ add ft
   return ft
 
--- | Adds `x` to index `p`.
+-- | Adds \(x\) to \(p\)-th value of the array.
 --
 -- = Constraints
 -- - \(0 \leq l \lt n\)

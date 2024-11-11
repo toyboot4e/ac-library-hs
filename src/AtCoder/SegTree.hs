@@ -57,7 +57,7 @@ data SegTree s a = SegTree
 -- | Creates an array @a@ of length @n@. All the elements are initialized to `mempty`.
 --
 -- = Constraints
--- - \(0 \leq n \)
+-- - \(0 \leq n\)
 --
 -- = Complexity
 -- - \(O(n)\)

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Growable vector with indirection and runtime overhead.
+-- | Growable vector with some runtime overhead.
 module AtCoder.Internal.GrowVec
   ( GrowVec (..),
     new,
