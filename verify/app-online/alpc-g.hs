@@ -10,7 +10,8 @@ main = do
   (!n, !m) <- ints2
   es <- VU.replicateM m ints2
   sccGr <- Scc.new n
-  VU.forM_ es (Scc.addEdge sccGr)
+  VU.forM_ es $ \(!u, !v) -> do
+    Scc.addEdge sccGr u v
   scc <- Scc.scc sccGr
   print $ V.length scc
   V.forM_ scc $ \vs -> do

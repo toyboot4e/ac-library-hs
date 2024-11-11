@@ -50,8 +50,8 @@ addClause :: (HasCallStack, PrimMonad m) => TwoSat (PrimState m) -> Int -> Bool 
 addClause TwoSat {..} i f j g = do
   let !_ = ACIA.checkVertex "AtCoder.TwoSat.addClause" i nTs
   let !_ = ACIA.checkVertex "AtCoder.TwoSat.addClause" j nTs
-  ACISCC.addEdge sccTs (2 * i + if f then 0 else 1, 2 * j + if g then 1 else 0)
-  ACISCC.addEdge sccTs (2 * j + if g then 0 else 1, 2 * i + if f then 1 else 0)
+  ACISCC.addEdge sccTs (2 * i + if f then 0 else 1) (2 * j + if g then 1 else 0)
+  ACISCC.addEdge sccTs (2 * j + if g then 0 else 1) (2 * i + if f then 1 else 0)
 
 -- | If there is a truth assignment that satisfies all clauses, it returns `True`. Otherwise, it
 -- returns `False`.

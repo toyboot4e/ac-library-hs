@@ -1,6 +1,4 @@
-{-# LANGUAGE RecordWildCards #-}
-
-module AtCoder.Scc (SccGraph (..), nScc, new, addEdge, scc) where
+module AtCoder.Scc (SccGraph, nScc, new, addEdge, scc) where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Scc qualified as ACISCC
@@ -36,12 +34,12 @@ new n = SccGraph <$> ACISCC.new n
 --
 -- = Complexity
 -- - \(O(1)\) amortized
-addEdge :: (HasCallStack, PrimMonad m) => SccGraph (PrimState m) -> (Int, Int) -> m ()
-addEdge (SccGraph gr) e@(!from, !to) = do
+addEdge :: (HasCallStack, PrimMonad m) => SccGraph (PrimState m) -> Int -> Int -> m ()
+addEdge (SccGraph gr) from to = do
   let n = ACISCC.nScc gr
   let !_ = ACIA.checkCustom "AtCoder.Scc.addEdge" "`from` vertex" from "the number of vertices" n
   let !_ = ACIA.checkCustom "AtCoder.Scc.addEdge" "`to` vertex" to "the number of vertices" n
-  ACISCC.addEdge gr e
+  ACISCC.addEdge gr from to
 
 -- | Returns the list of the "list of the vertices" that satisfies the following.
 --

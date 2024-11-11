@@ -29,9 +29,9 @@ new nScc = do
   return SccGraph {..}
 
 -- | \(O(1)\) amortized. Adds an edge to the graph.
-addEdge :: (PrimMonad m) => SccGraph (PrimState m) -> (Int, Int) -> m ()
-addEdge SccGraph {edgesScc} e@(!_, !_) = do
-  ACIGV.pushBack edgesScc e
+addEdge :: (PrimMonad m) => SccGraph (PrimState m) -> Int -> Int -> m ()
+addEdge SccGraph {edgesScc} from to = do
+  ACIGV.pushBack edgesScc (from, to)
 
 -- | \(O(n + m)\) Returns a pair of @(# of scc, scc id)@.
 sccIds :: (PrimMonad m) => SccGraph (PrimState m) -> m (Int, VU.Vector Int)
