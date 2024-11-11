@@ -32,11 +32,11 @@ newStn nStn = do
   dStn <- VUM.replicate nStn mempty
   return SegTreeNaive {..}
 
-setStn :: (VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> a -> m ()
-setStn SegTreeNaive {..} = VGM.write dStn
+writeStn :: (VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> a -> m ()
+writeStn SegTreeNaive {..} = VGM.write dStn
 
-getStn :: (VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> m a
-getStn SegTreeNaive {..} = VGM.read dStn
+readStn :: (VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> m a
+readStn SegTreeNaive {..} = VGM.read dStn
 
 prodStn :: (Monoid a, VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> Int -> m a
 prodStn SegTreeNaive {..} l r = do
@@ -114,8 +114,8 @@ spec_invalid = testSpec "invalid" $ do
     ST.new @(Sum Int) (-1) `shouldThrow` anyException
   s <- runIO $ ST.new @(Sum Int) 10
 
-  it "throws error" $ ST.get s (-1) `shouldThrow` anyException
-  it "throws error" $ ST.get s 10 `shouldThrow` anyException
+  it "throws error" $ ST.read s (-1) `shouldThrow` anyException
+  it "throws error" $ ST.read s 10 `shouldThrow` anyException
 
   it "throws error" $ ST.prod s (-1) (-1) `shouldThrow` anyException
   it "throws error" $ ST.prod s 3 2 `shouldThrow` anyException
@@ -130,11 +130,11 @@ unit_one :: TestTree
 unit_one = testCase "one" $ do
   seg <- ST.new @(Sum Int) 1
   (@?= mempty) =<< ST.allProd seg
-  (@?= mempty) =<< ST.get seg 0
+  (@?= mempty) =<< ST.read seg 0
   (@?= mempty) =<< ST.prod seg 0 1
   let dummy = Sum 42
-  ST.set seg 0 dummy
-  (@?= dummy) =<< ST.get seg 0
+  ST.write seg 0 dummy
+  (@?= dummy) =<< ST.read seg 0
   (@?= mempty) =<< ST.prod seg 0 0
   (@?= dummy) =<< ST.prod seg 0 1
   (@?= mempty) =<< ST.prod seg 1 1
@@ -145,8 +145,8 @@ unit_compareNaive = testCase "compareNaive" $ do
     seg0 <- newStn @Foo n
     seg1 <- ST.new @Foo n
     for_ [0 .. n - 1] $ \i -> do
-      setStn seg0 i . Foo . (: []) . chr $ ord 'a' + i
-      ST.set seg1 i . Foo . (: []) . chr $ ord 'a' + i
+      writeStn seg0 i . Foo . (: []) . chr $ ord 'a' + i
+      ST.write seg1 i . Foo . (: []) . chr $ ord 'a' + i
 
     -- prod
     for_ [0 .. n] $ \l -> do
@@ -183,10 +183,10 @@ unit_compareNaive = testCase "compareNaive" $ do
         r1 <- ST.minLeft seg1 r p
         assertEqual (show ((l, r), y)) r0 r1
 
-    -- get (extra test)
+    -- read (extra test)
     for_ [0 .. n - 1] $ \i -> do
-      expected <- getStn seg0 i
-      (@?= expected) =<< ST.get seg1 i
+      expected <- readStn seg0 i
+      (@?= expected) =<< ST.read seg1 i
 
 -- TODO: verify yosupo
 

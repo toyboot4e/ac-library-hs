@@ -26,8 +26,8 @@ module AtCoder.LazySegTree
     LazySegTree (..),
     new,
     build,
-    set,
-    get,
+    write,
+    read,
     prod,
     allProd,
     applyAt,
@@ -47,6 +47,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
+import Prelude hiding (read)
 
 -- | Haskell reprentation of the above properties.
 class (Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => SegAct f a where
@@ -111,9 +112,9 @@ build vs = do
 --
 -- = Complexity
 -- - \(O(\log n)\)
-set :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> a -> m ()
-set self@LazySegTree {..} p x = do
-  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.set" p nLst
+write :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> a -> m ()
+write self@LazySegTree {..} p x = do
+  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.write" p nLst
   let p' = p + sizeLst
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
     push self $ p' .>>. i
@@ -128,9 +129,9 @@ set self@LazySegTree {..} p x = do
 --
 -- = Complexity
 -- - \(O(\log n)\)
-get :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> m a
-get self@LazySegTree {..} p = do
-  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.get" p nLst
+read :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> m a
+read self@LazySegTree {..} p = do
+  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.read" p nLst
   let p' = p + sizeLst
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
     push self $ p' .>>. i

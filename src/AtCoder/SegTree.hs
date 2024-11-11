@@ -24,8 +24,8 @@ module AtCoder.SegTree
   ( SegTree (..),
     new,
     build,
-    set,
-    get,
+    write,
+    read,
     prod,
     allProd,
     maxRight,
@@ -42,6 +42,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
+import Prelude hiding (read)
 
 data SegTree s a = SegTree
   { -- | Valid length.
@@ -83,16 +84,16 @@ build vs = do
     update segtree i
   return segtree
 
--- | Sets \(p\)-th value of the array to \(x\).
+-- | Writes \(p\)-th value of the array to \(x\).
 --
 -- = Constraints
 -- - \(0 \leq p \lt n\)
 --
 -- = Complexity
 -- - \(O(1)\)
-set :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m ()
-set self@SegTree {..} p x = do
-  let !_ = ACIA.checkIndex "AtCoder.SegTree.set" p nSt
+write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m ()
+write self@SegTree {..} p x = do
+  let !_ = ACIA.checkIndex "AtCoder.SegTree.write" p nSt
   VGM.write dSt (p + sizeSt) x
   for_ [1 .. logSt] $ \i -> do
     update self ((p + sizeSt) .>>. i)
@@ -104,9 +105,9 @@ set self@SegTree {..} p x = do
 --
 -- = Complexity
 -- - \(O(\log n)\)
-get :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m a
-get SegTree {..} p = do
-  let !_ = ACIA.checkIndex "AtCoder.SegTree.get" p nSt
+read :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m a
+read SegTree {..} p = do
+  let !_ = ACIA.checkIndex "AtCoder.SegTree.read" p nSt
   VGM.read dSt $ p + sizeSt
 
 -- | Returns @a[l] <> ... <> a[r - 1]@, assuming the properties of the monoid. It returns `mempty`

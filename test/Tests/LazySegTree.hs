@@ -40,8 +40,8 @@ spec_invalid = testSpec "invalid" $ do
   it "throws error" $ LST.new @(Sum Int) @(Max Int) (-1) `shouldThrow` anyException
   s <- runIO $ LST.new @(Sum Int) @(Max Int) 10
 
-  it "throws error" $ LST.get s (-1) `shouldThrow` anyException
-  it "throws error" $ LST.get s 10 `shouldThrow` anyException
+  it "throws error" $ LST.read s (-1) `shouldThrow` anyException
+  it "throws error" $ LST.read s 10 `shouldThrow` anyException
 
   it "throws error" $ LST.prod s (-1) (-1) `shouldThrow` anyException
   it "throws error" $ LST.prod s 3 2 `shouldThrow` anyException
@@ -57,7 +57,7 @@ unit_naiveProd = testCase "naiveProd" $ do
     p <- VUM.replicate n mempty
     for_ [0 .. n - 1] $ \i -> do
       VGM.write p i . Max $ (i * i + 100) `mod` 31
-      LST.set seg i =<< VGM.read p i
+      LST.write seg i =<< VGM.read p i
 
     p' <- VU.unsafeFreeze p
     for_ [0 .. n] $ \l -> do
@@ -65,9 +65,9 @@ unit_naiveProd = testCase "naiveProd" $ do
         let expected = VU.foldl' (<>) mempty $ VU.slice l (r - l) p'
         (@?= expected) =<< LST.prod seg l r
 
-    -- get (extra test)
+    -- read (extra test)
     for_ [0 .. n - 1] $ \i -> do
-      (@?= p' VG.! i) =<< LST.get seg i
+      (@?= p' VG.! i) =<< LST.read seg i
 
 unit_usage :: TestTree
 unit_usage = testCase "usage" $ do

@@ -16,11 +16,11 @@ main = do
   -- seg <- ST.build xs
   seg <- ST.new n
   VU.iforM_ xs $ \i x -> do
-    ST.set seg i x
+    ST.write seg i x
 
   res <- (`VU.mapMaybeM` qs) $ \case
     (1, pred -> !x, !v) -> do
-      ST.set seg x $ Max v
+      ST.write seg x $ Max v
       return Nothing
     (2, pred -> !l, !r) -> do
       Just . getMax <$> ST.prod seg l r
