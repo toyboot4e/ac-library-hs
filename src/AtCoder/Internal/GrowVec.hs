@@ -21,6 +21,7 @@ import Data.Primitive.MutVar (MutVar, newMutVar, readMutVar, writeMutVar)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import GHC.Stack (HasCallStack)
 import Prelude hiding (length, null, read)
 
 -- | Growable vector with some runtime overhead.
@@ -46,9 +47,9 @@ build xs = do
 
 -- TODO: reserve
 
-read :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> m a
 -- | \(O(1)\) Yields the element at the given position. Will throw an exception if the index is out
 -- of range.
+read :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> m a
 read GrowVec {..} i = do
   vec <- readMutVar vecGV
   VGM.read vec i

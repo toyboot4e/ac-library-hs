@@ -10,6 +10,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Base qualified as VU -- V_2
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import GHC.Stack (HasCallStack)
 
 -- | Comperssed Sparse Row.
 data Csr e = Csr
@@ -17,8 +18,8 @@ data Csr e = Csr
     elistCsr :: !(VU.Vector e)
   }
 
-build :: (VU.Unbox e) => Int -> VU.Vector (Int, e) -> Csr e
 -- | \(O(n + m)\) Creates `Csr`.
+build :: (HasCallStack, VU.Unbox e) => Int -> VU.Vector (Int, e) -> Csr e
 build n edges = runST $ do
   start <- VUM.replicate (n + 1) (0 :: Int)
 
@@ -42,8 +43,8 @@ build n edges = runST $ do
   elistCsr <- VU.unsafeFreeze elist
   return Csr {..}
 
-adj :: (VU.Unbox e) => Csr e -> Int -> VU.Vector e
 -- | \(O(1)\) Returns adjacent vertices.
+adj :: (HasCallStack, VU.Unbox e) => Csr e -> Int -> VU.Vector e
 adj Csr {..} i =
   let il = startCsr VG.! i
       ir = startCsr VG.! (i + 1)
