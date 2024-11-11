@@ -67,7 +67,7 @@ addEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGrap
 addEdge MfGraph {..} from to cap = do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdge" "`from` vertex" from "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdge" "`to` vertex" to "the number of vertices" nG
-  let !_ = ACIA.runtimeAssert (0 <= cap) "AtCoder.MaxFlow.addEdge: given invalid `capacity` less than `0`" -- not `Show cap`
+  let !_ = ACIA.runtimeAssert (0 <= cap) "AtCoder.MaxFlow.addEdge: given invalid edge `cap` less than `0`" -- not `Show cap`
   m <- ACIGV.length posG
   iEdge <- ACIGV.length (gG VG.! from)
   ACIGV.pushBack posG (from, iEdge)

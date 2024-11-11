@@ -35,8 +35,8 @@ newStn nStn = do
 setStn :: (VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> a -> m ()
 setStn SegTreeNaive {..} = VGM.write dStn
 
--- getStn :: (VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> m a
--- getStn SegTreeNaive {..} = VGM.read dStn
+getStn :: (VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> m a
+getStn SegTreeNaive {..} = VGM.read dStn
 
 prodStn :: (Monoid a, VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> Int -> m a
 prodStn SegTreeNaive {..} l r = do
@@ -182,6 +182,11 @@ unit_compareNaive = testCase "compareNaive" $ do
         r0 <- minLeftStn seg0 r p
         r1 <- ST.minLeft seg1 r p
         assertEqual (show ((l, r), y)) r0 r1
+
+    -- get (extra test)
+    for_ [0 .. n - 1] $ \i -> do
+      expected <- getStn seg0 i
+      (@?= expected) =<< ST.get seg1 i
 
 -- TODO: verify yosupo
 

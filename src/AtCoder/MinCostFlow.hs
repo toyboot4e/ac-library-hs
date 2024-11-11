@@ -29,18 +29,40 @@ data McfGraph s cap cost = McfGraph
     edgesG :: !(ACIGV.GrowVec s (Int, Int, cap, cap, cost))
   }
 
--- | \(O(n)\) `McfGraph` with initial edge storage size `0`.
+-- | Creates a directed graph with \(n\) vertices and \(0\) edges. `Cap` and `Cost` are the type of
+-- the capacity and the cost, respectively.
+--
+-- = Constraints
+-- - \(0 \leq n\)
+--
+-- = Complexity
+-- - \(O(n)\)
 new :: (VU.Unbox cap, VU.Unbox cost, PrimMonad m) => Int -> m (McfGraph (PrimState m) cap cost)
 new nG = do
   new' nG 0
 
--- | \(O(n + e)\)
+-- | Creates a directed graph with \(n\) vertices with initial edge capacity \(m\). `Cap` and
+-- `Cost` are the type of the capacity and the cost, respectively.
+--
+-- = Constraints
+-- - \(0 \leq n\)
+--
+-- = Complexity
+-- - \(O(n)\)
 new' :: (VU.Unbox cap, VU.Unbox cost, PrimMonad m) => Int -> Int -> m (McfGraph (PrimState m) cap cost)
 new' nG nEdges = do
   edgesG <- ACIGV.new nEdges
   return McfGraph {..}
 
--- | Amortized \(O(1)\)
+-- | Adds an edge oriented from @from@ to @to@ with capacity @cap@ and cost @cost@. It returns an
+-- integer \(k\) such that this is the \(k\)-th edge that is added.
+--
+-- = Constraints
+-- - \(0 \leq \mathrm{from}, \mathrm{to} \lt n\)
+-- - \(0 \leq \mathrm{cap}, \mathrm{cost}\)
+--
+-- = Complexity
+-- - \(O(1)\) amortized
 addEdge ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
@@ -52,7 +74,7 @@ addEdge ::
 addEdge McfGraph {..} from to cap cost = do
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.addEdge" "`from` vertex" from "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.addEdge" "`to` vertex" to "the number of vertices" nG
-  let !_ = ACIA.runtimeAssert (0 <= cap) "AtCoder.MinCostFlow.addEdge: given invalid edge `capacity` less than `0`"
+  let !_ = ACIA.runtimeAssert (0 <= cap) "AtCoder.MinCostFlow.addEdge: given invalid edge `cap` less than `0`"
   let !_ = ACIA.runtimeAssert (0 <= cost) "AtCoder.MinCostFlow.addEdge: given invalid edge `cost` less than `0`"
   m <- ACIGV.length edgesG
   ACIGV.pushBack edgesG (from, to, cap, 0, cost)
@@ -96,25 +118,38 @@ getEdge McfGraph {..} i = do
   let !_ = ACIA.checkEdge "AtCoder.MinCostFlow.getEdge" i m
   ACIGV.read edgesG i
 
--- | \(O(1)\) Returns a vector of @(from, to, cap, flow, cost)@.
-unsafeFreezeEdges ::
+-- | Returns the current internal state of the edges: @(from, to, cap, flow, cost)@. The edges are
+-- ordered in the same order as added by `addEdge`.
+--
+-- = Complexity
+-- - \(O(m)\), where \(m\) is the number of added edges.
+edges ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
   m (VU.Vector (Int, Int, cap, cap, cost))
-unsafeFreezeEdges McfGraph {..} = do
-  ACIGV.unsafeFreeze edgesG
-
--- | \(O(m)\) Returns a vector of @(from, to, cap, flow, cost)@.
-freezeEdges ::
-  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
-  McfGraph (PrimState m) cap cost ->
-  m (VU.Vector (Int, Int, cap, cap, cost))
-freezeEdges McfGraph {..} = do
+edges McfGraph {..} = do
   ACIGV.freeze edgesG
 
--- | FIXME: \(O(n^2 m)\)
+-- | Returns the current internal state of the edges: @(from, to, cap, flow, cost)@, but without
+-- making copy. The edges are ordered in the same order as added by `addEdge`.
+--
+-- = Complexity
+-- - \(O(1)\)
+unsafeEdges ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
+  McfGraph (PrimState m) cap cost ->
+  m (VU.Vector (Int, Int, cap, cap, cost))
+unsafeEdges McfGraph {..} = do
+  ACIGV.unsafeFreeze edgesG
+
+-- | Augments the flow from \(s\) to \(t\) as much as possible, until reaching the amount of
+-- @flowLimit@. It returns the amount of the flow and the cost.
+--
+-- = Constraints
+--
+-- = Complexity
 flow ::
-  (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Integral cost, Ord cost, Bounded cost, VU.Unbox cost) =>
+  (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
   Int ->
   Int ->
@@ -124,9 +159,30 @@ flow graph s t flowLimit = do
   res <- slope graph s t flowLimit
   return $ VG.last res
 
--- | FIXME: \(O(n^2 m)\)
+-- | Let \(g\) be a function such that \(g(x)\) is the cost of the minimum cost \(s-t\) flow when
+-- the amount of the flow is exactly \(x\). \(g\) is known to be piecewise linear.
+--
+-- - The first element of the list is \((0, 0)\).
+-- - Both of first and second tuple elements are strictly increasing.
+-- - No three changepoints are on the same line.
+-- - (1) The last element of the list is \(x, g(x))\), where \(x\) is the maximum amount of the \(s-t\) flow.
+-- - (2) The last element of the list is \(y, g(y))\), where \(y = \min(x, \mathrm{flow\\_limit})\).
+--
+-- = Constraints
+--
+-- Let \(x\) be the maximum cost among all edges.
+--
+-- - \(s \neq t\)
+-- - \(0 \leq s, t \lt n\)
+-- - You can't call `slope` or `flow` multiple times.
+-- - The total amount of the flow is in `cap`.
+-- - The total cost of the flow is in `cost`.
+-- - (Cost : `Int`): \(0 \leq nx \leq 8 \times 10^{18} + 1000\)
+--
+-- = Complexity
+-- - \(O(F (n + m) \log (n + m))\), where \(F\) is the amount of the flow and \(m\) is the number of added edges.
 slope ::
-  (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Integral cost, Ord cost, Bounded cost, VU.Unbox cost) =>
+  (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
   Int ->
   Int ->
@@ -137,8 +193,8 @@ slope McfGraph {..} s t flowLimit = do
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.slope" "`sink` vertex" t "the number of vertices" nG
   let !_ = ACIA.runtimeAssert (s /= t) "AtCoder.MinCostFlow.slope: `source` and `sink` vertex have to be distict"
 
-  edges@(VU.V_5 _ _ _ caps _ _) <- ACIGV.unsafeFreeze edgesG
-  (!edgeIdx, !g) <- ACIMCSR.build nG edges
+  edges_@(VU.V_5 _ _ _ caps _ _) <- ACIGV.unsafeFreeze edgesG
+  (!edgeIdx, !g) <- ACIMCSR.build nG edges_
   result <- internalSlopeMCF g nG s t flowLimit
 
   (VUM.MV_5 _ _ _ _ flows _) <- readMutVar $ ACIGV.vecGV edgesG
@@ -150,7 +206,7 @@ slope McfGraph {..} s t flowLimit = do
 
 internalSlopeMCF ::
   forall cap cost m.
-  (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Integral cost, Ord cost, Bounded cost, VU.Unbox cost) =>
+  (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
   ACIMCSR.Csr (PrimState m) cap cost ->
   Int ->
   Int ->

@@ -39,7 +39,7 @@ main = do
       MCF.addEdge_ graph (row0 + iRow) (col0 + iCol) (1 :: Int) (big - a)
 
   (!_, !result) <- MCF.flow graph s t (n * k)
-  edges <- MCF.unsafeFreezeEdges graph
+  edges <- MCF.unsafeEdges graph
 
   outGrid <- V.replicateM n (VUM.replicate n '.')
   VU.forM_ edges $ \(!from, !to, !flow, !_, !_) -> do

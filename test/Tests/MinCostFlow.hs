@@ -78,7 +78,8 @@ spec_invalid = testSpec "invalid" $ do
   it "throws error" $ do
     MCF.addEdge g 0 0 0 (-1) `shouldThrow` anyException
 
--- TODO: streee test
+-- TODO: test `edges` and `unsafeEdges`
+-- TODO: stress test
 
 tests :: [TestTree]
 tests =
