@@ -27,7 +27,7 @@ data SegTreeNaive s a = SegTreeNaive
     dStn :: !(VUM.MVector s a)
   }
 
-newStn :: (Monoid a, VU.Unbox a, PrimMonad m) => Int -> m (SegTreeNaive (PrimState m) a)
+newStn :: (PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (SegTreeNaive (PrimState m) a)
 newStn nStn = do
   dStn <- VUM.replicate nStn mempty
   return SegTreeNaive {..}
@@ -103,7 +103,7 @@ instance VU.Unbox Foo
 
 unit_zero :: TestTree
 unit_zero = testCase "zero" $ do
-  s <- ST.new @(Sum Int) 0
+  s <- ST.new @_ @(Sum Int) 0
   (@?= mempty) =<< ST.allProd s
 
   return ()
@@ -111,8 +111,8 @@ unit_zero = testCase "zero" $ do
 spec_invalid :: IO TestTree
 spec_invalid = testSpec "invalid" $ do
   it "throws error" $
-    ST.new @(Sum Int) (-1) `shouldThrow` anyException
-  s <- runIO $ ST.new @(Sum Int) 10
+    ST.new @_ @(Sum Int) (-1) `shouldThrow` anyException
+  s <- runIO $ ST.new @_ @(Sum Int) 10
 
   it "throws error" $ ST.read s (-1) `shouldThrow` anyException
   it "throws error" $ ST.read s 10 `shouldThrow` anyException
@@ -128,7 +128,7 @@ spec_invalid = testSpec "invalid" $ do
 
 unit_one :: TestTree
 unit_one = testCase "one" $ do
-  seg <- ST.new @(Sum Int) 1
+  seg <- ST.new @_ @(Sum Int) 1
   (@?= mempty) =<< ST.allProd seg
   (@?= mempty) =<< ST.read seg 0
   (@?= mempty) =<< ST.prod seg 0 1
@@ -142,8 +142,8 @@ unit_one = testCase "one" $ do
 unit_compareNaive :: TestTree
 unit_compareNaive = testCase "compareNaive" $ do
   for_ [0 .. 30 - 1] $ \n -> do
-    seg0 <- newStn @Foo n
-    seg1 <- ST.new @Foo n
+    seg0 <- newStn @_ @Foo n
+    seg1 <- ST.new @_ @Foo n
     for_ [0 .. n - 1] $ \i -> do
       writeStn seg0 i . Foo . (: []) . chr $ ord 'a' + i
       ST.write seg1 i . Foo . (: []) . chr $ ord 'a' + i

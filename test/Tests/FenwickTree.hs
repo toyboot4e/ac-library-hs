@@ -14,7 +14,7 @@ import Test.Tasty.Hspec
 
 unit_zero :: TestTree
 unit_zero = testCase "zero" $ do
-  ft <- FT.new @Int 0
+  ft <- FT.new @_ @Int 0
   (@?= 0) =<< FT.sum ft 0 0
 
 -- TODO: add modint test
@@ -22,7 +22,7 @@ unit_zero = testCase "zero" $ do
 -- FIXME: it's uint test and not works with Int
 -- overFlowInt :: TestTree
 -- overFlowInt = testCase "overFlowInt" $ do
---   ft <- FT.new @Int 10
+--   ft <- FT.new @_ @Int 10
 --   for_ [0 .. 10 - 1] $ \i -> do
 --     FT.add ft i (bit 63 + i)
 --   for_ [0 .. 10] $ \i -> do
@@ -35,7 +35,7 @@ unit_zero = testCase "zero" $ do
 unit_naive :: TestTree
 unit_naive = testCase "naive" $ do
   for_ [0 .. 50] $ \n -> do
-    ft <- FT.new @Int n
+    ft <- FT.new @_ @Int n
     for_ [0 .. n - 1] $ \i -> do
       FT.add ft i (i * i)
     for_ [0 .. n] $ \l -> do
@@ -49,8 +49,8 @@ unit_naive = testCase "naive" $ do
 spec_invalid :: IO TestTree
 spec_invalid = testSpec "invalid" $ do
   it "throws error" $ do
-    FT.new @Int (-1) `shouldThrow` anyException
-  s <- runIO $ FT.new @Int 10
+    FT.new @_ @Int (-1) `shouldThrow` anyException
+  s <- runIO $ FT.new @_ @Int 10
 
   it "throws error" $ do
     FT.add s (-1) 0 `shouldThrow` anyException

@@ -4,7 +4,7 @@
 --
 -- = Example
 -- >>> import AtCoder.MaxFlow qualified as MF
--- >>> g <- MF.new @Int 3
+-- >>> g <- MF.new @_ @Int 3 -- new @s @cap n
 -- >>> MF.addEdge g 0 1 (2 :: Int)
 -- 0
 -- >>> MF.addEdge g 1 2 1
@@ -61,7 +61,7 @@ data MfGraph s cap = MfGraph
 --
 -- = Complexity
 -- - \(O(n)\)
-new :: (VU.Unbox cap, PrimMonad m) => Int -> m (MfGraph (PrimState m) cap)
+new :: (PrimMonad m, VU.Unbox cap) => Int -> m (MfGraph (PrimState m) cap)
 new nG = do
   gG <- V.replicateM nG (ACIGV.new 0)
   posG <- ACIGV.new 0

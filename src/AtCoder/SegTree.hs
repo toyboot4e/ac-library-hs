@@ -25,7 +25,7 @@
 -- >>> import AtCoder.SegTree qualified as ST
 -- >>> import Data.Monoid (Sum(..))
 -- >>> -- Create an array [0, 3, 0, 2]
--- >>> seg <- ST.new @(Sum Int) 4
+-- >>> seg <- ST.new @_ @(Sum Int) 4
 -- >>> ST.write seg 1 $ Sum 3
 -- >>> ST.write seg 3 $ Sum 2
 -- >>> -- Use read methods
@@ -81,7 +81,7 @@ data SegTree s a = SegTree
 --
 -- = Complexity
 -- - \(O(n)\)
-new :: (HasCallStack, Monoid a, VU.Unbox a, PrimMonad m) => Int -> m (SegTree (PrimState m) a)
+new :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (SegTree (PrimState m) a)
 new nSt
   | nSt >= 0 = build $ VU.replicate nSt mempty
   | otherwise = error $ "new: given negative size (`" ++ show nSt ++ "`)"
@@ -90,7 +90,7 @@ new nSt
 --
 -- = Complexity
 -- - \(O(n)\)
-build :: (Monoid a, VU.Unbox a, PrimMonad m) => VU.Vector a -> m (SegTree (PrimState m) a)
+build :: (PrimMonad m, Monoid a, VU.Unbox a) => VU.Vector a -> m (SegTree (PrimState m) a)
 build vs = do
   let nSt = VU.length vs
   let sizeSt = ACIBIT.bitCeil nSt

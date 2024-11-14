@@ -12,8 +12,8 @@ import Test.Tasty.Hspec
 
 unit_zero :: TestTree
 unit_zero = testCase "zero" $ do
-  _ <- MF.new @Int 0
-  _ <- MF.new @Double 0
+  _ <- MF.new @_ @Int 0
+  _ <- MF.new @_ @Double 0
   return ()
 
 -- Assign is skipped
@@ -123,7 +123,7 @@ unit_selfLoop = testCase "selfLoop" $ do
 
 spec_invalidFlow :: IO TestTree
 spec_invalidFlow = testSpec "invalidFlow" $ do
-  g <- runIO $ MF.new @Int 2
+  g <- runIO $ MF.new @_ @Int 2
   it "throws error" $ do
     MF.flow g 0 0 0 `shouldThrow` anyException
 

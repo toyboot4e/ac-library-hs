@@ -79,7 +79,7 @@ data LazySegTree s f a = LazySegTree
 --
 -- = Complexity
 -- - \(O(n)\)
-new :: (HasCallStack, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a, PrimMonad m) => Int -> m (LazySegTree (PrimState m) f a)
+new :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Int -> m (LazySegTree (PrimState m) f a)
 new nLst
   | nLst >= 0 = build $ VU.replicate nLst mempty
   | otherwise = error $ "new: given negative size `" ++ show nLst ++ "`"
@@ -91,7 +91,7 @@ new nLst
 --
 -- = Complexity
 -- - \(O(n)\)
-build :: (Monoid f, VU.Unbox f, Monoid a, VU.Unbox a, PrimMonad m) => VU.Vector a -> m (LazySegTree (PrimState m) f a)
+build :: (PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => VU.Vector a -> m (LazySegTree (PrimState m) f a)
 build vs = do
   let nLst = VU.length vs
   let sizeLst = ACIBIT.bitCeil nLst

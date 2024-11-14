@@ -4,7 +4,7 @@
 --
 -- = Examples
 -- >>> import AtCoder.MinCostFlow qualified as MCF
--- >>> g <- MCF.new {- capacity-} @Int @Int 4
+-- >>> g <- MCF.new @_ @Int @Int 4 -- new @s @cap @cost n
 -- >>> MCF.addEdge g 0 1 2 3 -- addEdge g from to cap cost
 -- 0
 -- >>> MCF.addEdge g 1 2 2 5
@@ -60,7 +60,7 @@ data McfGraph s cap cost = McfGraph
 --
 -- = Complexity
 -- - \(O(n)\)
-new :: (VU.Unbox cap, VU.Unbox cost, PrimMonad m) => Int -> m (McfGraph (PrimState m) cap cost)
+new :: (PrimMonad m, VU.Unbox cap, VU.Unbox cost) => Int -> m (McfGraph (PrimState m) cap cost)
 new nG = do
   edgesG <- ACIGV.new 0
   return McfGraph {..}

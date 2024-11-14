@@ -8,7 +8,7 @@
 -- = Example
 --
 -- >>> import AtCoder.FenwickTree qualified as FT
--- >>> ft <- FT.new @Int 4
+-- >>> ft <- FT.new @_ @Int 4
 -- >>> FT.nFt ft
 -- 4
 -- >>> FT.add ft 0 3
@@ -20,7 +20,7 @@
 --
 -- >>> import AtCoder.FenwickTree qualified as FT
 -- >>> import Data.Vector.Unboxed qualified as VU
--- >>> ft <- FT.build @Int $ VU.fromList [3, 0, 3, 0]
+-- >>> ft <- FT.build @_ @Int $ VU.fromList [3, 0, 3, 0]
 -- >>> FT.add ft 1 2
 -- >>> FT.sum ft 0 3
 -- 8
@@ -51,8 +51,9 @@ data FenwickTree s a = FenwickTree
 -- = Constraints
 -- - \(0 \leq n\)
 --
+-- - \(O(n)\)
 -- = Complexity
-new :: (HasCallStack, Num a, VU.Unbox a, PrimMonad m) => Int -> m (FenwickTree (PrimState m) a)
+new :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => Int -> m (FenwickTree (PrimState m) a)
 new nFt
   | nFt >= 0 = do
       dataFt <- VUM.replicate nFt 0
@@ -63,7 +64,7 @@ new nFt
 --
 -- = Complexity
 -- - \(O(n)\)
-build :: (Num a, VU.Unbox a, PrimMonad m) => VU.Vector a -> m (FenwickTree (PrimState m) a)
+build :: (PrimMonad m, Num a, VU.Unbox a) => VU.Vector a -> m (FenwickTree (PrimState m) a)
 build xs = do
   ft <- new $ VU.length xs
   VU.iforM_ xs $ add ft

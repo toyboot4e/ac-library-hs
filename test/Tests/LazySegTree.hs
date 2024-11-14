@@ -27,18 +27,18 @@ instance LST.SegAct (Sum Int) (Max Int) where
 unit_zero :: TestTree
 unit_zero = testCase "zero" $ do
   do
-    s <- LST.new @(Sum Int) @(Max Int) 0
+    s <- LST.new @_ @(Sum Int) @(Max Int) 0
     (@?= mempty) =<< LST.allProd s
   do
-    s <- LST.new @(Sum Int) @(Max Int) 10
+    s <- LST.new @_ @(Sum Int) @(Max Int) 10
     (@?= mempty) =<< LST.allProd s
 
 -- assign
 
 spec_invalid :: IO TestTree
 spec_invalid = testSpec "invalid" $ do
-  it "throws error" $ LST.new @(Sum Int) @(Max Int) (-1) `shouldThrow` anyException
-  s <- runIO $ LST.new @(Sum Int) @(Max Int) 10
+  it "throws error" $ LST.new @_ @(Sum Int) @(Max Int) (-1) `shouldThrow` anyException
+  s <- runIO $ LST.new @_ @(Sum Int) @(Max Int) 10
 
   it "throws error" $ LST.read s (-1) `shouldThrow` anyException
   it "throws error" $ LST.read s 10 `shouldThrow` anyException
@@ -53,7 +53,7 @@ spec_invalid = testSpec "invalid" $ do
 unit_naiveProd :: TestTree
 unit_naiveProd = testCase "naiveProd" $ do
   for_ [0 .. 50] $ \n -> do
-    seg <- LST.new @(Sum Int) @(Max Int) n
+    seg <- LST.new @_ @(Sum Int) @(Max Int) n
     p <- VUM.replicate n mempty
     for_ [0 .. n - 1] $ \i -> do
       VGM.write p i . Max $ (i * i + 100) `mod` 31
@@ -71,7 +71,7 @@ unit_naiveProd = testCase "naiveProd" $ do
 
 unit_usage :: TestTree
 unit_usage = testCase "usage" $ do
-  seg <- LST.build @(Sum Int) $ VU.replicate 10 (Max (0 :: Int))
+  seg <- LST.build @_ @(Sum Int) $ VU.replicate 10 (Max (0 :: Int))
   (@?= Max 0) =<< LST.allProd seg
   LST.applyIn seg 0 3 $ Sum 5
   (@?= Max 5) =<< LST.allProd seg
