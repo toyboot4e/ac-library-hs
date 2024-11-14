@@ -1,7 +1,18 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | It solves [Minimum-cost flow problem](https://en.wikipedia.org/wiki/Minimum-cost_flow_problem).
-module AtCoder.MinCostFlow (McfGraph, new, new', addEdge, addEdge_, getEdge, edges, unsafeEdges, flow, slope) where
+module AtCoder.MinCostFlow
+  ( McfGraph (nG),
+    new,
+    addEdge,
+    addEdge_,
+    getEdge,
+    edges,
+    unsafeEdges,
+    flow,
+    slope,
+  )
+where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Buffer qualified as ACIB
@@ -39,19 +50,7 @@ data McfGraph s cap cost = McfGraph
 -- - \(O(n)\)
 new :: (VU.Unbox cap, VU.Unbox cost, PrimMonad m) => Int -> m (McfGraph (PrimState m) cap cost)
 new nG = do
-  new' nG 0
-
--- | Creates a directed graph with \(n\) vertices with initial edge capacity \(m\). `Cap` and
--- `Cost` are the type of the capacity and the cost, respectively.
---
--- = Constraints
--- - \(0 \leq n\)
---
--- = Complexity
--- - \(O(n)\)
-new' :: (VU.Unbox cap, VU.Unbox cost, PrimMonad m) => Int -> Int -> m (McfGraph (PrimState m) cap cost)
-new' nG nEdges = do
-  edgesG <- ACIGV.new nEdges
+  edgesG <- ACIGV.new 0
   return McfGraph {..}
 
 -- | Adds an edge oriented from @from@ to @to@ with capacity @cap@ and cost @cost@. It returns an
@@ -146,8 +145,10 @@ unsafeEdges McfGraph {..} = do
 -- @flowLimit@. It returns the amount of the flow and the cost.
 --
 -- = Constraints
+-- - Same as `slope`.
 --
 -- = Complexity
+-- - Same as `slope`.
 flow ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->

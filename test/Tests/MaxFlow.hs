@@ -28,7 +28,7 @@ unit_simple = testCase "simple" $ do
   (@?= 4) =<< MF.addEdge g 1 2 1
 
   -- TODO: combine the builder and the graph
-  (@?= 2) =<< MF.flow g 0 3
+  (@?= 2) =<< MF.flow g 0 3 maxBound
 
   (@?= (0, 1, 1, 1)) =<< MF.getEdge g 0
   (@?= (0, 2, 1, 1)) =<< MF.getEdge g 1
@@ -49,7 +49,7 @@ unit_notSimple = testCase "notSimple" $ do
   (@?= 5) =<< MF.addEdge g 0 0 6
   (@?= 6) =<< MF.addEdge g 1 1 7
 
-  (@?= 15) =<< MF.flow g 0 1
+  (@?= 15) =<< MF.flow g 0 1 maxBound
 
   (@?= (0, 1, 1, 1)) =<< MF.getEdge g 0
   (@?= (0, 1, 2, 2)) =<< MF.getEdge g 1
@@ -64,7 +64,7 @@ unit_minCut = testCase "minCut" $ do
   g <- MF.new 3
   (@?= 0) =<< MF.addEdge g 0 1 (2 :: Int)
   (@?= 1) =<< MF.addEdge g 1 2 1
-  (@?= 1) =<< MF.flow g 0 2
+  (@?= 1) =<< MF.flow g 0 2 maxBound
 
   (@?= (0, 1, 2, 1)) =<< MF.getEdge g 0
   (@?= (1, 2, 1, 1)) =<< MF.getEdge g 1
@@ -78,7 +78,7 @@ unit_twice = testCase "twice" $ do
   (@?= 1) =<< MF.addEdge g 0 2 1
   (@?= 2) =<< MF.addEdge g 1 2 1
 
-  (@?= 2) =<< MF.flow g 0 2
+  (@?= 2) =<< MF.flow g 0 2 maxBound
 
   (@?= (0, 1, 1, 1)) =<< MF.getEdge g 0
   (@?= (0, 2, 1, 1)) =<< MF.getEdge g 1
@@ -87,14 +87,14 @@ unit_twice = testCase "twice" $ do
   MF.changeEdge g 0 100 10
   (@?= (0, 1, 100, 10)) =<< MF.getEdge g 0
 
-  (@?= 0) =<< MF.flow g 0 2
-  (@?= 90) =<< MF.flow g 0 1
+  (@?= 0) =<< MF.flow g 0 2 maxBound
+  (@?= 90) =<< MF.flow g 0 1 maxBound
 
   (@?= (0, 1, 100, 100)) =<< MF.getEdge g 0
   (@?= (0, 2, 1, 1)) =<< MF.getEdge g 1
   (@?= (1, 2, 1, 1)) =<< MF.getEdge g 2
 
-  (@?= 2) =<< MF.flow g 2 0
+  (@?= 2) =<< MF.flow g 2 0 maxBound
 
   (@?= (0, 1, 100, 99)) =<< MF.getEdge g 0
   (@?= (0, 2, 1, 0)) =<< MF.getEdge g 1
@@ -107,7 +107,7 @@ unit_maxFlowBound = testCase "maxFlowBound" $ do
   (@?= 1) =<< MF.addEdge g 1 0 maxBound
   (@?= 2) =<< MF.addEdge g 0 2 maxBound
 
-  (@?= maxBound) =<< MF.flow g 0 2
+  (@?= maxBound) =<< MF.flow g 0 2 maxBound
 
   (@?= (0, 1, maxBound, 0)) =<< MF.getEdge g 0
   (@?= (1, 0, maxBound, 0)) =<< MF.getEdge g 1
@@ -125,9 +125,7 @@ spec_invalidFlow :: IO TestTree
 spec_invalidFlow = testSpec "invalidFlow" $ do
   g <- runIO $ MF.new @Int 2
   it "throws error" $ do
-    MF.flow g 0 0 `shouldThrow` anyException
-  it "throws error" $ do
-    MF.flow' g 0 0 0 `shouldThrow` anyException
+    MF.flow g 0 0 0 `shouldThrow` anyException
 
 -- TODO: stress test
 

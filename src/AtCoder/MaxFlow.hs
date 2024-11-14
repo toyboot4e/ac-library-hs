@@ -1,7 +1,18 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | It solves [maximum flow problem](https://en.wikipedia.org/wiki/Maximum_flow_problem).
-module AtCoder.MaxFlow (MfGraph, new, new', addEdge, addEdge_, getEdge, edges, changeEdge, flow, flow', minCut) where
+module AtCoder.MaxFlow
+  ( MfGraph (nG),
+    new,
+    addEdge,
+    addEdge_,
+    getEdge,
+    edges,
+    changeEdge,
+    flow,
+    minCut,
+  )
+where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.GrowVec qualified as ACIGV
@@ -10,7 +21,7 @@ import Control.Monad (unless, when)
 import Control.Monad.Extra (whenJustM)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
-import Data.Bit (Bit(..))
+import Data.Bit (Bit (..))
 import Data.Primitive.MutVar (readMutVar)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
@@ -38,20 +49,8 @@ data MfGraph s cap = MfGraph
 -- - \(O(n)\)
 new :: (VU.Unbox cap, PrimMonad m) => Int -> m (MfGraph (PrimState m) cap)
 new nG = do
-  new' nG 0
-
--- | \(O(n + m)\) Creates a graph of @n@ vertices and initial edge capacity @m@. `cap` is the type
--- of the capacity.
---
--- = Constraints
--- - \(0 \leq n\)
---
--- = Complexity
--- - \(O(n)\)
-new' :: (VU.Unbox cap, PrimMonad m) => Int -> Int -> m (MfGraph (PrimState m) cap)
-new' nG nEdges = do
   gG <- V.replicateM nG (ACIGV.new 0)
-  posG <- ACIGV.new nEdges
+  posG <- ACIGV.new 0
   return MfGraph {..}
 
 -- | Adds an edge oriented from the vertex @from@ to the vertex @to@ with the capacity @cap@ and the
@@ -158,21 +157,6 @@ edges g@MfGraph {posG} = do
   -- TODO: rewrite
   VU.generateM len (getEdge g)
 
--- | Augments the flow from \(s\) to \(t\) as much as possible. It returns the amount of the flow
--- augmented. You may call it multiple times.
---
--- = Constraints
--- - \(s \neq t\)
--- - \(0 \leq s, t \lt n\)
---
--- = Complexity
--- - \(O((n + m) \sqrt{m})\) (if all the capacities are \(1\)),
--- - \(O(n^2 m)\) (general), or
--- - \(O(F(n + m))\), where \(F\) is the returned value
-flow :: (HasCallStack, Show cap, PrimMonad m, Bounded cap, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> m cap
-flow gr s t = do
-  flow' gr s t maxBound
-
 -- | Augments the flow from \(s\) to \(t\) as much as possible, until reaching the amount of
 -- @flowLimit@. It returns the amount of the flow augmented. You may call it multiple times.
 --
@@ -184,11 +168,11 @@ flow gr s t = do
 -- - \(O((n + m) \sqrt{m})\) (if all the capacities are \(1\)),
 -- - \(O(n^2 m)\) (general), or
 -- - \(O(F(n + m))\), where \(F\) is the returned value
-flow' :: (HasCallStack, Show cap, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m cap
-flow' MfGraph {..} s t flowLimit = do
-  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow'" "`source` vertex" s "the number of vertices" nG
-  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow'" "`sink` vertex" t "the number of vertices" nG
-  let !_ = ACIA.runtimeAssert (s /= t) $ "AtCoder.MaxFlow.flow': `source` and `sink` vertex have to be distinct: `" ++ show s ++ "`"
+flow :: (HasCallStack, Show cap, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m cap
+flow MfGraph {..} s t flowLimit = do
+  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`source` vertex" s "the number of vertices" nG
+  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`sink` vertex" t "the number of vertices" nG
+  let !_ = ACIA.runtimeAssert (s /= t) $ "AtCoder.MaxFlow.flow: `source` and `sink` vertex have to be distinct: `" ++ show s ++ "`"
 
   level <- VUM.unsafeNew nG
   que <- ACIQ.new nG

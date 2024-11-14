@@ -24,8 +24,7 @@ unit_simple = testCase "simple" $ do
   (@?= 4) =<< MCF.addEdge g 1 2 (1 :: Int) (1 :: Int)
 
   let expected = VU.fromListN 2 [(0, 0), (2, 4)]
-  res <- MCF.slope g 0 3 10
-  res @?= expected
+  (@?= expected) =<< MCF.slope g 0 3 10
 
   ((0, 1, 1, 1, 1) @?=) =<< MCF.getEdge g 0
   ((0, 2, 1, 1, 1) @?=) =<< MCF.getEdge g 1
