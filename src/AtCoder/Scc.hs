@@ -2,10 +2,14 @@
 --
 -- = Example
 -- >>> import AtCoder.Scc qualified as Scc
--- >>> gr <- Scc.new 4
+-- >>> gr <- Scc.new 4     -- 0    1    2    3
 -- >>> Scc.nScc gr
 -- 4
--- >>> Scc.addEdge gr 0 1
+-- >>> Scc.addEdge gr 0 1  -- 0 -> 1    2    3
+-- >>> Scc.addEdge gr 1 0  -- 0 == 1    2    3
+-- >>> Scc.addEdge gr 1 2  -- 0 == 1 -> 2    3
+-- >>> Scc.scc gr
+-- [[3],[0,1],[2]]
 module AtCoder.Scc (SccGraph, nScc, new, addEdge, scc) where
 
 import AtCoder.Internal.Assert qualified as ACIA

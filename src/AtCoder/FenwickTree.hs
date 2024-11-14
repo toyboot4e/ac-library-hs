@@ -8,13 +8,13 @@
 -- = Example
 --
 -- >>> import AtCoder.FenwickTree qualified as FT
--- >>> ft <- FT.new @_ @Int 4
+-- >>> ft <- FT.new @_ @Int 4 -- [0, 0, 0, 0]
 -- >>> FT.nFt ft
 -- 4
--- >>> FT.add ft 0 3
+-- >>> FT.add ft 0 3          -- [3, 0, 0, 0]
 -- >>> FT.sum ft 0 3
 -- 3
--- >>> FT.add ft 2 3
+-- >>> FT.add ft 2 3          -- [3, 0, 3, 0]
 -- >>> FT.sum ft 0 3
 -- 6
 --

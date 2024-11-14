@@ -1,12 +1,5 @@
 import AtCoder.MaxFlow qualified as MF
-import Control.Monad (unless, when)
-import Data.ByteString.Builder qualified as BSB
-import Data.ByteString.Char8 qualified as BS
-import Data.Foldable
-import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as VU
-import Data.Vector.Generic qualified as VG
-import Data.Vector.Generic.Mutable qualified as VGM
 import Util
 
 -- verification-helper: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A
@@ -18,5 +11,5 @@ main = do
   graph <- MF.new v
   VU.forM_ edges $ \(!u, !v, !c) -> do
     MF.addEdge_ graph u v c
-  res <- MF.flow graph 0 (v - 1)
+  res <- MF.flow graph 0 (v - 1) maxBound
   print res
