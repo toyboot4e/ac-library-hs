@@ -9,6 +9,8 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
 import System.IO (stdout)
 
+-- TODO: use MonadState, add INLINE
+
 -- | Failable parser.
 type Parser = StateT BS.ByteString Maybe
 
@@ -20,14 +22,14 @@ int2P :: Parser (Int, Int)
 int2P = do
   x1 <- intP
   x2 <- intP
-  return (x1, x2)
+  pure (x1, x2)
 
 int3P :: Parser (Int, Int, Int)
 int3P = do
   x1 <- intP
   x2 <- intP
   x3 <- intP
-  return (x1, x2, x3)
+  pure (x1, x2, x3)
 
 int4P :: Parser (Int, Int, Int, Int)
 int4P = do
@@ -35,7 +37,7 @@ int4P = do
   x2 <- intP
   x3 <- intP
   x4 <- intP
-  return (x1, x2, x3, x4)
+  pure (x1, x2, x3, x4)
 
 -- * Line getter
 

@@ -46,7 +46,7 @@ new :: (PrimMonad m) => Int -> m (TwoSat (PrimState m))
 new nTs = do
   answerTs <- VUM.unsafeNew nTs
   sccTs <- ACISCC.new $ 2 * nTs
-  return TwoSat {..}
+  pure TwoSat {..}
 
 -- | Adds a clause \((x_i = f) \lor (x_j = g)\).
 --
@@ -75,8 +75,8 @@ satisfiable :: (PrimMonad m) => TwoSat (PrimState m) -> m Bool
 satisfiable TwoSat {..} = do
   (!_, !ids) <- ACISCC.sccIds sccTs
   let inner i
-        | i >= nTs = return True
-        | ids VG.! (2 * i) == ids VG.! (2 * i + 1) = return False
+        | i >= nTs = pure True
+        | ids VG.! (2 * i) == ids VG.! (2 * i + 1) = pure False
         | otherwise = do
             VGM.write answerTs i . Bit $ ids VG.! (2 * i) < ids VG.! (2 * i + 1)
             inner (i + 1)

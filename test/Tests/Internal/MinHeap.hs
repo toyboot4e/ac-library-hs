@@ -20,7 +20,7 @@ prop_ordered =
               forM_ xs (ACIMH.push heap)
               replicateM n (fromJust <$> ACIMH.pop heap)
         let expected = L.sort xs
-        return . QC.counterexample (show xs) $ result QC.=== expected
+        pure . QC.counterexample (show xs) $ result QC.=== expected
     ]
 
 tests :: [TestTree]

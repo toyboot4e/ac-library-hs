@@ -14,7 +14,7 @@ unit_zero :: TestTree
 unit_zero = testCase "zero" $ do
   _ <- MF.new @_ @Int 0
   _ <- MF.new @_ @Double 0
-  return ()
+  pure ()
 
 -- Assign is skipped
 

@@ -12,7 +12,7 @@ import Test.Tasty.Hspec
 unit_zero :: TestTree
 unit_zero = testCase "zero" $ do
   _g <- MCF.new @_ @Int @Int 0
-  return ()
+  pure ()
 
 unit_simple :: TestTree
 unit_simple = testCase "simple" $ do

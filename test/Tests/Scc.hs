@@ -15,7 +15,7 @@ unit_empty :: TestTree
 unit_empty = testCase "empty" $ do
   graph0 <- Scc.new 0
   (@?= V.empty) =<< Scc.scc graph0
-  return ()
+  pure ()
 
 -- assign
 

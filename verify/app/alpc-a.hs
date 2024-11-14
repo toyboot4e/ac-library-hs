@@ -14,10 +14,10 @@ main = do
   res <- (`VU.mapMaybeM` tuvs) $ \case
     (0, !u, !v) -> do
       Dsu.merge_ dsu u v
-      return Nothing
+      pure Nothing
     (1, !u, !v) -> do
       b <- Dsu.same dsu u v
-      return . Just $ if b then 1 else 0
+      pure . Just $ if b then 1 else 0
     _ -> error "unreachable"
 
   printBSB $ unlinesBSB res

@@ -36,7 +36,7 @@ new :: (VU.Unbox a, PrimMonad m) => Int -> m (Heap (PrimState m) a)
 new n = do
   sizeBH_ <- VUM.replicate 1 0
   dataBH <- VUM.unsafeNew n
-  return Heap {..}
+  pure Heap {..}
 
 -- | \(O(1)\) Returns the number of elements the heap can hold.
 capacity :: (VU.Unbox a) => Heap s a -> Int
@@ -73,7 +73,7 @@ peek :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
 peek heap = do
   isNull <- null heap
   if isNull
-    then return Nothing
+    then pure Nothing
     else Just <$> VGM.read (dataBH heap) 0
 
 -- | \(O(\log n)\) Removes the last element from the heap and returns it, or `Nothing` if it is
@@ -82,7 +82,7 @@ pop :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a ->
 pop heap@Heap {..} = do
   len <- length heap
   if len == 0
-    then return Nothing
+    then pure Nothing
     else do
       let n = len - 1
       VGM.unsafeWrite sizeBH_ 0 n
@@ -113,4 +113,4 @@ pop heap@Heap {..} = do
                   siftDown il
 
       siftDown 0
-      return $ Just root
+      pure $ Just root

@@ -41,7 +41,7 @@ build n edges = runST $ do
 
   startCsr <- VU.unsafeFreeze start
   elistCsr <- VU.unsafeFreeze elist
-  return Csr {..}
+  pure Csr {..}
 
 -- | \(O(1)\) Returns adjacent vertices.
 adj :: (HasCallStack, VU.Unbox e) => Csr e -> Int -> VU.Vector e

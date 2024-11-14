@@ -39,7 +39,7 @@ main = do
           when (0 <= y' && y' < h && 0 <= x' && x' < w && BS.index (grid VG.! y') x' == '.') $ do
             let v' = w * y' + x'
             MF.addEdge_ graph v v' (1 :: Int)
-          return ()
+          pure ()
 
   maxFlow <- MF.flow graph s t
   printBSB $ BSB.intDec maxFlow

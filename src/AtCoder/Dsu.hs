@@ -68,7 +68,7 @@ new :: (PrimMonad m) => Int -> m (Dsu (PrimState m))
 new nDsu
   | nDsu >= 0 = do
       parentOrSizeDsu <- VUM.replicate nDsu (-1)
-      return Dsu {..}
+      pure Dsu {..}
   | otherwise = error $ "new: given negative size (`" ++ show nDsu ++ "`)"
 
 -- | Adds an edge @(a, b)@. the vertices @a@ and @b@ were in the same connected component, it
@@ -89,7 +89,7 @@ merge dsu@Dsu {..} a b = do
   y <- leader dsu b
   if x == y
     then do
-      return x
+      pure x
     else do
       px <- VGM.read parentOrSizeDsu x
       py <- VGM.read parentOrSizeDsu y
@@ -97,7 +97,7 @@ merge dsu@Dsu {..} a b = do
         VGM.swap parentOrSizeDsu x y
       sizeY <- VGM.exchange parentOrSizeDsu y x
       VGM.modify parentOrSizeDsu (+ sizeY) x
-      return x
+      pure x
 
 -- | `merge` with return value discarded.
 --
@@ -110,7 +110,7 @@ merge dsu@Dsu {..} a b = do
 merge_ :: (PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m ()
 merge_ dsu a b = do
   _ <- merge dsu a b
-  return ()
+  pure ()
 
 -- | Returns whether the vertices @a@ and @b@ are in the same connected component.
 --
@@ -126,7 +126,7 @@ same dsu@Dsu {..} a b = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.same" b nDsu
   la <- leader dsu a
   lb <- leader dsu b
-  return $ la == lb
+  pure $ la == lb
 
 -- | Returns the representative of the connected component that contains the vertex @a@.
 --
@@ -140,11 +140,11 @@ leader dsu@Dsu {..} a = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.leader" a nDsu
   pa <- VGM.read parentOrSizeDsu a
   if pa < 0
-    then return a
+    then pure a
     else do
       lpa <- leader dsu pa
       VGM.write parentOrSizeDsu a lpa
-      return lpa
+      pure lpa
 
 -- | Returns the size of the connected component that contains the vertex @a@.
 --
@@ -158,7 +158,7 @@ size dsu@Dsu {..} a = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.size" a nDsu
   la <- leader dsu a
   sizeLa <- VGM.read parentOrSizeDsu la
-  return (-sizeLa)
+  pure (-sizeLa)
 
 -- | Divides the graph into connected components and returns the list of them.
 --
@@ -173,7 +173,7 @@ groups dsu@Dsu {..} = do
   leaders <- VU.generateM nDsu $ \i -> do
     li <- leader dsu i
     VGM.modify groupSize (+ 1) li
-    return li
+    pure li
   result <- do
     groupSize' <- VU.unsafeFreeze groupSize
     V.mapM VUM.unsafeNew $ VU.convert groupSize'

@@ -26,7 +26,7 @@ main = do
         TS.addClause ts i True j False
       when (abs (ys VG.! i - ys VG.! j) < d) $ do
         TS.addClause ts i True j True
-      return ()
+      pure ()
 
   b <- TS.satisfiable ts
   unless b $ do

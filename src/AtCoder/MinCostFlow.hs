@@ -63,7 +63,7 @@ data McfGraph s cap cost = McfGraph
 new :: (PrimMonad m, VU.Unbox cap, VU.Unbox cost) => Int -> m (McfGraph (PrimState m) cap cost)
 new nG = do
   edgesG <- ACIGV.new 0
-  return McfGraph {..}
+  pure McfGraph {..}
 
 -- | Adds an edge oriented from @from@ to @to@ with capacity @cap@ and cost @cost@. It returns an
 -- integer \(k\) such that this is the \(k\)-th edge that is added.
@@ -89,7 +89,7 @@ addEdge McfGraph {..} from to cap cost = do
   let !_ = ACIA.runtimeAssert (0 <= cost) "AtCoder.MinCostFlow.addEdge: given invalid edge `cost` less than `0`"
   m <- ACIGV.length edgesG
   ACIGV.pushBack edgesG (from, to, cap, 0, cost)
-  return m
+  pure m
 
 -- | `addEdge` with return value discarded.
 --
@@ -109,7 +109,7 @@ addEdge_ ::
   m ()
 addEdge_ graph from to cap cost = do
   _ <- addEdge graph from to cap cost
-  return ()
+  pure ()
 
 -- | Returns the current internal state of the edges: @(from, to, cap, flow, cost)@. The edges are
 -- ordered in the same order as added by `addEdge`.
@@ -170,7 +170,7 @@ flow ::
   m (cap, cost)
 flow graph s t flowLimit = do
   res <- slope graph s t flowLimit
-  return $ VG.last res
+  pure $ VG.last res
 
 -- | Let \(g\) be a function such that \(g(x)\) is the cost of the minimum cost \(s-t\) flow when
 -- the amount of the flow is exactly \(x\). \(g\) is known to be piecewise linear.
@@ -215,7 +215,7 @@ slope McfGraph {..} s t flowLimit = do
     cap2 <- VGM.read (ACIMCSR.capCsr g) iEdge
     VGM.write flows v $! cap1 - cap2
 
-  return result
+  pure result
 
 internalSlopeMCF ::
   forall cap cost m.
@@ -256,7 +256,7 @@ internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
                   fromJust <$> ACIB.popBack queMin
                 else do
                   (!_, !to) <- fromJust <$> ACIMH.pop heap
-                  return to
+                  pure to
 
             Bit visV <- VGM.exchange vis v $ Bit True
             unless (v == t) $ do
@@ -275,7 +275,7 @@ internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
                     -- cost <= C - -(n-1)C + 0 = nC
                     cost' <- do
                       dualTo <- VGM.read duals to
-                      return $! cost - dualTo + dualV
+                      pure $! cost - dualTo + dualV
                     distTo <- VGM.read dists to
                     when (distTo - distV > cost') $ do
                       let !distTo' = distV + cost'
@@ -294,7 +294,7 @@ internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
           VU.iforM_ (VU.zip vis' dists') $ \v (Bit !visV, !distV) -> do
             when visV $ do
               VGM.modify duals (subtract (distT - distV)) v
-        return visT
+        pure visT
 
   result <- ACIGV.new 16
   ACIGV.pushBack result (0 :: cap, 0 :: cost)
@@ -308,7 +308,7 @@ internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
 
             let minC :: cap -> Int -> m cap
                 minC !acc v
-                  | v == s = return acc
+                  | v == s = pure acc
                   | otherwise = do
                       let iPrev = prevE' VG.! v
                       cap <- VGM.read capCsr $ revCsr VG.! iPrev

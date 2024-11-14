@@ -19,10 +19,10 @@ main = do
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !p, !x) -> do
       FT.add ft p x
-      return Nothing
+      pure Nothing
     (1, !l, !r) -> do
       x <- FT.sum ft l r
-      return $ Just x
+      pure $ Just x
     _ -> error "unreachable"
 
   printBSB $ unlinesBSB res

@@ -52,19 +52,19 @@ instance Monoid X where
 -- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_l
 main :: IO ()
 main = do
-  (!n, !q) <- ints2
+  (!_, !q) <- ints2
   xs <- ints
   qs <- VU.replicateM q $ do
     (!t, !l, !r) <- ints3
-    return (t, l - 1, r)
+    pure (t, l - 1, r)
 
   seg <- LST.build $ VU.map (\case 0 -> X (1, 0, 0); 1 -> X (0, 1, 0)) xs
   res <- (`VU.mapMaybeM` qs) $ \case
     (1, !l, !r) -> do
       LST.applyIn seg l r $ F True
-      return Nothing
+      pure Nothing
     (2, !l, !r) -> do
       X (!_, !_, !x) <- LST.prod seg l r
-      return $ Just x
+      pure $ Just x
 
   printBSB $ unlinesBSB res

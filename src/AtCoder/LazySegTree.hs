@@ -103,7 +103,7 @@ build vs = do
   let segtree = LazySegTree {..}
   for_ [sizeLst - 1, sizeLst - 2 .. 1] $ \i -> do
     update segtree i
-  return segtree
+  pure segtree
 
 -- | Sets \(p\)-th value of the array to \(x\).
 --
@@ -147,7 +147,7 @@ read self@LazySegTree {..} p = do
 -- - \(O(\log n)\)
 prod :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
 prod self@LazySegTree {..} l0 r0
-  | l0 == r0 = return mempty
+  | l0 == r0 = pure mempty
   | otherwise = do
       let l = l0 + sizeLst
       let r = r0 + sizeLst
@@ -159,16 +159,16 @@ prod self@LazySegTree {..} l0 r0
     !_ = ACIA.checkInterval "AtCoder.LazySegTree.prod" l0 r0 nLst
     -- NOTE: we're using inclusive range [l, r] for simplicity
     inner l r !smL !smR
-      | l > r = return $! smL <> smR
+      | l > r = pure $! smL <> smR
       | otherwise = do
           smL' <-
             if testBit l 0
               then (smL <>) <$> VGM.read dLst l
-              else return smL
+              else pure smL
           smR' <-
             if not $ testBit r 0
               then (<> smR) <$> VGM.read dLst r
-              else return smR
+              else pure smR
           inner ((l + 1) .>>. 1) ((r - 1) .>>. 1) smL' smR'
 
 -- | Returns the product of \([op(a[0], ..., a[n - 1])]\), assuming the properties of the monoid. It
@@ -207,7 +207,7 @@ applyAt self@LazySegTree {..} p f = do
 -- - \(O(\log n)\)
 applyIn :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
 applyIn self@LazySegTree {..} l0 r0 f
-  | l0 == r0 = return ()
+  | l0 == r0 = pure ()
   | otherwise = do
       let l = l0 + sizeLst
       let r = r0 + sizeLst
@@ -224,7 +224,7 @@ applyIn self@LazySegTree {..} l0 r0 f
     !_ = ACIA.checkInterval "AtCoder.LazySegTree.applyIn" l0 r0 nLst
     -- NOTE: we're using inclusive range [l, r] for simplicity
     inner l r
-      | l > r = return ()
+      | l > r = pure ()
       | otherwise = do
           when (testBit l 0) $ do
             allApply self l f
@@ -249,7 +249,7 @@ applyIn self@LazySegTree {..} l0 r0 f
 -- - \(O(\log n)\)
 maxRight :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 maxRight self@LazySegTree {..} l0 g
-  | l0 == nLst = return nLst
+  | l0 == nLst = pure nLst
   | otherwise = do
       let l = l0 + sizeLst
       for_ [logLst, logLst - 1 .. 1] $ \i -> do
@@ -269,7 +269,7 @@ maxRight self@LazySegTree {..} l0 g
           let l'' = l' + 1
           if (l'' .&. (-l'')) /= l''
             then inner l'' sm'
-            else return nLst
+            else pure nLst
     chooseBit :: Int -> Int
     chooseBit l
       | even l = chooseBit $ l .>>. 1
@@ -282,7 +282,7 @@ maxRight self@LazySegTree {..} l0 g
           if g sm'
             then inner2 (l' + 1) sm'
             else inner2 l' sm
-      | otherwise = return $ l - sizeLst
+      | otherwise = pure $ l - sizeLst
 
 -- | Applies a binary search on the segment tree. It returns an index @l@ that satisfies both of the
 -- following.
@@ -301,7 +301,7 @@ maxRight self@LazySegTree {..} l0 g
 -- - \(O(\log n)\)
 minLeft :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 minLeft self@LazySegTree {..} r0 g
-  | r0 == 0 = return 0
+  | r0 == 0 = pure 0
   | otherwise = do
       let r = r0 + sizeLst
       for_ [logLst, logLst - 1 .. 1] $ \i -> do
@@ -320,7 +320,7 @@ minLeft self@LazySegTree {..} r0 g
         else do
           if (r' .&. (-r')) /= r'
             then inner r' sm'
-            else return 0
+            else pure 0
     chooseBit r
       | r > 1 && odd r = chooseBit $ r .>>. 1
       | otherwise = r
@@ -332,7 +332,7 @@ minLeft self@LazySegTree {..} r0 g
           if g sm'
             then inner2 (r' - 1) sm'
             else inner2 r' sm
-      | otherwise = return $ r + 1 - sizeLst
+      | otherwise = pure $ r + 1 - sizeLst
 
 -- | \(O(1)\)
 update :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a, Monoid f, VU.Unbox f) => LazySegTree (PrimState m) f a -> Int -> m ()

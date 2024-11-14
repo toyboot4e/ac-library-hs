@@ -35,14 +35,14 @@ new :: (PrimMonad m, VU.Unbox a) => Int -> m (Buffer (PrimState m) a)
 new n = do
   lenB <- VUM.replicate 1 (0 :: Int)
   vecB <- VUM.unsafeNew n
-  return Buffer {..}
+  pure Buffer {..}
 
 -- | \(O(n)\) Creates a buffer with capacity \(n\) with initial values.
 build :: (PrimMonad m, VU.Unbox a) => VU.Vector a -> m (Buffer (PrimState m) a)
 build xs = do
   lenB <- VUM.replicate 1 $ VU.length xs
   vecB <- VU.thaw xs
-  return Buffer {..}
+  pure Buffer {..}
 
 -- | \(O(1)\) Appends an element to the back.
 pushBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> a -> m ()
@@ -56,21 +56,21 @@ popBack :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (Maybe a)
 popBack Buffer {..} = do
   len <- VGM.read lenB 0
   if len == 0
-    then return Nothing
+    then pure Nothing
     else do
       x <- VGM.read vecB (len - 1)
       VGM.write lenB 0 (len - 1)
-      return $ Just x
+      pure $ Just x
 
 -- | \(O(1)\) Returns the last value in the buffer, or `Nothing` if it is empty.
 back :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (Maybe a)
 back Buffer {..} = do
   len <- VGM.read lenB 0
   if len == 0
-    then return Nothing
+    then pure Nothing
     else do
       x <- VGM.read vecB (len - 1)
-      return $ Just x
+      pure $ Just x
 
 -- | \(O(1)\) Returns the array size.
 capacity :: (VU.Unbox a) => Buffer s a -> Int

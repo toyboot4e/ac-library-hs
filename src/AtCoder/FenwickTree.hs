@@ -57,7 +57,7 @@ new :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => Int -> m (FenwickTree (
 new nFt
   | nFt >= 0 = do
       dataFt <- VUM.replicate nFt 0
-      return FenwickTree {..}
+      pure FenwickTree {..}
   | otherwise = error $ "AtCoder.FenwickTree.new: given negative size `" ++ show nFt ++ "`"
 
 -- | Creates `FenwickTree` with initial values.
@@ -68,7 +68,7 @@ build :: (PrimMonad m, Num a, VU.Unbox a) => VU.Vector a -> m (FenwickTree (Prim
 build xs = do
   ft <- new $ VU.length xs
   VU.iforM_ xs $ add ft
-  return ft
+  pure ft
 
 -- | Adds \(x\) to \(p\)-th value of the array.
 --
@@ -94,7 +94,7 @@ prefixSum :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> 
 prefixSum FenwickTree {..} = inner 0
   where
     inner !acc !r
-      | r <= 0 = return acc
+      | r <= 0 = pure acc
       | otherwise = do
           dx <- VGM.read dataFt (r - 1)
           inner (acc + dx) (r - r .&. (-r))
@@ -111,4 +111,4 @@ sum ft@FenwickTree {..} l r = do
   let !_ = ACIA.checkInterval "AtCoder.FenwickTree.sum" l r nFt
   xr <- prefixSum ft r
   xl <- prefixSum ft l
-  return $! xr - xl
+  pure $! xr - xl

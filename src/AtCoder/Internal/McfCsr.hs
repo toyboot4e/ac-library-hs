@@ -36,7 +36,7 @@ build n edges = do
         -- sum up the degrees
         VUM.iforM_ (VUM.init start) $ \i dx -> do
           VGM.modify start (+ dx) (i + 1)
-        return start
+        pure start
 
   toVec <- VUM.unsafeNew $ 2 * m
   revVec <- VUM.unsafeNew $ 2 * m
@@ -61,12 +61,12 @@ build n edges = do
     VGM.write capCsr i2 flow
     VGM.write costVec i2 (-cost)
     -- remember forward edge index
-    return i1
+    pure i1
 
   toCsr <- VU.unsafeFreeze toVec
   revCsr <- VU.unsafeFreeze revVec
   costCsr <- VU.unsafeFreeze costVec
-  return (edgeIdx, Csr {..})
+  pure (edgeIdx, Csr {..})
 
 -- | \(O(1)\) Returns a vector of @(to, rev, cost)@.
 adj :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost) => Csr s cap cost -> Int -> VU.Vector (Int, Int, cost)

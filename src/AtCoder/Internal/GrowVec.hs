@@ -36,14 +36,14 @@ new :: (PrimMonad m, VU.Unbox a) => Int -> m (GrowVec (PrimState m) a)
 new n = do
   posGV <- VUM.replicate 1 (0 :: Int)
   vecGV <- newMutVar =<< VUM.unsafeNew n
-  return GrowVec {..}
+  pure GrowVec {..}
 
 -- | \(O(n)\) Creates `GrowVec` with initial values.
 build :: (PrimMonad m, VU.Unbox a) => VU.Vector a -> m (GrowVec (PrimState m) a)
 build xs = do
   posGV <- VUM.replicate 1 $ VU.length xs
   vecGV <- newMutVar =<< VU.thaw xs
-  return GrowVec {..}
+  pure GrowVec {..}
 
 -- TODO: reserve
 
@@ -61,17 +61,17 @@ pushBack GrowVec {..} e = do
   vec <- do
     vec <- readMutVar vecGV
     if VUM.length vec > len
-      then return vec
+      then pure vec
       else do
         newVec <- VUM.unsafeGrow vec $ max 1 len
         writeMutVar vecGV newVec
-        return newVec
+        pure newVec
 
   VGM.modifyM
     posGV
     ( \r -> do
         VGM.write vec r e
-        return $ r + 1
+        pure $ r + 1
     )
     0
 
@@ -80,7 +80,7 @@ popBack :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m (Maybe a)
 popBack GrowVec {..} = do
   pos <- VGM.read posGV 0
   if pos <= 0
-    then return Nothing
+    then pure Nothing
     else do
       VGM.write posGV 0 $ pos - 1
       vec <- readMutVar vecGV

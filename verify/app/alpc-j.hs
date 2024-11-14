@@ -21,7 +21,7 @@ main = do
   res <- (`VU.mapMaybeM` qs) $ \case
     (1, pred -> !x, !v) -> do
       ST.write seg x $ Max v
-      return Nothing
+      pure Nothing
     (2, pred -> !l, !r) -> do
       Just . getMax <$> ST.prod seg l r
     (3, pred -> !p, !target) -> do

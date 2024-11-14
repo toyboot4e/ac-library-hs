@@ -30,7 +30,7 @@ data SegTreeNaive s a = SegTreeNaive
 newStn :: (PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (SegTreeNaive (PrimState m) a)
 newStn nStn = do
   dStn <- VUM.replicate nStn mempty
-  return SegTreeNaive {..}
+  pure SegTreeNaive {..}
 
 writeStn :: (VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> a -> m ()
 writeStn SegTreeNaive {..} = VGM.write dStn
@@ -42,7 +42,7 @@ prodStn :: (Monoid a, VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -
 prodStn SegTreeNaive {..} l r = do
   d <- VU.unsafeFreeze dStn
   let slice = VU.take (r - l) $ VU.drop l d
-  return $ VU.foldl' (<>) mempty slice
+  pure $ VU.foldl' (<>) mempty slice
 
 maxRightStn :: (HasCallStack, Monoid a, VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> (a -> Bool) -> m Int
 maxRightStn SegTreeNaive {..} l0 f = do
@@ -54,7 +54,7 @@ maxRightStn SegTreeNaive {..} l0 f = do
         where
           !acc' = acc <> x
   d <- VU.unsafeFreeze dStn
-  return . loop l0 mempty . VU.toList $ VU.drop l0 d
+  pure . loop l0 mempty . VU.toList $ VU.drop l0 d
 
 minLeftStn :: (HasCallStack, Monoid a, VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> Int -> (a -> Bool) -> m Int
 minLeftStn SegTreeNaive {..} r0 f = do
@@ -66,7 +66,7 @@ minLeftStn SegTreeNaive {..} r0 f = do
         where
           !acc' = x <> acc
   d <- VU.unsafeFreeze dStn
-  return . loop (r0 - 1) mempty . VU.toList . VU.reverse $ VU.take r0 d
+  pure . loop (r0 - 1) mempty . VU.toList . VU.reverse $ VU.take r0 d
 
 type FooRepr = DoNotUnboxLazy String
 
@@ -106,7 +106,7 @@ unit_zero = testCase "zero" $ do
   s <- ST.new @_ @(Sum Int) 0
   (@?= mempty) =<< ST.allProd s
 
-  return ()
+  pure ()
 
 spec_invalid :: IO TestTree
 spec_invalid = testSpec "invalid" $ do

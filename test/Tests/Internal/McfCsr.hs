@@ -18,7 +18,7 @@ edgeGen n m = QC.vectorOf m $ do
   cap <- QC.chooseInt (0, 16)
   flow <- QC.chooseInt (0, cap)
   cost <- QC.chooseInt (0, 16)
-  return (from, to, cap, flow, cost)
+  pure (from, to, cap, flow, cost)
 
 -- TODO: monadic gen?
 -- TODO: Deduplicate graph generation code. Implement Arbitrary?

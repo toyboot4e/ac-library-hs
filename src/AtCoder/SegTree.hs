@@ -101,7 +101,7 @@ build vs = do
   let segtree = SegTree {..}
   for_ [sizeSt - 1, sizeSt - 2 .. 1] $ \i -> do
     update segtree i
-  return segtree
+  pure segtree
 
 -- | Writes \(p\)-th value of the array to \(x\).
 --
@@ -143,16 +143,16 @@ prod SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
     !_ = ACIA.checkInterval "AtCoder.SegTree.prod" l0 r0 nSt
     -- NOTE: we're using inclusive range [l, r] for simplicity
     inner l r !smL !smR
-      | l > r = return $! smL <> smR
+      | l > r = pure $! smL <> smR
       | otherwise = do
           smL' <-
             if testBit l 0
               then (smL <>) <$> VGM.read dSt l
-              else return smL
+              else pure smL
           smR' <-
             if not $ testBit r 0
               then (<> smR) <$> VGM.read dSt r
-              else return smR
+              else pure smR
           inner ((l + 1) .>>. 1) ((r - 1) .>>. 1) smL' smR'
 
 -- | Returns @a[0] <> ... <> a[n - 1]@, assuming the properties of the monoid. It returns `mempty`
@@ -181,7 +181,7 @@ allProd SegTree {..} = VGM.read dSt 1
 -- - \(O(\log n)\)
 maxRight :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
 maxRight SegTree {..} l0 f
-  | l0 == nSt = return nSt
+  | l0 == nSt = pure nSt
   | otherwise = inner (l0 + sizeSt) mempty
   where
     -- NOTE: Not ordinary bounds check!
@@ -197,7 +197,7 @@ maxRight SegTree {..} l0 f
           let l'' = l' + 1
           if (l'' .&. (-l'')) /= l''
             then inner l'' sm'
-            else return nSt
+            else pure nSt
     chooseBit :: Int -> Int
     chooseBit l
       | even l = chooseBit $ l .>>. 1
@@ -209,7 +209,7 @@ maxRight SegTree {..} l0 f
           if f sm'
             then inner2 (l' + 1) sm'
             else inner2 l' sm
-      | otherwise = return $ l - sizeSt
+      | otherwise = pure $ l - sizeSt
 
 -- | It applies binary search on the segment tree. It returns an index @l@ that satisfies both of
 -- the following.
@@ -228,7 +228,7 @@ maxRight SegTree {..} l0 f
 -- - \(O(\log n)\)
 minLeft :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
 minLeft SegTree {..} r0 f
-  | r0 == 0 = return 0
+  | r0 == 0 = pure 0
   | otherwise = inner (r0 + sizeSt) mempty
   where
     -- NOTE: Not ordinary bounds check!
@@ -243,7 +243,7 @@ minLeft SegTree {..} r0 f
         else do
           if (r' .&. (-r')) /= r'
             then inner r' sm'
-            else return 0
+            else pure 0
     chooseBit r
       | r > 1 && odd r = chooseBit $ r .>>. 1
       | otherwise = r
@@ -254,7 +254,7 @@ minLeft SegTree {..} r0 f
           if f sm'
             then inner2 (r' - 1) sm'
             else inner2 r' sm
-      | otherwise = return $ r + 1 - sizeSt
+      | otherwise = pure $ r + 1 - sizeSt
 
 -- | \(O(1)\)
 update :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m ()

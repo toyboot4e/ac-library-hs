@@ -65,7 +65,7 @@ new :: (PrimMonad m, VU.Unbox cap) => Int -> m (MfGraph (PrimState m) cap)
 new nG = do
   gG <- V.replicateM nG (ACIGV.new 0)
   posG <- ACIGV.new 0
-  return MfGraph {..}
+  pure MfGraph {..}
 
 -- | Adds an edge oriented from the vertex @from@ to the vertex @to@ with the capacity @cap@ and the
 -- flow amount \(0\). It returns an integer \(k\) such that this is the \(k\)-th edge that is added.
@@ -86,10 +86,10 @@ addEdge MfGraph {..} from to cap = do
   ACIGV.pushBack posG (from, iEdge)
   iRevEdge <- do
     len <- ACIGV.length (gG VG.! to)
-    return $ if from == to then len + 1 else len
+    pure $ if from == to then len + 1 else len
   ACIGV.pushBack (gG VG.! from) (to, iRevEdge, cap)
   ACIGV.pushBack (gG VG.! to) (from, iEdge, 0)
-  return m
+  pure m
 
 -- | `addEdge` with return value discarded.
 --
@@ -102,7 +102,7 @@ addEdge MfGraph {..} from to cap = do
 addEdge_ :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m ()
 addEdge_ graph from to cap = do
   _ <- addEdge graph from to cap
-  return ()
+  pure ()
 
 -- | \(O(1)\) Changes the capacity and the flow amount of the $i$-th edge to @newCap@ and
 -- @newFlow@, respectively. It doesn't change the capacity or the flow amount of other edges.
@@ -158,7 +158,7 @@ getEdge MfGraph {..} i = do
   (!from, !iEdge) <- ACIGV.read posG i
   (!to, !iRevEdge, !cap) <- ACIGV.read (gG VG.! from) iEdge
   revCap <- readCapacity gG to iRevEdge
-  return (from, to, cap + revCap, revCap)
+  pure (from, to, cap + revCap, revCap)
 
 -- | Returns the current internal state of the edges: @(from, to, cap, flow)@. The edges are ordered
 -- in the same order as added by `addEdge`.
@@ -214,14 +214,14 @@ flow MfGraph {..} s t flowLimit = do
 
   iter <- VUM.unsafeNew nG
   let dfs v up
-        | v == s = return up
+        | v == s = pure up
         | otherwise = do
             len <- ACIGV.length (gG VG.! v)
             levelV <- VGM.read level v
             result <- flip fix 0 $ \loop res -> do
               i <- VGM.read iter v
               if i >= len
-                then return res
+                then pure res
                 else do
                   VGM.write iter v $ i + 1
                   (!to, !iRevEdge, !_) <- ACIGV.read (gG VG.! v) i
@@ -238,28 +238,28 @@ flow MfGraph {..} s t flowLimit = do
                           modifyCapacity (gG VG.! to) (subtract d) iRevEdge
                           let !res' = res + d
                           if res' == up
-                            then return res'
+                            then pure res'
                             else loop res' -- next neighbor
             VGM.write level v nG
-            return result
+            pure result
 
   flip fix 0 $ \loop flow_ -> do
     if flow_ >= flowLimit
-      then return flow_
+      then pure flow_
       else do
         bfs
         levelT <- VGM.read level t
         if levelT == -1
-          then return flow_
+          then pure flow_
           else do
             VGM.set iter (0 :: Int)
             f <- dfs t $! flowLimit - flow_
             if f == 0
-              then return flow_
+              then pure flow_
               else loop $! flow_ + f
 
 -- | Returns a vector of length \(n\), such that the \(i\)-th element is `True` if and only if there
--- is a directed path from \(s\) to \(i\) in the residual network. The returned vector corresponds
+  -- is a directed path from \(s\) to \(i\) in the residual network. The returned vector corresponds
 -- to a \(s-t\) minimum cut after calling @flow(s, t)@ exactly once without @flow_limit@.
 --
 -- = Complexity

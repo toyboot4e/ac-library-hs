@@ -34,7 +34,7 @@ new :: (PrimMonad m, VU.Unbox a) => Int -> m (Queue (PrimState m) a)
 new n = do
   posQ <- VUM.replicate 2 (0 :: Int)
   vecQ <- VUM.unsafeNew n
-  return Queue {..}
+  pure Queue {..}
 
 -- | \(O(1)\) Appends an element to the back.
 pushBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> a -> m ()
@@ -43,7 +43,7 @@ pushBack Queue {..} e = do
     posQ
     ( \r -> do
         VGM.write vecQ r e
-        return $ r + 1
+        pure $ r + 1
     )
     1
 
@@ -53,11 +53,11 @@ popFront Queue {..} = do
   l <- VGM.read posQ 0
   r <- VGM.read posQ 1
   if l >= r
-    then return Nothing
+    then pure Nothing
     else do
       x <- VGM.read vecQ l
       VGM.write posQ 0 (l + 1)
-      return $ Just x
+      pure $ Just x
 
 -- | \(O(1)\) Returns the array size.
 capacity :: (VU.Unbox a) => Queue s a -> Int
@@ -68,7 +68,7 @@ length :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Int
 length Queue {..} = do
   l <- VGM.read posQ 0
   r <- VGM.read posQ 1
-  return $ r - l
+  pure $ r - l
 
 -- | \(O(1)\) Returns `True` if the buffer is empty.
 null :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Bool

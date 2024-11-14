@@ -26,7 +26,7 @@ data SccGraph s = SccGraph
 new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
 new nScc = do
   edgesScc <- ACIGV.new 0
-  return SccGraph {..}
+  pure SccGraph {..}
 
 -- | \(O(1)\) amortized. Adds an edge to the graph.
 addEdge :: (PrimMonad m) => SccGraph (PrimState m) -> Int -> Int -> m ()
@@ -65,11 +65,11 @@ sccIds SccGraph {..} = do
                     nextOrd <- dfs to $ curOrd
                     lowTo <- VGM.read low to
                     VGM.modify low (min lowTo) v
-                    return nextOrd
+                    pure nextOrd
                   else do
                     -- lookup back and update the low-link.
                     VGM.modify low (min ordTo) v
-                    return curOrd
+                    pure curOrd
             )
             (ord0 + 1)
             (g `ACICSR.adj` v)
@@ -85,14 +85,14 @@ sccIds SccGraph {..} = do
             VGM.write ids u sccId
             unless (u == v) loop
           VGM.unsafeWrite groupNum 0 $ sccId + 1
-        return ord'
+        pure ord'
 
   VU.foldM'_
     ( \curOrd i -> do
         o <- VGM.read ord i
         if o == -1
           then dfs i curOrd
-          else return curOrd
+          else pure curOrd
     )
     (0 :: Int)
     (VU.generate nScc id)
@@ -104,7 +104,7 @@ sccIds SccGraph {..} = do
     VGM.modify ids ((num - 1) -) i
 
   ids' <- VU.unsafeFreeze ids
-  return (num, ids')
+  pure (num, ids')
 
 -- | \(O(n + m)\) Returns the strongly connected components.
 scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
@@ -114,7 +114,7 @@ scc g = do
         vec <- VUM.replicate groupNum (0 :: Int)
         VU.forM_ ids $ \x -> do
           VGM.modify vec (+ 1) x
-        return vec
+        pure vec
   groups <- V.mapM VUM.unsafeNew $ VU.convert counts
   is <- VUM.replicate groupNum (0 :: Int)
   VU.iforM_ ids $ \v sccId -> do
