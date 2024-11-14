@@ -20,8 +20,27 @@
 -- = Storing boxed types
 -- If you really need to store boxed type to `SegTree`, wrap them in a newtype that implements
 -- @Unbox@ typeclass via a boxed vector, such as [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict).
+--
+-- = Example
+-- >>> import AtCoder.SegTree qualified as ST
+-- >>> import Data.Monoid (Sum(..))
+-- >>> -- Create an array [0, 3, 0, 2]
+-- >>> seg <- ST.new @(Sum Int) 4
+-- >>> ST.write seg 1 $ Sum 3
+-- >>> ST.write seg 3 $ Sum 2
+-- >>> -- Use read methods
+-- >>> ST.read seg 1
+-- Sum {getSum = 3}
+-- >>> ST.prod seg 0 3
+-- Sum {getSum = 3}
+-- >>> ST.allProd seg
+-- Sum {getSum = 5}
+-- >>> ST.maxRight seg 0 (< (Sum 5)) -- sum [0, 3) = 3 < 5
+-- 3
+-- >>> ST.minLeft seg 4 (< (Sum 5)) -- sum [2, 4) = 2 < 5
+-- 2
 module AtCoder.SegTree
-  ( SegTree (..),
+  ( SegTree (nSt, sizeSt, logSt),
     new,
     build,
     write,

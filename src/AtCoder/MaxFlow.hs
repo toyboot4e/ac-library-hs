@@ -1,6 +1,20 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | It solves [maximum flow problem](https://en.wikipedia.org/wiki/Maximum_flow_problem).
+--
+-- = Example
+-- >>> import AtCoder.MaxFlow qualified as MF
+-- >>> g <- MF.new @Int 3
+-- >>> MF.addEdge g 0 1 (2 :: Int)
+-- 0
+-- >>> MF.addEdge g 1 2 1
+-- 1
+-- >>> MF.flow g 0 2 maxBound
+-- 1
+-- >>> MF.getEdge g 0
+-- (0,1,2,1)
+-- >>> MF.minCut g 0
+-- [1,1,0]
 module AtCoder.MaxFlow
   ( MfGraph (nG),
     new,

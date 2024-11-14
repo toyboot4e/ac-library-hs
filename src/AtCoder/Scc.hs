@@ -1,3 +1,11 @@
+-- | It calculates the strongly connected components of directed graphs.
+--
+-- = Example
+-- >>> import AtCoder.Scc qualified as Scc
+-- >>> gr <- Scc.new 4
+-- >>> Scc.nScc gr
+-- 4
+-- >>> Scc.addEdge gr 0 1
 module AtCoder.Scc (SccGraph, nScc, new, addEdge, scc) where
 
 import AtCoder.Internal.Assert qualified as ACIA
@@ -7,12 +15,10 @@ import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
 
+-- | Directed graph for calculating strongly connected components.
 newtype SccGraph s = SccGraph (ACISCC.SccGraph s)
 
---
--- = Constraints
---
--- = Complexity
+-- | Returns the number of vertices in the SCC graph.
 nScc :: SccGraph s -> Int
 nScc (SccGraph g) = ACISCC.nScc g
 

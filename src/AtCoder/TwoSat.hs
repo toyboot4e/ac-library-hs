@@ -7,6 +7,16 @@
 -- - \((x_i = f) \lor (x_j = g)\)
 --
 -- it decides whether there is a truth assignment that satisfies all clauses.
+--
+-- = Example
+-- >>> import AtCoder.TwoSat qualified as TS
+-- >>> import Data.Bit (Bit(..))
+-- >>> ts <- TS.new 1
+-- >>> TS.addClause ts 0 False 0 False
+-- >>> TS.satisfiable ts
+-- True
+-- >>> TS.answer ts
+-- [0]
 module AtCoder.TwoSat (TwoSat (..), new, addClause, satisfiable, answer) where
 
 import AtCoder.Internal.Assert qualified as ACIA

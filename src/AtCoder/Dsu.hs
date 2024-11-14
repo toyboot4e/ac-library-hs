@@ -9,8 +9,25 @@
 -- Each connected component internally has a representative vertex. When two connected components
 -- are merged by edge addition, one of the two representatives of these connected components
 -- becomes the representative of the new connected component.
+--
+-- = Example
+-- >>> import AtCoder.Dsu qualified as Dsu
+-- >>> dsu <- Dsu.new 4
+-- >>> Dsu.nDsu dsu
+-- 4
+-- >>> Dsu.merge dsu 0 1
+-- 0
+-- >>> Dsu.merge_ dsu 1 2
+-- >>> Dsu.leader dsu 2
+-- 0
+-- >>> Dsu.same dsu 0 2
+-- True
+-- >>> Dsu.size dsu 0
+-- 3
+-- >>> Dsu.groups dsu
+-- [[2,1,0],[3]]
 module AtCoder.Dsu
-  ( Dsu,
+  ( Dsu (nDsu),
     new,
     merge,
     merge_,
@@ -31,7 +48,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | Disjoint set union.
+-- | Disjoint set union. Akso known as Union-Find tree.
 data Dsu s = Dsu
   { -- | The number of nodes.
     nDsu :: {-# UNPACK #-} !Int,

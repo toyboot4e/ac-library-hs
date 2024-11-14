@@ -4,7 +4,27 @@
 --
 -- - Updating an element
 -- - Calculating the sum of the elements of an interval
-module AtCoder.FenwickTree (FenwickTree, new, build, add, sum) where
+--
+-- = Example
+--
+-- >>> import AtCoder.FenwickTree qualified as FT
+-- >>> ft <- FT.new @Int 4
+-- >>> FT.nFt ft
+-- 4
+-- >>> FT.add ft 0 3
+-- >>> FT.sum ft 0 3
+-- 3
+-- >>> FT.add ft 2 3
+-- >>> FT.sum ft 0 3
+-- 6
+--
+-- >>> import AtCoder.FenwickTree qualified as FT
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> ft <- FT.build @Int $ VU.fromList [3, 0, 3, 0]
+-- >>> FT.add ft 1 2
+-- >>> FT.sum ft 0 3
+-- 8
+module AtCoder.FenwickTree (FenwickTree (nFt), new, build, add, sum) where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
@@ -35,8 +55,8 @@ data FenwickTree s a = FenwickTree
 new :: (HasCallStack, Num a, VU.Unbox a, PrimMonad m) => Int -> m (FenwickTree (PrimState m) a)
 new nFt
   | nFt >= 0 = do
-    dataFt <- VUM.replicate nFt 0
-    return FenwickTree {..}
+      dataFt <- VUM.replicate nFt 0
+      return FenwickTree {..}
   | otherwise = error $ "AtCoder.FenwickTree.new: given negative size `" ++ show nFt ++ "`"
 
 -- | Creates `FenwickTree` with initial values.

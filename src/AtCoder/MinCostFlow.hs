@@ -1,6 +1,18 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | It solves [Minimum-cost flow problem](https://en.wikipedia.org/wiki/Minimum-cost_flow_problem).
+--
+-- = Examples
+-- >>> import AtCoder.MinCostFlow qualified as MCF
+-- >>> g <- MCF.new {- capacity-} @Int @Int 4
+-- >>> MCF.addEdge g 0 1 2 3 -- addEdge g from to cap cost
+-- 0
+-- >>> MCF.addEdge g 1 2 2 5
+-- 1
+-- >>> MCF.slope g 0 2 maxBound -- slope g from to flowLimit
+-- [(0,0),(2,16)]
+--
+-- Note that you can't call `flow` or `slope` multiple times, or else you'll get wrong return value.
 module AtCoder.MinCostFlow
   ( McfGraph (nG),
     new,
