@@ -205,9 +205,19 @@ executable yosupo-scc
   main-is:       yosupo-scc.hs
   build-depends: verify
 
+executable yosupo-suffixarray
+  import:        app-local
+  main-is:       yosupo-suffixarray.hs
+  build-depends: verify
+
 executable yosupo-two-sat
   import:        app-local
   main-is:       yosupo-two-sat.hs
+  build-depends: verify
+
+executable yosupo-zalgorithm
+  import:        app-local
+  main-is:       yosupo-zalgorithm.hs
   build-depends: verify
 
 -- online judges

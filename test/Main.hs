@@ -16,6 +16,7 @@ import Tests.MaxFlow qualified
 import Tests.MinCostFlow qualified
 import Tests.Scc qualified
 import Tests.SegTree qualified
+import Tests.String qualified
 import Tests.TwoSat qualified
 
 main :: IO ()
@@ -36,5 +37,6 @@ main =
         testGroup "Tests.MinCostFlow" Tests.MinCostFlow.tests,
         testGroup "Tests.Scc" Tests.Scc.tests,
         testGroup "Tests.SegTree" Tests.SegTree.tests,
+        testGroup "Tests.String" Tests.String.tests,
         testGroup "Tests.TwoSat" Tests.TwoSat.tests
       ]

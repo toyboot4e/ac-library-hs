@@ -157,12 +157,14 @@ library
     AtCoder.Internal.McfCsr
     AtCoder.Internal.Queue
     AtCoder.Internal.Scc
+    AtCoder.Internal.String
     AtCoder.LazySegTree
     AtCoder.Math
     AtCoder.MaxFlow
     AtCoder.MinCostFlow
     AtCoder.Scc
     AtCoder.SegTree
+    AtCoder.String
     AtCoder.TwoSat
 
   -- Modules included in this library but not exported.
@@ -206,6 +208,7 @@ test-suite ac-library-hs-test
     Tests.MinCostFlow
     Tests.Scc
     Tests.SegTree
+    Tests.String
     Tests.TwoSat
     Util
 
