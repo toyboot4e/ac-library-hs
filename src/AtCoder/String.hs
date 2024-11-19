@@ -1,6 +1,26 @@
 -- | It contains string algorithms.
 --
--- Let @s@ be a string. We denote the substring of @s@ between \(a\)-th and \(b - 1\)-th character by @s[a..b)@.
+-- Let @s@ be a string. We denote the substring of @s@ between \(a\)-th and \(b - 1\)-th character
+-- by @s[a..b)@.
+--
+-- = Examples
+--
+-- == Suffix Array
+--
+-- >>> import AtCoder.String qualified as S
+-- >>> import Data.ByteString.Char8 qualified as BS
+-- >>> let s = BS.pack "aab"
+-- >>> let sa = S.suffixArrayBS s
+-- >>> S.lcpArrayBS s sa
+-- [1,0]
+--
+-- == Z Algorithm
+--
+-- >>> import AtCoder.String qualified as S
+-- >>> import Data.ByteString.Char8 qualified as BS
+-- >>> let s = BS.pack "abab"
+-- >>> S.zAlgorithmBS s
+-- [4,0,2,0]
 module AtCoder.String
   ( suffixArray,
     suffixArrayBS,
