@@ -1,5 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module Tests.Internal.Math (tests) where
 
 import AtCoder.Internal.Assert qualified as ACIA
@@ -8,7 +6,6 @@ import AtCoder.Internal.Math qualified as ACIM
 import Control.Monad (foldM, unless, when)
 import Data.Foldable
 import Data.Int (Int32)
-import Data.List qualified as L
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -16,14 +13,6 @@ import Data.WideWord.Word128
 import Data.Word (Word32, Word64)
 import Test.Tasty
 import Test.Tasty.HUnit
-
--- powModNaive :: Int -> Int -> Int -> Int
--- powModNaive x n m =
---   let y = x `mod` m
---    in L.foldl' (\z _ -> (z * y) `mod` m) 1 [0 .. n - 1]
-
--- floorSumNaive :: Int -> Int -> Int -> Int -> Int
--- floorSumNaive n m a b = sum [(a * i + b) `div` m | i <- [0 .. n - 1]]
 
 isPrimeNaive :: Int -> Bool
 isPrimeNaive n
