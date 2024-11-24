@@ -106,6 +106,7 @@ common dependencies
     , vector-algorithms              ^>=0.9.0.1
     , vector-stream                  ^>=0.1.0.0
     , vector-th-unbox                ^>=0.2.2
+    , wide-word
     , xhtml                          ^>=3000.2.2.1
 
 library
@@ -116,6 +117,7 @@ library
     AtCoder.Dsu
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
+    AtCoder.Internal.Barrett
     AtCoder.Internal.Bit
     AtCoder.Internal.Buffer
     AtCoder.Internal.Csr
@@ -152,6 +154,7 @@ test-suite ac-library-hs-test
     Tests.Internal.Bit
     Tests.Internal.Buffer
     Tests.Internal.GrowVec
+    Tests.Internal.Math
     Tests.Internal.McfCsr
     Tests.Internal.MinHeap
     Tests.Internal.Queue

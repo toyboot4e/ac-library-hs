@@ -8,6 +8,7 @@ import Tests.Internal.Bit qualified
 import Tests.Internal.Buffer qualified
 import Tests.Internal.GrowVec qualified
 import Tests.Internal.McfCsr qualified
+import Tests.Internal.Math qualified
 import Tests.Internal.MinHeap qualified
 import Tests.Internal.Queue qualified
 import Tests.LazySegTree qualified
@@ -28,6 +29,7 @@ main =
         testGroup "Tests.Internal.Bit" Tests.Internal.Bit.tests,
         testGroup "Tests.Internal.Buffer" Tests.Internal.Buffer.tests,
         testGroup "Tests.Internal.GrowVec" Tests.Internal.GrowVec.tests,
+        testGroup "Tests.Internal.Math" Tests.Internal.Math.tests,
         testGroup "Tests.Internal.MinHeap" Tests.Internal.MinHeap.tests,
         testGroup "Tests.Internal.McfCsr" Tests.Internal.McfCsr.tests,
         testGroup "Tests.Internal.Queue" Tests.Internal.Queue.tests,
