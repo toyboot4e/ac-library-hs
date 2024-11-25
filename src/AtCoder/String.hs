@@ -160,7 +160,7 @@ lcpArray s sa =
 --
 -- = Complexity
 -- - \(O(n)\)
-lcpArrayBS :: BS.ByteString -> VU.Vector Int -> VU.Vector Int
+lcpArrayBS :: (HasCallStack) => BS.ByteString -> VU.Vector Int -> VU.Vector Int
 lcpArrayBS s sa =
   let n = BS.length s
       s2 = VU.map ord . VU.fromListN n $ BS.unpack s

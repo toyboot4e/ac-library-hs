@@ -11,6 +11,8 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
+-- TODO: remove `HasCallStack` when we're 100% sure the input is guarded
+
 -- | \(O(n^2)\) Internal implementation of suffix array creation.
 saNaive :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 saNaive s =

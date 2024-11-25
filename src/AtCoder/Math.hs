@@ -20,7 +20,7 @@ import GHC.Stack (HasCallStack)
 --
 -- = Complexity
 -- - \(O(\log m)\)
-invMod :: Int -> Int -> Int
+invMod :: (HasCallStack) => Int -> Int -> Int
 invMod x m =
   let !_ = ACIA.runtimeAssert (1 <= m) $ "AtCoder.Math.invMod: given invalid `m` less than 1: " ++ show m
       (!z1, !z2) = ACIM.invGcd (fromIntegral x) (fromIntegral m)
@@ -43,7 +43,7 @@ invMod x m =
 --
 -- = Complexity
 -- - \(O(n \log{\mathrm{lcm}(m[i])})\)
-crt :: VU.Vector Int -> VU.Vector Int -> (Int, Int)
+crt :: (HasCallStack) => VU.Vector Int -> VU.Vector Int -> (Int, Int)
 crt r m = loop 0 1 [0 .. VU.length r - 1]
   where
     !_ = ACIA.runtimeAssert (VU.length r == VU.length m) "AtCoder.Math.crt: given `r` and `m` with different lengths"
