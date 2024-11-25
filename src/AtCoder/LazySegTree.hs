@@ -21,6 +21,10 @@
 -- = Storing boxed types
 -- If you really need to store boxed type to `LazySegTree`, wrap them in a newtype that implements
 -- @Unbox@ typeclass via a boxed vector, such as [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict).
+--
+-- = Major changes from the original @ac-library@
+-- - @get@ and @set@ are renamed to `read` and `write`.
+-- - The implementaion is based on `Monoid` and `SegAct`.
 module AtCoder.LazySegTree
   ( SegAct (..),
     LazySegTree (..),
@@ -161,11 +165,11 @@ prod self@LazySegTree {..} l0 r0
     inner l r !smL !smR
       | l > r = pure $! smL <> smR
       | otherwise = do
-          smL' <-
+          !smL' <-
             if testBit l 0
               then (smL <>) <$> VGM.read dLst l
               else pure smL
-          smR' <-
+          !smR' <-
             if not $ testBit r 0
               then (<> smR) <$> VGM.read dLst r
               else pure smR

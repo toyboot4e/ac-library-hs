@@ -39,6 +39,10 @@
 -- 3
 -- >>> ST.minLeft seg 4 (< (Sum 5)) -- sum [2, 4) = 2 < 5
 -- 2
+--
+-- = Major changes from the original @ac-library@
+-- - @get@ and @set@ are renamed to `read` and `write`.
+-- - The implementation is `Monoid`-based.
 module AtCoder.SegTree
   ( SegTree (nSt, sizeSt, logSt),
     new,
@@ -145,11 +149,11 @@ prod SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
     inner l r !smL !smR
       | l > r = pure $! smL <> smR
       | otherwise = do
-          smL' <-
+          !smL' <-
             if testBit l 0
               then (smL <>) <$> VGM.read dSt l
               else pure smL
-          smR' <-
+          !smR' <-
             if not $ testBit r 0
               then (<> smR) <$> VGM.read dSt r
               else pure smR
