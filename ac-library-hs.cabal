@@ -129,6 +129,7 @@ library
     AtCoder.Internal.Scc
     AtCoder.Internal.String
     AtCoder.LazySegTree
+    AtCoder.LazySegTree.Monoid
     AtCoder.Math
     AtCoder.MaxFlow
     AtCoder.MinCostFlow

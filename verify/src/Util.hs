@@ -1,12 +1,30 @@
 -- | Minimum parse/print with @bytestring@.
-module Util (int, ints2, ints3, ints4, ints, unlinesBSB, unlinesWithBSB, unwordsBSB, putBSB, printBSB) where
+module Util
+  ( intP,
+    int2P,
+    int3P,
+    int4P,
+    int,
+    ints2,
+    ints3,
+    ints4,
+    ints,
+    withLine,
+    unlinesBSB,
+    unlinesWithBSB,
+    unwordsBSB,
+    putBSB,
+    printBSB,
+  )
+where
 
 import Control.Monad.Trans.State.Strict (StateT (..), evalStateT)
 import Data.ByteString.Builder qualified as BSB
 import Data.ByteString.Char8 qualified as BS
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromJust, fromMaybe)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
+import GHC.Stack (HasCallStack)
 import System.IO (stdout)
 
 -- TODO: use MonadState, add INLINE
@@ -42,24 +60,28 @@ int4P = do
 -- * Line getter
 
 -- | Gets @a@.
-int :: IO Int
+int :: (HasCallStack) => IO Int
 int = fromMaybe (error "int") . evalStateT intP <$> BS.getLine
 
 -- | Gets @a b@.
-ints2 :: IO (Int, Int)
+ints2 :: (HasCallStack) => IO (Int, Int)
 ints2 = fromMaybe (error "ints2") . evalStateT int2P <$> BS.getLine
 
 -- | Gets @a b c@.
-ints3 :: IO (Int, Int, Int)
+ints3 :: (HasCallStack) => IO (Int, Int, Int)
 ints3 = fromMaybe (error "ints3") . evalStateT int3P <$> BS.getLine
 
 -- | Gets @a b c d@.
-ints4 :: IO (Int, Int, Int, Int)
+ints4 :: (HasCallStack) => IO (Int, Int, Int, Int)
 ints4 = fromMaybe (error "ints4") . evalStateT int4P <$> BS.getLine
 
 -- | Gets @a b c ..@.
 ints :: IO (VU.Vector Int)
 ints = VU.unfoldr (BS.readInt . BS.dropSpace) <$> BS.getLine
+
+-- | Reads one line from the state and runs a pure parser for it.
+withLine :: (HasCallStack) => Parser a -> IO a
+withLine f = fromJust . evalStateT f <$> BS.getLine
 
 -- * Handy bytestirng @Builder@
 
