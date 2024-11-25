@@ -54,7 +54,7 @@ import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
 -- | Haskell reprentation of the above properties.
-class (Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => SegAct f a where
+class (Monoid f, Monoid a) => SegAct f a where
   -- | Lazy segment tree action.
   --
   -- = Constraints
@@ -116,7 +116,7 @@ build vs = do
 --
 -- = Complexity
 -- - \(O(\log n)\)
-write :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> a -> m ()
+write :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> a -> m ()
 write self@LazySegTree {..} p x = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.write" p nLst
   let p' = p + sizeLst
@@ -133,7 +133,7 @@ write self@LazySegTree {..} p x = do
 --
 -- = Complexity
 -- - \(O(\log n)\)
-read :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> m a
+read :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m a
 read self@LazySegTree {..} p = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.read" p nLst
   let p' = p + sizeLst
@@ -149,7 +149,7 @@ read self@LazySegTree {..} p = do
 --
 -- = Complexity
 -- - \(O(\log n)\)
-prod :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
+prod :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
 prod self@LazySegTree {..} l0 r0
   | l0 == r0 = pure mempty
   | otherwise = do
@@ -190,7 +190,7 @@ allProd LazySegTree {..} = VGM.read dLst 1
 --
 -- = Complexity
 -- - \(O(\log n)\)
-applyAt :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
+applyAt :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
 applyAt self@LazySegTree {..} p f = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.applyAt" p nLst
   let p' = p + sizeLst
@@ -209,7 +209,7 @@ applyAt self@LazySegTree {..} p f = do
 --
 -- = Complexity
 -- - \(O(\log n)\)
-applyIn :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
+applyIn :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
 applyIn self@LazySegTree {..} l0 r0 f
   | l0 == r0 = pure ()
   | otherwise = do
@@ -251,7 +251,7 @@ applyIn self@LazySegTree {..} l0 r0 f
 --
 -- = Complexity
 -- - \(O(\log n)\)
-maxRight :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
+maxRight :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 maxRight self@LazySegTree {..} l0 g
   | l0 == nLst = pure nLst
   | otherwise = do
@@ -303,7 +303,7 @@ maxRight self@LazySegTree {..} l0 g
 --
 -- = Complexity
 -- - \(O(\log n)\)
-minLeft :: (HasCallStack, PrimMonad m, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
+minLeft :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 minLeft self@LazySegTree {..} r0 g
   | r0 == 0 = pure 0
   | otherwise = do
@@ -346,14 +346,14 @@ update LazySegTree {..} k = do
   VGM.write dLst k $! opL <> opR
 
 -- | \(O(1)\)
-allApply :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a, Monoid f, VU.Unbox f, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
+allApply :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
 allApply LazySegTree {..} k f = do
   VGM.modify dLst (f `segAct`) k
   when (k < sizeLst) $ do
     VGM.modify lzLst (f <>) k
 
 -- | \(O(1)\)
-push :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a, Monoid f, VU.Unbox f, SegAct f a) => LazySegTree (PrimState m) f a -> Int -> m ()
+push :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m ()
 push self@LazySegTree {..} k = do
   lzK <- VGM.read lzLst k
   allApply self (2 * k) lzK
