@@ -5,7 +5,7 @@ import Control.Monad.ST (runST)
 import Data.Foldable
 import Data.Vector.Unboxed qualified as VU
 import Test.Tasty
-import Test.Tasty.QuickCheck as QC
+import Test.Tasty.QuickCheck qualified as QC
 
 prop_push :: [Int] -> Bool
 prop_push xs =

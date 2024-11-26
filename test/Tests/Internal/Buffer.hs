@@ -7,7 +7,7 @@ import Data.Foldable
 import Data.Maybe
 import Data.Vector.Unboxed qualified as VU
 import Test.Tasty
-import Test.Tasty.QuickCheck as QC
+import Test.Tasty.QuickCheck qualified as QC
 
 prop_build :: [Int] -> Bool
 prop_build xs =

@@ -6,7 +6,7 @@ import Control.Monad.ST (runST)
 import Data.List qualified as L
 import Data.Maybe
 import Test.Tasty
-import Test.Tasty.QuickCheck as QC
+import Test.Tasty.QuickCheck qualified as QC
 
 prop_ordered :: TestTree
 prop_ordered =
