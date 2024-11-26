@@ -8,17 +8,20 @@ module Tests.ModInt (tests) where
 import AtCoder.ModInt qualified as ModInt
 import Control.Exception (evaluate)
 import Control.Monad (when)
+import Data.Bits
 import Data.Bits ((.<<.))
 import Data.Foldable
 import Data.Proxy (Proxy (..))
 import Data.WideWord (Int128, Word128)
+import Data.Word (Word32)
 import GHC.Exts (proxy#)
+import GHC.TypeLits (KnownNat, natVal, natVal')
 import System.IO.Unsafe (unsafePerformIO)
 import Test.Hspec
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.Hspec
-import Test.Tasty.QuickCheck as QC
+import Test.Tasty.QuickCheck qualified as QC
 
 -- TODO: the tests are not enough?
 
@@ -144,8 +147,8 @@ unit_constructorStatic = testCase "constructorStatic" $ do
   0 @=? ModInt.val (modInt 0)
 
 -- | Orphan `Arbitrary` instance for QuickCheck tests.
-instance (ModInt.Modulus a) => Arbitrary (ModInt.StaticModInt a) where
-  arbitrary = ModInt.new <$> arbitrary
+instance (ModInt.Modulus a) => QC.Arbitrary (ModInt.StaticModInt a) where
+  arbitrary = ModInt.new <$> QC.arbitrary
 
 prop_new :: ModInt.ModInt998244353 -> Bool
 prop_new x =
@@ -166,6 +169,84 @@ prop_nonPrimeMul x y c = (x + y) * c == (x * c + y * c)
 prop_nonPrimeInv :: ModInt.ModInt998244353 -> Bool
 prop_nonPrimeInv x = x - x == 0
 
+-- bitwise operators
+
+wrap :: (KnownNat p) => (forall a. (Bits a) => a -> a) -> ModInt.StaticModInt p -> Bool
+wrap op a@(ModInt.StaticModInt a') =
+  fromIntegral (ModInt.val (op a)) == op a' `mod` fromIntegral (ModInt.modulus a)
+
+wrap2 :: (KnownNat p) => (forall a. (Bits a) => a -> a -> a) -> ModInt.StaticModInt p -> ModInt.StaticModInt p -> Bool
+wrap2 op a@(ModInt.StaticModInt a') b@(ModInt.StaticModInt b') =
+  fromIntegral (ModInt.val (op a b)) == op a' b' `mod` fromIntegral (ModInt.modulus a)
+
+wrapInt :: (KnownNat p) => (forall a. (Bits a) => a -> Int -> a) -> ModInt.StaticModInt p -> Int -> Bool
+wrapInt op a@(ModInt.StaticModInt a') i =
+  fromIntegral (ModInt.val (op a i)) == op a' i `mod` fromIntegral (ModInt.modulus a)
+
+prop_bitAnd :: ModInt.ModInt998244353 -> ModInt.ModInt998244353 -> Bool
+prop_bitAnd = wrap2 (.&.)
+
+prop_bitOr :: ModInt.ModInt998244353 -> ModInt.ModInt998244353 -> Bool
+prop_bitOr = wrap2 (.|.)
+
+prop_bitXor :: ModInt.ModInt998244353 -> ModInt.ModInt998244353 -> Bool
+prop_bitXor = wrap2 (.|.)
+
+prop_complement :: ModInt.ModInt998244353 -> Bool
+prop_complement = wrap complement
+
+prop_shift :: ModInt.ModInt998244353 -> Int -> Bool
+prop_shift = wrapInt shift
+
+prop_rotate :: ModInt.ModInt998244353 -> Int -> Bool
+prop_rotate = wrapInt rotate
+
+prop_zeroBits :: Bool
+prop_zeroBits = zeroBits @ModInt.ModInt998244353 == zeroBits
+
+prop_bit :: Int -> Bool
+prop_bit i = ModInt.val32 @998244353 (bit i) == ((bit i :: Word32) `mod` 998244353)
+
+prop_setBit :: ModInt.ModInt998244353 -> Int -> Bool
+prop_setBit = wrapInt setBit
+
+prop_clearBit :: ModInt.ModInt998244353 -> Int -> Bool
+prop_clearBit = wrapInt clearBit
+
+prop_compelementBit :: ModInt.ModInt998244353 -> Int -> Bool
+prop_compelementBit = wrapInt complementBit
+
+prop_testBit :: ModInt.ModInt998244353 -> Int -> Bool
+prop_testBit a@(ModInt.StaticModInt a') i = testBit a i == testBit a' i
+
+-- TOOD: test, or define their proper behavior
+-- prop_bitSizeMaybe :: ModInt.ModInt998244353 -> Bool
+-- prop_bitSize :: ModInt.ModInt998244353 -> Bool
+
+prop_isSigned :: ModInt.ModInt998244353 -> Bool
+prop_isSigned a@(ModInt.StaticModInt a') = isSigned a == isSigned a'
+
+prop_testShiftL :: ModInt.ModInt998244353 -> Int -> Bool
+prop_testShiftL = wrapInt shiftL
+
+prop_testUnsafeShiftL :: ModInt.ModInt998244353 -> Int -> Bool
+prop_testUnsafeShiftL = wrapInt unsafeShiftL
+
+prop_testShiftR :: ModInt.ModInt998244353 -> Int -> Bool
+prop_testShiftR = wrapInt shiftR
+
+prop_testUnsafeShiftR :: ModInt.ModInt998244353 -> Int -> Bool
+prop_testUnsafeShiftR = wrapInt unsafeShiftR
+
+prop_testRotateL :: ModInt.ModInt998244353 -> Int -> Bool
+prop_testRotateL = wrapInt rotateL
+
+prop_testRotateR :: ModInt.ModInt998244353 -> Int -> Bool
+prop_testRotateR = wrapInt rotateR
+
+prop_testPopCount :: ModInt.ModInt998244353 -> Bool
+prop_testPopCount a@(ModInt.StaticModInt a') = popCount a == popCount a'
+
 tests :: [TestTree]
 tests =
   [ unit_modulus,
@@ -180,5 +261,27 @@ tests =
     QC.testProperty "prop_primeMul" prop_primeMul,
     QC.testProperty "prop_primeInv" prop_primeInv,
     QC.testProperty "prop_nonPrimeMul" prop_nonPrimeMul,
-    QC.testProperty "prop_nonPrimeInv" prop_nonPrimeInv
+    QC.testProperty "prop_nonPrimeInv" prop_nonPrimeInv,
+    QC.testProperty "prop_bitAnd" prop_bitAnd,
+    QC.testProperty "prop_bitOr" prop_bitOr,
+    QC.testProperty "prop_bitXor" prop_bitXor,
+    QC.testProperty "prop_complement" prop_complement,
+    QC.testProperty "prop_shift" prop_shift,
+    QC.testProperty "prop_rotate" prop_rotate,
+    QC.testProperty "prop_zeroBits" prop_zeroBits,
+    QC.testProperty "prop_bit" prop_bit,
+    QC.testProperty "prop_setBit" prop_setBit,
+    QC.testProperty "prop_clearBit" prop_clearBit,
+    QC.testProperty "prop_compelementBit" prop_compelementBit,
+    QC.testProperty "prop_testBit" prop_testBit,
+    -- prop_bitSizeMaybe,
+    -- prop_bitSize,
+    QC.testProperty "prop_isSigned" prop_isSigned,
+    QC.testProperty "prop_testShiftL" prop_testShiftL,
+    QC.testProperty "prop_testUnsafeShiftL" prop_testUnsafeShiftL,
+    QC.testProperty "prop_testShiftR" prop_testShiftR,
+    QC.testProperty "prop_testUnsafeShiftR" prop_testUnsafeShiftR,
+    QC.testProperty "prop_testRotateL" prop_testRotateL,
+    QC.testProperty "prop_testRotateR" prop_testRotateR,
+    QC.testProperty "prop_testPopCount" prop_testPopCount
   ]

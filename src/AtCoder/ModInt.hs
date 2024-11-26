@@ -20,10 +20,14 @@ module AtCoder.ModInt
     StaticModInt (..),
     modVal,
     modVal#,
+    -- TODO: polish API
     new,
+    new32,
     modulus,
     raw,
+    raw32,
     val,
+    val32,
     pow,
     inv,
   )
@@ -31,7 +35,7 @@ where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Math qualified as ACIM
-import Data.Bits ((.>>.))
+import Data.Bits
 import Data.Coerce (coerce)
 import Data.Proxy (Proxy)
 import Data.Ratio (denominator, numerator)
@@ -89,14 +93,23 @@ modVal# p = fromInteger $ natVal' p
 new :: forall a. (KnownNat a) => Int -> StaticModInt a
 new v = StaticModInt . fromIntegral $! v `mod` fromInteger (natVal' (proxy# @a))
 
+new32 :: forall a. (KnownNat a) => Word32 -> StaticModInt a
+new32 v = StaticModInt $! v `mod` fromInteger (natVal' (proxy# @a))
+
 modulus :: forall a. (KnownNat a) => StaticModInt a -> Int
 modulus _ = fromInteger (natVal' (proxy# @a))
 
 raw :: (KnownNat a) => Int -> StaticModInt a
 raw = StaticModInt . fromIntegral
 
+raw32 :: (KnownNat a) => Word32 -> StaticModInt a
+raw32 = StaticModInt
+
 val :: (KnownNat a) => StaticModInt a -> Int
 val = fromIntegral . unStaticModInt
+
+val32 :: (KnownNat a) => StaticModInt a -> Word32
+val32 = unStaticModInt
 
 pow :: (HasCallStack, KnownNat a) => StaticModInt a -> Int -> StaticModInt a
 pow x0 n0 = inner x0 n0 1
@@ -157,6 +170,30 @@ instance (Modulus p) => Integral (StaticModInt p) where
 instance (Modulus p) => Fractional (StaticModInt p) where
   recip = inv
   fromRational q = fromInteger (numerator q) / fromInteger (denominator q)
+
+instance (KnownNat p) => Bits (StaticModInt p) where
+  (StaticModInt x1) .&. (StaticModInt x2) = StaticModInt $! x1 .&. x2
+  (StaticModInt x1) .|. (StaticModInt x2) = StaticModInt $! x1 .|. x2
+  (StaticModInt x1) `xor` (StaticModInt x2) = StaticModInt $! x1 `xor` x2
+  complement (StaticModInt x) = new32 $! complement x
+  shift (StaticModInt x) i = new32 $! shift x i
+  rotate (StaticModInt x) i = new32 $! rotate x i
+  zeroBits = StaticModInt 0
+  bit i = new32 $! bit i
+  setBit (StaticModInt x) i = new32 $! setBit x i
+  clearBit (StaticModInt x) i = new32 $! clearBit x i
+  complementBit (StaticModInt x) i = new32 $! complementBit x i
+  testBit (StaticModInt x) = testBit x
+  bitSizeMaybe (StaticModInt x) = bitSizeMaybe x -- FIXME: should be defined to @p@?
+  bitSize (StaticModInt x) = bitSize x -- FIXME: should be defined to @p@?
+  isSigned _ = False
+  shiftL (StaticModInt x) i = new32 $! shiftL x i
+  unsafeShiftL (StaticModInt x) i = new32 $! unsafeShiftL x i
+  shiftR (StaticModInt x) i = new32 $! shiftR x i
+  unsafeShiftR (StaticModInt x) i = new32 $! unsafeShiftR x i
+  rotateL (StaticModInt x) i = new32 $! rotateL x i
+  rotateR (StaticModInt x) i = new32 $! rotateR x i
+  popCount (StaticModInt x) = popCount x
 
 newtype instance VU.MVector s (StaticModInt a) = MV_StaticModInt (VU.MVector s Word32)
 
