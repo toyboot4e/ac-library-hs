@@ -45,7 +45,7 @@ import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
 import Control.Monad (unless, when)
 import Control.Monad.Primitive (PrimMonad, PrimState)
-import Data.Bits (countLeadingZeros, countTrailingZeros, testBit, (.&.), (.<<.), (.>>.))
+import Data.Bits (bit, countLeadingZeros, countTrailingZeros, testBit, (.&.), (.<<.), (.>>.))
 import Data.Foldable (for_)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -201,7 +201,7 @@ applyAt self@LazySegTree {..} p f = do
   -- propagate
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
     push self $ p' .>>. i
-  let !len = 1 .<<. (logLst - 1 - (63 - countLeadingZeros p'))
+  let !len = bit $! logLst - (63 - countLeadingZeros p')
   VGM.modify dLst (segActWithLength len f) p'
   -- evaluate
   for_ [1 .. logLst] $ \i -> do
@@ -353,7 +353,7 @@ update LazySegTree {..} k = do
 -- | \(O(1)\)
 allApply :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
 allApply LazySegTree {..} k f = do
-  let !len = 1 .<<. (logLst - (63 - countLeadingZeros k))
+  let !len = bit $! logLst - (63 - countLeadingZeros k)
   VGM.modify dLst (segActWithLength len f) k
   when (k < sizeLst) $ do
     VGM.modify lzLst (f <>) k
