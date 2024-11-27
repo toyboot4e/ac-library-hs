@@ -128,7 +128,7 @@ inv self@(StaticModInt x)
        in pow self (fromInteger (natVal' (proxy# @a)) - 2)
   | otherwise =
       let (!eg1, !eg2) = ACIM.invGcd (fromIntegral x) $ fromInteger (natVal' (proxy# @a))
-          !_ = ACIA.runtimeAssert (eg1 == 1) "AtCoder.ModInt.inv: eg1 == 1"
+          !_ = ACIA.runtimeAssert (eg1 == 1) "AtCoder.ModInt.inv: `gcd x mod` not equals to `1`"
        in fromIntegral eg2
 
 deriving newtype instance (KnownNat p) => Real (StaticModInt p)
@@ -141,7 +141,7 @@ instance (KnownNat p) => Num (StaticModInt p) where
       !x' = x1 + x2
       !m = fromInteger (natVal' (proxy# @p))
   (StaticModInt !x1) - (StaticModInt !x2)
-    | x' >= m = StaticModInt $! x' - m
+    | x' >= m = StaticModInt $! x' + m -- loops
     | otherwise = StaticModInt x'
     where
       !x' = x1 - x2
