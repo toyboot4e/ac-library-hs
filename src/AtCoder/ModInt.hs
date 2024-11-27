@@ -52,12 +52,37 @@ import GHC.TypeLits (KnownNat, natVal, natVal')
 -- | `KnownNat` with meta information used for modulus.
 class (KnownNat a) => Modulus a where
   isPrimeModulus :: Proxy# a -> Bool
+  -- | Be sure to override for the speed.
+  primitiveRootModulus :: Proxy# a -> Int
+  primitiveRootModulus _ = ACIM.primitiveRoot $ fromInteger (natVal' (proxy# @a))
+
+instance Modulus 2 where
+  isPrimeModulus _ = True
+  primitiveRootModulus _ = 1
+
+instance Modulus 3 where
+  isPrimeModulus _ = True
+  primitiveRootModulus _ = 2
+
+instance Modulus 167772161 where
+  isPrimeModulus _ = True
+  primitiveRootModulus _ = 3
+
+instance Modulus 469762049 where
+  isPrimeModulus _ = True
+  primitiveRootModulus _ = 3
+
+instance Modulus 754974721 where
+  isPrimeModulus _ = True
+  primitiveRootModulus _ = 11
 
 instance Modulus 998244353 where
   isPrimeModulus _ = True
+  primitiveRootModulus _ = 3
 
 instance Modulus 1000000007 where
   isPrimeModulus _ = True
+  primitiveRootModulus _ = 5
 
 type ModInt998244353 = StaticModInt 998244353
 

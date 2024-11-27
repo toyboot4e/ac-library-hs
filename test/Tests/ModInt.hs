@@ -5,6 +5,7 @@
 
 module Tests.ModInt (tests) where
 
+import AtCoder.Internal.Math qualified as ACIM
 import AtCoder.ModInt qualified as ModInt
 import Control.Exception (evaluate)
 import Control.Monad (when)
@@ -48,6 +49,16 @@ unit_modulus :: TestTree
 unit_modulus = testCase "modulus" $ do
   (@?= 998244353) $ ModInt.modulus (999 :: ModInt.ModInt998244353)
   (@?= 1000000007) $ ModInt.modulus (999 :: ModInt.ModInt1000000007)
+
+unit_preDefinedPrimitiveRoots :: TestTree
+unit_preDefinedPrimitiveRoots = testCase "preDefinedPrimitiveRotos" $ do
+  ModInt.primitiveRootModulus (proxy# @2) @?= ACIM.primitiveRoot 2
+  ModInt.primitiveRootModulus (proxy# @3) @?= ACIM.primitiveRoot 3
+  ModInt.primitiveRootModulus (proxy# @167772161) @?= ACIM.primitiveRoot 167772161
+  ModInt.primitiveRootModulus (proxy# @469762049) @?= ACIM.primitiveRoot 469762049
+  ModInt.primitiveRootModulus (proxy# @754974721) @?= ACIM.primitiveRoot 754974721
+  ModInt.primitiveRootModulus (proxy# @998244353) @?= ACIM.primitiveRoot 998244353
+  ModInt.primitiveRootModulus (proxy# @1000000007) @?= ACIM.primitiveRoot 1000000007
 
 unit_mod1 :: TestTree
 unit_mod1 = testCase "mod1" $ do
@@ -174,6 +185,7 @@ prop_nonPrimeInv x = x - x == 0
 tests :: [TestTree]
 tests =
   [ unit_modulus,
+    unit_preDefinedPrimitiveRoots,
     unit_mod1,
     unit_intMax,
     unit_int128,
