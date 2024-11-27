@@ -102,18 +102,18 @@ unit_int128 = testCase "intMax" $ do
 unit_inv :: TestTree
 unit_inv = testCase "inv" $ do
   for_ [1 .. 10 - 1] $ \i -> do
-    1 @=? (ModInt.val (ModInt.inv (ModInt.new @11 i)) * i) `rem` 11
+    1 @=? ModInt.val (ModInt.inv (ModInt.new @11 i)) * i `rem` 11
 
   for_ [1 .. 11 - 1] $ \i -> do
     when (gcd i 12 == 1) $ do
-      1 @=? (ModInt.val (ModInt.inv (ModInt.new @12 i)) * i) `rem` 12
+      1 @=? ModInt.val (ModInt.inv (ModInt.new @12 i)) * i `rem` 12
 
   for_ [1 .. 100000 - 1] $ \i -> do
-    1 @=? (ModInt.val (ModInt.inv (ModInt.new @1_000_000_007 i)) * i) `rem` 1_000_000_007
+    1 @=? ModInt.val (ModInt.inv (ModInt.new @1_000_000_007 i)) * i `rem` 1_000_000_007
 
   for_ [1 .. 100000 - 1] $ \i -> do
     when (gcd i 1_000_000_008 == 1) $ do
-      1 @=? (ModInt.val (ModInt.inv (ModInt.new @1_000_000_008 i)) * i) `rem` 1_000_000_008
+      1 @=? ModInt.val (ModInt.inv (ModInt.new @1_000_000_008 i)) * i `rem` 1_000_000_008
 
 -- ConstUsage
 
@@ -176,11 +176,14 @@ prop_primeInv x
   | x == 0 = True
   | otherwise = ModInt.inv x * x == 1 && x * ModInt.inv x == 1
 
-prop_nonPrimeMul :: ModInt.StaticModInt 1000000008 -> ModInt.StaticModInt 1000000008 -> ModInt.StaticModInt 1000000008 -> Bool
+prop_nonPrimeMul :: ModInt.StaticModInt 1_000_000_008 -> ModInt.StaticModInt 1_000_000_008 -> ModInt.StaticModInt 1_000_000_008 -> Bool
 prop_nonPrimeMul x y c = (x + y) * c == (x * c + y * c)
 
-prop_nonPrimeInv :: ModInt.StaticModInt 1000000008 -> Bool
-prop_nonPrimeInv x = x - x == 0
+prop_nonPrimeInv :: ModInt.StaticModInt 1_000_000_008 -> Bool
+prop_nonPrimeInv x
+  | x == 0 = True
+  | gcd (ModInt.val x) (ModInt.modulus x) /= 1 = True
+  | otherwise = ModInt.inv x * x == 1 && x * ModInt.inv x == 1
 
 tests :: [TestTree]
 tests =

@@ -24,7 +24,7 @@ invMod :: (HasCallStack) => Int -> Int -> Int
 invMod x m =
   let !_ = ACIA.runtimeAssert (1 <= m) $ "AtCoder.Math.invMod: given invalid `m` less than 1: " ++ show m
       (!z1, !z2) = ACIM.invGcd (fromIntegral x) (fromIntegral m)
-      !_ = ACIA.runtimeAssert (z1 == 1) "AtCoder.Math.invMod: `z1` is not `1`"
+      !_ = ACIA.runtimeAssert (z1 == 1) "AtCoder.Math.invMod: `x^(-1) mod m` cannot be calculated when `gcd x m /= 1`"
    in z2
 
 -- | Given two arrays \(r,m\) with length \(n\), it solves the modular equation system

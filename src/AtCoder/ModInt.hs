@@ -64,14 +64,17 @@ instance Modulus 3 where
   isPrimeModulus _ = True
   primitiveRootModulus _ = 2
 
+-- | 2^24 - 1
 instance Modulus 167772161 where
   isPrimeModulus _ = True
   primitiveRootModulus _ = 3
 
+-- | 2^25 - 1
 instance Modulus 469762049 where
   isPrimeModulus _ = True
   primitiveRootModulus _ = 3
 
+-- | 2^26 - 1
 instance Modulus 754974721 where
   isPrimeModulus _ = True
   primitiveRootModulus _ = 11
@@ -153,7 +156,7 @@ inv self@(StaticModInt x)
        in pow self (fromInteger (natVal' (proxy# @a)) - 2)
   | otherwise =
       let (!eg1, !eg2) = ACIM.invGcd (fromIntegral x) $ fromInteger (natVal' (proxy# @a))
-          !_ = ACIA.runtimeAssert (eg1 == 1) "AtCoder.ModInt.inv: `gcd x mod` not equals to `1`"
+          !_ = ACIA.runtimeAssert (eg1 == 1) "AtCoder.ModInt.inv: `x^(-1) mod m` cannot be calculated when `gcd x modulus /= 1`"
        in fromIntegral eg2
 
 deriving newtype instance (KnownNat p) => Real (StaticModInt p)
