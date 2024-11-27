@@ -171,30 +171,6 @@ instance (Modulus p) => Fractional (StaticModInt p) where
   recip = inv
   fromRational q = fromInteger (numerator q) / fromInteger (denominator q)
 
-instance (KnownNat p) => Bits (StaticModInt p) where
-  (StaticModInt x1) .&. (StaticModInt x2) = StaticModInt $! x1 .&. x2
-  (StaticModInt x1) .|. (StaticModInt x2) = new32 $! x1 .|. x2
-  (StaticModInt x1) `xor` (StaticModInt x2) = new32 $! x1 `xor` x2
-  complement (StaticModInt x) = new32 $! complement x
-  shift (StaticModInt x) i = new32 $! shift x i
-  rotate (StaticModInt x) i = new32 $! rotate x i
-  zeroBits = StaticModInt 0
-  bit i = new32 $! bit i
-  setBit (StaticModInt x) i = new32 $! setBit x i
-  clearBit (StaticModInt x) i = new32 $! clearBit x i
-  complementBit (StaticModInt x) i = new32 $! complementBit x i
-  testBit (StaticModInt x) = testBit x
-  bitSizeMaybe (StaticModInt x) = bitSizeMaybe x -- FIXME: should be defined to @p@?
-  bitSize (StaticModInt x) = bitSize x -- FIXME: should be defined to @p@?
-  isSigned _ = False
-  shiftL (StaticModInt x) i = new32 $! shiftL x i
-  unsafeShiftL (StaticModInt x) i = new32 $! unsafeShiftL x i
-  shiftR (StaticModInt x) i = new32 $! shiftR x i
-  unsafeShiftR (StaticModInt x) i = new32 $! unsafeShiftR x i
-  rotateL (StaticModInt x) i = new32 $! rotateL x i
-  rotateR (StaticModInt x) i = new32 $! rotateR x i
-  popCount (StaticModInt x) = popCount x
-
 newtype instance VU.MVector s (StaticModInt a) = MV_StaticModInt (VU.MVector s Word32)
 
 newtype instance VU.Vector (StaticModInt a) = V_StaticModInt (VU.Vector Word32)
