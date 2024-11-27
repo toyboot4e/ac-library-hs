@@ -15,6 +15,7 @@ import Tests.LazySegTree qualified
 import Tests.Math qualified
 import Tests.MaxFlow qualified
 import Tests.MinCostFlow qualified
+import Tests.ModInt qualified
 import Tests.Scc qualified
 import Tests.SegTree qualified
 import Tests.String qualified
@@ -37,6 +38,7 @@ main =
         testGroup "Tests.Math" Tests.Math.tests,
         testGroup "Tests.MaxFlow" Tests.MaxFlow.tests,
         testGroup "Tests.MinCostFlow" Tests.MinCostFlow.tests,
+        testGroup "Tests.ModInt" Tests.ModInt.tests,
         testGroup "Tests.Scc" Tests.Scc.tests,
         testGroup "Tests.SegTree" Tests.SegTree.tests,
         testGroup "Tests.String" Tests.String.tests,

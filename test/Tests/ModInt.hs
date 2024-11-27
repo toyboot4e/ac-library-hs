@@ -74,7 +74,7 @@ unit_intMax = testCase "intMax" $ do
       ModInt.val (modInt i * modInt j) @=? i * j
 
   modInt 1234 + modInt 5678 @?= 1234 + 5678
-  modInt 1234 - modInt 5678 @?= 2147483647 - 1234 + 5678
+  modInt 1234 - modInt 5678 @?= 2147483647 - 5678 + 1234
   modInt 1234 * modInt 5678 @?= 1234 * 5678
   modInt 2147483647 * modInt 2147483647 @?= 0
 
@@ -95,13 +95,14 @@ unit_inv = testCase "inv" $ do
 
   for_ [1 .. 11 - 1] $ \i -> do
     when (gcd i 12 == 1) $ do
-      1 @=? (ModInt.val (ModInt.inv (ModInt.new @12 i)) * i) `rem` 11
+      1 @=? (ModInt.val (ModInt.inv (ModInt.new @12 i)) * i) `rem` 12
 
   for_ [1 .. 100000 - 1] $ \i -> do
     1 @=? (ModInt.val (ModInt.inv (ModInt.new @1_000_000_007 i)) * i) `rem` 1_000_000_007
 
   for_ [1 .. 100000 - 1] $ \i -> do
-    1 @=? (ModInt.val (ModInt.inv (ModInt.new @1_000_000_008 i)) * i) `rem` 1_000_000_008
+    when (gcd i 1_000_000_008 == 1) $ do
+      1 @=? (ModInt.val (ModInt.inv (ModInt.new @1_000_000_008 i)) * i) `rem` 1_000_000_008
 
 -- ConstUsage
 
@@ -110,6 +111,7 @@ unit_increment = testCase "increment" $ do
   let modInt :: Int -> ModInt.StaticModInt 11
       modInt = ModInt.new
 
+  -- not incrementations though
   let a = modInt 8
   9 @=? a + 1
   10 @=? a + 2
@@ -153,7 +155,7 @@ instance (ModInt.Modulus a) => QC.Arbitrary (ModInt.StaticModInt a) where
 prop_new :: ModInt.ModInt998244353 -> Bool
 prop_new x =
   let r = ModInt.val x
-   in 0 <= r && r < 998244353 - 1
+   in 0 <= r && r < 998244353
 
 prop_primeMul :: ModInt.ModInt998244353 -> ModInt.ModInt998244353 -> ModInt.ModInt998244353 -> Bool
 prop_primeMul x y c = (x + y) * c == (x * c + y * c)
@@ -171,9 +173,20 @@ prop_nonPrimeInv x = x - x == 0
 
 -- bitwise operators
 
+-- | Generator of `Int` in @[0, 31]@.
+newtype WordBit = WordBit Int
+  deriving newtype (Eq, Show, Ord)
+
+instance QC.Arbitrary WordBit where
+  arbitrary = WordBit <$> QC.chooseInt (0, finiteBitSize (0 :: Word32) - 1)
+
 wrap :: (KnownNat p) => (forall a. (Bits a) => a -> a) -> ModInt.StaticModInt p -> Bool
 wrap op a@(ModInt.StaticModInt a') =
   fromIntegral (ModInt.val (op a)) == op a' `mod` fromIntegral (ModInt.modulus a)
+
+wrap1 :: (KnownNat p, QC.Arbitrary b) => (forall a. (Bits a) => a -> b -> a) -> ModInt.StaticModInt p -> b -> Bool
+wrap1 op a@(ModInt.StaticModInt a') b =
+  fromIntegral (ModInt.val (op a b)) == op a' b `mod` fromIntegral (ModInt.modulus a)
 
 wrap2 :: (KnownNat p) => (forall a. (Bits a) => a -> a -> a) -> ModInt.StaticModInt p -> ModInt.StaticModInt p -> Bool
 wrap2 op a@(ModInt.StaticModInt a') b@(ModInt.StaticModInt b') =
@@ -181,6 +194,14 @@ wrap2 op a@(ModInt.StaticModInt a') b@(ModInt.StaticModInt b') =
 
 wrapInt :: (KnownNat p) => (forall a. (Bits a) => a -> Int -> a) -> ModInt.StaticModInt p -> Int -> Bool
 wrapInt op a@(ModInt.StaticModInt a') i =
+  fromIntegral (ModInt.val (op a i)) == op a' i `mod` fromIntegral (ModInt.modulus a)
+
+wrapBit :: (KnownNat p) => (forall a. (Bits a) => a -> Int -> a) -> ModInt.StaticModInt p -> WordBit -> Bool
+wrapBit op a@(ModInt.StaticModInt a') (WordBit i) =
+  fromIntegral (ModInt.val (op a i)) == op a' i `mod` fromIntegral (ModInt.modulus a)
+
+wrapPositive :: (KnownNat p) => (forall a. (Bits a) => a -> Int -> a) -> ModInt.StaticModInt p -> QC.Positive Int -> Bool
+wrapPositive op a@(ModInt.StaticModInt a') (QC.Positive i) =
   fromIntegral (ModInt.val (op a i)) == op a' i `mod` fromIntegral (ModInt.modulus a)
 
 prop_bitAnd :: ModInt.ModInt998244353 -> ModInt.ModInt998244353 -> Bool
@@ -204,20 +225,20 @@ prop_rotate = wrapInt rotate
 prop_zeroBits :: Bool
 prop_zeroBits = zeroBits @ModInt.ModInt998244353 == zeroBits
 
-prop_bit :: Int -> Bool
-prop_bit i = ModInt.val32 @998244353 (bit i) == ((bit i :: Word32) `mod` 998244353)
+prop_bit :: WordBit -> Bool
+prop_bit (WordBit i) = ModInt.val32 @998244353 (bit i) == ((bit i :: Word32) `mod` 998244353)
 
-prop_setBit :: ModInt.ModInt998244353 -> Int -> Bool
-prop_setBit = wrapInt setBit
+prop_setBit :: ModInt.ModInt998244353 -> WordBit -> Bool
+prop_setBit = wrapBit setBit
 
-prop_clearBit :: ModInt.ModInt998244353 -> Int -> Bool
-prop_clearBit = wrapInt clearBit
+prop_clearBit :: ModInt.ModInt998244353 -> WordBit -> Bool
+prop_clearBit = wrapBit clearBit
 
-prop_compelementBit :: ModInt.ModInt998244353 -> Int -> Bool
-prop_compelementBit = wrapInt complementBit
+prop_compelementBit :: ModInt.ModInt998244353 -> QC.Positive Int -> Bool
+prop_compelementBit = wrapPositive complementBit
 
-prop_testBit :: ModInt.ModInt998244353 -> Int -> Bool
-prop_testBit a@(ModInt.StaticModInt a') i = testBit a i == testBit a' i
+prop_testBit :: ModInt.ModInt998244353 -> QC.Positive Int -> Bool
+prop_testBit a@(ModInt.StaticModInt a') (QC.Positive i) = testBit a i == testBit a' i
 
 -- TOOD: test, or define their proper behavior
 -- prop_bitSizeMaybe :: ModInt.ModInt998244353 -> Bool

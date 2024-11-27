@@ -173,8 +173,8 @@ instance (Modulus p) => Fractional (StaticModInt p) where
 
 instance (KnownNat p) => Bits (StaticModInt p) where
   (StaticModInt x1) .&. (StaticModInt x2) = StaticModInt $! x1 .&. x2
-  (StaticModInt x1) .|. (StaticModInt x2) = StaticModInt $! x1 .|. x2
-  (StaticModInt x1) `xor` (StaticModInt x2) = StaticModInt $! x1 `xor` x2
+  (StaticModInt x1) .|. (StaticModInt x2) = new32 $! x1 .|. x2
+  (StaticModInt x1) `xor` (StaticModInt x2) = new32 $! x1 `xor` x2
   complement (StaticModInt x) = new32 $! complement x
   shift (StaticModInt x) i = new32 $! shift x i
   rotate (StaticModInt x) i = new32 $! rotate x i
