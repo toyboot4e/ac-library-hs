@@ -170,6 +170,11 @@ executable alpc-f
   main-is:       alpc-f.hs
   build-depends: verify
 
+executable alpc-f-mod
+  import:        app-local
+  main-is:       alpc-f-mod.hs
+  build-depends: verify
+
 executable alpc-i
   import:        app-local
   main-is:       alpc-i.hs

@@ -120,6 +120,7 @@ library
     AtCoder.Internal.Barrett
     AtCoder.Internal.Bit
     AtCoder.Internal.Buffer
+    AtCoder.Internal.Convolution
     AtCoder.Internal.Csr
     AtCoder.Internal.GrowVec
     AtCoder.Internal.Math
