@@ -25,6 +25,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Exts (proxy#)
+import GHC.Stack (HasCallStack)
 import GHC.TypeLits (natVal')
 
 -- TODO: see also the namings in ac-library-rs
@@ -41,7 +42,7 @@ import GHC.TypeLits (natVal')
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 convolution ::
   forall p.
-  (AM.Modulus p) =>
+  (HasCallStack, AM.Modulus p) =>
   VU.Vector (AM.StaticModInt p) ->
   VU.Vector (AM.StaticModInt p) ->
   VU.Vector (AM.StaticModInt p)
@@ -69,7 +70,7 @@ convolution a b
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 convolutionMod ::
   forall p a.
-  (AM.Modulus p, Integral a, VU.Unbox a) =>
+  (HasCallStack, AM.Modulus p, Integral a, VU.Unbox a) =>
   Proxy p ->
   VU.Vector a ->
   VU.Vector a ->
@@ -96,6 +97,7 @@ convolutionMod _ a b
 -- = Complexity
 -- - \(O(n\log{n})\), where \(n = |a| + |b|\).
 convolution64 ::
+  (HasCallStack) =>
   VU.Vector Int ->
   VU.Vector Int ->
   VU.Vector Int
