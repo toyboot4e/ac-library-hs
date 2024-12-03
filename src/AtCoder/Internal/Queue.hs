@@ -72,7 +72,7 @@ length Queue {..} = do
 
 -- | \(O(1)\) Returns `True` if the buffer is empty.
 null :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Bool
-null = fmap (== 0) . length
+null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Sets the `length` to zero.
 clear :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m ()

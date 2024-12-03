@@ -48,7 +48,7 @@ length Heap {sizeBH_} = VGM.unsafeRead sizeBH_ 0
 
 -- | \(O(1)\) Returns `True` if the heap is empty.
 null :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m Bool
-null = fmap (== 0) . length
+null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Sets the `length` to zero.
 clear :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()

@@ -99,7 +99,7 @@ length GrowVec {posGV} = do
 
 -- | \(O(1)\) Returns `True` if the vector is empty.
 null :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Bool
-null = fmap (== 0) . length
+null = (<$>) (== 0) . length
 
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 freeze :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m (VU.Vector a)
