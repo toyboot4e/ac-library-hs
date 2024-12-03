@@ -31,6 +31,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Exts (proxy#)
 import GHC.TypeLits (natVal')
+import Data.Word (Word64)
 
 data FftInfo p = FftInfo
   { rootFft :: !(VU.Vector (AM.StaticModInt p)),
@@ -138,13 +139,13 @@ butterfly a = do
                 let !mod2 = m * m
                 for_ [0 .. p - 1] $ \i -> do
                   !a0 :: Int <- AM.val <$> VGM.read a (i + offset)
-                  !a1 :: Int <- (* rot1) . AM.val <$> VGM.read a (i + offset + p)
-                  !a2 :: Int <- (* rot2) . AM.val <$> VGM.read a (i + offset + 2 * p)
-                  !a3 :: Int <- (* rot3) . AM.val <$> VGM.read a (i + offset + 3 * p)
-                  let !a1na3imag = (a1 + mod2 - a3) `mod` m * imag
+                  !a1 :: Int <- (`mod` m) . (* rot1) . AM.val <$> VGM.read a (i + offset + p)
+                  !a2 :: Int <- (`mod` m) . (* rot2) . AM.val <$> VGM.read a (i + offset + 2 * p)
+                  !a3 :: Int <- (`mod` m) . (* rot3) . AM.val <$> VGM.read a (i + offset + 3 * p)
+                  let !a1na3imag = (a1 + mod2 - a3) `mod` m * imag `mod` m
                   let !na2 = mod2 - a2
                   VGM.write a (i + offset) . AM.new $! a0 + a2 + a1 + a3
-                  VGM.write a (i + offset + 1 * p) . AM.new $! a0 + a2 + (2 * mod2 - (a1 + a3))
+                  VGM.write a (i + offset + 1 * p) . AM.new $! a0 + a2 + (2 * mod2 `mod` m - (a1 + a3))
                   VGM.write a (i + offset + 2 * p) . AM.new $! a0 + na2 + a1na3imag
                   VGM.write a (i + offset + 3 * p) . AM.new $! a0 + na2 + (mod2 - a1na3imag)
                 if s + 1 /= bit len
@@ -203,12 +204,12 @@ butterflyInv a = do
                   !a2 :: Int <- AM.val <$> VGM.read a (i + offset + 2 * p)
                   !a3 :: Int <- AM.val <$> VGM.read a (i + offset + 3 * p)
 
-                  let !a2na3iimag = (m + a2 - a3) * iimag `mod` m
+                  let !a2na3iimag = (m + a2 - a3) `mod` m * iimag `mod` m
 
                   VGM.write a (i + offset) . AM.new $! a0 + a1 + a2 + a3
-                  VGM.write a (i + offset + 1 * p) . AM.new $! (a0 + (m - a1) + a2na3iimag) * irot1
-                  VGM.write a (i + offset + 2 * p) . AM.new $! (a0 + a1 + (m - a2) + (m - a3)) * irot2
-                  VGM.write a (i + offset + 3 * p) . AM.new $! (a0 + (m - a1) + (m - a2na3iimag)) * irot3
+                  VGM.write a (i + offset + 1 * p) . AM.new $! (a0 + (m - a1) + a2na3iimag) `mod` m * irot1
+                  VGM.write a (i + offset + 2 * p) . AM.new $! (a0 + a1 + (m - a2) + (m - a3)) `mod` m * irot2
+                  VGM.write a (i + offset + 3 * p) . AM.new $! (a0 + (m - a1) + (m - a2na3iimag)) `mod` m * irot3
                 if s + 1 /= bit (len - 2)
                   then pure . (irot *) $ iRate3Fft VG.! countTrailingZeros (complement s)
                   else pure irot
@@ -243,7 +244,7 @@ convolutionFft ::
   VU.Vector (AM.StaticModInt p) ->
   VU.Vector (AM.StaticModInt p) ->
   VU.Vector (AM.StaticModInt p)
-convolutionFft a_ b_ = VU.create $ do
+convolutionFft a_ b_ = {- VU.force $ -} VU.create $ do
   let n = VU.length a_
   let m = VU.length b_
   let z = ACIB.bitCeil (n + m - 1)
@@ -258,13 +259,8 @@ convolutionFft a_ b_ = VU.create $ do
   VUM.iforM_ b $ \i bi -> do
     VGM.modify a (* bi) i
   butterflyInv a
-  a' <-
-    if n + m - 1 == z
-      then pure a
-      else do
-        vec <- VUM.replicate (n + m - 1) 0
-        VGM.copy vec $ VUM.take (n + m - 1) a
-        pure vec
+  -- TODO: free rest space? (`force`)
+  let a' = VUM.take (n + m - 1) a
   let !iz = AM.inv $ AM.new z
   for_ [0 .. n + m - 2] $ \i -> do
     VGM.modify a' (* iz) i
