@@ -5,15 +5,11 @@ module Tests.Convolution (tests) where
 import AtCoder.Convolution qualified as ACC
 import AtCoder.Internal.Convolution qualified as ACIC
 import AtCoder.ModInt qualified as AM
-import Data.Foldable
 import Data.Proxy (Proxy (..))
-import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import Data.Word (Word64)
-import Debug.Trace
-import Test.Hspec.QuickCheck qualified as QC
 import Test.QuickCheck qualified as QC
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -196,7 +192,7 @@ prop_conv641 = QC.testProperty "prop_conv641" $ do
   let modulus = 641
   a <- VU.fromList <$> QC.vectorOf 64 (QC.chooseInt (0, modulus - 1))
   b <- VU.fromList <$> QC.vectorOf 65 (QC.chooseInt (0, modulus - 1))
-  pure $ convModNaive modulus a b @=? ACC.convolutionMod (Proxy @641) a b
+  pure $ convModNaive modulus a b QC.=== ACC.convolutionMod (Proxy @641) a b
 
 instance AM.Modulus 18433 where
   isPrimeModulus _ = True
@@ -207,10 +203,10 @@ prop_conv18433 = QC.testProperty "prop_conv18433" $ do
   let modulus = 18433
   a <- VU.fromList <$> QC.vectorOf 1024 (QC.chooseInt (0, modulus - 1))
   b <- VU.fromList <$> QC.vectorOf 1025 (QC.chooseInt (0, modulus - 1))
-  pure $ convModNaive modulus a b @=? ACC.convolutionMod (Proxy @18433) a b
+  pure $ convModNaive modulus a b QC.=== ACC.convolutionMod (Proxy @18433) a b
 
 unit_conv2 :: TestTree
-unit_conv2 = QC.testProperty "prop_conv2" $ do
+unit_conv2 = testCase "prop_conv2" $ do
   VU.empty @Int @=? ACC.convolutionMod (Proxy @2) VU.empty VU.empty
 
 instance AM.Modulus 257 where
@@ -222,7 +218,7 @@ prop_conv257 = QC.testProperty "prop_conv257" $ do
   let modulus = 257
   a <- VU.fromList <$> QC.vectorOf 128 (QC.chooseInt (0, modulus - 1))
   b <- VU.fromList <$> QC.vectorOf 129 (QC.chooseInt (0, modulus - 1))
-  pure $ convModNaive modulus a b @=? ACC.convolutionMod (Proxy @257) a b
+  pure $ convModNaive modulus a b QC.=== ACC.convolutionMod (Proxy @257) a b
 
 instance AM.Modulus 2147483647 where
   isPrimeModulus _ = True
@@ -232,22 +228,23 @@ prop_conv2147483647 :: TestTree
 prop_conv2147483647 = QC.testProperty "prop_conv2147483647" $ do
   a <- VU.map (AM.new @2147483647) . VU.fromList <$> QC.vectorOf 1 (QC.arbitrary @Int)
   b <- VU.map (AM.new @2147483647) . VU.fromList <$> QC.vectorOf 2 (QC.arbitrary @Int)
-  pure $ convMintNaive a b @=? ACC.convolution a b
+  pure $ convMintNaive a b QC.=== ACC.convolution a b
 
 instance AM.Modulus 2130706433 where
   isPrimeModulus _ = True
   primitiveRootModulus _ = 3
 
--- FIXME: what is wrong
 prop_conv2130706433 :: TestTree
 prop_conv2130706433 = QC.testProperty "prop_conv2130706433" $ do
-  -- a <- VU.map (AM.new @2130706433) . VU.fromList <$> QC.vectorOf 1024 (QC.arbitrary @Int)
-  -- b <- VU.map (AM.new @2130706433) . VU.fromList <$> QC.vectorOf 1024 (QC.arbitrary @Int)
-  a <- VU.map (AM.new @2130706433) . VU.fromList <$> QC.vectorOf 65 (QC.arbitrary @Int)
-  b <- VU.map (AM.new @2130706433) . VU.fromList <$> QC.vectorOf 65 (QC.arbitrary @Int)
-  pure $ convMintNaive a b @=? ACC.convolution a b
+  a <- VU.map (AM.new @2130706433) . VU.fromList <$> QC.vectorOf 1024 (QC.arbitrary @Int)
+  b <- VU.map (AM.new @2130706433) . VU.fromList <$> QC.vectorOf 1024 (QC.arbitrary @Int)
+  pure $ convMintNaive a b QC.=== ACC.convolution a b
 
--- TODO: verify convolution64 with the PAST problem
+unit_bigPrime :: TestTree
+unit_bigPrime = testCase "bigPrime" $ do
+  let a = VU.map (AM.new @2130706433) $ VU.fromList [1,2130706432,1,0,2130706432]
+  let b = VU.map (AM.new @2130706433) $ VU.fromList [1,1,2130706432,0,0]
+  convMintNaive a b @=? ACIC.convolutionFft a b
 
 tests :: [TestTree]
 tests =
@@ -255,6 +252,7 @@ tests =
     -- prop_mid, -- slow
     unit_butterfly,
     unit_invButterfly,
+    unit_bigPrime,
     prop_simpleSMod1,
     prop_simpleSMod2,
     prop_simpleInt0,
