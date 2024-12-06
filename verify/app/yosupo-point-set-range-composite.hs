@@ -5,7 +5,6 @@ import AtCoder.LazySegTree.Monoid (Affine2d (..))
 import AtCoder.ModInt qualified as M
 import AtCoder.SegTree qualified as ST
 import Data.Monoid (Dual (..))
-import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
@@ -28,8 +27,7 @@ main = do
       pure Nothing
     (1, !l, !r, !x) -> do
       Dual f <- ST.prod seg l r
-      -- FIXME: relax the Monoid constraint
-      pure . Just . M.val . getSum $ f `segAct` Sum (modInt x)
+      pure . Just . M.val $ f `segAct` modInt x
     _ -> error "unreachable"
 
   printBSB $ unlinesBSB res

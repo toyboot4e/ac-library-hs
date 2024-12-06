@@ -46,7 +46,7 @@ instance (Num a) => Monoid (Affine2d a) where
   {-# INLINE mempty #-}
   mempty = identAffine2d
 
-instance (Integral a, Monoid a) => SegAct (Affine2d a) a where
+instance (Integral a) => SegAct (Affine2d a) a where
   {-# INLINE segAct #-}
   segAct = segActWithLength 1
   {-# INLINE segActWithLength #-}
