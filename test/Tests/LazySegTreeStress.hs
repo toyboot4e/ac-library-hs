@@ -68,7 +68,7 @@ newtype T = T TRepr
 type TRepr = Int
 
 instance Semigroup T where
-  -- new <> old??
+  -- new <> old
   (T t1) <> r@(T t2)
     | t1 == -1 = r
     | t1 <= t2 = error "unreachable"

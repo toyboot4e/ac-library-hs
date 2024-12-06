@@ -1,32 +1,25 @@
-import AtCoder.LazySegTree.Monoid (Affine2d (..))
-import AtCoder.ModInt qualified as M
+{-# LANGUAGE LambdaCase #-}
+
 import AtCoder.SegTree qualified as ST
 import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
-type Mint = M.ModInt998244353
-
-modInt :: Int -> Mint
-modInt = M.new
-
--- TODO: move Affine2d to somewhere else
-
 -- verification-helper: PROBLEM https://judge.yosupo.jp/problem/point_add_range_sum
 main :: IO ()
 main = do
-  (!n, !q) <- ints2
-  abs <- VU.map (\(!a, !b) -> Affine2 (modInt a, modInt b)) ints
-  qs <- VU.replicateM q ints4
+  (!_, !q) <- ints2
+  xs <- VU.map Sum <$> ints
+  qs <- VU.replicateM q ints3
 
-  seg <- ST.build $ VU.map Sum xs
-  res <- (`VU.mapMaybeM` qs) $ \q -> case q of
-    (0, !p, !c, !d) -> do
-      ST.write seg i $ Affine2d (c, d)
+  seg <- ST.build xs
+  res <- (`VU.mapMaybeM` qs) $ \case
+    (0, !p, !x) -> do
+      ST.modify seg (+ Sum x) p
       return Nothing
     (1, !l, !r) -> do
-      affine <- ST.prod seg l r
-      return . Just $ segAct affine x
+      Sum x <- ST.prod seg l r
+      return $ Just x
     _ -> error "unreachable"
 
   printBSB $ unlinesBSB res

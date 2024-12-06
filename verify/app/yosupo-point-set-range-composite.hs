@@ -1,7 +1,6 @@
 {-# LANGUAGE LambdaCase #-}
 
-import AtCoder.LazySegTree (segAct)
-import AtCoder.LazySegTree.Monoid (Affine2d (..))
+import AtCoder.Extra.Monoid (segAct, Affine2d(..))
 import AtCoder.ModInt qualified as M
 import AtCoder.SegTree qualified as ST
 import Data.Monoid (Dual (..))
@@ -17,7 +16,9 @@ modInt = M.new
 main :: IO ()
 main = do
   (!n, !q) <- ints2
-  xs <- VU.map (\(!a, !b) -> Dual (Affine2d (modInt a, modInt b))) <$> VU.replicateM n ints2
+  xs <- VU.replicateM n $ do
+    (!a, !b) <- ints2
+    pure . Dual $ Affine2d (modInt a, modInt b)
   qs <- VU.replicateM q ints4
 
   seg <- ST.build xs

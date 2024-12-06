@@ -1,7 +1,7 @@
 {-# LANGUAGE LambdaCase #-}
 
+import AtCoder.Extra.Monoid (Affine2d (..))
 import AtCoder.LazySegTree qualified as LST
-import AtCoder.LazySegTree.Monoid (Affine2d (..))
 import AtCoder.ModInt qualified as M
 import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU

@@ -2,8 +2,8 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeFamilies #-}
 
+import AtCoder.Extra.Monoid (Affine2d (..))
 import AtCoder.LazySegTree qualified as LST
-import AtCoder.LazySegTree.Monoid (Affine2d (..))
 import AtCoder.ModInt qualified as ModInt
 import Data.Semigroup
 import Data.Vector.Unboxed qualified as VU

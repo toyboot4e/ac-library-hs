@@ -1,10 +1,16 @@
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TypeFamilies #-}
 
+import AtCoder.Extra.Math qualified as EM
+import AtCoder.Extra.Monoid (Affine2d (..), SegAct (..))
 import AtCoder.LazySegTree qualified as LST
-import AtCoder.LazySegTree.Monoid (Affine2d (..))
 import AtCoder.ModInt qualified as M
-import Data.Semigroup (Sum (..))
+import Data.Monoid (Dual (..))
+import Data.Vector.Generic qualified as VG
+import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
+import Data.Vector.Unboxed.Mutable qualified as VUM
 import Util
 
 type Mint = M.ModInt998244353
@@ -12,57 +18,41 @@ type Mint = M.ModInt998244353
 modInt :: Int -> Mint
 modInt = M.new
 
--- | \(O(W)\) Calculates @s^n@ by @n@ (N > 0) times using the binary lifting technique.
-{-# INLINE power #-}
--- TODO: move to extra module.
-power :: Int -> (a -> a -> a) -> a -> a
-power n0 op x1
-  | n0 <= 0 = errorWithoutStackTrace "power: positive multiplier expected"
-  | otherwise = f x1 n0
-  where
-    f !x !n
-      | even n = f (x `op` x) (n .>>. 1)
-      | n == 1 = x
-      | otherwise = g (x `op` x) (n .>>. 1) x
-    g !x !n !z
-      | even n = g (x `op` x) (n .>>. 1) z
-      | n == 1 = x `op` z
-      | otherwise = g (x `op` x) (n .>>. 1) (x `op` z)
-
--- | Add
-type OpRepr = Affine2d MyModInt
+-- | Range set
+type OpRepr = (Bool, Affine2d Mint)
 
 instance Semigroup Op where
   {-# INLINE (<>) #-}
-  new <> _old = new
+  new@(Op (!b1, !_)) <> old
+    | not b1 = old
+    | otherwise = new
 
 instance Monoid Op where
-  -- REMARK: be sure to implement identity operator
   {-# INLINE mempty #-}
-  mempty = Op (Affine2d (ModInt (-1), ModInt (-1)))
+  mempty = Op (False, mempty)
 
-instance SemigroupAction Op Acc where
-  {-# INLINE sact #-}
-  sact = segAct
-
-instance SegmentAction Op Acc where
+instance SegAct Op Acc where
+  {-# INLINE segAct #-}
+  segAct = segActWithLength 1
   {-# INLINE segActWithLength #-}
-  segActWithLength len op@(Op f) x
-    | op == mempty = x
+  segActWithLength len (Op (!b, !f)) x
+    | not b = x
     | len == 1 = Dual f
-    | otherwise = Dual $ power (<>) len f
+    | otherwise = Dual $ EM.power len (<>) f
 
-type Acc = Dual (Affine2d MyModInt)
+type Acc = Dual (Affine2d Mint)
 
 {- ORMOLU_DISABLE -}
-newtype Op = Op OpRepr deriving newtype (Eq, Ord, Show) ; unOp :: Op -> OpRepr ; unOp (Op x) = x; newtype instance VU.MVector s Op = MV_Op (VU.MVector s OpRepr) ; newtype instance VU.Vector Op = V_Op (VU.Vector OpRepr) ; deriving instance GM.MVector VUM.MVector Op ; deriving instance G.Vector VU.Vector Op ; instance VU.Unbox Op ;
+newtype Op = Op OpRepr deriving newtype (Eq, Ord, Show) ; unOp :: Op -> OpRepr ; unOp (Op x) = x; newtype instance VU.MVector s Op = MV_Op (VU.MVector s OpRepr) ; newtype instance VU.Vector Op = V_Op (VU.Vector OpRepr) ; deriving instance VGM.MVector VUM.MVector Op ; deriving instance VG.Vector VU.Vector Op ; instance VU.Unbox Op ;
 {- ORMOLU_ENABLE -}
 
 -- verification-helper: PROBLEM https://judge.yosupo.jp/problem/range_set_range_composite
 main :: IO ()
 main = do
-  (!_, !q) <- ints2
-  xs <- VU.map (\(!a, !b) -> Dual (Affine2d (modInt a, modInt b))) <$> ints
+  (!n, !q) <- ints2
+  xs <- VU.replicateM n $ do
+    (!a, !b) <- ints2
+    pure . Dual $ Affine2d (modInt a, modInt b)
   qs <- VU.replicateM q $ withLine $ do
     intP >>= \case
       0 -> (0 :: Int,,,,) <$> intP <*> intP <*> intP <*> intP
@@ -72,11 +62,11 @@ main = do
   seg <- LST.build xs
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !l, !r, !a, !b) -> do
-      LST.applyIn seg l r . Op $ Affine2d (modInt a, modInt b)
-      return Nothing
+      LST.applyIn seg l r . Op $ (True, Affine2d (modInt a, modInt b))
+      pure Nothing
     (1, !l, !r, !x, !_) -> do
       Dual f <- LST.prod seg l r
-      pure . Just . M.val x $ segAct f x
+      pure . Just . M.val $ segAct f (modInt x)
     _ -> error "unreachable"
 
   printBSB $ unlinesBSB res
