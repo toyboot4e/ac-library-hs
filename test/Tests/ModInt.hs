@@ -62,7 +62,7 @@ unit_preDefinedPrimitiveRoots = testCase "preDefinedPrimitiveRotos" $ do
 
 unit_mod1 :: TestTree
 unit_mod1 = testCase "mod1" $ do
-  let modInt :: Int -> ModInt.StaticModInt 1
+  let modInt :: Int -> ModInt.ModInt 1
       modInt = ModInt.new
 
   for_ [0 .. 100 - 1] $ \i -> do
@@ -77,7 +77,7 @@ unit_mod1 = testCase "mod1" $ do
 
 unit_intMax :: TestTree
 unit_intMax = testCase "intMax" $ do
-  let modInt :: Int -> ModInt.StaticModInt 2147483647
+  let modInt :: Int -> ModInt.ModInt 2147483647
       modInt = ModInt.new
 
   for_ [0 .. 100 - 1] $ \i -> do
@@ -119,7 +119,7 @@ unit_inv = testCase "inv" $ do
 
 unit_increment :: TestTree
 unit_increment = testCase "increment" $ do
-  let modInt :: Int -> ModInt.StaticModInt 11
+  let modInt :: Int -> ModInt.ModInt 11
       modInt = ModInt.new
 
   -- not incrementations though
@@ -137,7 +137,7 @@ unit_increment = testCase "increment" $ do
 
 spec_staticUsage :: IO TestTree
 spec_staticUsage = testSpec "staticUsage" $ do
-  let modInt :: Int -> ModInt.StaticModInt 11
+  let modInt :: Int -> ModInt.ModInt 11
       modInt = ModInt.new
 
   it "ok" $ do
@@ -153,14 +153,14 @@ spec_staticUsage = testSpec "staticUsage" $ do
 
 unit_constructorStatic :: TestTree
 unit_constructorStatic = testCase "constructorStatic" $ do
-  let modInt :: Int -> ModInt.StaticModInt 11
+  let modInt :: Int -> ModInt.ModInt 11
       modInt = ModInt.new
 
   1 @=? ModInt.val (modInt (fromEnum True))
   0 @=? ModInt.val (modInt 0)
 
 -- | Orphan `Arbitrary` instance for QuickCheck tests.
-instance (ModInt.Modulus a) => QC.Arbitrary (ModInt.StaticModInt a) where
+instance (ModInt.Modulus a) => QC.Arbitrary (ModInt.ModInt a) where
   arbitrary = ModInt.new <$> QC.arbitrary
 
 prop_new :: ModInt.ModInt998244353 -> Bool
@@ -176,10 +176,10 @@ prop_primeInv x
   | x == 0 = True
   | otherwise = ModInt.inv x * x == 1 && x * ModInt.inv x == 1
 
-prop_nonPrimeMul :: ModInt.StaticModInt 1_000_000_008 -> ModInt.StaticModInt 1_000_000_008 -> ModInt.StaticModInt 1_000_000_008 -> Bool
+prop_nonPrimeMul :: ModInt.ModInt 1_000_000_008 -> ModInt.ModInt 1_000_000_008 -> ModInt.ModInt 1_000_000_008 -> Bool
 prop_nonPrimeMul x y c = (x + y) * c == (x * c + y * c)
 
-prop_nonPrimeInv :: ModInt.StaticModInt 1_000_000_008 -> Bool
+prop_nonPrimeInv :: ModInt.ModInt 1_000_000_008 -> Bool
 prop_nonPrimeInv x
   | x == 0 = True
   | gcd (ModInt.val x) (ModInt.modulus x) /= 1 = True

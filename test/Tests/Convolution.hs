@@ -28,7 +28,7 @@ convModNaive modulus a b = VU.create $ do
       VGM.modify c ((`mod` modulus) . (+ ai * bj)) (i + j)
   pure c
 
-convMintNaive :: (AM.Modulus p) => VU.Vector (AM.StaticModInt p) -> VU.Vector (AM.StaticModInt p) -> VU.Vector (AM.StaticModInt p)
+convMintNaive :: (AM.Modulus p) => VU.Vector (AM.ModInt p) -> VU.Vector (AM.ModInt p) -> VU.Vector (AM.ModInt p)
 convMintNaive a b = VU.create $ do
   c <- VUM.replicate (VU.length a + VU.length b - 1) 0
   VU.iforM_ a $ \i ai -> do
@@ -57,10 +57,10 @@ unit_empty = testCase "empty" $ do
   VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @Word64 [1, 2]) (VU.empty @Word64)
   VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @Word64 [1]) (VU.empty @Word64)
 
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.empty @(AM.StaticModInt 998244353)) (VU.empty @(AM.StaticModInt 998244353))
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.empty @(AM.StaticModInt 998244353)) (VU.fromList @(AM.StaticModInt 998244353) [1, 2])
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @(AM.StaticModInt 998244353) [1, 2]) (VU.empty @(AM.StaticModInt 998244353))
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @(AM.StaticModInt 998244353) [1]) (VU.empty @(AM.StaticModInt 998244353))
+  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.empty @(AM.ModInt 998244353)) (VU.empty @(AM.ModInt 998244353))
+  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.empty @(AM.ModInt 998244353)) (VU.fromList @(AM.ModInt 998244353) [1, 2])
+  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @(AM.ModInt 998244353) [1, 2]) (VU.empty @(AM.ModInt 998244353))
+  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @(AM.ModInt 998244353) [1]) (VU.empty @(AM.ModInt 998244353))
 
 -- FIXME: the naive calculation seems like too slwo
 prop_mid :: TestTree
@@ -93,7 +93,7 @@ unit_invButterfly = testCase "invButterfly" $ do
 testWithRangeMint ::
   forall p.
   (AM.Modulus p) =>
-  (VU.Vector (AM.StaticModInt p) -> VU.Vector (AM.StaticModInt p) -> QC.Property) ->
+  (VU.Vector (AM.ModInt p) -> VU.Vector (AM.ModInt p) -> QC.Property) ->
   QC.Gen QC.Property
 testWithRangeMint f = do
   m <- QC.chooseInt (1, 20 - 1)
@@ -242,8 +242,8 @@ prop_conv2130706433 = QC.testProperty "prop_conv2130706433" $ do
 
 unit_bigPrime :: TestTree
 unit_bigPrime = testCase "bigPrime" $ do
-  let a = VU.map (AM.new @2130706433) $ VU.fromList [1,2130706432,1,0,2130706432]
-  let b = VU.map (AM.new @2130706433) $ VU.fromList [1,1,2130706432,0,0]
+  let a = VU.map (AM.new @2130706433) $ VU.fromList [1, 2130706432, 1, 0, 2130706432]
+  let b = VU.map (AM.new @2130706433) $ VU.fromList [1, 1, 2130706432, 0, 0]
   convMintNaive a b @=? ACIC.convolutionFft a b
 
 tests :: [TestTree]

@@ -21,7 +21,7 @@ module AtCoder.ModInt
   ( Modulus (..),
     ModInt998244353,
     ModInt1000000007,
-    StaticModInt (..),
+    ModInt (..),
     modVal,
     modVal#,
     -- TODO: polish API
@@ -56,6 +56,7 @@ import GHC.TypeLits (KnownNat, natVal, natVal')
 -- | `KnownNat` with meta information used for modulus.
 class (KnownNat a) => Modulus a where
   isPrimeModulus :: Proxy# a -> Bool
+
   -- | Note that the default implementation is slow.
   primitiveRootModulus :: Proxy# a -> Int
   primitiveRootModulus _ = ACIM.primitiveRoot $ fromInteger (natVal' (proxy# @a))
@@ -91,9 +92,9 @@ instance Modulus 1000000007 where
   isPrimeModulus _ = True
   primitiveRootModulus _ = 5
 
-type ModInt998244353 = StaticModInt 998244353
+type ModInt998244353 = ModInt 998244353
 
-type ModInt1000000007 = StaticModInt 1000000007
+type ModInt1000000007 = ModInt 1000000007
 
 -- type ModInt998244353 = DynamicModInt (-1);
 
@@ -118,30 +119,30 @@ modVal p = fromInteger $ natVal p
 modVal# :: forall a. (KnownNat a) => Proxy# a -> Int
 modVal# p = fromInteger $ natVal' p
 
-newtype StaticModInt a = StaticModInt {unStaticModInt :: Word32}
+newtype ModInt a = ModInt {unModInt :: Word32}
   deriving (P.Prim)
   deriving newtype (Eq, Ord, Read, Show)
 
--- | Creates `StaticModInt` taking the modulo of an `Int` value.
-new :: forall a. (KnownNat a) => Int -> StaticModInt a
-new v = StaticModInt . fromIntegral $! v `mod` fromInteger (natVal' (proxy# @a))
+-- | Creates `ModInt` taking the modulo of an `Int` value.
+new :: forall a. (KnownNat a) => Int -> ModInt a
+new v = ModInt . fromIntegral $! v `mod` fromInteger (natVal' (proxy# @a))
 
--- | Creates `StaticModInt` taking the modulo of an `Word32` value.
-new32 :: forall a. (KnownNat a) => Word32 -> StaticModInt a
-new32 v = StaticModInt $! v `mod` fromInteger (natVal' (proxy# @a))
+-- | Creates `ModInt` taking the modulo of an `Word32` value.
+new32 :: forall a. (KnownNat a) => Word32 -> ModInt a
+new32 v = ModInt $! v `mod` fromInteger (natVal' (proxy# @a))
 
 -- | \(O(1)\) Returns the mod.
-modulus :: forall a. (KnownNat a) => StaticModInt a -> Int
+modulus :: forall a. (KnownNat a) => ModInt a -> Int
 modulus _ = fromInteger (natVal' (proxy# @a))
 
 -- | \(O(1)\) Returns the internal value converted to `Int`.
-val :: (KnownNat a) => StaticModInt a -> Int
-val = fromIntegral . unStaticModInt
+val :: (KnownNat a) => ModInt a -> Int
+val = fromIntegral . unModInt
 
 -- | \(O(1)\) Returns the internal value as `Word32` without conversion. It is the function for
 -- constant-factor speedup.
-val32 :: (KnownNat a) => StaticModInt a -> Word32
-val32 = unStaticModInt
+val32 :: (KnownNat a) => ModInt a -> Word32
+val32 = unModInt
 
 -- | Returns \(x^n\).
 --
@@ -150,7 +151,7 @@ val32 = unStaticModInt
 --
 -- = Complexity
 -- - \(O(\log n)\)
-pow :: (HasCallStack, KnownNat a) => StaticModInt a -> Int -> StaticModInt a
+pow :: (HasCallStack, KnownNat a) => ModInt a -> Int -> ModInt a
 pow x0 n0 = inner x0 n0 1
   where
     !_ = ACIA.runtimeAssert (0 <= n0) $ "AtCoder.ModInt.pow: given negative exponential `n`: " ++ show n0 ++ show "`"
@@ -167,8 +168,8 @@ pow x0 n0 = inner x0 n0 1
 --
 -- = Complexity
 -- - \(O(\log \mathrm{mod})\)
-inv :: forall a. (HasCallStack, Modulus a) => StaticModInt a -> StaticModInt a
-inv self@(StaticModInt x)
+inv :: forall a. (HasCallStack, Modulus a) => ModInt a -> ModInt a
+inv self@(ModInt x)
   | isPrimeModulus (proxy# @a) =
       let !_ = ACIA.runtimeAssert (x /= 0) "AtCoder.ModInt.inv: tried to perform zero division"
        in pow self (fromInteger (natVal' (proxy# @a)) - 2)
@@ -177,66 +178,66 @@ inv self@(StaticModInt x)
           !_ = ACIA.runtimeAssert (eg1 == 1) "AtCoder.ModInt.inv: `x^(-1) mod m` cannot be calculated when `gcd x modulus /= 1`"
        in fromIntegral eg2
 
--- | Creates `StaticModInt` without taking mod. It is the function for constant-factor speedup.
+-- | Creates `ModInt` without taking mod. It is the function for constant-factor speedup.
 --
 -- = Constraints
 -- - \(0 \leq x \lt \mathrm{mod}\) (not asserted at runtime)
-raw :: (KnownNat a) => Int -> StaticModInt a
-raw = StaticModInt . fromIntegral
+raw :: (KnownNat a) => Int -> ModInt a
+raw = ModInt . fromIntegral
 
--- | Creates `StaticModInt` without taking mod. It is the function for constant-factor speedup.
+-- | Creates `ModInt` without taking mod. It is the function for constant-factor speedup.
 --
 -- = Constraints
 -- - \(0 \leq x \lt \mathrm{mod}\) (not asserted at runtime)
-raw32 :: (KnownNat a) => Word32 -> StaticModInt a
-raw32 = StaticModInt
+raw32 :: (KnownNat a) => Word32 -> ModInt a
+raw32 = ModInt
 
-deriving newtype instance (KnownNat p) => Real (StaticModInt p)
+deriving newtype instance (KnownNat p) => Real (ModInt p)
 
-instance (KnownNat p) => Num (StaticModInt p) where
-  (StaticModInt !x1) + (StaticModInt !x2)
-    | x' >= m = StaticModInt $! x' - m
-    | otherwise = StaticModInt x'
+instance (KnownNat p) => Num (ModInt p) where
+  (ModInt !x1) + (ModInt !x2)
+    | x' >= m = ModInt $! x' - m
+    | otherwise = ModInt x'
     where
       !x' = x1 + x2
       !m = fromInteger (natVal' (proxy# @p))
-  (StaticModInt !x1) - (StaticModInt !x2)
-    | x' >= m = StaticModInt $! x' + m -- loops
-    | otherwise = StaticModInt x'
+  (ModInt !x1) - (ModInt !x2)
+    | x' >= m = ModInt $! x' + m -- loops
+    | otherwise = ModInt x'
     where
       !x' = x1 - x2
       !m = fromInteger (natVal' (proxy# @p))
-  (StaticModInt !x1) * (StaticModInt !x2) = StaticModInt $! fromIntegral (x' `rem` m)
+  (ModInt !x1) * (ModInt !x2) = ModInt $! fromIntegral (x' `rem` m)
     where
       !x' :: Word64 = fromIntegral x1 * fromIntegral x2
       !m :: Word64 = fromInteger (natVal' (proxy# @p))
   negate x = 0 - x
   abs = id
-  signum _ = StaticModInt 1
-  fromInteger = StaticModInt . fromInteger . (`mod` natVal' (proxy# @p))
+  signum _ = ModInt 1
+  fromInteger = ModInt . fromInteger . (`mod` natVal' (proxy# @p))
 
-instance (KnownNat p) => Bounded (StaticModInt p) where
-  minBound = StaticModInt 0
-  maxBound = StaticModInt $! fromInteger (natVal' (proxy# @p)) - 1
+instance (KnownNat p) => Bounded (ModInt p) where
+  minBound = ModInt 0
+  maxBound = ModInt $! fromInteger (natVal' (proxy# @p)) - 1
 
-instance (KnownNat p) => Enum (StaticModInt p) where
+instance (KnownNat p) => Enum (ModInt p) where
   toEnum = new
-  fromEnum = fromIntegral . unStaticModInt
+  fromEnum = fromIntegral . unModInt
 
-instance (Modulus p) => Integral (StaticModInt p) where
+instance (Modulus p) => Integral (ModInt p) where
   quotRem x y = (x / y, x - x / y * y)
   toInteger = coerce (toInteger @Word32)
 
-instance (Modulus p) => Fractional (StaticModInt p) where
+instance (Modulus p) => Fractional (ModInt p) where
   recip = inv
   fromRational q = fromInteger (numerator q) / fromInteger (denominator q)
 
-newtype instance VU.MVector s (StaticModInt a) = MV_StaticModInt (VU.MVector s Word32)
+newtype instance VU.MVector s (ModInt a) = MV_ModInt (VU.MVector s Word32)
 
-newtype instance VU.Vector (StaticModInt a) = V_StaticModInt (VU.Vector Word32)
+newtype instance VU.Vector (ModInt a) = V_ModInt (VU.Vector Word32)
 
-deriving newtype instance VGM.MVector VU.MVector (StaticModInt a)
+deriving newtype instance VGM.MVector VU.MVector (ModInt a)
 
-deriving newtype instance VG.Vector VU.Vector (StaticModInt a)
+deriving newtype instance VG.Vector VU.Vector (ModInt a)
 
-instance VU.Unbox (StaticModInt a)
+instance VU.Unbox (ModInt a)

@@ -31,15 +31,14 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Exts (proxy#)
 import GHC.TypeLits (natVal')
-import Data.Word (Word64)
 
 data FftInfo p = FftInfo
-  { rootFft :: !(VU.Vector (AM.StaticModInt p)),
-    iRootFft :: !(VU.Vector (AM.StaticModInt p)),
-    rate2Fft :: !(VU.Vector (AM.StaticModInt p)),
-    iRate2Fft :: !(VU.Vector (AM.StaticModInt p)),
-    rate3Fft :: !(VU.Vector (AM.StaticModInt p)),
-    iRate3Fft :: !(VU.Vector (AM.StaticModInt p))
+  { rootFft :: !(VU.Vector (AM.ModInt p)),
+    iRootFft :: !(VU.Vector (AM.ModInt p)),
+    rate2Fft :: !(VU.Vector (AM.ModInt p)),
+    iRate2Fft :: !(VU.Vector (AM.ModInt p)),
+    rate3Fft :: !(VU.Vector (AM.ModInt p)),
+    iRate3Fft :: !(VU.Vector (AM.ModInt p))
   }
 
 -- | TODO: should be evaluated at compile time?
@@ -97,7 +96,7 @@ newInfo = do
 butterfly ::
   forall m p.
   (PrimMonad m, AM.Modulus p) =>
-  VUM.MVector (PrimState m) (AM.StaticModInt p) ->
+  VUM.MVector (PrimState m) (AM.ModInt p) ->
   m ()
 butterfly a = do
   let n = VUM.length a
@@ -159,7 +158,7 @@ butterfly a = do
 butterflyInv ::
   forall m p.
   (PrimMonad m, AM.Modulus p) =>
-  VUM.MVector (PrimState m) (AM.StaticModInt p) ->
+  VUM.MVector (PrimState m) (AM.ModInt p) ->
   m ()
 butterflyInv a = do
   let n = VUM.length a
@@ -221,9 +220,9 @@ butterflyInv a = do
 convolutionNaive ::
   forall p.
   (AM.Modulus p) =>
-  VU.Vector (AM.StaticModInt p) ->
-  VU.Vector (AM.StaticModInt p) ->
-  VU.Vector (AM.StaticModInt p)
+  VU.Vector (AM.ModInt p) ->
+  VU.Vector (AM.ModInt p) ->
+  VU.Vector (AM.ModInt p)
 convolutionNaive a b = VU.create $ do
   let n = VU.length a
   let m = VU.length b
@@ -241,9 +240,9 @@ convolutionNaive a b = VU.create $ do
 
 convolutionFft ::
   (AM.Modulus p) =>
-  VU.Vector (AM.StaticModInt p) ->
-  VU.Vector (AM.StaticModInt p) ->
-  VU.Vector (AM.StaticModInt p)
+  VU.Vector (AM.ModInt p) ->
+  VU.Vector (AM.ModInt p) ->
+  VU.Vector (AM.ModInt p)
 convolutionFft a_ b_ = {- VU.force $ -} VU.create $ do
   let n = VU.length a_
   let m = VU.length b_

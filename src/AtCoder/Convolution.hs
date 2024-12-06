@@ -49,7 +49,7 @@ import GHC.Exts (proxy#)
 import GHC.Stack (HasCallStack)
 import GHC.TypeLits (natVal')
 
--- | Calculates the convolution in \(\bmod m\) for a vector of `ACIM.StaticModInt`. It returns an empty
+-- | Calculates the convolution in \(\bmod m\) for a vector of `ACIM.ModInt`. It returns an empty
 -- array if at least one of \(a\) and \(b\) are empty.
 --
 -- = Constraints
@@ -62,9 +62,9 @@ import GHC.TypeLits (natVal')
 convolution ::
   forall p.
   (HasCallStack, AM.Modulus p) =>
-  VU.Vector (AM.StaticModInt p) ->
-  VU.Vector (AM.StaticModInt p) ->
-  VU.Vector (AM.StaticModInt p)
+  VU.Vector (AM.ModInt p) ->
+  VU.Vector (AM.ModInt p) ->
+  VU.Vector (AM.ModInt p)
 convolution a b
   | n == 0 || m == 0 = VU.empty
   | otherwise =
@@ -149,7 +149,7 @@ convolution64 a b
             c <- VUM.unsafeNew (n + m - 1)
             let !offset = VU.fromListN @Int 5 [0, 0, m1m2m3, 2 * m1m2m3, 3 * m1m2m3]
             VU.ifoldM'_
-              ( \ !x i (AM.StaticModInt !x1, AM.StaticModInt !x2, AM.StaticModInt !x3) -> do
+              ( \ !x i (AM.ModInt !x1, AM.ModInt !x2, AM.ModInt !x3) -> do
                   let !x' =
                         x
                           + (fromIntegral x1 * i1) `mod` mod1 * m2m3
