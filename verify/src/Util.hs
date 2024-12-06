@@ -36,20 +36,20 @@ type Parser = StateT BS.ByteString Maybe
 intP :: Parser Int
 intP = StateT $ BS.readInt . BS.dropSpace
 
-int2P :: Parser (Int, Int)
+int2P :: (HasCallStack) => Parser (Int, Int)
 int2P = do
   x1 <- intP
   x2 <- intP
   pure (x1, x2)
 
-int3P :: Parser (Int, Int, Int)
+int3P :: (HasCallStack) => Parser (Int, Int, Int)
 int3P = do
   x1 <- intP
   x2 <- intP
   x3 <- intP
   pure (x1, x2, x3)
 
-int4P :: Parser (Int, Int, Int, Int)
+int4P :: (HasCallStack) => Parser (Int, Int, Int, Int)
 int4P = do
   x1 <- intP
   x2 <- intP

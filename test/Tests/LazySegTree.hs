@@ -19,7 +19,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.Hspec
 
--- | AddMax. Orphan instance is.. ok.
+-- | AddMax. FIXME: Orphan instance.
 instance LST.SegAct (Sum Int) (Max Int) where
   {-# INLINE segAct #-}
   segAct (Sum !dx) (Max !x) = Max $ dx + x
@@ -47,6 +47,9 @@ spec_invalid = testSpec "invalid" $ do
   it "throws error" $ LST.prod s 3 2 `shouldThrow` anyException
   it "throws error" $ LST.prod s 0 11 `shouldThrow` anyException
   it "throws error" $ LST.prod s (-1) 11 `shouldThrow` anyException
+
+  it "throws error" $ LST.minLeft s (-1) (const True) `shouldThrow` anyException
+  it "throws error" $ LST.maxRight s 0 (const False) `shouldThrow` anyException
 
 -- TODO: verify yosupo
 
@@ -79,8 +82,12 @@ unit_usage = testCase "usage" $ do
   (@?= Max (-5)) =<< LST.prod seg 2 3
   (@?= Max 0) =<< LST.prod seg 2 4
 
--- TODO: maxRight, minLeft tests
+-- maxRight and minLeft are tested in the stress test file.
 
 tests :: [TestTree]
 tests =
-  [unit_zero, unsafePerformIO spec_invalid, unit_naiveProd, unit_usage]
+  [ unit_zero,
+    unsafePerformIO spec_invalid,
+    unit_naiveProd,
+    unit_usage
+  ]

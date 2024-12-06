@@ -41,6 +41,8 @@ module AtCoder.LazySegTree
   )
 where
 
+-- FIXME: validate and write abount operator direction
+
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
 import Control.Monad (unless, when)

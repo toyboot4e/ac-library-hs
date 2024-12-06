@@ -21,7 +21,7 @@ data Csr s cap cost = Csr
     costCsr :: !(VU.Vector cost)
   }
 
--- | \(O(n + m)\) Creates `McfCsr`.
+-- | \(O(n + m)\) Creates `Csr`.
 build :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost, PrimMonad m) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> m (VU.Vector Int, Csr (PrimState m) cap cost)
 build n edges = do
   let m = VU.length edges

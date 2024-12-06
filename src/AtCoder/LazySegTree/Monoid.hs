@@ -1,6 +1,5 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DerivingStrategies #-}
-{-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 
 -- | Extra module of pre-defined monoids and operators.
@@ -17,7 +16,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- | 2D affine transformation \(f: x \rightarrow a x + b\)
+-- | 2D affine transformation \(f: x \rightarrow a x + b\).
 --
 -- The acted target type is `V2`, which holds the length at the second element.
 --
@@ -27,6 +26,8 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 -- sure to wrap `Affine2d` with `Dual`.
 newtype Affine2d a = Affine2d (Affine2dRepr a)
   deriving newtype (Eq, Ord, Show)
+
+-- Tuple is not the fastest representation, but it's easier to implement `Unbox`.
 
 identAffine2d :: (Num a) => Affine2d a
 identAffine2d = Affine2d (1, 0)
