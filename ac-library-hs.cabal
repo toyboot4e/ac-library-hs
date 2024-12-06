@@ -8,7 +8,7 @@ version:         0.1.0.0
 synopsis:        Data structures and algorithms
 description:
   Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive
-  programming especially on AtCoder.
+  programming on AtCoder.
 
 license:         CC0-1.0
 license-file:    LICENSE

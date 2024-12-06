@@ -12,12 +12,12 @@
 --
 -- = Example
 -- >>> import AtCoder.Dsu qualified as Dsu
--- >>> dsu <- Dsu.new 4      -- 0 1 2 3
+-- >>> dsu <- Dsu.new 4   -- 0 1 2 3
 -- >>> Dsu.nDsu dsu
 -- 4
--- >>> Dsu.merge dsu 0 1     -- 0=1 2 3
+-- >>> Dsu.merge dsu 0 1  -- 0=1 2 3
 -- 0
--- >>> Dsu.merge_ dsu 1 2    -- 0=1=2 3
+-- >>> Dsu.merge_ dsu 1 2 -- 0=1=2 3
 -- >>> Dsu.leader dsu 2
 -- 0
 -- >>> Dsu.same dsu 0 2

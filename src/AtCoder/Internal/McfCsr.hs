@@ -16,7 +16,7 @@ data Csr s cap cost = Csr
   { startCsr :: !(VU.Vector Int),
     toCsr :: !(VU.Vector Int),
     revCsr :: !(VU.Vector Int),
-    -- | Mutable
+    -- | Mutable.
     capCsr :: !(VUM.MVector s cap),
     costCsr :: !(VU.Vector cost)
   }

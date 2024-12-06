@@ -2,17 +2,17 @@
 
 -- | It solves [Minimum-cost flow problem](https://en.wikipedia.org/wiki/Minimum-cost_flow_problem).
 --
--- = Examples
+-- = Example
 -- >>> import AtCoder.MinCostFlow qualified as MCF
 -- >>> g <- MCF.new @_ @Int @Int 4 -- new @s @cap @cost n
 -- >>> MCF.addEdge g 0 1 2 3 -- addEdge g from to cap cost
 -- 0
--- >>> MCF.addEdge g 1 2 2 5
--- 1
+-- >>> MCF.addEdge_ g 1 2 2 5
 -- >>> MCF.slope g 0 2 maxBound -- slope g from to flowLimit
 -- [(0,0),(2,16)]
 --
--- Note that you can't call `flow` or `slope` multiple times, or else you'll get wrong return value.
+-- Note that you can't call `flow`, `maxFlow` or `slope` multiple times, or else you'll get wrong
+-- return value.
 module AtCoder.MinCostFlow
   ( McfGraph (nG),
     new,
@@ -56,7 +56,7 @@ data McfGraph s cap cost = McfGraph
     edgesG :: !(ACIGV.GrowVec s (Int, Int, cap, cap, cost))
   }
 
--- | Creates a directed graph with \(n\) vertices and \(0\) edges. `Cap` and `Cost` are the type of
+-- | Creates a directed graph with \(n\) vertices and \(0\) edges. @cap@ and @cost@ are the type of
 -- the capacity and the cost, respectively.
 --
 -- = Constraints
@@ -199,8 +199,7 @@ maxFlow graph s t = do
 -- - The first element of the list is \((0, 0)\).
 -- - Both of first and second tuple elements are strictly increasing.
 -- - No three changepoints are on the same line.
--- - (1) The last element of the list is \(x, g(x))\), where \(x\) is the maximum amount of the \(s-t\) flow.
--- - (2) The last element of the list is \(y, g(y))\), where \(y = \min(x, \mathrm{flow\\_limit})\).
+-- - The last element of the list is \(y, g(y))\), where \(y = \min(x, \mathrm{flowLimit})\).
 --
 -- = Constraints
 --
@@ -209,8 +208,8 @@ maxFlow graph s t = do
 -- - \(s \neq t\)
 -- - \(0 \leq s, t \lt n\)
 -- - You can't call `slope` or `flow` multiple times.
--- - The total amount of the flow is in `cap`.
--- - The total cost of the flow is in `cost`.
+-- - The total amount of the flow is in @cap@.
+-- - The total cost of the flow is in @cost@.
 -- - (Cost : `Int`): \(0 \leq nx \leq 8 \times 10^{18} + 1000\)
 --
 -- = Complexity

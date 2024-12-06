@@ -36,6 +36,8 @@ invMod x m =
 -- If there is no solution, it returns \((0, 0)\). Otherwise, all the solutions can be written as the form \(x \equiv y \pmod z\), using integers
 -- \(y, z\) \((0 \leq y < z = \mathrm{lcm}(m[i]))\). It returns this \((y, z)\) as a pair. If \(n=0\), it returns \((0, 1)\).
 --
+-- Chinese Remainder Theorem.
+--
 -- = Constraints
 -- - \(|r| = |m|\)
 -- - \(1 \le m[i]\)
@@ -75,11 +77,11 @@ crt r m = loop 0 1 [0 .. VU.length r - 1]
           | m0 < m1 = (m1, m0, r1, r0)
           | otherwise = (m0, m1, r0, r1)
 
--- | returns \(\sum\limits_{i = 0}^{n - 1} \left\lfloor \frac{a \times i + b}{m} \right\rfloor\)
+-- | Returns \(\sum\limits_{i = 0}^{n - 1} \left\lfloor \frac{a \times i + b}{m} \right\rfloor\)
 --
 -- = Constraints
--- - \(0 \le n)
--- - \(1 \le m)
+-- - \(0 \le n\)
+-- - \(1 \le m\)
 --
 -- = Complexity
 -- - \(O(\log m)\)

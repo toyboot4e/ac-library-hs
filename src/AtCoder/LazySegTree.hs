@@ -19,12 +19,12 @@
 -- appear in this document is multipled by \(O(T)\).
 --
 -- = Storing boxed types
--- If you really need to store boxed type to `LazySegTree`, wrap them in a newtype that implements
--- @Unbox@ typeclass via a boxed vector, such as [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict).
+-- If you really need to store boxed type to `LazySegTree`, use [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
+-- or another wrapper.
 --
 -- = Major changes from the original @ac-library@
--- - @get@ and @set@ are renamed to `read` and `write`.
 -- - The implementaion is based on `Monoid` and `SegAct`.
+-- - @get@ and @set@ are renamed to `read` and `write`.
 module AtCoder.LazySegTree
   ( SegAct (..),
     LazySegTree (..),
@@ -41,7 +41,7 @@ module AtCoder.LazySegTree
   )
 where
 
--- FIXME: validate and write abount operator direction
+-- FIXME: validate and write about operator direction
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
@@ -65,7 +65,8 @@ class (Monoid f, Monoid a) => SegAct f a where
   -- - Endomorphism: @f (a1 <> a2) = (f a1) <> (f a2)@
   segAct :: f -> a -> a
 
-  -- | Lazy segment tree action with target segment length.
+  -- | Lazy segment tree action with target monoid length. You don't have to store the monoid length
+  -- when implementing `SegAct` with this function (`segAct` is given as @segActWithLength 1@).
   segActWithLength :: Int -> f -> a -> a
   segActWithLength _ = segAct
 
@@ -253,7 +254,7 @@ applyIn self@LazySegTree {..} l0 r0 f
 --
 -- = Constraints
 --
--- - @g mempty == True@
+-- - @g mempty == True@.
 -- - \(0 \leq l \leq n\)
 --
 -- = Complexity
@@ -305,7 +306,7 @@ maxRight self@LazySegTree {..} l0 g
 --
 -- = Constraints
 --
--- - @g mempty == True@
+-- - @g mempty == True@.
 -- - \(0 \leq r \leq n\)
 --
 -- = Complexity

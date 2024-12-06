@@ -6,6 +6,27 @@
 -- \[
 -- c_i = \sum_{j = 0}^i a_j b_{i - j}
 -- \]
+--
+-- = Example
+-- >>> :set -XDataKinds
+-- >>> import AtCoder.Convolution qualified as C
+-- >>> import AtCoder.ModInt qualified as M
+-- >>> import Data.Proxy (Proxy)
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> type Mint = M.ModInt998244353
+-- >>> let modInt :: Int -> Mint; modInt = M.new
+-- >>>
+-- >>> -- Convolution for mod int:
+-- >>> let a = VU.map modInt $ VU.fromList [1, 2, 3, 4]
+-- >>> let b = VU.map modInt $ VU.fromList [5, 6, 7, 8]
+-- >>> C.convolution a b
+-- [5,16,34,60,61,52,32]
+-- >>>
+-- >>> -- Convolution for any `Integral a`:
+-- >>> let a = VU.fromList @Int [1, 2, 3, 4]
+-- >>> let b = VU.fromList @Int [5, 6, 7, 8]
+-- >>> C.convolutionMod (Proxy @998244353) a b
+-- [5,16,34,60,61,52,32]
 module AtCoder.Convolution
   ( convolution,
     convolutionMod,
@@ -28,9 +49,7 @@ import GHC.Exts (proxy#)
 import GHC.Stack (HasCallStack)
 import GHC.TypeLits (natVal')
 
--- TODO: see also the namings in ac-library-rs
-
--- | Calculates the convolution in \(\bmod m\) for a vector of `StaticModInt`. It returns an empty
+-- | Calculates the convolution in \(\bmod m\) for a vector of `ACIM.StaticModInt`. It returns an empty
 -- array if at least one of \(a\) and \(b\) are empty.
 --
 -- = Constraints
@@ -59,7 +78,7 @@ convolution a b
     n = VU.length a
     m = VU.length b
 
--- | `convolution` for any @Integral a@.
+-- | `convolution` for any `Integral` @a@.
 --
 -- = Constraints
 -- - \(2 \leq m \leq 2 \times 10^9\)

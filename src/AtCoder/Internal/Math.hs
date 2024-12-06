@@ -63,12 +63,10 @@ isPrime n
       | t == n - 1 || y == 1 || y == n - 1 = not $ y /= n - 1 && even t
       | otherwise = inner (t .<<. 1) (y * y `mod` n)
 
--- | TODO: \(O(?)\)
+-- | Returns @(g, x)@ such that \(g = \gcd(a, b), \mathrm{xa} = g(\bmod b), 0 \le x \le b/g\).
 --
 -- = Constraints
--- - \(1 <\le b\) (not asserted)
---
--- Returns @(g, x)@ such that \(g = \gcd(a, b), \mathrm{xa} = g(\bmod b), 0 \le x \le b/g\)
+-- - \(1 \le b\) (not asserted)
 invGcd :: Int -> Int -> (Int, Int)
 invGcd a0 b
   | a == 0 = (b, 0)
@@ -90,7 +88,7 @@ invGcd a0 b
               !m0' = m0 - m1 * u
            in inner t s' m1 m0'
 
--- | TODO: Compile-time calculation (constexpr)
+-- | Returns primitive root.
 primitiveRoot :: Int -> Int
 primitiveRoot m
   | m == 2 = 1
@@ -129,8 +127,8 @@ primitiveRoot m
 -- | \(O(\log m)\)
 --
 -- = Constraints
--- - \(n \lt 2^32\)
--- - \(1 \le m \lt 2^32\)
+-- - \(n \lt 2^{32}\)
+-- - \(1 \le m \lt 2^{32}\)
 floorSumUnsigned :: Int -> Int -> Int -> Int -> Int
 floorSumUnsigned = inner 0
   where

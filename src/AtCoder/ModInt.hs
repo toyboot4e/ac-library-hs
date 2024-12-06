@@ -6,13 +6,17 @@
 -- | It is the struct that treats the modular arithmetic. All the remaining parts of AC Library
 -- works without modint, so you don't necessarily read this to use the remaining parts.
 --
--- For most of the problems, it is sufficient to use `ModInt998244353`, `ModInt1000000007`, or
--- `modInt`, which can be used as follows.
+-- For most of the problems, it is sufficient to use `ModInt998244353`, `ModInt1000000007`, which
+-- can be used as follows.
 --
--- FIXME: write example
+-- >>> import AtCoder.ModInt qualified as M
+-- >>> type Mint = M.ModInt998244353
+-- >>> let modInt :: Int -> Mint; modInt = M.new
+-- >>> modInt 1000000000
+-- 1755647
 --
 -- = Major changes from the original @ac-library@
--- @DynamicModInt@ is removed.
+-- - @DynamicModInt@ is removed.
 module AtCoder.ModInt
   ( Modulus (..),
     ModInt998244353,
@@ -52,7 +56,7 @@ import GHC.TypeLits (KnownNat, natVal, natVal')
 -- | `KnownNat` with meta information used for modulus.
 class (KnownNat a) => Modulus a where
   isPrimeModulus :: Proxy# a -> Bool
-  -- | Be sure to override for the speed.
+  -- | Note that the default implementation is slow.
   primitiveRootModulus :: Proxy# a -> Int
   primitiveRootModulus _ = ACIM.primitiveRoot $ fromInteger (natVal' (proxy# @a))
 
@@ -93,10 +97,6 @@ type ModInt1000000007 = StaticModInt 1000000007
 
 -- type ModInt998244353 = DynamicModInt (-1);
 
-newtype StaticModInt a = StaticModInt {unStaticModInt :: Word32}
-  deriving (P.Prim)
-  deriving newtype (Eq, Ord, Read, Show)
-
 -- | Retrieves `Int` from `KnownNat`.
 --
 -- >>> :set -XDataKinds
@@ -118,27 +118,38 @@ modVal p = fromInteger $ natVal p
 modVal# :: forall a. (KnownNat a) => Proxy# a -> Int
 modVal# p = fromInteger $ natVal' p
 
+newtype StaticModInt a = StaticModInt {unStaticModInt :: Word32}
+  deriving (P.Prim)
+  deriving newtype (Eq, Ord, Read, Show)
+
+-- | Creates `StaticModInt` taking the modulo of an `Int` value.
 new :: forall a. (KnownNat a) => Int -> StaticModInt a
 new v = StaticModInt . fromIntegral $! v `mod` fromInteger (natVal' (proxy# @a))
 
+-- | Creates `StaticModInt` taking the modulo of an `Word32` value.
 new32 :: forall a. (KnownNat a) => Word32 -> StaticModInt a
 new32 v = StaticModInt $! v `mod` fromInteger (natVal' (proxy# @a))
 
+-- | \(O(1)\) Returns the mod.
 modulus :: forall a. (KnownNat a) => StaticModInt a -> Int
 modulus _ = fromInteger (natVal' (proxy# @a))
 
-raw :: (KnownNat a) => Int -> StaticModInt a
-raw = StaticModInt . fromIntegral
-
-raw32 :: (KnownNat a) => Word32 -> StaticModInt a
-raw32 = StaticModInt
-
+-- | \(O(1)\) Returns the internal value converted to `Int`.
 val :: (KnownNat a) => StaticModInt a -> Int
 val = fromIntegral . unStaticModInt
 
+-- | \(O(1)\) Returns the internal value as `Word32` without conversion. It is the function for
+-- constant-factor speedup.
 val32 :: (KnownNat a) => StaticModInt a -> Word32
 val32 = unStaticModInt
 
+-- | Returns \(x^n\).
+--
+-- = Constraints
+-- - \(0 \le n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
 pow :: (HasCallStack, KnownNat a) => StaticModInt a -> Int -> StaticModInt a
 pow x0 n0 = inner x0 n0 1
   where
@@ -149,6 +160,13 @@ pow x0 n0 = inner x0 n0 1
           let !r' = if odd n then r * x else r
            in inner (x * x) (n .>>. 1) r'
 
+-- | Returns \(y\) with \(xy \equiv 1\).
+--
+-- = Constraints
+-- - @\gcd(val x, modulus x) == 1@.
+--
+-- = Complexity
+-- - \(O(\log \mathrm{mod})\)
 inv :: forall a. (HasCallStack, Modulus a) => StaticModInt a -> StaticModInt a
 inv self@(StaticModInt x)
   | isPrimeModulus (proxy# @a) =
@@ -158,6 +176,20 @@ inv self@(StaticModInt x)
       let (!eg1, !eg2) = ACIM.invGcd (fromIntegral x) $ fromInteger (natVal' (proxy# @a))
           !_ = ACIA.runtimeAssert (eg1 == 1) "AtCoder.ModInt.inv: `x^(-1) mod m` cannot be calculated when `gcd x modulus /= 1`"
        in fromIntegral eg2
+
+-- | Creates `StaticModInt` without taking mod. It is the function for constant-factor speedup.
+--
+-- = Constraints
+-- - \(0 \leq x \lt \mathrm{mod}\) (not asserted at runtime)
+raw :: (KnownNat a) => Int -> StaticModInt a
+raw = StaticModInt . fromIntegral
+
+-- | Creates `StaticModInt` without taking mod. It is the function for constant-factor speedup.
+--
+-- = Constraints
+-- - \(0 \leq x \lt \mathrm{mod}\) (not asserted at runtime)
+raw32 :: (KnownNat a) => Word32 -> StaticModInt a
+raw32 = StaticModInt
 
 deriving newtype instance (KnownNat p) => Real (StaticModInt p)
 

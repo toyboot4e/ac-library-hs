@@ -51,8 +51,8 @@ data FenwickTree s a = FenwickTree
 -- = Constraints
 -- - \(0 \leq n\)
 --
--- - \(O(n)\)
 -- = Complexity
+-- - \(O(n)\)
 new :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => Int -> m (FenwickTree (PrimState m) a)
 new nFt
   | nFt >= 0 = do
