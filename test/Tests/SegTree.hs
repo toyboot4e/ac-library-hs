@@ -117,6 +117,13 @@ spec_invalid = testSpec "invalid" $ do
   it "throws error" $ ST.read s (-1) `shouldThrow` anyException
   it "throws error" $ ST.read s 10 `shouldThrow` anyException
 
+  it "throws error" $ ST.write s (-1) 0 `shouldThrow` anyException
+  it "throws error" $ ST.write s 10 0 `shouldThrow` anyException
+  it "throws error" $ ST.modify s (+ 1) (-1) `shouldThrow` anyException
+  it "throws error" $ ST.modify s (+ 1) 10 `shouldThrow` anyException
+  it "throws error" $ ST.modifyM s (pure . (+ 1)) (-1) `shouldThrow` anyException
+  it "throws error" $ ST.modifyM s (pure . (+ 1)) 10 `shouldThrow` anyException
+
   it "throws error" $ ST.prod s (-1) (-1) `shouldThrow` anyException
   it "throws error" $ ST.prod s 3 2 `shouldThrow` anyException
   it "throws error" $ ST.prod s 0 11 `shouldThrow` anyException
@@ -141,52 +148,58 @@ unit_one = testCase "one" $ do
 
 unit_compareNaive :: TestTree
 unit_compareNaive = testCase "compareNaive" $ do
-  for_ [0 .. 30 - 1] $ \n -> do
-    seg0 <- newStn @_ @Foo n
-    seg1 <- ST.new @_ @Foo n
-    for_ [0 .. n - 1] $ \i -> do
-      writeStn seg0 i . Foo . (: []) . chr $ ord 'a' + i
-      ST.write seg1 i . Foo . (: []) . chr $ ord 'a' + i
+  run $ \seg i x -> ST.write seg i x
+  run $ \seg i x -> ST.modify seg (const x) i
+  run $ \seg i x -> ST.modifyM seg (pure . (const x)) i
+  where
+    run f = do
+      for_ [0 .. 30 - 1] $ \n -> do
+        seg0 <- newStn @_ @Foo n
+        seg1 <- ST.new @_ @Foo n
+        -- write
+        for_ [0 .. n - 1] $ \i -> do
+          writeStn seg0 i . Foo . (: []) . chr $ ord 'a' + i
+          (f seg1 i) . Foo . (: []) . chr $ ord 'a' + i
 
-    -- prod
-    for_ [0 .. n] $ \l -> do
-      for_ [l .. n] $ \r -> do
-        x0 <- prodStn seg0 l r
-        x1 <- ST.prod seg1 l r
-        assertEqual (show (l, r)) x0 x1
+        -- prod
+        for_ [0 .. n] $ \l -> do
+          for_ [l .. n] $ \r -> do
+            x0 <- prodStn seg0 l r
+            x1 <- ST.prod seg1 l r
+            assertEqual (show (l, r)) x0 x1
 
-    -- prodAll
-    do
-      x1 <- prodStn seg0 0 n
-      x2 <- ST.prod seg1 0 n
-      x3 <- ST.allProd seg1
-      x1 @?= x2
-      x1 @?= x3
+        -- prodAll
+        do
+          x1 <- prodStn seg0 0 n
+          x2 <- ST.prod seg1 0 n
+          x3 <- ST.allProd seg1
+          x1 @?= x2
+          x1 @?= x3
 
-    -- maxRight
-    for_ [0 .. n] $ \l -> do
-      for_ [l .. n] $ \r -> do
-        Foo y <- ST.prod seg1 l r
-        let p :: Foo -> Bool
-            p (Foo x) = length x <= length y
-        r0 <- maxRightStn seg0 l p
-        r1 <- ST.maxRight seg1 l p
-        assertEqual (show ((l, r), y)) r0 r1
+        -- maxRight
+        for_ [0 .. n] $ \l -> do
+          for_ [l .. n] $ \r -> do
+            Foo y <- ST.prod seg1 l r
+            let p :: Foo -> Bool
+                p (Foo x) = length x <= length y
+            r0 <- maxRightStn seg0 l p
+            r1 <- ST.maxRight seg1 l p
+            assertEqual (show ((l, r), y)) r0 r1
 
-    -- minLeft
-    for_ [0 .. n] $ \r -> do
-      for_ [0 .. r] $ \l -> do
-        Foo y <- ST.prod seg1 l r
-        let p :: Foo -> Bool
-            p (Foo x) = length x <= length y
-        r0 <- minLeftStn seg0 r p
-        r1 <- ST.minLeft seg1 r p
-        assertEqual (show ((l, r), y)) r0 r1
+        -- minLeft
+        for_ [0 .. n] $ \r -> do
+          for_ [0 .. r] $ \l -> do
+            Foo y <- ST.prod seg1 l r
+            let p :: Foo -> Bool
+                p (Foo x) = length x <= length y
+            r0 <- minLeftStn seg0 r p
+            r1 <- ST.minLeft seg1 r p
+            assertEqual (show ((l, r), y)) r0 r1
 
-    -- read (extra test)
-    for_ [0 .. n - 1] $ \i -> do
-      expected <- readStn seg0 i
-      (@?= expected) =<< ST.read seg1 i
+        -- read (extra test)
+        for_ [0 .. n - 1] $ \i -> do
+          expected <- readStn seg0 i
+          (@?= expected) =<< ST.read seg1 i
 
 -- TODO: verify yosupo
 

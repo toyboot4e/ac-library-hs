@@ -48,6 +48,8 @@ module AtCoder.SegTree
     new,
     build,
     write,
+    modify,
+    modifyM,
     read,
     prod,
     allProd,
@@ -120,6 +122,34 @@ write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState
 write self@SegTree {..} p x = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.write" p nSt
   VGM.write dSt (p + sizeSt) x
+  for_ [1 .. logSt] $ \i -> do
+    update self ((p + sizeSt) .>>. i)
+
+-- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
+--
+-- = Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- = Complexity
+-- - \(O(1)\)
+modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> a) -> Int -> m ()
+modify self@SegTree {..} f p = do
+  let !_ = ACIA.checkIndex "AtCoder.SegTree.modify" p nSt
+  VGM.modify dSt f (p + sizeSt)
+  for_ [1 .. logSt] $ \i -> do
+    update self ((p + sizeSt) .>>. i)
+
+-- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
+--
+-- = Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- = Complexity
+-- - \(O(1)\)
+modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> m a) -> Int -> m ()
+modifyM self@SegTree {..} f p = do
+  let !_ = ACIA.checkIndex "AtCoder.SegTree.modifyM" p nSt
+  VGM.modifyM dSt f (p + sizeSt)
   for_ [1 .. logSt] $ \i -> do
     update self ((p + sizeSt) .>>. i)
 

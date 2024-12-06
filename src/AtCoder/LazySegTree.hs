@@ -31,6 +31,8 @@ module AtCoder.LazySegTree
     new,
     build,
     write,
+    modify,
+    modifyM,
     read,
     prod,
     allProd,
@@ -130,6 +132,40 @@ write self@LazySegTree {..} p x = do
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
     push self $ p' .>>. i
   VGM.write dLst p' x
+  for_ [1 .. logLst] $ \i -> do
+    update self $ p' .>>. i
+
+-- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
+--
+-- = Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
+modify :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> (a -> a) -> Int -> m ()
+modify self@LazySegTree {..} f p = do
+  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.modify" p nLst
+  let p' = p + sizeLst
+  for_ [logLst, logLst - 1 .. 1] $ \i -> do
+    push self $ p' .>>. i
+  VGM.modify dLst f p'
+  for_ [1 .. logLst] $ \i -> do
+    update self $ p' .>>. i
+
+-- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
+--
+-- = Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
+modifyM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, VU.Unbox a) => LazySegTree (PrimState m) f a -> (a -> m a) -> Int -> m ()
+modifyM self@LazySegTree {..} f p = do
+  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.modify" p nLst
+  let p' = p + sizeLst
+  for_ [logLst, logLst - 1 .. 1] $ \i -> do
+    push self $ p' .>>. i
+  VGM.modifyM dLst f p'
   for_ [1 .. logLst] $ \i -> do
     update self $ p' .>>. i
 
