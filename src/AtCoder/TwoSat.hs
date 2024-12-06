@@ -17,7 +17,15 @@
 -- True
 -- >>> TS.answer ts
 -- [0]
-module AtCoder.TwoSat (TwoSat (..), new, addClause, satisfiable, answer) where
+module AtCoder.TwoSat
+  ( TwoSat (..),
+    new,
+    addClause,
+    satisfiable,
+    answer,
+    unsafeAnswer,
+  )
+where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Scc qualified as ACISCC
@@ -29,6 +37,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
+-- | 2-Sat state.
 data TwoSat s = TwoSat
   { nTs :: {-# UNPACK #-} !Int,
     answerTs :: !(VUM.MVector s Bit),
@@ -89,4 +98,11 @@ satisfiable TwoSat {..} = do
 -- = Complexity
 -- - \(O(n)\)
 answer :: (PrimMonad m) => TwoSat (PrimState m) -> m (VU.Vector Bit)
-answer = VU.unsafeFreeze . answerTs
+answer = VU.freeze . answerTs
+
+-- | `answer` without making copy.
+--
+-- = Complexity
+-- - \(O(1)\)
+unsafeAnswer :: (PrimMonad m) => TwoSat (PrimState m) -> m (VU.Vector Bit)
+unsafeAnswer = VU.unsafeFreeze . answerTs
