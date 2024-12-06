@@ -2,12 +2,12 @@
  amortized <span class="mathjax">\(O(\alpha(n))\)</span> time.</p><ul><li>Edge addition</li><li>Deciding whether given two vertices are in the same connected component</li></ul><p>Each connected component internally has a representative vertex. When two connected components
  are merged by edge addition, one of the two representatives of these connected components
  becomes the representative of the new connected component.</p><h1>Example</h1><pre class="screen"><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>import AtCoder.Dsu qualified as Dsu
-</code></strong><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>dsu &lt;- Dsu.new 4      -- 0 1 2 3
+</code></strong><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>dsu &lt;- Dsu.new 4   -- 0 1 2 3
 </code></strong><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>Dsu.nDsu dsu
 </code></strong>4
-<code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>Dsu.merge dsu 0 1     -- 0=1 2 3
+<code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>Dsu.merge dsu 0 1  -- 0=1 2 3
 </code></strong>0
-<code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>Dsu.merge_ dsu 1 2    -- 0=1=2 3
+<code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>Dsu.merge_ dsu 1 2 -- 0=1=2 3
 </code></strong><code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>Dsu.leader dsu 2
 </code></strong>0
 <code class="prompt">&gt;&gt;&gt; </code><strong class="userinput"><code>Dsu.same dsu 0 2
