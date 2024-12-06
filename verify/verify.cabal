@@ -205,6 +205,31 @@ executable aoj-GRL_6_B
   main-is:       aoj-GRL_6_B.hs
   build-depends: verify
 
+executable yosupo-point-add-range-sum
+  import:        app-local
+  main-is:       yosupo-point-add-range-sum.hs
+  build-depends: verify
+
+executable yosupo-point-set-range-composite
+  import:        app-local
+  main-is:       yosupo-point-set-range-composite.hs
+  build-depends: verify
+
+executable yosupo-range-affine-range-sum
+  import:        app-local
+  main-is:       yosupo-range-affine-range-sum.hs
+  build-depends: verify
+
+executable yosupo-range-affine-point-get
+  import:        app-local
+  main-is:       yosupo-range-affine-point-get.hs
+  build-depends: verify
+
+executable yosupo-range-set-range-composite
+  import:        app-local
+  main-is:       yosupo-range-set-range-composite.hs
+  build-depends: verify
+
 executable yosupo-scc
   import:        app-local
   main-is:       yosupo-scc.hs
