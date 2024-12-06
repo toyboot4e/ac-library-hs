@@ -4,16 +4,15 @@
 --
 -- = Example
 -- >>> import AtCoder.MaxFlow qualified as MF
--- >>> g <- MF.new @_ @Int 3 -- new @s @cap n
--- >>> MF.addEdge g 0 1 (2 :: Int)
+-- >>> g <- MF.new @_ @Int 3        -- 0   1   2
+-- >>> MF.addEdge g 0 1 (2 :: Int)  -- 0-->1   2
 -- 0
--- >>> MF.addEdge g 1 2 1
+-- >>> MF.addEdge_ g 1 2 (1 :: Int) -- 0-->1-->2
+-- >>> MF.flow g 0 2 maxBound -- MF.maxFlow g 0 2
 -- 1
--- >>> MF.flow g 0 2 maxBound
--- 1
--- >>> MF.getEdge g 0
+-- >>> MF.getEdge g 0 -- returns (from, to, cap, flow)
 -- (0,1,2,1)
--- >>> MF.minCut g 0
+-- >>> MF.minCut g 0 -- returns a bit vector
 -- [1,1,0]
 module AtCoder.MaxFlow
   ( MfGraph (nG),
@@ -24,9 +23,12 @@ module AtCoder.MaxFlow
     edges,
     changeEdge,
     flow,
+    maxFlow,
     minCut,
   )
 where
+
+-- TODO: add `build`.
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.GrowVec qualified as ACIGV
@@ -182,7 +184,7 @@ edges g@MfGraph {posG} = do
 -- - \(O((n + m) \sqrt{m})\) (if all the capacities are \(1\)),
 -- - \(O(n^2 m)\) (general), or
 -- - \(O(F(n + m))\), where \(F\) is the returned value
-flow :: (HasCallStack, Show cap, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m cap
+flow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m cap
 flow MfGraph {..} s t flowLimit = do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`source` vertex" s "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`sink` vertex" t "the number of vertices" nG
@@ -257,6 +259,19 @@ flow MfGraph {..} s t flowLimit = do
             if f == 0
               then pure flow_
               else loop $! flow_ + f
+
+-- | `flow` with no capacity limit.
+--
+-- = Constraints
+-- - \(s \neq t\)
+-- - \(0 \leq s, t \lt n\)
+--
+-- = Complexity
+-- - \(O((n + m) \sqrt{m})\) (if all the capacities are \(1\)),
+-- - \(O(n^2 m)\) (general), or
+-- - \(O(F(n + m))\), where \(F\) is the returned value
+maxFlow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, Bounded cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> m cap
+maxFlow graph s t = flow graph s t maxBound
 
 -- | Returns a vector of length \(n\), such that the \(i\)-th element is `True` if and only if there
   -- is a directed path from \(s\) to \(i\) in the residual network. The returned vector corresponds

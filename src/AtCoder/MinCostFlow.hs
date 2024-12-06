@@ -22,9 +22,13 @@ module AtCoder.MinCostFlow
     edges,
     unsafeEdges,
     flow,
+    maxFlow,
     slope,
   )
 where
+
+-- TODO: add `maxCostFlow`.
+-- TODO: add `build`.
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Buffer qualified as ACIB
@@ -170,6 +174,23 @@ flow ::
   m (cap, cost)
 flow graph s t flowLimit = do
   res <- slope graph s t flowLimit
+  pure $ VG.last res
+
+-- | `flow` with no capacity limit.
+--
+-- = Constraints
+-- - Same as `slope`.
+--
+-- = Complexity
+-- - Same as `slope`.
+maxFlow ::
+  (HasCallStack, PrimMonad m, Integral cap, Ord cap, Bounded cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
+  McfGraph (PrimState m) cap cost ->
+  Int ->
+  Int ->
+  m (cap, cost)
+maxFlow graph s t = do
+  res <- slope graph s t maxBound
   pure $ VG.last res
 
 -- | Let \(g\) be a function such that \(g(x)\) is the cost of the minimum cost \(s-t\) flow when
