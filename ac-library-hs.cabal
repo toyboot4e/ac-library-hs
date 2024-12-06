@@ -98,6 +98,7 @@ test-suite ac-library-hs-test
     Tests.Internal.MinHeap
     Tests.Internal.Queue
     Tests.LazySegTree
+    Tests.LazySegTreeStress
     Tests.Math
     Tests.MaxFlow
     Tests.MinCostFlow
@@ -116,7 +117,9 @@ test-suite ac-library-hs-test
   build-depends:
     , ac-library-hs
     , hspec
+    , mtl
     , QuickCheck
+    , random
     , tasty
     , tasty-hspec
     , tasty-hunit
