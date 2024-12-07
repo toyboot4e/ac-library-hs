@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 import AtCoder.Math (floorSum)
 import Data.Vector.Unboxed qualified as VU
 import Util

@@ -50,7 +50,6 @@
 -- example.
 --
 -- @
--- {-# LANGUAGE DerivingStrategies #-}
 -- {-# LANGUAGE TypeFamilies #-}
 --
 -- import AtCoder.LazySegTree (SegAct (..)) -- also re-exported from AtCoder.Extra.Monoid.

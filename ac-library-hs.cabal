@@ -26,10 +26,9 @@ tested-with:     GHC ==9.4.5
 common warnings
   ghc-options: -Wall
 
--- TODO: setup default language extensions compatible with GHC2024
 -- TODO: setup GHC 9.8.3
 common dependencies
-  ghc-options:   -Wall
+  ghc-options:        -Wall
   build-depends:
     , base               ==4.17.1.0
     , bitvec             ^>=1.1.4.0
@@ -40,6 +39,19 @@ common dependencies
     , vector-algorithms  ^>=0.9.0.1
     , wide-word
 
+  default-language:   GHC2021
+
+  -- compatible with GHC2024:
+  default-extensions:
+    DataKinds
+    DerivingStrategies
+    DisambiguateRecordFields
+    ExplicitNamespaces
+    GADTs
+    LambdaCase
+    MonoLocalBinds
+    RoleAnnotations
+
 -- , deepseq                        ==1.4.8.0
 -- , exceptions                     ^>=0.10.7
 -- , mtl                            ^>=2.3.1
@@ -47,8 +59,8 @@ common dependencies
 -- , transformers                   ^>=0.6.1.0
 -- , vector-stream                  ^>=0.1.0.0
 library
-  import:           warnings
-  import:           dependencies
+  import:          warnings
+  import:          dependencies
   exposed-modules:
     AtCoder.Convolution
     AtCoder.Dsu
@@ -80,13 +92,11 @@ library
 
   -- other-modules:
   -- other-extensions:
-  hs-source-dirs:   src
-  default-language: GHC2021
+  hs-source-dirs:  src
 
 test-suite ac-library-hs-test
-  import:           warnings
-  import:           dependencies
-  default-language: GHC2021
+  import:         warnings
+  import:         dependencies
   other-modules:
     Tests.Convolution
     Tests.Dsu
@@ -112,9 +122,9 @@ test-suite ac-library-hs-test
 
   -- other-extensions:
 
-  type:             exitcode-stdio-1.0
-  hs-source-dirs:   test
-  main-is:          Main.hs
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Main.hs
   build-depends:
     , ac-library-hs
     , hspec
@@ -129,24 +139,22 @@ test-suite ac-library-hs-test
     , transformers
 
 library benchlib
-  import:           warnings
-  import:           dependencies
-  ghc-options:      -O2
-  default-language: GHC2021
-  exposed-modules:  BenchLib.PowMod
-  type:             exitcode-stdio-1.0
-  hs-source-dirs:   benchlib
-  build-depends:    ac-library-hs
+  import:          warnings
+  import:          dependencies
+  ghc-options:     -O2
+  exposed-modules: BenchLib.PowMod
+  type:            exitcode-stdio-1.0
+  hs-source-dirs:  benchlib
+  build-depends:   ac-library-hs
 
 benchmark ac-library-hs-benchmark
-  import:           warnings
-  import:           dependencies
-  ghc-options:      -O2
-  default-language: GHC2021
-  type:             exitcode-stdio-1.0
-  main-is:          Main.hs
-  hs-source-dirs:   benchmarks
-  other-modules:    Bench.PowMod
+  import:         warnings
+  import:         dependencies
+  ghc-options:    -O2
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  hs-source-dirs: benchmarks
+  other-modules:  Bench.PowMod
   build-depends:
     , ac-library-hs:{ac-library-hs, benchlib}
     , base

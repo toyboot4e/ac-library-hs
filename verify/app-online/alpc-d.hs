@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 import AtCoder.MaxFlow qualified as MF
 import Control.Monad (unless, when)
 import Data.ByteString.Builder qualified as BSB

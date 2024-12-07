@@ -1,5 +1,3 @@
-{-# LANGUAGE DataKinds #-}
-
 module Tests.Convolution (tests) where
 
 import AtCoder.Convolution qualified as ACC

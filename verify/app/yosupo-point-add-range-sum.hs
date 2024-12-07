@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 import AtCoder.SegTree qualified as ST
 import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU

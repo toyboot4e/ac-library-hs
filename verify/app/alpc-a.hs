@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 import AtCoder.Dsu qualified as Dsu
 import Data.Vector.Unboxed qualified as VU
 import Util

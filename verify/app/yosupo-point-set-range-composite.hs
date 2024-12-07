@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 import AtCoder.Extra.Monoid (segAct, Affine2d(..))
 import AtCoder.ModInt qualified as M
 import AtCoder.SegTree qualified as ST

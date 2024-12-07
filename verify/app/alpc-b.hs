@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 import AtCoder.FenwickTree qualified as FT
 import Data.Vector.Unboxed qualified as VU
 import Util

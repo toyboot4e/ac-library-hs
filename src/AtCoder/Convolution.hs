@@ -1,4 +1,3 @@
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE MagicHash #-}
 
 -- | It calculates \((+,\times)\) convolution. Given two arrays \(a_0, a_1, \cdots, a_{N - 1}\) and \(b_0, b_1, \cdots, b_{M - 1}\), it calculates the array \(c\) of length \(N + M - 1\), defined by
@@ -8,7 +7,6 @@
 -- \]
 --
 -- = Example
--- >>> :set -XDataKinds
 -- >>> import AtCoder.Convolution qualified as C
 -- >>> import AtCoder.ModInt qualified as M
 -- >>> import Data.Proxy (Proxy)
