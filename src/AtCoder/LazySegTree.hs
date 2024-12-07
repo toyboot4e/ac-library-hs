@@ -71,6 +71,8 @@
 -- instance (Num a) => 'Monoid' (Affine2d a) where
 --   {-# INLINE 'mempty' #-}
 --   'mempty' = Affine2d (1, 0)
+--   {-# INLINE mconcat #-}
+--   mconcat = foldl' (<>) mempty
 --
 -- instance (Integral a) => SegAct (Affine2d a) (Sum a) where
 --   {-# INLINE 'segActWithLength' #-}

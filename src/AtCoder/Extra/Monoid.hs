@@ -8,6 +8,7 @@ module AtCoder.Extra.Monoid
 where
 
 import AtCoder.LazySegTree (SegAct (..))
+import Data.Foldable (foldl')
 import Data.Monoid
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -40,6 +41,8 @@ instance (Num a) => Semigroup (Affine2d a) where
 instance (Num a) => Monoid (Affine2d a) where
   {-# INLINE mempty #-}
   mempty = Affine2d (1, 0)
+  {-# INLINE mconcat #-}
+  mconcat = foldl' (<>) mempty
 
 instance (Integral a) => SegAct (Affine2d a) a where
   {-# INLINE segAct #-}
