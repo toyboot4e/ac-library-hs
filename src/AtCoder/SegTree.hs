@@ -199,18 +199,18 @@ prod SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> m a
 allProd SegTree {..} = VGM.read dSt 1
 
--- | Applies binary search on the segment tree. It returns an index @r@ that satisfies both of the
+-- | Applies a binary search on the segment tree. It returns an index \(r\) that satisfies both of the
 -- following.
 --
--- - @r == l@ or @a[l] <> a[l + 1] <> ... <> a[r - 1] == True@
--- - @r == n@ or @a[l] <> a[l + 1] <> ... <> a[r]) == False@
+-- - \(r = l\) or \(f(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\) returns `True`.
+-- - \(r = n\) or \(f(a[l] \diamond a[l + 1] \diamond ... \diamond a[r]))\) returns `False`.
 --
--- If @f@ is monotone, this is the maximum @r@ that satisfies
--- @f(a[l] <> a[l + 1] <> ... <> a[r - 1]) == True@.
+-- If \(f\) is monotone, this is the maximum \(r\) that satisfies
+-- \(f(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\).
 --
 -- = Constraints
--- - if @f@ is called with the same argument, it returns the same value, i.e., @f@ has no side effect.
--- - @f mempty == True@
+-- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
+-- - @f mempty == True@.
 -- - \(0 \leq l \leq n\)
 --
 -- = Complexity
@@ -247,17 +247,20 @@ maxRight SegTree {..} l0 f
             else inner2 l' sm
       | otherwise = pure $ l - sizeSt
 
--- | It applies binary search on the segment tree. It returns an index @l@ that satisfies both of
+-- | Applies a binary search on the segment tree. It returns an index \(l\) that satisfies both of
 -- the following.
 --
--- - @l == r@ or @f(a[l] <> a[l + 1] <> ... <> a[r - 1]) == True@
--- - @l == 0@ or @f(a[l - 1] <> a[l] <> ... <> a[r - 1]) == False@
+-- - \(l = r\) or \(f(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\) returns `True`.
+-- - \(l = 0\) or \(f(a[l - 1] \diamond a[l] \diamond ... \diamond a[r - 1])\) returns `False`.
+--
+-- If \(f\) is monotone, this is the minimum \(l\) that satisfies
+-- \(f(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\).
 --
 -- = Constraints
 --
--- - if @f@ is called with the same argument, it returns the same value, i.e., @f@ has no side
+-- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side
 --   effect.
--- - @f mempty == True@
+-- - @f mempty == True@.
 -- - \(0 \leq r \leq n\)
 --
 -- = Complexity

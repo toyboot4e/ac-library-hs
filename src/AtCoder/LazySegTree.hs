@@ -23,7 +23,6 @@
 -- or another wrapper.
 --
 -- = Example
--- Note that new operators come from the left: @new <> old@.
 --
 -- >>> import AtCoder.LazySegTree qualified as LST
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine2d(..))
@@ -85,8 +84,8 @@ class (Monoid f) => SegAct f a where
   --
   -- = Constraints
   --
-  -- - Left monoid action: @(f2 <> f1) a = f2 (f1 a)@
-  -- - Endomorphism: @f (a1 <> a2) = (f a1) <> (f a2)@
+  -- - Left monoid action: \((f_2 \diamond f_1) a = f_2 (f_1 a)\)
+  -- - Endomorphism: \(f (a_1 \diamond a_2) = (f a_1) \diamond (f a_2)\)
   segAct :: f -> a -> a
 
   -- | Lazy segment tree action with target monoid length. You don't have to store the monoid length
@@ -302,16 +301,18 @@ applyIn self@LazySegTree {..} l0 r0 f
             allApply self r f
           inner ((l + 1) .>>. 1) ((r - 1) .>>. 1)
 
--- | Applies a binary search on the segment tree. It returns an index @r@ that satisfies both of the
+-- | Applies a binary search on the segment tree. It returns an index \(r\) that satisfies both of the
 -- followings.
 --
--- - @r = l@ or @g(a[l] <> a[l + 1] <> ... <> a[r - 1])) == True@
--- - @r = n@ or @g(a[l] <> a[l + 1] <> ... <> a[r])) == False@
+-- - \(r = l\) or \(g(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1]))\) returns `True`.
+-- - \(r = n\) or \(g(a[l] \diamond a[l + 1] \diamond ... \diamond a[r]))\) returns `False`.
 --
--- If @g@ is monotone, this is the maximum @r@ that satisfies @g(a[l] <> a[l + 1] <> ... <> a[r - 1]) == True@.
+-- If \(g\) is monotone, this is the maximum \(r\) that satisfies
+-- \(g(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\).
 --
 -- = Constraints
 --
+-- - If \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
 -- - @g mempty == True@.
 -- - \(0 \leq l \leq n\)
 --
@@ -354,16 +355,18 @@ maxRight self@LazySegTree {..} l0 g
             else inner2 l' sm
       | otherwise = pure $ l - sizeLst
 
--- | Applies a binary search on the segment tree. It returns an index @l@ that satisfies both of the
+-- | Applies a binary search on the segment tree. It returns an index \(l\) that satisfies both of the
 -- following.
 --
--- - @l = r@ or @g(a[l] <> a[l + 1] <> ... <> a[r - 1]) == True@
--- - @l = 0@ or @g(a[l - 1] <> a[l] <> ... <> a[r - 1]) == False@
+-- - \(l = r\) or \(g(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\) returns `True`.
+-- - \(l = 0\) or \(g(a[l - 1] \diamond a[l] \diamond ... \diamond a[r - 1])\) returns `False`.
 --
--- If @g@ is monotone, this is the minimum @l@ that satisfies @g(a[l] <> a[l + 1] <> ... <> a[r - 1]) == True@.
+-- If \(g\) is monotone, this is the minimum \(l\) that satisfies
+-- \(g(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\).
 --
 -- = Constraints
 --
+-- - if \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
 -- - @g mempty == True@.
 -- - \(0 \leq r \leq n\)
 --
