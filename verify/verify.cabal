@@ -52,8 +52,20 @@ extra-doc-files: CHANGELOG.md
 -- extra-source-files:
 
 common dependencies
-  default-language: GHC2021
-  ghc-options:      -Wall
+  default-language:   GHC2021
+
+  -- compatible with GHC2024:
+  default-extensions:
+    DataKinds
+    DerivingStrategies
+    DisambiguateRecordFields
+    ExplicitNamespaces
+    GADTs
+    LambdaCase
+    MonoLocalBinds
+    RoleAnnotations
+
+  ghc-options:        -Wall
   build-depends:
     , ac-library-hs
     , adjunctions                    ^>=4.4.2

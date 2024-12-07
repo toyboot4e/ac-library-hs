@@ -39,7 +39,7 @@ main = do
             MF.addEdge_ graph v v' (1 :: Int)
           pure ()
 
-  maxFlow <- MF.flow graph s t
+  maxFlow <- MF.maxFlow graph s t
   printBSB $ BSB.intDec maxFlow
 
   edges <- MF.edges graph
