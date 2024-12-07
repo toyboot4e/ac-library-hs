@@ -1,6 +1,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeFamilies #-}
 
+-- | Math.
 module AtCoder.Math (powMod, invMod, crt, floorSum) where
 
 import AtCoder.Internal.Assert qualified as ACIA

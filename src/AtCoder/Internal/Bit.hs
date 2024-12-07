@@ -1,3 +1,16 @@
+-- | Bit operations not in `Data.Bits`.
+--
+-- = Example
+-- >>> bitCeil 0
+-- 1
+-- >>> bitCeil 1
+-- 1
+-- >>> bitCeil 2
+-- 2
+-- >>> bitCeil 3
+-- 4
+-- >>> bitCeil 4
+-- 4
 module AtCoder.Internal.Bit (bitCeil) where
 
 -- TODO: faster implmentation

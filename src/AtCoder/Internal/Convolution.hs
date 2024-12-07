@@ -1,13 +1,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- | It calculates \((+,\times)\) convolution. Given two arrays \(a_0, a_1, \cdots, a_{N - 1}\) and
--- \(b_0, b_1, \cdots, b_{M - 1}\), it calculates the array \(c\) of length \(N + M - 1\), defined
--- by
---
--- \[
--- c_i = \sum_{j = 0}^i a_j b_{i - j}
--- \]
+-- | Internal convolution implementation.
 module AtCoder.Internal.Convolution
   ( FftInfo,
     newInfo,
@@ -32,6 +26,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Exts (proxy#)
 import GHC.TypeLits (natVal')
 
+-- | Data for FFT calculation.
 data FftInfo p = FftInfo
   { rootFft :: !(VU.Vector (AM.ModInt p)),
     iRootFft :: !(VU.Vector (AM.ModInt p)),

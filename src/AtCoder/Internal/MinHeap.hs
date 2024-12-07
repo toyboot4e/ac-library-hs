@@ -3,7 +3,37 @@
 -- | Minimum binary heap. Mutable and fixed-sized.
 --
 -- <https://en.wikipedia.org/wiki/Binary_heap>
-module AtCoder.Internal.MinHeap (Heap (..), new, capacity, length, null, clear, push, peek, pop) where
+--
+-- = Example
+-- >>> heap <- new @Int 4
+-- >>> capacity heap
+-- 4
+-- >>> push heap 10
+-- >>> push heap 0
+-- >>> push heap 5
+-- >>> length heap
+-- 3
+-- >>> pop heap
+-- Just 0
+-- >>> peek heap
+-- Just 5
+-- >>> pop heap
+-- Just 5
+-- >>> clear heap
+-- >>> null heap
+-- True
+module AtCoder.Internal.MinHeap
+  ( Heap (..),
+    new,
+    capacity,
+    length,
+    null,
+    clear,
+    push,
+    peek,
+    pop,
+  )
+where
 
 import Control.Monad (when)
 import Control.Monad.Primitive (PrimMonad, PrimState)

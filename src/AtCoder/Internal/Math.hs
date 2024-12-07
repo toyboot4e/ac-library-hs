@@ -1,3 +1,18 @@
+-- | Math.
+--
+-- = Example
+-- >>> powMod 10 60 998244353 -- 10^60 mod 998244353
+-- 526662729
+-- >>> isPrime 998244353
+-- True
+-- >>> isPrime 4
+-- False
+-- >>> invGcd 128 37
+-- (1,24)
+-- >>> primitiveRoot 2130706433
+-- 3
+-- >>> floorSumUnsigned 8 12 3 5
+-- 6
 module AtCoder.Internal.Math
   ( powMod,
     isPrime,

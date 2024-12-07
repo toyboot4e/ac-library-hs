@@ -1,6 +1,30 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | ac-library-hs only.
+-- | Stack-like vector.
+--
+-- = Example
+--
+-- >>> buf <- new @_ @Int 16
+-- >>> capacity buf
+-- 16
+-- >>> null buf
+-- True
+-- >>> pushBack buf 10
+-- >>> pushBack buf 11
+-- >>> length buf
+-- 2
+-- >>> read buf 0
+-- 10
+-- >>> write buf 1 0
+-- >>> popBack buf
+-- Just 0
+-- >>> freeze buf
+-- [10]
+-- >>> clear buf
+-- >>> null buf
+-- True
+-- >>> unsafeFreeze buf
+-- []
 module AtCoder.Internal.Buffer
   ( Buffer (..),
     new,
@@ -8,6 +32,8 @@ module AtCoder.Internal.Buffer
     pushBack,
     popBack,
     back,
+    read,
+    write,
     capacity,
     length,
     null,
@@ -17,12 +43,13 @@ module AtCoder.Internal.Buffer
   )
 where
 
+import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
-import Prelude hiding (length, null)
+import Prelude hiding (length, null, read)
 
 -- | Pushable vector with fixed size capacity. Stack.
 data Buffer s a = Buffer
@@ -71,6 +98,22 @@ back Buffer {..} = do
     else do
       x <- VGM.read vecB (len - 1)
       pure $ Just x
+
+-- | \(O(1)\) Yields the element at the given position. Will throw an exception if the index is out
+-- of range.
+read :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> Int -> m a
+read Buffer {..} i = do
+  len <- VGM.read lenB 0
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.read" i len
+  VGM.read vecB i
+
+-- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
+-- out of range.
+write :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> Int -> a -> m ()
+write Buffer {..} i e = do
+  len <- VGM.read lenB 0
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.write" i len
+  VGM.write vecB i e
 
 -- | \(O(1)\) Returns the array size.
 capacity :: (VU.Unbox a) => Buffer s a -> Int

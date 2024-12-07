@@ -1,6 +1,15 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
+-- | Fast modular multiplication by barrett reduction.
+-- Reference: https://en.wikipedia.org/wiki/Barrett_reduction
+--
+-- = Example
+-- >>> let bt = new 10 -- mod 10
+-- >>> umod bt
+-- 10
+-- >>> mul bt 7 7
+-- 9
 module AtCoder.Internal.Barrett (Barrett, new, umod, mul) where
 
 -- TODO: Use MagicHash?
@@ -16,14 +25,17 @@ data Barrett = Barrett
     imBarrett :: {-# UNPACK #-} !Word64
   }
 
+-- | Creates barret reduction for modulus \(m\).
 new :: Word32 -> Barrett
 new m =
   Barrett m $
     maxBound @Word64 `div` fromIntegral (fromIntegral m :: Word64) + 1
 
+-- | Retrieves the modulus \(m\).
 umod :: Barrett -> Word32
 umod Barrett {mBarrett} = mBarrett
 
+-- | Calculates \(a \cdot b \bmod m\).
 mul :: Barrett -> Word32 -> Word32 -> Word32
 mul Barrett {..} a b =
   let z :: Word64 = fromIntegral a * fromIntegral b

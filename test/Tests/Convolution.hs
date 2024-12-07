@@ -62,7 +62,7 @@ unit_empty = testCase "empty" $ do
   VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @(AM.ModInt 998244353) [1, 2]) (VU.empty @(AM.ModInt 998244353))
   VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @(AM.ModInt 998244353) [1]) (VU.empty @(AM.ModInt 998244353))
 
--- FIXME: the naive calculation seems like too slwo
+-- FIXME: the naive calculation seems like too slow
 prop_mid :: TestTree
 prop_mid = QC.testProperty "mid" $ do
   -- any `Integral a` is allowed

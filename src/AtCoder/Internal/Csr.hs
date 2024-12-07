@@ -1,6 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Immutable Compresed Sparse Row.
+--
+-- = Example
+-- >>> let csr = build 3 $ VU.fromList @(Int, Int) [(0, 1), (0, 2), (0, 3), (1, 2), (2, 3)]
+-- >>> csr `adj` 0
+-- [1,2,3]
+-- >>> csr `adj` 1
+-- [2]
+-- >>> csr `adj` 2
+-- [3]
 module AtCoder.Internal.Csr (Csr (..), build, adj) where
 
 import Control.Monad.ST (runST)
