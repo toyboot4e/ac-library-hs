@@ -73,8 +73,6 @@
 --   'mempty' = Affine2d (1, 0)
 --
 -- instance (Integral a) => SegAct (Affine2d a) (Sum a) where
---   {-# INLINE 'segAct' #-}
---   'segAct' = 'segActWithLength' 1
 --   {-# INLINE 'segActWithLength' #-}
 --   'segActWithLength' !len (Affine2d (!a, !b)) (Sum !x) = Sum $ a * x + b * fromIntegral len
 --
@@ -130,7 +128,8 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
--- | Haskell reprentation of the above properties.
+-- | Haskell reprentation of the above properties. User can implement either `segAct` or
+-- `segActWithLength`.
 class (Monoid f) => SegAct f a where
   -- | Lazy segment tree action.
   --
@@ -138,13 +137,15 @@ class (Monoid f) => SegAct f a where
   --
   -- - Left monoid action: \((f_2 \diamond f_1) a = f_2 (f_1 a)\)
   -- - Endomorphism: \(f (a_1 \diamond a_2) = (f a_1) \diamond (f a_2)\)
+  {-# INLINE segAct #-}
   segAct :: f -> a -> a
+  segAct = segActWithLength 1
 
   -- | Lazy segment tree action with target monoid length.
   --
-  -- By default implementation, it discards the monoid length and falls back to `segAct`. If you
-  -- implement this function, you don't have to store the monoid length, since it's given
-  -- externally. `segAct` can be implemented with @segActWithLength 1@.
+  -- If you implement `SegAt` with this function, you don't have to store the monoid length, since
+  -- it's given externally.
+  {-# INLINE segActWithLength #-}
   segActWithLength :: Int -> f -> a -> a
   segActWithLength _ = segAct
 
