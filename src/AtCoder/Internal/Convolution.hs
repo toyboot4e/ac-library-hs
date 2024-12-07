@@ -36,7 +36,7 @@ data FftInfo p = FftInfo
     iRate3Fft :: !(VU.Vector (AM.ModInt p))
   }
 
--- | TODO: should be evaluated at compile time?
+-- | \(O(\log m)\)
 newInfo :: forall m p. (PrimMonad m, AM.Modulus p) => m (FftInfo p)
 newInfo = do
   let !g = AM.primitiveRootModulus (proxy# @p)

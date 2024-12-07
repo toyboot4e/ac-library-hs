@@ -18,7 +18,7 @@
 -- multipled by \(O(T)\).
 --
 -- = Storing boxed types
--- If you really need to store boxed type to `LazySegTree`, use [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
+-- If you really need to store boxed types to `LazySegTree`, use [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
 -- or other wrappers.
 --
 -- = Example
@@ -167,8 +167,8 @@ read SegTree {..} p = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.read" p nSt
   VGM.read dSt $ p + sizeSt
 
--- | Returns @a[l] <> ... <> a[r - 1]@, assuming the properties of the monoid. It returns `mempty`
--- if \(l = r\).
+-- | Returns \(a[l] \diamond ... \diamond a[r - 1]\), assuming the properties of the monoid. It
+-- returns `mempty` if \(l = r\).
 --
 -- = Constraints
 -- - \(0 \leq l \leq r \leq n\)

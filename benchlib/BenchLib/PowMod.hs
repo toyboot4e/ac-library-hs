@@ -1,14 +1,16 @@
-module BenchLib.PowMod (powModBT, powModMod, powModRem) where
+module BenchLib.PowMod
+  ( powModBT,
+    powModMod,
+    powModRem,
+    powModPowerMod,
+    powModPowerRem,
+  )
+where
 
+import AtCoder.Extra.Math qualified as ACEM
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Barrett qualified as ACIBT
-import Control.Monad.ST (runST)
-import Data.Bits ((.<<.), (.>>.))
-import Data.Foldable
-import Data.Maybe (fromJust)
-import Data.Vector.Generic.Mutable qualified as VGM
-import Data.Vector.Unboxed qualified as VU
-import Data.Vector.Unboxed.Mutable qualified as VUM
+import Data.Bits ((.>>.))
 import Data.Word (Word32)
 import GHC.Stack (HasCallStack)
 
@@ -35,7 +37,7 @@ powModBT x n0 m0
 powModMod :: (HasCallStack) => Int -> Int -> Int -> Int
 powModMod x n0 m0
   | m0 == 1 = 0
-  | otherwise = fromIntegral $ inner n0 1 $ fromIntegral (x `mod` m0)
+  | otherwise = inner n0 1 $ fromIntegral (x `mod` m0)
   where
     !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "BenchLib.PowMod.powModMod: given invalid `n` or `m`: " ++ show (n0, m0)
     inner :: Int -> Int -> Int -> Int
@@ -50,7 +52,7 @@ powModMod x n0 m0
 powModRem :: (HasCallStack) => Int -> Int -> Int -> Int
 powModRem x n0 m0
   | m0 == 1 = 0
-  | otherwise = fromIntegral $ inner n0 1 $ fromIntegral (x `mod` m0)
+  | otherwise = inner n0 1 $ fromIntegral (x `mod` m0)
   where
     !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "BenchLib.PowMod.powModRem: given invalid `n` or `m`: " ++ show (n0, m0)
     inner :: Int -> Int -> Int -> Int
@@ -60,3 +62,15 @@ powModRem x n0 m0
           let r' = if odd n then r * y `rem` m0 else r
               y' = y * y `rem` m0
            in inner (n .>>. 1) r' y'
+
+-- | power-based
+powModPowerMod :: (HasCallStack) => Int -> Int -> Int -> Int
+powModPowerMod x n0 m0
+  | m0 == 1 = 0
+  | otherwise = ACEM.power n0 (\ !a !b -> a * b `mod` m0) x
+
+-- | power-based
+powModPowerRem :: (HasCallStack) => Int -> Int -> Int -> Int
+powModPowerRem x n0 m0
+  | m0 == 1 = 0
+  | otherwise = ACEM.power n0 (\ !a !b -> a * b `rem` m0) x

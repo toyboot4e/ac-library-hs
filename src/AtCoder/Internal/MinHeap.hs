@@ -32,6 +32,7 @@ module AtCoder.Internal.MinHeap
     push,
     peek,
     pop,
+    pop_,
   )
 where
 
@@ -144,3 +145,9 @@ pop heap@Heap {..} = do
 
       siftDown 0
       pure $ Just root
+
+-- | \(O(\log n)\) Removes the last element from the heap and discards it.
+pop_ :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
+pop_ heap = do
+  _ <- pop heap
+  pure ()

@@ -109,7 +109,6 @@ convolutionMod _ a b
 --
 -- = Constraints
 -- - \(|a| + |b| - 1 \leq 2^{24}\)
--- - All the elements of the array are in `Int` after convolution
 --
 -- = Complexity
 -- - \(O(n\log{n})\), where \(n = |a| + |b|\).

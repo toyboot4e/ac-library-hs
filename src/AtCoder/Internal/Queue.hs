@@ -2,6 +2,7 @@
 
 -- | Queue with fixed size capacity.
 --
+-- = Example
 -- >>> que <- new @_ @Int 3
 -- >>> capacity que
 -- 3

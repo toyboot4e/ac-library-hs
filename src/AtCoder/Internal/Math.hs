@@ -9,6 +9,8 @@
 -- False
 -- >>> invGcd 128 37
 -- (1,24)
+-- >>> 24 * 128 `mod` 37 == 1
+-- True
 -- >>> primitiveRoot 2130706433
 -- 3
 -- >>> floorSumUnsigned 8 12 3 5

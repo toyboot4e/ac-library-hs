@@ -19,7 +19,7 @@
 -- appear in this document is multipled by \(O(T)\).
 --
 -- = Storing boxed types
--- If you really need to store boxed type to `LazySegTree`, use [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
+-- If you really need to store boxed types to `LazySegTree`, use [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
 -- or other wrappers.
 --
 -- = Example
@@ -91,8 +91,8 @@
 -- Tips:
 --
 -- - New monoid always come from the left: @new <> old@.
--- - `prod` returns \(f_l \diamond f_{l + 1} \diamond .. \diamond f_{r - 1}\).
--- - If you need \(f_{r - 1} \diamond f_{r - 2} \diamond .. \diamond f_{l}\), wrap your monoid in `Data.Monoid.Dual`.
+-- - `prod` returns \(a_l \diamond f_{l + 1} \diamond .. \diamond a_{r - 1}\).
+-- - If you need \(a_{r - 1} \diamond a_{r - 2} \diamond .. \diamond f_{l}\), wrap your monoid in `Data.Monoid.Dual`.
 --
 -- = Major changes from the original @ac-library@
 -- - The implementaion is `Monoid` and `SegAct` based.
