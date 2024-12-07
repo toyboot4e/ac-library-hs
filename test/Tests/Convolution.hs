@@ -78,7 +78,8 @@ unit_butterfly = testCase "butterfly" $ do
       modInt = AM.new
   let expected = VU.fromList [10, 998244351, 173167434, 825076915]
   vec <- VU.unsafeThaw $ VU.map modInt $ VU.fromList [1, 2, 3, 4]
-  ACIC.butterfly vec
+  info <- ACIC.newInfo @_ @998244353
+  ACIC.butterfly info vec
   (expected @=?) =<< VU.unsafeFreeze vec
 
 unit_invButterfly :: TestTree
@@ -87,7 +88,8 @@ unit_invButterfly = testCase "invButterfly" $ do
       modInt = AM.new
   let expected = VU.fromList [10, 911660634, 998244349, 86583717]
   vec <- VU.unsafeThaw $ VU.map modInt $ VU.fromList [1, 2, 3, 4]
-  ACIC.butterflyInv vec
+  info <- ACIC.newInfo @_ @998244353
+  ACIC.butterflyInv info vec
   (expected @=?) =<< VU.unsafeFreeze vec
 
 testWithRangeMint ::

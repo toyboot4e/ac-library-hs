@@ -91,14 +91,14 @@ newInfo = do
 butterfly ::
   forall m p.
   (PrimMonad m, AM.Modulus p) =>
+  FftInfo p ->
   VUM.MVector (PrimState m) (AM.ModInt p) ->
   m ()
-butterfly a = do
+butterfly FftInfo {..} a = do
   let n = VUM.length a
   let h = countTrailingZeros n
   let !m = fromInteger $ natVal' (proxy# @p)
 
-  FftInfo {..} <- newInfo @_ @p
   flip fix 0 $ \loop len -> do
     when (len < h) $ do
       if h - len == 1
@@ -153,14 +153,14 @@ butterfly a = do
 butterflyInv ::
   forall m p.
   (PrimMonad m, AM.Modulus p) =>
+  FftInfo p ->
   VUM.MVector (PrimState m) (AM.ModInt p) ->
   m ()
-butterflyInv a = do
+butterflyInv FftInfo {..} a = do
   let n = VUM.length a
   let h = countTrailingZeros n
   let !m = fromInteger $ natVal' (proxy# @p)
 
-  FftInfo {..} <- newInfo @_ @p
   flip fix h $ \loop len -> do
     when (len /= 0) $ do
       if len == 1
@@ -234,6 +234,7 @@ convolutionNaive a b = VU.create $ do
   pure ans
 
 convolutionFft ::
+  forall p.
   (AM.Modulus p) =>
   VU.Vector (AM.ModInt p) ->
   VU.Vector (AM.ModInt p) ->
@@ -245,14 +246,15 @@ convolutionFft a_ b_ = {- VU.force $ -} VU.create $ do
   a <- VUM.replicate z 0
   VU.iforM_ a_ $ \i ai -> do
     VGM.write a i ai
-  butterfly a
+  info <- newInfo @_ @p
+  butterfly info a
   b <- VUM.replicate z 0
   VU.iforM_ b_ $ \i bi -> do
     VGM.write b i bi
-  butterfly b
+  butterfly info b
   VUM.iforM_ b $ \i bi -> do
     VGM.modify a (* bi) i
-  butterflyInv a
+  butterflyInv info a
   -- TODO: free rest space? (`force`)
   let a' = VUM.take (n + m - 1) a
   let !iz = AM.inv $ AM.new z
