@@ -22,9 +22,31 @@
 -- If you really need to store boxed type to `LazySegTree`, use [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
 -- or another wrapper.
 --
+-- = Example
+-- Note that new operators come from the left: @new <> old@.
+--
+-- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine2d(..))
+-- >>> import Data.Semigroup (Sum(..))
+-- >>> seg <- LST.build @_ @(Affine2d Int) @(Sum Int) $ VU.fromList [1, 2, 3, 4]
+-- >>> LST.applyIn seg 1 3 $ Affine2d (2, 1) -- \x -> 2 * x + 1
+-- >>> LST.write seg 3 $ Sum 10 -- [1, 5, 7, 10]
+-- >>> LST.modify seg (+ 1) 0   -- [2, 5, 7, 10]
+-- >>> LST.read seg 1
+-- Sum {getSum = 5}
+-- >>> LST.prod seg 0 3
+-- Sum {getSum = 14}
+-- >>> LST.allProd seg
+-- Sum {getSum = 24}
+-- >>> LST.maxRight seg 0 (<= (Sum 10)) -- sum [0, 2) = 7 <= 10
+-- 2
+-- >>> LST.minLeft seg 4 (<= (Sum 10)) -- sum [3, 4) = 10 <= 10
+-- 3
+--
 -- = Major changes from the original @ac-library@
 -- - The implementaion is based on `Monoid` and `SegAct`.
 -- - @get@ and @set@ are renamed to `read` and `write`.
+-- - `modify` and `modifyM` are added.
 module AtCoder.LazySegTree
   ( SegAct (..),
     LazySegTree (..),

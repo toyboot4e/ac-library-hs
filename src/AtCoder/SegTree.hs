@@ -24,25 +24,25 @@
 -- = Example
 -- >>> import AtCoder.SegTree qualified as ST
 -- >>> import Data.Monoid (Sum(..))
--- >>> -- Create an array [0, 3, 0, 2]
 -- >>> seg <- ST.new @_ @(Sum Int) 4
--- >>> ST.write seg 1 $ Sum 3
--- >>> ST.write seg 3 $ Sum 2
--- >>> -- Use read methods
+-- >>> ST.write seg 1 $ Sum 1
+-- >>> ST.modify seg (+ Sum 2) 2
+-- >>> ST.write seg 3 $ Sum 3 -- [0, 1, 2, 3]
 -- >>> ST.read seg 1
--- Sum {getSum = 3}
+-- Sum {getSum = 1}
 -- >>> ST.prod seg 0 3
 -- Sum {getSum = 3}
 -- >>> ST.allProd seg
--- Sum {getSum = 5}
--- >>> ST.maxRight seg 0 (< (Sum 5)) -- sum [0, 3) = 3 < 5
+-- Sum {getSum = 6}
+-- >>> ST.maxRight seg 0 (< (Sum 5)) -- sum [0, 3) = 2 < 5
 -- 3
--- >>> ST.minLeft seg 4 (< (Sum 5)) -- sum [2, 4) = 2 < 5
--- 2
+-- >>> ST.minLeft seg 4 (< (Sum 5)) -- sum [3, 4) = 3 < 5
+-- 3
 --
 -- = Major changes from the original @ac-library@
 -- - @get@ and @set@ are renamed to `read` and `write`.
 -- - The implementation is `Monoid`-based.
+-- - `modify` and `modifyM` are added.
 module AtCoder.SegTree
   ( SegTree (nSt, sizeSt, logSt),
     new,
