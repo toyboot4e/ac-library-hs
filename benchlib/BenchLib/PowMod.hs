@@ -1,4 +1,4 @@
-module Bench.PowMod (powModBT, powModMod, powModRem) where
+module BenchLib.PowMod (powModBT, powModMod, powModRem) where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Barrett qualified as ACIBT
@@ -21,7 +21,7 @@ powModBT x n0 m0
   | m0 == 1 = 0
   | otherwise = fromIntegral $ inner n0 1 $ fromIntegral (x `mod` m0)
   where
-    !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "AtCoder.Internal.Math.powMod: given invalid `n` or `m`: " ++ show (n0, m0)
+    !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "BenchLib.PowMod.powModBT: given invalid `n` or `m`: " ++ show (n0, m0)
     bt = ACIBT.new $ fromIntegral m0
     inner :: Int -> Word32 -> Word32 -> Word32
     inner !n !r !y
@@ -37,14 +37,13 @@ powModMod x n0 m0
   | m0 == 1 = 0
   | otherwise = fromIntegral $ inner n0 1 $ fromIntegral (x `mod` m0)
   where
-    !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "AtCoder.Internal.Math.powMod: given invalid `n` or `m`: " ++ show (n0, m0)
-    !m :: Word32 = fromIntegral m0
-    inner :: Int -> Word32 -> Word32 -> Word32
+    !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "BenchLib.PowMod.powModMod: given invalid `n` or `m`: " ++ show (n0, m0)
+    inner :: Int -> Int -> Int -> Int
     inner !n !r !y
       | n == 0 = r
       | otherwise =
-          let r' = if odd n then r * y `mod` m else r
-              y' = y * y `mod` m
+          let r' = if odd n then r * y `mod` m0 else r
+              y' = y * y `mod` m0
            in inner (n .>>. 1) r' y'
 
 -- | rem-based. Be warned
@@ -53,12 +52,11 @@ powModRem x n0 m0
   | m0 == 1 = 0
   | otherwise = fromIntegral $ inner n0 1 $ fromIntegral (x `mod` m0)
   where
-    !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "AtCoder.Internal.Math.powMod: given invalid `n` or `m`: " ++ show (n0, m0)
-    !m :: Word32 = fromIntegral m0
-    inner :: Int -> Word32 -> Word32 -> Word32
+    !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "BenchLib.PowMod.powModRem: given invalid `n` or `m`: " ++ show (n0, m0)
+    inner :: Int -> Int -> Int -> Int
     inner !n !r !y
       | n == 0 = r
       | otherwise =
-          let r' = if odd n then r * y `rem` m else r
-              y' = y * y `rem` m
+          let r' = if odd n then r * y `rem` m0 else r
+              y' = y * y `rem` m0
            in inner (n .>>. 1) r' y'
