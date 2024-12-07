@@ -18,8 +18,8 @@
 -- multipled by \(O(T)\).
 --
 -- = Storing boxed types
--- If you really need to store boxed type to `SegTree`, wrap them in a newtype that implements
--- @Unbox@ typeclass via a boxed vector, such as [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict).
+-- If you really need to store boxed type to `LazySegTree`, use [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
+-- or other wrappers.
 --
 -- = Example
 -- >>> import AtCoder.SegTree qualified as ST
@@ -40,8 +40,8 @@
 -- 3
 --
 -- = Major changes from the original @ac-library@
+-- - The implementation is `Monoid` based.
 -- - @get@ and @set@ are renamed to `read` and `write`.
--- - The implementation is `Monoid`-based.
 -- - `modify` and `modifyM` are added.
 module AtCoder.SegTree
   ( SegTree (nSt, sizeSt, logSt),
@@ -54,7 +54,9 @@ module AtCoder.SegTree
     prod,
     allProd,
     maxRight,
+    maxRightM,
     minLeft,
+    minLeftM,
   )
 where
 
@@ -215,18 +217,34 @@ allProd SegTree {..} = VGM.read dSt 1
 --
 -- = Complexity
 -- - \(O(\log n)\)
+{-# INLINE maxRight #-}
 maxRight :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
-maxRight SegTree {..} l0 f
-  | l0 == nSt = pure nSt
-  | otherwise = inner (l0 + sizeSt) mempty
+maxRight seg l0 f = maxRightM seg l0 (pure . f)
+
+-- | Moandic version of `maxRight`.
+--
+-- = Constraints
+-- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
+-- - @f mempty == True@.
+-- - \(0 \leq l \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
+maxRightM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
+maxRightM SegTree {..} l0 f = do
+  b <- f mempty
+  let !_ = ACIA.runtimeAssert b "AtCoder.SegTree.maxRightM: `f mempty` returned `False`"
+  if l0 == nSt
+    then pure nSt
+    else inner (l0 + sizeSt) mempty
   where
     -- NOTE: Not ordinary bounds check!
-    !_ = ACIA.runtimeAssert (0 <= l0 && l0 <= nSt) $ "AtCoder.SegTree.maxRight: given invalid `left` index `" ++ show l0 ++ "` over length `" ++ show nSt ++ "`"
-    !_ = ACIA.runtimeAssert (f mempty) "AtCoder.SegTree.maxRight: `f mempty` returned `False`"
+    !_ = ACIA.runtimeAssert (0 <= l0 && l0 <= nSt) $ "AtCoder.SegTree.maxRightM: given invalid `left` index `" ++ show l0 ++ "` over length `" ++ show nSt ++ "`"
     inner l !sm = do
       let l' = chooseBit l
       !sm' <- (sm <>) <$> VGM.read dSt l'
-      if not $ f sm'
+      b <- f sm'
+      if not b
         then do
           inner2 l' sm
         else do
@@ -242,7 +260,8 @@ maxRight SegTree {..} l0 f
       | l < sizeSt = do
           let l' = 2 * l
           !sm' <- (sm <>) <$> VGM.read dSt l'
-          if f sm'
+          b <- f sm'
+          if b
             then inner2 (l' + 1) sm'
             else inner2 l' sm
       | otherwise = pure $ l - sizeSt
@@ -265,18 +284,36 @@ maxRight SegTree {..} l0 f
 --
 -- = Complexity
 -- - \(O(\log n)\)
+{-# INLINE minLeft #-}
 minLeft :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
-minLeft SegTree {..} r0 f
-  | r0 == 0 = pure 0
-  | otherwise = inner (r0 + sizeSt) mempty
+minLeft seg r0 f = minLeftM seg r0 (pure . f)
+
+-- | Monadic version of `minLeft`.
+--
+-- = Constraints
+--
+-- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side
+--   effect.
+-- - @f mempty == True@.
+-- - \(0 \leq r \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
+minLeftM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
+minLeftM SegTree {..} r0 f = do
+  b <- f mempty
+  let !_ = ACIA.runtimeAssert b "AtCoder.SegTree.minLeftM: `f empty` returned `False`"
+  if r0 == 0
+    then pure 0
+    else inner (r0 + sizeSt) mempty
   where
     -- NOTE: Not ordinary bounds check!
-    !_ = ACIA.runtimeAssert (0 <= r0 && r0 <= nSt) $ "AtCoder.SegTree.minLeft: given invalid `right` index `" ++ show r0 ++ "` over length `" ++ show nSt ++ "`"
-    !_ = ACIA.runtimeAssert (f mempty) "AtCoder.SegTree.minLeft: `f empty` returned `False`"
+    !_ = ACIA.runtimeAssert (0 <= r0 && r0 <= nSt) $ "AtCoder.SegTree.minLeftM: given invalid `right` index `" ++ show r0 ++ "` over length `" ++ show nSt ++ "`"
     inner r !sm = do
       let r' = chooseBit $ r - 1
       !sm' <- (<> sm) <$> VGM.read dSt r'
-      if not $ f sm'
+      b <- f sm'
+      if not b
         then do
           inner2 r' sm
         else do
@@ -290,7 +327,8 @@ minLeft SegTree {..} r0 f
       | r < sizeSt = do
           let r' = 2 * r + 1
           !sm' <- (<> sm) <$> VGM.read dSt r'
-          if f sm'
+          b <- f sm'
+          if b
             then inner2 (r' - 1) sm'
             else inner2 r' sm
       | otherwise = pure $ r + 1 - sizeSt

@@ -20,9 +20,12 @@
 --
 -- = Storing boxed types
 -- If you really need to store boxed type to `LazySegTree`, use [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
--- or another wrapper.
+-- or other wrappers.
 --
 -- = Example
+--
+-- == Usage
+-- Here, we're using `AtCoder.Extra.Monoid.Affine2d`.
 --
 -- >>> import AtCoder.LazySegTree qualified as LST
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine2d(..))
@@ -42,8 +45,58 @@
 -- >>> LST.minLeft seg 4 (<= (Sum 10)) -- sum [3, 4) = 10 <= 10
 -- 3
 --
+-- == `SegAct` instance
+-- `LazeSegTree` functions require `SegAct` instance. Take `AtCoder.Extra.Monoid.Affine2d` as an
+-- example.
+--
+-- @
+-- {-# LANGUAGE DerivingStrategies #-}
+-- {-# LANGUAGE TypeFamilies #-}
+--
+-- import AtCoder.LazySegTree (SegAct (..)) -- also re-exported from AtCoder.Extra.Monoid.
+-- import Data.Monoid
+-- import Data.Vector.Generic qualified as VG
+-- import Data.Vector.Generic.Mutable qualified as VGM
+-- import Data.Vector.Unboxed qualified as VU
+-- import Data.Vector.Unboxed.Mutable qualified as VUM
+--
+-- newtype Affine2d a = Affine2d (Affine2dRepr a)
+--   deriving newtype (Eq, Ord, Show)
+--
+-- type Affine2dRepr a = (a, a)
+--
+-- instance (Num a) => 'Semigroup' (Affine2d a) where
+--   {-# INLINE ('<>') #-}
+--   (Affine2d (!a1, !b1)) '<>' (Affine2d (!a2, !b2)) = Affine2d (a1 * a2, a1 * b2 + b1)
+--
+-- instance (Num a) => 'Monoid' (Affine2d a) where
+--   {-# INLINE 'mempty' #-}
+--   'mempty' = Affine2d (1, 0)
+--
+-- instance (Integral a) => SegAct (Affine2d a) (Sum a) where
+--   {-# INLINE 'segAct' #-}
+--   'segAct' = 'segActWithLength' 1
+--   {-# INLINE 'segActWithLength' #-}
+--   'segActWithLength' !len (Affine2d (!a, !b)) (Sum !x) = Sum $ a * x + b * fromIntegral len
+--
+-- -- Other 'SegAct' instances are ommited
+--
+-- -- Derive Unbox:
+-- newtype instance VU.MVector s (Affine2d a) = MV_Affine2d (VU.MVector s (Affine2dRepr a))
+-- newtype instance VU.Vector (Affine2d a) = V_Affine2d (VU.Vector (Affine2dRepr a))
+-- deriving instance (VU.Unbox a) => VGM.MVector VUM.MVector (Affine2d a)
+-- deriving instance (VU.Unbox a) => VG.Vector VU.Vector (Affine2d a)
+-- instance (VU.Unbox a) => VU.Unbox (Affine2d a)
+-- @
+--
+-- Tips:
+--
+-- - New monoid always come from the left: @new <> old@.
+-- - `prod` returns \(f_l \diamond f_{l + 1} \diamond .. \diamond f_{r - 1}\).
+-- - If you need \(f_{r - 1} \diamond f_{r - 2} \diamond .. \diamond f_{l}\), wrap your monoid in `Data.Monoid.Dual`.
+--
 -- = Major changes from the original @ac-library@
--- - The implementaion is based on `Monoid` and `SegAct`.
+-- - The implementaion is `Monoid` and `SegAct` based.
 -- - @get@ and @set@ are renamed to `read` and `write`.
 -- - `modify` and `modifyM` are added.
 module AtCoder.LazySegTree
@@ -60,11 +113,11 @@ module AtCoder.LazySegTree
     applyAt,
     applyIn,
     maxRight,
+    maxRightM,
     minLeft,
+    minLeftM,
   )
 where
-
--- FIXME: validate and write about operator direction
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
@@ -88,11 +141,15 @@ class (Monoid f) => SegAct f a where
   -- - Endomorphism: \(f (a_1 \diamond a_2) = (f a_1) \diamond (f a_2)\)
   segAct :: f -> a -> a
 
-  -- | Lazy segment tree action with target monoid length. You don't have to store the monoid length
-  -- when implementing `SegAct` with this function (`segAct` is given as @segActWithLength 1@).
+  -- | Lazy segment tree action with target monoid length.
+  --
+  -- By default implementation, it discards the monoid length and falls back to `segAct`. If you
+  -- implement this function, you don't have to store the monoid length, since it's given
+  -- externally. `segAct` can be implemented with @segActWithLength 1@.
   segActWithLength :: Int -> f -> a -> a
   segActWithLength _ = segAct
 
+-- | Lazy segment tree defined around `SegAct`.
 data LazySegTree s f a = LazySegTree
   { -- | Valid length.
     nLst :: {-# UNPACK #-} !Int,
@@ -319,21 +376,37 @@ applyIn self@LazySegTree {..} l0 r0 f
 -- = Complexity
 -- - \(O(\log n)\)
 maxRight :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
-maxRight self@LazySegTree {..} l0 g
-  | l0 == nLst = pure nLst
-  | otherwise = do
+maxRight seg l0 g = maxRightM seg l0 (pure . g)
+
+-- | Monadic version of `maxRight`.
+--
+-- = Constraints
+--
+-- - If \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
+-- - @g mempty == True@.
+-- - \(0 \leq l \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
+maxRightM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
+maxRightM self@LazySegTree {..} l0 g = do
+  b <- g mempty
+  let !_ = ACIA.runtimeAssert b "AtCoder.LazySegTree.maxRightM: `g mempty` returned `False`"
+  if l0 == nLst
+    then pure nLst
+    else do
       let l = l0 + sizeLst
       for_ [logLst, logLst - 1 .. 1] $ \i -> do
         push self (l .>>. i)
       inner l mempty
   where
     -- NOTE: Not ordinary bounds check!
-    !_ = ACIA.runtimeAssert (0 <= l0 && l0 <= nLst) $ "AtCoder.LazySegTree.maxRight: given invalid `left` index `" ++ show l0 ++ "` over length `" ++ show nLst ++ "`"
-    !_ = ACIA.runtimeAssert (g mempty) "AtCoder.LazySegTree.maxRight: `g mempty` returned `False`"
+    !_ = ACIA.runtimeAssert (0 <= l0 && l0 <= nLst) $ "AtCoder.LazySegTree.maxRightM: given invalid `left` index `" ++ show l0 ++ "` over length `" ++ show nLst ++ "`"
     inner l !sm = do
       let l' = chooseBit l
       !sm' <- (sm <>) <$> VGM.read dLst l'
-      if not $ g sm'
+      b <- g sm'
+      if not $ b
         then do
           inner2 l' sm
         else do
@@ -350,7 +423,8 @@ maxRight self@LazySegTree {..} l0 g
           push self l
           let l' = 2 * l
           !sm' <- (sm <>) <$> VGM.read dLst l'
-          if g sm'
+          b <- g sm'
+          if b
             then inner2 (l' + 1) sm'
             else inner2 l' sm
       | otherwise = pure $ l - sizeLst
@@ -373,21 +447,37 @@ maxRight self@LazySegTree {..} l0 g
 -- = Complexity
 -- - \(O(\log n)\)
 minLeft :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
-minLeft self@LazySegTree {..} r0 g
-  | r0 == 0 = pure 0
-  | otherwise = do
+minLeft seg r0 g = minLeftM seg r0 (pure . g)
+
+-- | Monadic version of `minLeft`.
+--
+-- = Constraints
+--
+-- - if \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
+-- - @g mempty == True@.
+-- - \(0 \leq r \leq n\)
+--
+-- = Complexity
+-- - \(O(\log n)\)
+minLeftM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
+minLeftM self@LazySegTree {..} r0 g = do
+  b <- g mempty
+  let !_ = ACIA.runtimeAssert b "AtCoder.LazySegTree.minLeftM: `g empty` returned `False`"
+  if r0 == 0
+    then pure 0
+    else do
       let r = r0 + sizeLst
       for_ [logLst, logLst - 1 .. 1] $ \i -> do
         push self $ (r - 1) .>>. i
       inner r mempty
   where
     -- NOTE: Not ordinary bounds check!
-    !_ = ACIA.runtimeAssert (0 <= r0 && r0 <= nLst) $ "AtCoder.LazySegTree.minLeft: given invalid `right` index `" ++ show r0 ++ "` over length `" ++ show nLst ++ "`"
-    !_ = ACIA.runtimeAssert (g mempty) "AtCoder.LazySegTree.minLeft: `g empty` returned `False`"
+    !_ = ACIA.runtimeAssert (0 <= r0 && r0 <= nLst) $ "AtCoder.LazySegTree.minLeftM: given invalid `right` index `" ++ show r0 ++ "` over length `" ++ show nLst ++ "`"
     inner r !sm = do
       let r' = chooseBit $ r - 1
       !sm' <- (<> sm) <$> VGM.read dLst r'
-      if not $ g sm'
+      b <- g sm'
+      if not $ b
         then do
           inner2 r' sm
         else do
@@ -402,7 +492,8 @@ minLeft self@LazySegTree {..} r0 g
           push self r
           let r' = 2 * r + 1
           !sm' <- (<> sm) <$> VGM.read dLst r'
-          if g sm'
+          b <- g sm'
+          if b
             then inner2 (r' - 1) sm'
             else inner2 r' sm
       | otherwise = pure $ r + 1 - sizeLst
