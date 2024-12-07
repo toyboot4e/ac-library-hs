@@ -33,7 +33,6 @@ common dependencies
     , base               ==4.17.1.0
     , bitvec             ^>=1.1.4.0
     , bytestring         ^>=0.11.4.0
-    , extra              ^>=1.7.13
     , primitive          ^>=0.8.0.0
     , vector             ^>=0.13.0.0
     , vector-algorithms  ^>=0.9.0.1

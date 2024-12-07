@@ -34,7 +34,6 @@ import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.GrowVec qualified as ACIGV
 import AtCoder.Internal.Queue qualified as ACIQ
 import Control.Monad (unless, when)
-import Control.Monad.Extra (whenJustM)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Bit (Bit (..))
@@ -198,21 +197,24 @@ flow MfGraph {..} s t flowLimit = do
         ACIQ.clear que
         ACIQ.pushBack que s
         fix $ \loop -> do
-          whenJustM (ACIQ.popFront que) $ \v -> do
-            (VUM.MV_3 _ vecTo _ vecCap) <- readMutVar $ ACIGV.vecGV (gG VG.! v)
-            len <- ACIGV.length (gG VG.! v)
-            neighbors <- VU.zip <$> VU.unsafeFreeze (VUM.take len vecTo) <*> VU.unsafeFreeze (VUM.take len vecCap)
-            VU.forM_ neighbors $ \(!to, !cap) -> do
-              when (cap /= 0) $ do
-                levelTo <- VGM.read level to
-                when (levelTo < 0) $ do
-                  levelV <- VGM.read level v
-                  VGM.write level to (levelV + 1)
-                  -- FIXME: break on to == t
-                  ACIQ.pushBack que to
-            levelT <- VGM.read level t
-            when (levelT == -1) $ do
-              loop
+          v_ <- ACIQ.popFront que
+          case v_ of
+            Nothing -> pure ()
+            Just v -> do
+              (VUM.MV_3 _ vecTo _ vecCap) <- readMutVar $ ACIGV.vecGV (gG VG.! v)
+              len <- ACIGV.length (gG VG.! v)
+              neighbors <- VU.zip <$> VU.unsafeFreeze (VUM.take len vecTo) <*> VU.unsafeFreeze (VUM.take len vecCap)
+              VU.forM_ neighbors $ \(!to, !cap) -> do
+                when (cap /= 0) $ do
+                  levelTo <- VGM.read level to
+                  when (levelTo < 0) $ do
+                    levelV <- VGM.read level v
+                    VGM.write level to (levelV + 1)
+                    -- FIXME: break on to == t
+                    ACIQ.pushBack que to
+              levelT <- VGM.read level t
+              when (levelT == -1) $ do
+                loop
 
   iter <- VUM.unsafeNew nG
   let dfs v up
@@ -285,13 +287,16 @@ minCut MfGraph {..} s = do
   que <- ACIQ.new nG -- we could use a growable queue here
   ACIQ.pushBack que s
   fix $ \loop -> do
-    whenJustM (ACIQ.popFront que) $ \p -> do
-      VGM.write visited p $ Bit True
-      es <- ACIGV.unsafeFreeze (gG VG.! p)
-      VU.forM_ es $ \(!to, !_, !cap) -> do
-        when (cap /= 0) $ do
-          Bit b <- VGM.exchange visited to $ Bit True
-          unless b $ do
-            ACIQ.pushBack que to
-      loop
+    p_ <- ACIQ.popFront que
+    case p_ of
+      Nothing -> pure ()
+      Just p -> do
+        VGM.write visited p $ Bit True
+        es <- ACIGV.unsafeFreeze (gG VG.! p)
+        VU.forM_ es $ \(!to, !_, !cap) -> do
+          when (cap /= 0) $ do
+            Bit b <- VGM.exchange visited to $ Bit True
+            unless b $ do
+              ACIQ.pushBack que to
+        loop
   VU.unsafeFreeze visited
