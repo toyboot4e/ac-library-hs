@@ -127,3 +127,31 @@ test-suite ac-library-hs-test
     , tasty-quickcheck
     , tasty-rerun
     , transformers
+
+library benchlib
+  import:           warnings
+  import:           dependencies
+  ghc-options:      -O2
+  default-language: GHC2021
+  exposed-modules:  BenchLib.PowMod
+  type:             exitcode-stdio-1.0
+  hs-source-dirs:   benchlib
+  build-depends:    ac-library-hs
+
+benchmark ac-library-hs-benchmark
+  import:           warnings
+  import:           dependencies
+  ghc-options:      -O2
+  default-language: GHC2021
+  type:             exitcode-stdio-1.0
+  main-is:          Main.hs
+  hs-source-dirs:   benchmarks
+  other-modules:    Bench.PowMod
+  build-depends:
+    , ac-library-hs:{ac-library-hs, benchlib}
+    , base
+    , criterion
+    , random
+
+-- , tasty
+-- , tasty-bench
