@@ -4,6 +4,7 @@
 -- the same monoid \(x\) such as @Sum Int@.
 module AtCoder.Extra.Monoid.RangeSet
   ( RangeSet (..),
+    new,
   )
 where
 
@@ -24,6 +25,10 @@ newtype RangeSet a = RangeSet (RangeSetRepr a)
 type RangeSetRepr a = (Bool, a)
 
 -- TODO: Monoid requirement on `a` should not be required
+
+-- | Creates a new `RangeSet` action.
+new :: a -> RangeSet a
+new = RangeSet . (True,)
 
 instance Semigroup (RangeSet a) where
   {-# INLINE (<>) #-}

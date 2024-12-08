@@ -4,6 +4,7 @@
 -- an interval \([l, r)\) to an idempotent monoid \(x\) such as @Max Int@.
 module AtCoder.Extra.Monoid.RangeSetId
   ( RangeSetId (..),
+    new,
   )
 where
 
@@ -23,6 +24,10 @@ newtype RangeSetId a = RangeSetId (RangeSetIdRepr a)
 type RangeSetIdRepr a = (Bool, a)
 
 -- TODO: Monoid requirement on `a` should not be required
+
+-- | Creates a new `RangeSet` action.
+new :: a -> RangeSetId a
+new = RangeSetId . (True,)
 
 instance Semigroup (RangeSetId a) where
   {-# INLINE (<>) #-}
