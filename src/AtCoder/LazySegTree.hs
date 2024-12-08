@@ -135,7 +135,6 @@ import Prelude hiding (read)
 -- `segAct` or `segActWithLength`.
 --
 -- = Constraints
---
 -- - Identity: \(\mathrm{segAct} \mathrm{mempty} a = a\).
 -- - Left monoid action: \((f_2 \diamond f_1) a = f_2 (f_1 a)\)
 -- - Endomorphism: \(f (a_1 \diamond a_2) = (f a_1) \diamond (f a_2)\)
@@ -149,6 +148,9 @@ class (Monoid f) => SegAct f a where
   --
   -- If you implement `SegAt` with this function, you don't have to store the monoid length, since
   -- it's given externally.
+  --
+  -- = Constraints
+  -- - Linear monoid action: @'segActWithLength' len f a = 'stimes' len ('segAct' f a)} a@.
   {-# INLINE segActWithLength #-}
   segActWithLength :: Int -> f -> a -> a
   segActWithLength _ = segAct
