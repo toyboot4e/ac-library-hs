@@ -33,6 +33,23 @@ powModBT x n0 m0
               y' = ACIBT.mul bt y y
            in inner (n .>>. 1) r' y'
 
+-- TODO: Barrett64
+-- -- | Barrett-based
+-- powModBT :: (HasCallStack) => Int -> Int -> Int -> Int
+-- powModBT x n0 m0
+--   | m0 == 1 = 0
+--   | otherwise = fromIntegral $ inner n0 1 $ fromIntegral (x `mod` m0)
+--   where
+--     !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "BenchLib.PowMod.powModBT: given invalid `n` or `m`: " ++ show (n0, m0)
+--     bt = ACIBT.new $ fromIntegral m0
+--     inner :: Int -> Word32 -> Word32 -> Word32
+--     inner !n !r !y
+--       | n == 0 = r
+--       | otherwise =
+--           let r' = if odd n then ACIBT.mul bt r y else r
+--               y' = ACIBT.mul bt y y
+--            in inner (n .>>. 1) r' y'
+
 -- | mod-based
 powModMod :: (HasCallStack) => Int -> Int -> Int -> Int
 powModMod x n0 m0

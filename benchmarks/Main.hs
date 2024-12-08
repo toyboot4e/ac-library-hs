@@ -1,5 +1,6 @@
 module Main where
 
+import Bench.MulMod qualified
 import Bench.PowMod qualified
 import Criterion.Main
 
@@ -8,5 +9,6 @@ import Criterion.Main
 main :: IO ()
 main =
   defaultMain
-    [ Bench.PowMod.benches
+    [ Bench.MulMod.benches,
+      Bench.PowMod.benches
     ]

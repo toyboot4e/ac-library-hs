@@ -157,7 +157,12 @@ library benchlib
   import:          warnings
   import:          dependencies
   ghc-options:     -O2
-  exposed-modules: BenchLib.PowMod
+  exposed-modules:
+    BenchLib.MulMod.Barrett64
+    BenchLib.MulMod.BarrettWideWord
+    BenchLib.MulMod.Mongomery
+    BenchLib.PowMod
+
   type:            exitcode-stdio-1.0
   hs-source-dirs:  benchlib
   build-depends:   ac-library-hs
