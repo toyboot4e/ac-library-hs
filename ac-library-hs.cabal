@@ -65,6 +65,9 @@ library
     AtCoder.Dsu
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid
+    AtCoder.Extra.Monoid.Affine2d
+    AtCoder.Extra.Monoid.RangeSet
+    AtCoder.Extra.Monoid.RangeSetId
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
     AtCoder.Internal.Barrett
@@ -155,7 +158,8 @@ benchmark ac-library-hs-benchmark
   hs-source-dirs: benchmarks
   other-modules:  Bench.PowMod
   build-depends:
-    , ac-library-hs:{ac-library-hs, benchlib}
+    , ac-library-hs
+    , ac-library-hs:benchlib
     , base
     , criterion
     , random

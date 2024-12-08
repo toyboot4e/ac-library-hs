@@ -130,8 +130,8 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
--- | Haskell reprentation of the above properties. User can implement either `segAct` or
--- `segActWithLength`.
+-- | Haskell reprentation of the `AtCoder.LazySegTree` properties. User can implement either
+-- `segAct` or `segActWithLength`.
 class (Monoid f) => SegAct f a where
   -- | Lazy segment tree action.
   --
