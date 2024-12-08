@@ -44,7 +44,7 @@ instance (Num a) => Monoid (Affine2d a) where
   mconcat [] = mempty
   mconcat (x:xs) = foldl' (<>) x xs
 
-instance (Integral a) => SegAct (Affine2d a) a where
+instance (Num a) => SegAct (Affine2d a) a where
   {-# INLINE segActWithLength #-}
   segActWithLength !len (Affine2d (!a, !b)) !x = id $! a * x + b * fromIntegral len
 

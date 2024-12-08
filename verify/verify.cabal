@@ -153,6 +153,11 @@ executable alpc-l
   main-is:       alpc-l.hs
   build-depends: verify
 
+executable aoj-DSL_2_L
+  import:        app-local
+  main-is:       aoj-DSL_2_L.hs
+  build-depends: verify
+
 executable aoj-GRL_6_A
   import:        app-local
   main-is:       aoj-GRL_6_A.hs
@@ -228,4 +233,9 @@ executable alpc-g
 executable alpc-h
   import:        app-online
   main-is:       alpc-h.hs
+  build-depends: verify
+
+executable typical90_ac
+  import:        app-online
+  main-is:       typical90_ac.hs
   build-depends: verify

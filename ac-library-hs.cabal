@@ -112,6 +112,7 @@ test-suite ac-library-hs-test
   other-modules:
     Tests.Convolution
     Tests.Dsu
+    Tests.Extra.Monoid
     Tests.FenwickTree
     Tests.Internal.Bit
     Tests.Internal.Buffer
@@ -142,6 +143,8 @@ test-suite ac-library-hs-test
     , hspec
     , mtl
     , QuickCheck
+    , quickcheck-classes
+    , quickcheck-classes-base
     , random
     , tasty
     , tasty-hspec

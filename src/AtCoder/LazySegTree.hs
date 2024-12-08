@@ -25,7 +25,8 @@
 -- = Example
 --
 -- == Usage
--- Here, we're using `AtCoder.Extra.Monoid.Affine2d`.
+-- Here, we're using `AtCoder.Extra.Monoid.Affine2d` as monoid action and `Data.Semigroup.Sum` as
+-- acted monoid.
 --
 -- >>> import AtCoder.LazySegTree qualified as LST
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine2d(..))
@@ -132,13 +133,14 @@ import Prelude hiding (read)
 
 -- | Haskell reprentation of the `AtCoder.LazySegTree` properties. User can implement either
 -- `segAct` or `segActWithLength`.
+--
+-- = Constraints
+--
+-- - Identity: \(\mathrm{segAct} \mathrm{mempty} a = a\).
+-- - Left monoid action: \((f_2 \diamond f_1) a = f_2 (f_1 a)\)
+-- - Endomorphism: \(f (a_1 \diamond a_2) = (f a_1) \diamond (f a_2)\)
 class (Monoid f) => SegAct f a where
   -- | Lazy segment tree action.
-  --
-  -- = Constraints
-  --
-  -- - Left monoid action: \((f_2 \diamond f_1) a = f_2 (f_1 a)\)
-  -- - Endomorphism: \(f (a_1 \diamond a_2) = (f a_1) \diamond (f a_2)\)
   {-# INLINE segAct #-}
   segAct :: f -> a -> a
   segAct = segActWithLength 1

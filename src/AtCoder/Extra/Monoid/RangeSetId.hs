@@ -14,27 +14,38 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
 -- | `AtCoder.LazySegTree.SegAct` instance of range set action over ideomponent monoid.
-newtype RangeSetId a = RangeSetId a
+newtype RangeSetId a = RangeSetId (RangeSetIdRepr a)
   deriving newtype (Eq, Ord, Show)
+
+-- | `RangeSetId` internal representation. The first value represents if it is an identity action.
+-- Tuples are not the fastest representation, but it's easier to implement
+-- `Data.Vector.Unboxed.Unbox`.
+type RangeSetIdRepr a = (Bool, a)
+
+-- TODO: Monoid requirement on `a` should not be required
 
 instance Semigroup (RangeSetId a) where
   {-# INLINE (<>) #-}
+  RangeSetId (False, !_) <> old = old
   new <> _ = new
 
 instance (Monoid a) => Monoid (RangeSetId a) where
   {-# INLINE mempty #-}
-  mempty = RangeSetId mempty
+  mempty = RangeSetId (False, mempty)
   {-# INLINE mconcat #-}
+  -- find the first non-mempty
   mconcat [] = mempty
-  mconcat (a:_) = a
+  mconcat (RangeSetId (False, !_) : as) = mconcat as
+  mconcat (a : _) = a
 
 instance (Monoid a) => SegAct (RangeSetId a) a where
   {-# INLINE segAct #-}
-  segAct (RangeSetId x) _ = x
+  segAct (RangeSetId (False, !_)) x = x
+  segAct (RangeSetId (True, !a)) _ = a
 
-newtype instance VU.MVector s (RangeSetId a) = MV_RangeSetId (VU.MVector s a)
+newtype instance VU.MVector s (RangeSetId a) = MV_RangeSetId (VU.MVector s (RangeSetIdRepr a))
 
-newtype instance VU.Vector (RangeSetId a) = V_RangeSetId (VU.Vector a)
+newtype instance VU.Vector (RangeSetId a) = V_RangeSetId (VU.Vector (RangeSetIdRepr a))
 
 deriving instance (VU.Unbox a) => VGM.MVector VUM.MVector (RangeSetId a)
 
