@@ -8,9 +8,11 @@ module AtCoder.Extra.Monoid.Affine1
   )
 where
 
+import AtCoder.Extra.Math qualified as ACEM
 import AtCoder.LazySegTree (SegAct (..))
 import Data.Foldable (foldl')
-import Data.Semigroup (Max (..), Min (..), Product (..), Sum (..), Dual(..))
+import Data.List.NonEmpty (NonEmpty (..))
+import Data.Semigroup (Dual (..), Max (..), Min (..), Product (..), Semigroup (..), Sum (..))
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -38,13 +40,17 @@ instance (Num a) => Semigroup (Affine1 a) where
     where
       !a' = a1 * a2
       !b' = a1 * b2 + b1
+  {-# INLINE sconcat #-}
+  sconcat (x :| xs) = foldl' (<>) x xs
+  {-# INLINE stimes #-}
+  stimes b = ACEM.power (fromIntegral b) (<>)
 
 instance (Num a) => Monoid (Affine1 a) where
   {-# INLINE mempty #-}
   mempty = Affine1 (1, 0)
   {-# INLINE mconcat #-}
   mconcat [] = mempty
-  mconcat (x:xs) = foldl' (<>) x xs
+  mconcat (x : xs) = foldl' (<>) x xs
 
 instance (Num a) => SegAct (Affine1 a) a where
   {-# INLINE segActWithLength #-}

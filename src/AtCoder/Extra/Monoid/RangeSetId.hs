@@ -9,6 +9,7 @@ module AtCoder.Extra.Monoid.RangeSetId
 where
 
 import AtCoder.LazySegTree (SegAct (..))
+import Data.Semigroup (stimes)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -32,7 +33,9 @@ new = RangeSetId . (True,)
 instance Semigroup (RangeSetId a) where
   {-# INLINE (<>) #-}
   RangeSetId (False, !_) <> old = old
-  new <> _ = new
+  new_ <> _ = new_
+  {-# INLINE stimes #-}
+  stimes _ x = x
 
 instance (Monoid a) => Monoid (RangeSetId a) where
   {-# INLINE mempty #-}

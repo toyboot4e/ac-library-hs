@@ -10,6 +10,7 @@ where
 
 import AtCoder.Extra.Math qualified as ACEM
 import AtCoder.LazySegTree (SegAct (..))
+import Data.Semigroup (stimes)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -33,7 +34,9 @@ new = RangeSet . (True,)
 instance Semigroup (RangeSet a) where
   {-# INLINE (<>) #-}
   RangeSet (False, !_) <> old = old
-  new <> _ = new
+  new_ <> _ = new_
+  {-# INLINE stimes #-}
+  stimes _ x = x
 
 instance (Monoid a) => Monoid (RangeSet a) where
   {-# INLINE mempty #-}
