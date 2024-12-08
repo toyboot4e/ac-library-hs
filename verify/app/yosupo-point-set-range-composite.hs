@@ -1,4 +1,4 @@
-import AtCoder.Extra.Monoid (segAct, Affine2d(..))
+import AtCoder.Extra.Monoid (segAct, Affine1(..))
 import AtCoder.ModInt qualified as M
 import AtCoder.SegTree qualified as ST
 import Data.Monoid (Dual (..))
@@ -16,13 +16,13 @@ main = do
   (!n, !q) <- ints2
   xs <- VU.replicateM n $ do
     (!a, !b) <- ints2
-    pure . Dual $ Affine2d (modInt a, modInt b)
+    pure . Dual $ Affine1 (modInt a, modInt b)
   qs <- VU.replicateM q ints4
 
   seg <- ST.build xs
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !p, !c, !d) -> do
-      ST.write seg p . Dual $ Affine2d (modInt c, modInt d)
+      ST.write seg p . Dual $ Affine1 (modInt c, modInt d)
       pure Nothing
     (1, !l, !r, !x) -> do
       Dual f <- ST.prod seg l r

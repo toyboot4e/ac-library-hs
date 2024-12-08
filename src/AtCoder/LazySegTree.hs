@@ -25,14 +25,14 @@
 -- = Example
 --
 -- == Usage
--- Here, we're using `AtCoder.Extra.Monoid.Affine2d` as monoid action and `Data.Semigroup.Sum` as
+-- Here, we're using `AtCoder.Extra.Monoid.Affine1` as monoid action and `Data.Semigroup.Sum` as
 -- acted monoid.
 --
 -- >>> import AtCoder.LazySegTree qualified as LST
--- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine2d(..))
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..))
 -- >>> import Data.Semigroup (Sum(..))
--- >>> seg <- LST.build @_ @(Affine2d Int) @(Sum Int) $ VU.fromList [1, 2, 3, 4]
--- >>> LST.applyIn seg 1 3 $ Affine2d (2, 1) -- \x -> 2 * x + 1
+-- >>> seg <- LST.build @_ @(Affine1 Int) @(Sum Int) $ VU.fromList [1, 2, 3, 4]
+-- >>> LST.applyIn seg 1 3 $ Affine1 (2, 1) -- \x -> 2 * x + 1
 -- >>> LST.write seg 3 $ Sum 10 -- [1, 5, 7, 10]
 -- >>> LST.modify seg (+ 1) 0   -- [2, 5, 7, 10]
 -- >>> LST.read seg 1
@@ -47,7 +47,7 @@
 -- 3
 --
 -- == `SegAct` instance
--- `LazeSegTree` functions require `SegAct` instance. Take `AtCoder.Extra.Monoid.Affine2d` as an
+-- `LazeSegTree` functions require `SegAct` instance. Take `AtCoder.Extra.Monoid.Affine1` as an
 -- example.
 --
 -- @
@@ -60,33 +60,33 @@
 -- import Data.Vector.Unboxed qualified as VU
 -- import Data.Vector.Unboxed.Mutable qualified as VUM
 --
--- newtype Affine2d a = Affine2d (Affine2dRepr a)
+-- newtype Affine1 a = Affine1 (Affine1 a)
 --   deriving newtype (Eq, Ord, Show)
 --
--- type Affine2dRepr a = (a, a)
+-- type Affine1 a = (a, a)
 --
--- instance (Num a) => 'Semigroup' (Affine2d a) where
+-- instance (Num a) => 'Semigroup' (Affine1 a) where
 --   {-# INLINE ('<>') #-}
---   (Affine2d (!a1, !b1)) '<>' (Affine2d (!a2, !b2)) = Affine2d (a1 * a2, a1 * b2 + b1)
+--   (Affine1 (!a1, !b1)) '<>' (Affine1 (!a2, !b2)) = Affine1 (a1 * a2, a1 * b2 + b1)
 --
--- instance (Num a) => 'Monoid' (Affine2d a) where
+-- instance (Num a) => 'Monoid' (Affine1 a) where
 --   {-# INLINE 'mempty' #-}
---   'mempty' = Affine2d (1, 0)
+--   'mempty' = Affine1 (1, 0)
 --   {-# INLINE mconcat #-}
 --   mconcat = foldl' (<>) mempty
 --
--- instance (Integral a) => SegAct (Affine2d a) (Sum a) where
+-- instance (Integral a) => SegAct (Affine1 a) (Sum a) where
 --   {-# INLINE 'segActWithLength' #-}
---   'segActWithLength' !len (Affine2d (!a, !b)) (Sum !x) = Sum $ a * x + b * fromIntegral len
+--   'segActWithLength' !len (Affine1 (!a, !b)) (Sum !x) = Sum $ a * x + b * fromIntegral len
 --
 -- -- Other 'SegAct' instances are ommited
 --
 -- -- Derive Unbox:
--- newtype instance VU.MVector s (Affine2d a) = MV_Affine2d (VU.MVector s (Affine2dRepr a))
--- newtype instance VU.Vector (Affine2d a) = V_Affine2d (VU.Vector (Affine2dRepr a))
--- deriving instance (VU.Unbox a) => VGM.MVector VUM.MVector (Affine2d a)
--- deriving instance (VU.Unbox a) => VG.Vector VU.Vector (Affine2d a)
--- instance (VU.Unbox a) => VU.Unbox (Affine2d a)
+-- newtype instance VU.MVector s (Affine1 a) = MV_Affine1 (VU.MVector s (Affine1 a))
+-- newtype instance VU.Vector (Affine1 a) = V_Affine1 (VU.Vector (Affine1 a))
+-- deriving instance (VU.Unbox a) => VGM.MVector VUM.MVector (Affine1 a)
+-- deriving instance (VU.Unbox a) => VG.Vector VU.Vector (Affine1 a)
+-- instance (VU.Unbox a) => VU.Unbox (Affine1 a)
 -- @
 --
 -- Tips:

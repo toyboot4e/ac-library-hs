@@ -75,7 +75,7 @@ library
     AtCoder.Dsu
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid
-    AtCoder.Extra.Monoid.Affine2d
+    AtCoder.Extra.Monoid.Affine1
     AtCoder.Extra.Monoid.RangeSet
     AtCoder.Extra.Monoid.RangeSetId
     AtCoder.FenwickTree

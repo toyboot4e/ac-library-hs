@@ -56,8 +56,8 @@ segActEndomorphism _ = QCCI.myForAllShrink True (const True) desc lhsS lhs rhsS 
     rhs (!f, !a1, !a2) = (f `segAct` a1) <> (f `segAct` a2)
 
 -- orphan instance
-instance (QC.Arbitrary a, Monoid a) => QC.Arbitrary (Affine2d a) where
-  arbitrary = Affine2d <$> QC.arbitrary
+instance (QC.Arbitrary a, Monoid a) => QC.Arbitrary (Affine1 a) where
+  arbitrary = Affine1 <$> QC.arbitrary
 
 -- orphan instance
 instance (QC.Arbitrary a, Monoid a) => QC.Arbitrary (RangeSet a) where
@@ -82,13 +82,13 @@ instance QC.Arbitrary (Max Int) where
 tests :: [TestTree]
 tests =
   [ testGroup
-      "Affine2d"
-      [ laws @(Affine2d (Sum Int))
+      "Affine1"
+      [ laws @(Affine1 (Sum Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
-        laws @(Affine2d (Sum Int), Sum Int)
+        laws @(Affine1 (Sum Int), Sum Int)
           [ segActLaw
           ]
       ],

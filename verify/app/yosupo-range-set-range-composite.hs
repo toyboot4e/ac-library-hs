@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 
 import AtCoder.Extra.Math qualified as EM
-import AtCoder.Extra.Monoid (Affine2d (..), SegAct (..))
+import AtCoder.Extra.Monoid (Affine1 (..), SegAct (..))
 import AtCoder.LazySegTree qualified as LST
 import AtCoder.ModInt qualified as M
 import Data.Monoid (Dual (..))
@@ -17,7 +17,7 @@ modInt :: Int -> Mint
 modInt = M.new
 
 -- | Range set
-type OpRepr = (Bool, Affine2d Mint)
+type OpRepr = (Bool, Affine1 Mint)
 
 instance Semigroup Op where
   {-# INLINE (<>) #-}
@@ -38,7 +38,7 @@ instance SegAct Op Acc where
     | len == 1 = Dual f
     | otherwise = Dual $ EM.power len (<>) f
 
-type Acc = Dual (Affine2d Mint)
+type Acc = Dual (Affine1 Mint)
 
 {- ORMOLU_DISABLE -}
 newtype Op = Op OpRepr deriving newtype (Eq, Ord, Show) ; unOp :: Op -> OpRepr ; unOp (Op x) = x; newtype instance VU.MVector s Op = MV_Op (VU.MVector s OpRepr) ; newtype instance VU.Vector Op = V_Op (VU.Vector OpRepr) ; deriving instance VGM.MVector VUM.MVector Op ; deriving instance VG.Vector VU.Vector Op ; instance VU.Unbox Op ;
@@ -50,7 +50,7 @@ main = do
   (!n, !q) <- ints2
   xs <- VU.replicateM n $ do
     (!a, !b) <- ints2
-    pure . Dual $ Affine2d (modInt a, modInt b)
+    pure . Dual $ Affine1 (modInt a, modInt b)
   qs <- VU.replicateM q $ withLine $ do
     intP >>= \case
       0 -> (0 :: Int,,,,) <$> intP <*> intP <*> intP <*> intP
@@ -60,7 +60,7 @@ main = do
   seg <- LST.build xs
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !l, !r, !a, !b) -> do
-      LST.applyIn seg l r . Op $ (True, Affine2d (modInt a, modInt b))
+      LST.applyIn seg l r . Op $ (True, Affine1 (modInt a, modInt b))
       pure Nothing
     (1, !l, !r, !x, !_) -> do
       Dual f <- LST.prod seg l r

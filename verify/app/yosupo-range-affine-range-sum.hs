@@ -1,4 +1,4 @@
-import AtCoder.Extra.Monoid (Affine2d (..))
+import AtCoder.Extra.Monoid (Affine1 (..))
 import AtCoder.LazySegTree qualified as LST
 import AtCoder.ModInt qualified as M
 import Data.Semigroup (Sum (..))
@@ -24,7 +24,7 @@ main = do
   seg <- LST.build xs
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !l, !r, !a, !b) -> do
-      LST.applyIn seg l r $ Affine2d (modInt a, modInt b)
+      LST.applyIn seg l r $ Affine1 (modInt a, modInt b)
       return Nothing
     (1, !l, !r, !_, !_) -> do
       Sum x <- LST.prod seg l r
