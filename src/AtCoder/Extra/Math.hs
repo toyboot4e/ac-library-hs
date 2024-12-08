@@ -1,16 +1,24 @@
 -- | Extra math module.
 module AtCoder.Extra.Math
   ( power,
+    mtimes',
   )
 where
 
 import Data.Bits ((.>>.))
 
--- | \(O(W)\) Calculates @s^n@ by @n@ (N > 0) times using the binary lifting technique.
+-- | \(O(\log n)\) Calculates \(s^n\) with custom multiplication operator using the binary lifting
+-- technique.
+--
+-- The internal implementation is taken from `Data.Semigroup.stimes`, but `powers` uses strict
+-- evaluation and is often much faster.
+--
+-- = Constraints
+-- - \(n \gt 0\)
 {-# INLINE power #-}
 power :: Int -> (a -> a -> a) -> a -> a
 power n0 op x1
-  | n0 <= 0 = errorWithoutStackTrace "AtCoder.Extra.power: positive multiplier expected"
+  | n0 <= 0 = errorWithoutStackTrace "AtCoder.Extra.Math.power: positive multiplier expected"
   | otherwise = f x1 n0
   where
     f !x !n
@@ -22,4 +30,14 @@ power n0 op x1
       | n == 1 = x `op` z
       | otherwise = g (x `op` x) (n .>>. 1) (x `op` z)
 
+-- | \(O(\log n)\) Strict `Data.Monoid.mtimes`.
+--
+-- = Constraints
+-- - \(n \ge 0\)
+{-# INLINE mtimes' #-}
+mtimes' :: (Monoid a) => Int -> a -> a
+mtimes' n0 x1 = case compare n0 0 of
+  LT -> errorWithoutStackTrace "AtCoder.Extra.Mathmtimes: zero or positive multiplier expected"
+  EQ -> mempty
+  GT -> power n0 (<>) x1
 
