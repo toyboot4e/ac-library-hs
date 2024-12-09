@@ -160,12 +160,37 @@ library benchlib
   exposed-modules:
     BenchLib.MulMod.Barrett64
     BenchLib.MulMod.BarrettWideWord
-    BenchLib.MulMod.Mongomery
+    BenchLib.MulMod.Montgomery
     BenchLib.PowMod
 
   type:            exitcode-stdio-1.0
   hs-source-dirs:  benchlib
   build-depends:   ac-library-hs
+
+test-suite benchlib-test
+  import:         warnings
+  import:         dependencies
+  other-modules:  Tests.MulMod
+
+  -- other-extensions:
+
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: benchlib-test
+  main-is:        Main.hs
+  build-depends:
+    , ac-library-hs:benchlib
+    , hspec
+    , mtl
+    , QuickCheck
+    , quickcheck-classes
+    , quickcheck-classes-base
+    , random
+    , tasty
+    , tasty-hspec
+    , tasty-hunit
+    , tasty-quickcheck
+    , tasty-rerun
+    , transformers
 
 benchmark ac-library-hs-benchmark
   import:         warnings

@@ -9,6 +9,8 @@ import Criterion.Main
 main :: IO ()
 main =
   defaultMain
-    [ Bench.MulMod.benches,
+  -- TODO: generate graph by benchmark group?
+    [ -- Bench.MulMod.benches32,
+      -- Bench.MulMod.benches64,
       Bench.PowMod.benches
     ]

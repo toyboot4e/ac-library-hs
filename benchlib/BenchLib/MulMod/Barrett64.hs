@@ -10,12 +10,12 @@
 -- 10
 -- >>> mul bt 7 7
 -- 9
-module BenchLib.MulMod.Barrett64 (Barrett(mBarrett), new, umod, mulMod) where
+module BenchLib.MulMod.Barrett64 (Barrett (mBarrett), new, umod, mulMod) where
 
 -- FIXME: test
 -- TODO: Use MagicHash?
 
-import Data.Bits ((.>>.), (.&.), complement)
+import Data.Bits (bit, complement, (.&.), (.>>.))
 import Data.Word (Word64)
 
 -- | Fast modular multiplication by barrett reduction.
@@ -29,11 +29,11 @@ data Barrett = Barrett
 -- | Creates barret reduction for modulus \(m\).
 new :: Word64 -> Barrett
 new m0 =
-  let !m = (0 :: Word64) `div` m0
+  let !m = complement 0 `div` m0
       !m' = if m * m0 + m0 == 0 then m + 1 else m
-      !mh = m .>>. 32
-      !ml = m' .&. (complement 0) -- TODO: remove complement
-   in Barrett m' mh ml
+      !mh = m' .>>. 32
+      !ml = m' .&. (bit 32 - 1)
+   in Barrett m0 mh ml
 
 -- | Retrieves the modulus \(m\).
 umod :: Barrett -> Word64
@@ -46,8 +46,8 @@ mulMod bt a b = reduce bt (a * b)
 -- | Retrieves \( a \cdot b \bbmod m from a \cdot b\).
 reduce :: Barrett -> Word64 -> Word64
 reduce Barrett {..} x =
-  let !z = (x .&. complement 0) * mlBarrett
-      !z' = (x .&. complement 0) * mhBarrett + (x .>>. 32) * mlBarrett + (z .>>. 32)
+  let !z = (x .&. (bit 32 - 1)) * mlBarrett
+      !z' = (x .&. (bit 32 - 1)) * mhBarrett + (x .>>. 32) * mlBarrett + (z .>>. 32)
       !z'' = (x .>>. 32) * mhBarrett + (z' .>>. 32)
       !x' = x - z'' * mBarrett
    in if x' < mBarrett then x' else x' - mBarrett
