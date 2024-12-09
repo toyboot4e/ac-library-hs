@@ -10,10 +10,16 @@
 -- 10
 -- >>> mul bt 7 7
 -- 9
-module AtCoder.Internal.Barrett (Barrett, new, umod, mul) where
+module AtCoder.Internal.Barrett
+  ( Barrett,
+    new32,
+    new64,
+    umod,
+    mulMod,
+  )
+where
 
 -- TODO: Use MagicHash?
--- TODO: Does it make it really faster? Or even slower? Benchmark!
 
 import Data.WideWord.Word128 (Word128 (..))
 import Data.Word (Word32, Word64)
@@ -21,24 +27,26 @@ import Data.Word (Word32, Word64)
 -- | Fast modular multiplication by barrett reduction.
 --  Reference: https://en.wikipedia.org/wiki/Barrett_reduction
 data Barrett = Barrett
-  { mBarrett :: {-# UNPACK #-} !Word32,
+  { -- TODO: should we have it as `Word64`?
+    mBarrett :: {-# UNPACK #-} !Word32,
     imBarrett :: {-# UNPACK #-} !Word64
   }
 
 -- | Creates barret reduction for modulus \(m\).
-new :: Word32 -> Barrett
-new m =
-  Barrett m $
-    maxBound @Word64 `div` fromIntegral (fromIntegral m :: Word64) + 1
+new32 :: Word32 -> Barrett
+new32 m = Barrett m $ maxBound @Word64 `div` (fromIntegral m :: Word64) + 1
+
+new64 :: Word64 -> Barrett
+new64 m = Barrett (fromIntegral m) $ maxBound @Word64 `div` m + 1
 
 -- | Retrieves the modulus \(m\).
 umod :: Barrett -> Word32
 umod Barrett {mBarrett} = mBarrett
 
 -- | Calculates \(a \cdot b \bmod m\).
-mul :: Barrett -> Word32 -> Word32 -> Word32
-mul Barrett {..} a b =
-  let z :: Word64 = fromIntegral a * fromIntegral b
-      x :: Word64 = word128Hi64 ((fromIntegral z :: Word128) * fromIntegral imBarrett)
+mulMod :: Barrett -> Word64 -> Word64 -> Word64
+mulMod Barrett {..} a b =
+  let z :: Word64 = a * b
+      x :: Word64 = word128Hi64 ((fromIntegral z :: Word128) * (fromIntegral imBarrett :: Word128))
       y :: Word64 = x * fromIntegral mBarrett
-   in fromIntegral $ fromIntegral z - y + if fromIntegral z < y then fromIntegral mBarrett else 0
+   in fromIntegral z - y + if fromIntegral z < y then fromIntegral mBarrett else 0

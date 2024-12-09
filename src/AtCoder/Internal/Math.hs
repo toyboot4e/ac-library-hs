@@ -33,7 +33,7 @@ import Data.Maybe (fromJust)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
-import Data.Word (Word32, Word64)
+import Data.Word (Word64)
 import GHC.Stack (HasCallStack)
 
 -- safeMod :: Int -> Int -> Int
@@ -52,14 +52,14 @@ powMod x n0 m0
   | m0 == 1 = 0
   | otherwise = fromIntegral $ inner n0 1 $ fromIntegral (x `mod` m0)
   where
-    !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "AtCoder.Internal.Math.powMod: given invalid `n` or `m`: " ++ show (n0, m0)
-    bt = ACIBT.new $ fromIntegral m0
-    inner :: Int -> Word32 -> Word32 -> Word32
+    !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "BenchLib.PowMod.powMod: given invalid `n` or `m`: " ++ show (n0, m0)
+    bt = ACIBT.new64 $ fromIntegral m0
+    inner :: Int -> Word64 -> Word64 -> Word64
     inner !n !r !y
       | n == 0 = r
       | otherwise =
-          let r' = if odd n then ACIBT.mul bt r y else r
-              y' = ACIBT.mul bt y y
+          let r' = if odd n then ACIBT.mulMod bt r y else r
+              y' = ACIBT.mulMod bt y y
            in inner (n .>>. 1) r' y'
 
 -- | M. Forisek and J. Jancina, Fast Primality Testing for Integers That Fit into a Machine Word

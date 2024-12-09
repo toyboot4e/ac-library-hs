@@ -36,20 +36,20 @@ isPrimitiveRootNaive m g
 
 unit_barrett :: TestTree
 unit_barrett = testCase "barrett" $ do
-  for_ [1 .. 100 :: Word32] $ \m -> do
-    let bt = ACIBT.new $ fromIntegral m
-    for_ [0 .. m - 1 :: Word32] $ \a -> do
-      for_ [0 .. m - 1 :: Word32] $ \b -> do
-        (a * b) `mod` m @=? ACIBT.mul bt a b
+  for_ [1 .. 100 :: Word64] $ \m -> do
+    let bt = ACIBT.new64 m
+    for_ [0 .. m - 1 :: Word64] $ \a -> do
+      for_ [0 .. m - 1 :: Word64] $ \b -> do
+        (a * b) `mod` m @=? ACIBT.mulMod bt a b
 
-  let bt = ACIBT.new 1
-  0 @=? ACIBT.mul bt 0 0
+  let bt = ACIBT.new64 1
+  0 @=? ACIBT.mulMod bt 0 0
 
 testBarrettWithModulo :: Word32 -> Assertion
 testBarrettWithModulo modUpper = do
   for_ [modUpper, modUpper - 1 .. modUpper - 20] $ \modulo32 -> do
     let modulo64 :: Word64 = fromIntegral modulo32
-    let bt = ACIBT.new modulo32
+    let bt = ACIBT.new32 modulo32
     let v = VU.create $ do
           vec <- VUM.unsafeNew @_ @Word32 40
           for_ [0 .. 10 - 1 :: Word32] $ \i -> do
@@ -59,12 +59,12 @@ testBarrettWithModulo modUpper = do
             VGM.write vec (4 * fromIntegral i + 3) $ modulo32 `div` 2 - i
           pure vec
     VU.forM_ v $ \a -> do
-      let a2 :: Word64 = fromIntegral a
-      let expected = fromIntegral $ ((a2 * a2) `mod` modulo64 * a2) `mod` modulo64
-      expected @=? ACIBT.mul bt a (ACIBT.mul bt a a)
+      let a64 :: Word64 = fromIntegral a
+      let expected = fromIntegral $ ((a64 * a64) `mod` modulo64 * a64) `mod` modulo64
+      (expected @=?) . fromIntegral $ ACIBT.mulMod bt a64 (ACIBT.mulMod bt a64 a64)
       VU.forM_ v $ \b -> do
-        let b2 :: Word64 = fromIntegral b
-        fromIntegral ((a2 * b2) `mod` modulo64) @=? ACIBT.mul bt a b
+        let b64 :: Word64 = fromIntegral b
+        (a64 * b64) `mod` modulo64 @=? ACIBT.mulMod bt a64 b64
 
 unit_barrettIntBorder :: TestTree
 unit_barrettIntBorder = testCase "barrettIntBobrder" $ do
