@@ -44,6 +44,8 @@ common dependencies
       , bitvec
       , bytestring
       , primitive
+      -- FIXME: add it to GHC 9.4.5, too
+      , tagged
       , vector
       , vector-algorithms
       , wide-word
@@ -158,6 +160,8 @@ library benchlib
   import:          dependencies
   ghc-options:     -O2
   exposed-modules:
+    BenchLib.ModInt.ModIntNats
+    BenchLib.ModInt.Modulus
     BenchLib.MulMod.Barrett64
     BenchLib.MulMod.BarrettWideWord
     BenchLib.MulMod.Montgomery

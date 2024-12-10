@@ -14,7 +14,7 @@ import AtCoder.Internal.Assert qualified as ACIA
 import BenchLib.MulMod.Barrett64 qualified as Barrett64
 import BenchLib.MulMod.BarrettWideWord qualified as BarrettWideWord
 import BenchLib.MulMod.Montgomery qualified as Montgomery
-import Data.Bits ((.>>.))
+import Data.Bits ((!>>.))
 import Data.Word (Word64)
 import GHC.Stack (HasCallStack)
 
@@ -37,7 +37,7 @@ powModBarrettWideWord x n0 m0
       | otherwise =
           let r' = if odd n then BarrettWideWord.mulMod bt r y else r
               y' = BarrettWideWord.mulMod bt y y
-           in inner (n .>>. 1) r' y'
+           in inner (n !>>. 1) r' y'
 
 -- | Barrett64-based
 powModBarrett64 :: (HasCallStack) => Int -> Int -> Int -> Int
@@ -53,7 +53,7 @@ powModBarrett64 x n0 m0
       | otherwise =
           let r' = if odd n then Barrett64.mulMod bt r y else r
               y' = Barrett64.mulMod bt y y
-           in inner (n .>>. 1) r' y'
+           in inner (n !>>. 1) r' y'
 
 -- | Montgomery-based
 powModMontgomery :: (HasCallStack) => Int -> Int -> Int -> Int
@@ -69,7 +69,7 @@ powModMontgomery x n0 m0
       | otherwise =
           let r' = if odd n then Montgomery.mulModGenerated mont r y else r
               y' = Montgomery.mulModGenerated mont y y
-           in inner (n .>>. 1) r' y'
+           in inner (n !>>. 1) r' y'
 
 -- | mod-based
 powModMod :: (HasCallStack) => Int -> Int -> Int -> Int
@@ -84,7 +84,7 @@ powModMod x n0 m0
       | otherwise =
           let r' = if odd n then r * y `mod` m0 else r
               y' = y * y `mod` m0
-           in inner (n .>>. 1) r' y'
+           in inner (n !>>. 1) r' y'
 
 -- | rem-based. Be warned
 powModRem :: (HasCallStack) => Int -> Int -> Int -> Int
@@ -99,7 +99,7 @@ powModRem x n0 m0
       | otherwise =
           let r' = if odd n then r * y `rem` m0 else r
               y' = y * y `rem` m0
-           in inner (n .>>. 1) r' y'
+           in inner (n !>>. 1) r' y'
 
 -- | power-based
 powModPowerMod :: (HasCallStack) => Int -> Int -> Int -> Int

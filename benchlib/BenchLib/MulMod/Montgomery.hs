@@ -47,6 +47,9 @@ new m =
     -- TODO: more efficient impplementation
     inner !negInv 32 !_ !_ = negInv
     inner !negInv !i !s !t
+      -- REMARK: `!>>.` does not work here.
+      -- | even t = inner (negInv + s) (i + 1) (2 * s) ((t + m) !>>. 2)
+      -- | otherwise = inner negInv (i + 1) (2 * s) (t !>>. 2)
       | even t = inner (negInv + s) (i + 1) (2 * s) ((t + m) `div` 2)
       | otherwise = inner negInv (i + 1) (2 * s) (t `div` 2)
 
