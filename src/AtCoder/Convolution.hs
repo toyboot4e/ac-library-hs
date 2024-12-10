@@ -45,7 +45,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Exts (proxy#)
 import GHC.Stack (HasCallStack)
-import GHC.TypeLits (natVal')
+import GHC.TypeNats (natVal')
 
 -- | Calculates the convolution in \(\bmod m\) for a vector of `ACIM.ModInt`. It returns an empty
 -- array if at least one of \(a\) and \(b\) are empty.
@@ -67,7 +67,7 @@ convolution a b
   | n == 0 || m == 0 = VU.empty
   | otherwise =
       let z = ACIB.bitCeil (n + m - 1)
-          !modulus = fromInteger (natVal' (proxy# @p))
+          !modulus = fromIntegral (natVal' (proxy# @p))
           !_ = ACIA.runtimeAssert ((modulus - 1) `mod` z == 0) $ "AtCoder.Convolution.convolution: not works when `(m - 1) mod z /= 0`: " ++ show (m, z)
        in if min n m <= 60
             then ACIC.convolutionNaive a b
@@ -96,7 +96,7 @@ convolutionMod _ a b
   | n == 0 || m == 0 = VU.empty
   | otherwise =
       let z = ACIB.bitCeil (n + m - 1)
-          !modulus = fromInteger (natVal' (proxy# @p))
+          !modulus = fromIntegral (natVal' (proxy# @p))
           !_ = ACIA.runtimeAssert ((modulus - 1) `mod` z == 0) $ "AtCoder.Convolution.convolutionMod: not works when `(m - 1) mod z /= 0`: " ++ show (m, z)
           c2 = convolution @p (VU.map fromIntegral a) (VU.map fromIntegral b)
        in VU.map fromIntegral c2

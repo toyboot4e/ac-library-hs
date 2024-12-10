@@ -8,13 +8,10 @@ import AtCoder.ModInt qualified as ModInt
 import Control.Exception (evaluate)
 import Control.Monad (when)
 import Data.Bits
-import Data.Bits ((.<<.))
 import Data.Foldable
 import Data.Proxy (Proxy (..))
 import Data.WideWord (Int128, Word128)
-import Data.Word (Word32)
 import GHC.Exts (proxy#)
-import GHC.TypeLits (KnownNat, natVal, natVal')
 import System.IO.Unsafe (unsafePerformIO)
 import Test.Hspec
 import Test.Tasty
@@ -49,7 +46,7 @@ unit_modulus = testCase "modulus" $ do
   (@?= 1000000007) $ ModInt.modulus (999 :: ModInt.ModInt1000000007)
 
 unit_preDefinedPrimitiveRoots :: TestTree
-unit_preDefinedPrimitiveRoots = testCase "preDefinedPrimitiveRotos" $ do
+unit_preDefinedPrimitiveRoots = testCase "preDefinedPrimitiveRoots" $ do
   ModInt.primitiveRootModulus (proxy# @2) @?= ACIM.primitiveRoot 2
   ModInt.primitiveRootModulus (proxy# @3) @?= ACIM.primitiveRoot 3
   ModInt.primitiveRootModulus (proxy# @167772161) @?= ACIM.primitiveRoot 167772161

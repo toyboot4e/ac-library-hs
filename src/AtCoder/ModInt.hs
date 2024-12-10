@@ -22,22 +22,23 @@ module AtCoder.ModInt
     ModInt (..),
     modVal,
     modVal#,
-    -- TODO: polish API
     new,
     new32,
+    new64,
     modulus,
-    raw,
-    raw32,
+    unsafeNew,
     val,
     val32,
+    val64,
     pow,
     inv,
   )
 where
 
 import AtCoder.Internal.Assert qualified as ACIA
+import AtCoder.Internal.Barrett qualified as ACIBT
 import AtCoder.Internal.Math qualified as ACIM
-import Data.Bits
+import Data.Bits ((!>>.))
 import Data.Coerce (coerce)
 import Data.Proxy (Proxy)
 import Data.Ratio (denominator, numerator)
@@ -49,45 +50,61 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Word (Word32, Word64)
 import GHC.Exts (Proxy#, proxy#)
 import GHC.Stack (HasCallStack)
-import GHC.TypeLits (KnownNat, natVal, natVal')
+import GHC.TypeNats (KnownNat, natVal, natVal')
 
 -- | `KnownNat` with meta information used for modulus.
 class (KnownNat a) => Modulus a where
+  -- | Returns if
   isPrimeModulus :: Proxy# a -> Bool
 
   -- | Note that the default implementation is slow.
+  {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus :: Proxy# a -> Int
-  primitiveRootModulus _ = ACIM.primitiveRoot $ fromInteger (natVal' (proxy# @a))
+  -- we could use `AllowAmbigousTypes` or `Tagged` newtype, but `Proxy#` wan't slow.
+  primitiveRootModulus _ = ACIM.primitiveRoot $ fromIntegral (natVal' (proxy# @a))
 
 instance Modulus 2 where
+  {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
+  {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 1
 
 instance Modulus 3 where
+  {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
+  {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 2
 
 -- | 2^24 - 1
 instance Modulus 167772161 where
   isPrimeModulus _ = True
+  {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 3
 
 -- | 2^25 - 1
 instance Modulus 469762049 where
+  {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
+  {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 3
 
 -- | 2^26 - 1
 instance Modulus 754974721 where
+  {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
+  {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 11
 
 instance Modulus 998244353 where
+  {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
+  {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 3
 
 instance Modulus 1000000007 where
+  {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
+  {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 5
 
 type ModInt998244353 = ModInt 998244353
@@ -99,21 +116,19 @@ type ModInt1000000007 = ModInt 1000000007
 -- | Retrieves `Int` from `KnownNat`.
 --
 -- >>> import Data.Proxy (Proxy(..))
--- >>> import GHC.TypeLits (natVal)
--- >>> fromInteger (natVal (Proxy @42))
+-- >>> modVal (Proxy @42)
 -- 42
 modVal :: forall a. (KnownNat a) => Proxy a -> Int
-modVal p = fromInteger $ natVal p
+modVal p = fromIntegral $ natVal p
 
 -- | Retrieves `Int` from `KnownNat`.
 --
 -- >>> :set -XMagicHash
 -- >>> import GHC.Exts (proxy#)
--- >>> import GHC.TypeLits (natVal')
--- >>> fromInteger (natVal' (proxy# @42))
+-- >>> modVal# (proxy# 42)
 -- 42
 modVal# :: forall a. (KnownNat a) => Proxy# a -> Int
-modVal# p = fromInteger $ natVal' p
+modVal# p = fromIntegral $ natVal' p
 
 newtype ModInt a = ModInt {unModInt :: Word32}
   deriving (P.Prim)
@@ -121,15 +136,19 @@ newtype ModInt a = ModInt {unModInt :: Word32}
 
 -- | Creates `ModInt` taking the modulo of an `Int` value.
 new :: forall a. (KnownNat a) => Int -> ModInt a
-new v = ModInt . fromIntegral $! v `mod` fromInteger (natVal' (proxy# @a))
+new v = ModInt . fromIntegral $ v `mod` fromIntegral (natVal' (proxy# @a))
 
--- | Creates `ModInt` taking the modulo of an `Word32` value.
+-- | Creates `ModInt` taking the modulo of a `Word32` value.
 new32 :: forall a. (KnownNat a) => Word32 -> ModInt a
-new32 v = ModInt $! v `mod` fromInteger (natVal' (proxy# @a))
+new32 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
+
+-- | Creates `ModInt` taking the modulo of a `Word64` value.
+new64 :: forall a. (KnownNat a) => Word32 -> ModInt a
+new64 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
 
 -- | \(O(1)\) Returns the mod.
 modulus :: forall a. (KnownNat a) => ModInt a -> Int
-modulus _ = fromInteger (natVal' (proxy# @a))
+modulus _ = fromIntegral (natVal' (proxy# @a))
 
 -- | \(O(1)\) Returns the internal value converted to `Int`.
 val :: (KnownNat a) => ModInt a -> Int
@@ -140,22 +159,41 @@ val = fromIntegral . unModInt
 val32 :: (KnownNat a) => ModInt a -> Word32
 val32 = unModInt
 
--- | Returns \(x^n\).
+-- | \(O(1)\) Returns the internal value converted to `Word32`.
+val64 :: (KnownNat a) => ModInt a -> Word32
+val64 = fromIntegral . unModInt
+
+-- | Returns \(x^n\). The implementation is a bit more efficient than `^`.
 --
 -- = Constraints
 -- - \(0 \le n\)
 --
 -- = Complexity
 -- - \(O(\log n)\)
-pow :: (HasCallStack, KnownNat a) => ModInt a -> Int -> ModInt a
-pow x0 n0 = inner x0 n0 1
+pow :: forall a. (HasCallStack, KnownNat a) => ModInt a -> Int -> ModInt a
+pow (ModInt x0) n0 = ModInt . fromIntegral $ inner n0 1 (fromIntegral x0)
   where
     !_ = ACIA.runtimeAssert (0 <= n0) $ "AtCoder.ModInt.pow: given negative exponential `n`: " ++ show n0 ++ show "`"
-    inner !x !n !r
+    -- FIXME: cannot calculate correctly
+    bt = ACIBT.new64 $ fromIntegral (natVal' (proxy# @a))
+    inner :: Int -> Word64 -> Word64 -> Word64
+    inner !n !r !y
       | n == 0 = r
       | otherwise =
-          let !r' = if odd n then r * x else r
-           in inner (x * x) (n .>>. 1) r'
+          let r' = if odd n then ACIBT.mulMod bt r y else r
+              y' = ACIBT.mulMod bt y y
+           in inner (n !>>. 1) r' y'
+
+-- ACL version
+-- pow :: (HasCallStack, KnownNat a) => ModInt a -> Int -> ModInt a
+-- pow x0 n0 = inner x0 n0 1
+--   where
+--     !_ = ACIA.runtimeAssert (0 <= n0) $ "AtCoder.ModInt.pow: given negative exponential `n`: " ++ show n0 ++ show "`"
+--     inner !x !n !r
+--       | n == 0 = r
+--       | otherwise =
+--           let !r' = if odd n then r * x else r
+--            in inner (x * x) (n !>>. 1) r'
 
 -- | Returns \(y\) with \(xy \equiv 1\).
 --
@@ -168,9 +206,9 @@ inv :: forall a. (HasCallStack, Modulus a) => ModInt a -> ModInt a
 inv self@(ModInt x)
   | isPrimeModulus (proxy# @a) =
       let !_ = ACIA.runtimeAssert (x /= 0) "AtCoder.ModInt.inv: tried to perform zero division"
-       in pow self (fromInteger (natVal' (proxy# @a)) - 2)
+       in pow self (fromIntegral (natVal' (proxy# @a)) - 2)
   | otherwise =
-      let (!eg1, !eg2) = ACIM.invGcd (fromIntegral x) $ fromInteger (natVal' (proxy# @a))
+      let (!eg1, !eg2) = ACIM.invGcd (fromIntegral x) $ fromIntegral (natVal' (proxy# @a))
           !_ = ACIA.runtimeAssert (eg1 == 1) "AtCoder.ModInt.inv: `x^(-1) mod m` cannot be calculated when `gcd x modulus /= 1`"
        in fromIntegral eg2
 
@@ -178,15 +216,8 @@ inv self@(ModInt x)
 --
 -- = Constraints
 -- - \(0 \leq x \lt \mathrm{mod}\) (not asserted at runtime)
-raw :: (KnownNat a) => Int -> ModInt a
-raw = ModInt . fromIntegral
-
--- | Creates `ModInt` without taking mod. It is the function for constant-factor speedup.
---
--- = Constraints
--- - \(0 \leq x \lt \mathrm{mod}\) (not asserted at runtime)
-raw32 :: (KnownNat a) => Word32 -> ModInt a
-raw32 = ModInt
+unsafeNew :: (KnownNat a) => Word32 -> ModInt a
+unsafeNew = ModInt
 
 deriving newtype instance (KnownNat p) => Real (ModInt p)
 
@@ -196,25 +227,25 @@ instance (KnownNat p) => Num (ModInt p) where
     | otherwise = ModInt x'
     where
       !x' = x1 + x2
-      !m = fromInteger (natVal' (proxy# @p))
+      !m = fromIntegral (natVal' (proxy# @p))
   (ModInt !x1) - (ModInt !x2)
     | x' >= m = ModInt $! x' + m -- loops
     | otherwise = ModInt x'
     where
       !x' = x1 - x2
-      !m = fromInteger (natVal' (proxy# @p))
+      !m = fromIntegral (natVal' (proxy# @p))
   (ModInt !x1) * (ModInt !x2) = ModInt $! fromIntegral (x' `rem` m)
     where
       !x' :: Word64 = fromIntegral x1 * fromIntegral x2
-      !m :: Word64 = fromInteger (natVal' (proxy# @p))
+      !m :: Word64 = fromIntegral (natVal' (proxy# @p))
   negate x = 0 - x
   abs = id
   signum _ = ModInt 1
-  fromInteger = ModInt . fromInteger . (`mod` natVal' (proxy# @p))
+  fromInteger = ModInt . fromInteger . (`mod` fromIntegral (natVal' (proxy# @p)))
 
 instance (KnownNat p) => Bounded (ModInt p) where
   minBound = ModInt 0
-  maxBound = ModInt $! fromInteger (natVal' (proxy# @p)) - 1
+  maxBound = ModInt $! fromIntegral (natVal' (proxy# @p)) - 1
 
 instance (KnownNat p) => Enum (ModInt p) where
   toEnum = new

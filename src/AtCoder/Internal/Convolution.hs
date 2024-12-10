@@ -24,7 +24,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Exts (proxy#)
-import GHC.TypeLits (natVal')
+import GHC.TypeNats (natVal')
 
 -- | Data for FFT calculation.
 data FftInfo p = FftInfo
@@ -40,7 +40,7 @@ data FftInfo p = FftInfo
 newInfo :: forall m p. (PrimMonad m, AM.Modulus p) => m (FftInfo p)
 newInfo = do
   let !g = AM.primitiveRootModulus (proxy# @p)
-  let !m = fromInteger $ natVal' (proxy# @p)
+  let !m = fromIntegral $ natVal' (proxy# @p)
   let !rank2 = countTrailingZeros $ m - 1
 
   root <- VUM.unsafeNew (rank2 + 1)
@@ -97,7 +97,7 @@ butterfly ::
 butterfly FftInfo {..} a = do
   let n = VUM.length a
   let h = countTrailingZeros n
-  let !m = fromInteger $ natVal' (proxy# @p)
+  let !m = fromIntegral $ natVal' (proxy# @p)
 
   flip fix 0 $ \loop len -> do
     when (len < h) $ do
@@ -146,7 +146,7 @@ butterfly FftInfo {..} a = do
                   then pure . (rot *) $ rate3Fft VG.! countTrailingZeros (complement s)
                   else pure rot
             )
-            (AM.raw32 @p 1)
+            (AM.unsafeNew @p 1)
             (VU.generate (bit len) id)
           loop $ len + 2
 
@@ -159,7 +159,7 @@ butterflyInv ::
 butterflyInv FftInfo {..} a = do
   let n = VUM.length a
   let h = countTrailingZeros n
-  let !m = fromInteger $ natVal' (proxy# @p)
+  let !m = fromIntegral $ natVal' (proxy# @p)
 
   flip fix h $ \loop len -> do
     when (len /= 0) $ do
@@ -208,7 +208,7 @@ butterflyInv FftInfo {..} a = do
                   then pure . (irot *) $ iRate3Fft VG.! countTrailingZeros (complement s)
                   else pure irot
             )
-            (AM.raw32 @p 1)
+            (AM.unsafeNew @p 1)
             (VU.generate (bit (len - 2)) id)
           loop $ len - 2
 
