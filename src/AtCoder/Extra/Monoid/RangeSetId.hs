@@ -2,20 +2,23 @@
 
 -- | `AtCoder.LazySegTree.SegAct` instance of range set action over ideomponent monoids. It can set
 -- an interval \([l, r)\) to an idempotent monoid \(x\) such as @Max Int@.
+--
+-- While this monoid is a `SegAct` sample, be warned that it's not guaanteed to be correct.
 module AtCoder.Extra.Monoid.RangeSetId
   ( RangeSetId (..),
     new,
+    act,
   )
 where
 
 import AtCoder.LazySegTree (SegAct (..))
-import Data.Semigroup (stimes)
+import Data.Semigroup (Max (..), Min (..), stimes)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- | `AtCoder.LazySegTree.SegAct` instance of range set action over ideomponent monoid.
+-- | `AtCoder.LazySegTree.SegAct` instance of range set action over ideomponent monoids.
 newtype RangeSetId a = RangeSetId (RangeSetIdRepr a)
   deriving newtype (Eq, Ord, Show)
 
@@ -24,11 +27,18 @@ newtype RangeSetId a = RangeSetId (RangeSetIdRepr a)
 -- `Data.Vector.Unboxed.Unbox`.
 type RangeSetIdRepr a = (Bool, a)
 
--- TODO: Monoid requirement on `a` should not be required
-
 -- | Creates a new `RangeSet` action.
+{-# INLINE new #-}
 new :: a -> RangeSetId a
 new = RangeSetId . (True,)
+
+-- | Acts on @a@.
+{-# INLINE act #-}
+act :: RangeSetId a -> a -> a
+act (RangeSetId (True, !f)) _ = f
+act (RangeSetId (False, !_)) x = x
+
+-- segActWithLength works for ideomponent monoids only.
 
 instance Semigroup (RangeSetId a) where
   {-# INLINE (<>) #-}
@@ -37,6 +47,7 @@ instance Semigroup (RangeSetId a) where
   {-# INLINE stimes #-}
   stimes _ x = x
 
+-- The `Monoid` constraint is just for their default value.
 instance (Monoid a) => Monoid (RangeSetId a) where
   {-# INLINE mempty #-}
   mempty = RangeSetId (False, mempty)
@@ -46,10 +57,17 @@ instance (Monoid a) => Monoid (RangeSetId a) where
   mconcat (RangeSetId (False, !_) : as) = mconcat as
   mconcat (a : _) = a
 
-instance (Monoid a) => SegAct (RangeSetId a) a where
+-- The target is limited to ideomponent monoids. The `Monoid` constraint is just for their default
+-- value.
+instance (Ord a, Bounded a) => SegAct (RangeSetId (Max a)) (Max a) where
   {-# INLINE segAct #-}
-  segAct (RangeSetId (False, !_)) x = x
-  segAct (RangeSetId (True, !a)) _ = a
+  segAct = act
+
+-- The target is limited to ideomponent monoids. The `Monoid` constraint is just for their default
+-- value.
+instance (Ord a, Bounded a) => SegAct (RangeSetId (Min a)) (Min a) where
+  {-# INLINE segAct #-}
+  segAct = act
 
 newtype instance VU.MVector s (RangeSetId a) = MV_RangeSetId (VU.MVector s (RangeSetIdRepr a))
 

@@ -5,14 +5,17 @@
 module AtCoder.Extra.Monoid.Affine1
   ( Affine1 (..),
     Affine1Repr,
+    new,
+    act,
   )
 where
 
 import AtCoder.Extra.Math qualified as ACEM
 import AtCoder.LazySegTree (SegAct (..))
+import Data.Coerce (coerce)
 import Data.Foldable (foldl')
 import Data.List.NonEmpty (NonEmpty (..))
-import Data.Semigroup (Dual (..), Max (..), Min (..), Product (..), Semigroup (..), Sum (..))
+import Data.Semigroup (Dual (..), Semigroup (..), Sum (..))
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -34,6 +37,21 @@ newtype Affine1 a = Affine1 (Affine1Repr a)
 -- to implement `Data.Vector.Unboxed.Unbox`.
 type Affine1Repr a = (a, a)
 
+-- | Creates `Affine1`.
+{-# INLINE new #-}
+new :: a -> a -> Affine1 a
+new !a !b = Affine1 (a, b)
+
+-- | Acts on @a@.
+{-# INLINE act #-}
+act :: (Num a) => Affine1 a -> a -> a
+act (Affine1 (!a, !b)) x = a * x + b
+
+-- | Acts on @a@ with length in terms of `SegAct`. Works for `Sum a` only.
+{-# INLINE actWithLength #-}
+actWithLength :: (Num a) => Int -> Affine1 a -> a -> a
+actWithLength len (Affine1 (!a, !b)) !x = a * x + b * fromIntegral len
+
 instance (Num a) => Semigroup (Affine1 a) where
   {-# INLINE (<>) #-}
   (Affine1 (!a1, !b1)) <> (Affine1 (!a2, !b2)) = Affine1 (a', b')
@@ -52,46 +70,23 @@ instance (Num a) => Monoid (Affine1 a) where
   mconcat [] = mempty
   mconcat (x : xs) = foldl' (<>) x xs
 
-instance (Num a) => SegAct (Affine1 a) a where
+instance (Num a) => SegAct (Affine1 a) (Sum a) where
   {-# INLINE segActWithLength #-}
-  segActWithLength !len (Affine1 (!a, !b)) !x = id $! a * x + b * fromIntegral len
+  segActWithLength !len f (Sum !x) = Sum $! actWithLength len f x
 
-instance (Integral a) => SegAct (Affine1 a) (Sum a) where
+instance (Num a) => SegAct (Affine1 (Sum a)) (Sum a) where
   {-# INLINE segActWithLength #-}
-  segActWithLength !len (Affine1 (!a, !b)) (Sum !x) = Sum $! a * x + b * fromIntegral len
+  segActWithLength = actWithLength
 
-instance (Integral a) => SegAct (Affine1 a) (Product a) where
+instance (Num a) => SegAct (Dual (Affine1 a)) (Sum a) where
   {-# INLINE segActWithLength #-}
-  segActWithLength !len (Affine1 (!a, !b)) (Product !x) = Product $! a * x + b * fromIntegral len
+  segActWithLength !len (Dual f) (Sum !x) = Sum $! actWithLength len f x
 
-instance (Integral a) => SegAct (Affine1 a) (Min a) where
+instance (Num a) => SegAct (Dual (Affine1 (Sum a))) (Sum a) where
   {-# INLINE segActWithLength #-}
-  segActWithLength !len (Affine1 (!a, !b)) (Min !x) = Min $! a * x + b * fromIntegral len
+  segActWithLength !len (Dual f) (Sum !x) = Sum $! actWithLength len (coerce f) x
 
-instance (Integral a) => SegAct (Affine1 a) (Max a) where
-  {-# INLINE segActWithLength #-}
-  segActWithLength !len (Affine1 (!a, !b)) (Max !x) = Max $! a * x + b * fromIntegral len
-
--- implementations for Duals
-instance (Integral a) => SegAct (Dual (Affine1 a)) a where
-  {-# INLINE segActWithLength #-}
-  segActWithLength !len (Dual (Affine1 (!a, !b))) !x = id $! a * x + b * fromIntegral len
-
-instance (Integral a) => SegAct (Dual (Affine1 a)) (Sum a) where
-  {-# INLINE segActWithLength #-}
-  segActWithLength !len (Dual (Affine1 (!a, !b))) (Sum !x) = Sum $! a * x + b * fromIntegral len
-
-instance (Integral a) => SegAct (Dual (Affine1 a)) (Product a) where
-  {-# INLINE segActWithLength #-}
-  segActWithLength !len (Dual (Affine1 (!a, !b))) (Product !x) = Product $! a * x + b * fromIntegral len
-
-instance (Integral a) => SegAct (Dual (Affine1 a)) (Min a) where
-  {-# INLINE segActWithLength #-}
-  segActWithLength !len (Dual (Affine1 (!a, !b))) (Min !x) = Min $! a * x + b * fromIntegral len
-
-instance (Integral a) => SegAct (Dual (Affine1 a)) (Max a) where
-  {-# INLINE segActWithLength #-}
-  segActWithLength !len (Dual (Affine1 (!a, !b))) (Max !x) = Max $! a * x + b * fromIntegral len
+-- not works as SegAct for Product, Min, and Max.
 
 newtype instance VU.MVector s (Affine1 a) = MV_Affine1 (VU.MVector s (Affine1Repr a))
 

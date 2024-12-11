@@ -2,6 +2,7 @@
 
 import AtCoder.Extra.Math qualified as EM
 import AtCoder.Extra.Monoid (Affine1 (..), SegAct (..))
+import AtCoder.Extra.Monoid.Affine1 qualified as Affine1
 import AtCoder.LazySegTree qualified as LST
 import AtCoder.ModInt qualified as M
 import Data.Monoid (Dual (..))
@@ -64,7 +65,7 @@ main = do
       pure Nothing
     (1, !l, !r, !x, !_) -> do
       Dual f <- LST.prod seg l r
-      pure . Just . M.val $ segAct f (modInt x)
+      pure . Just . M.val $ Affine1.act f (modInt x)
     _ -> error "unreachable"
 
   printBSB $ unlinesBSB res

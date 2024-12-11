@@ -4,9 +4,8 @@
 module Tests.LazySegTree (tests) where
 
 import AtCoder.LazySegTree qualified as LST
-import Data.Foldable
-import Data.Monoid
-import Data.Semigroup
+import Data.Foldable (for_)
+import Data.Semigroup (Max (..), Sum (..))
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU

@@ -1,14 +1,17 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | Monoid action for setting interval \([l, r)\) to the same value \(x\).
+-- | Monoid action for setting interval \([l, r)\).
+--
+-- While this monoid is a `SegAct` sample, be warned that it's not guaanteed to be correct.
 module AtCoder.Extra.Monoid.RangeAdd
   ( RangeAdd (..),
+    new,
+    act,
   )
 where
 
 import AtCoder.LazySegTree (SegAct (..))
-import Data.Foldable (foldl')
-import Data.Monoid
+import Data.Semigroup (Sum (..))
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -18,33 +21,34 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 newtype RangeAdd a = RangeAdd a
   deriving newtype (Eq, Ord, Show)
 
-instance Semigroup (RangeAdd a) where
+-- | Creates `RangeAdd`.
+{-# INLINE new #-}
+new :: a -> RangeAdd a
+new = RangeAdd
+
+-- | Acts on @a@.
+{-# INLINE act #-}
+act :: (Num a) => RangeAdd a -> a -> a
+act (RangeAdd f) x = f + x
+
+-- | Acts on @a@ with length in terms of `SegAct`.
+{-# INLINE actWithLength #-}
+actWithLength :: (Num a) => Int -> RangeAdd a -> a -> a
+actWithLength len (RangeAdd f) x = fromIntegral len * f + x
+
+instance (Num a) => Semigroup (RangeAdd a) where
   {-# INLINE (<>) #-}
-  new <> _ = new
+  (RangeAdd a) <> (RangeAdd b) = RangeAdd $! a + b
 
 instance (Num a) => Monoid (RangeAdd a) where
   {-# INLINE mempty #-}
-  mempty = 0
-
-instance (Num a) => SegAct (RangeAdd a) a where
-  {-# INLINE segActWithLength #-}
-  segActWithLength !len (RangeAdd a) x = id $! x + a * fromIntegral len
+  mempty = RangeAdd 0
 
 instance (Num a) => SegAct (RangeAdd a) (Sum a) where
   {-# INLINE segActWithLength #-}
-  segActWithLength !len (RangeAdd a) (Sum x) = Sum $! x + a * fromIntegral len
+  segActWithLength len a (Sum x) = Sum $! actWithLength len a x
 
-instance (Num a) => SegAct (RangeAdd a) (Product a) where
-  {-# INLINE segActWithLength #-}
-  segActWithLength !len (RangeAdd a) (Product x) = Product $! x + a * fromIntegral len
-
-instance (Num a) => SegAct (RangeAdd a) (Min a) where
-  {-# INLINE segActWithLength #-}
-  segActWithLength !len (RangeAdd a) (Min x) = Min $! x + a * fromIntegral len
-
-instance (Num a) => SegAct (RangeAdd a) (Max a) where
-  {-# INLINE segActWithLength #-}
-  segActWithLength !len (RangeAdd a) (Max x) = Max $! power len (<>) a
+-- not works as SegAct for Product, Min, and Max.
 
 newtype instance VU.MVector s (RangeAdd a) = MV_RangeAdd (VU.MVector s a)
 
@@ -55,6 +59,3 @@ deriving instance (VU.Unbox a) => VGM.MVector VUM.MVector (RangeAdd a)
 deriving instance (VU.Unbox a) => VG.Vector VU.Vector (RangeAdd a)
 
 instance (VU.Unbox a) => VU.Unbox (RangeAdd a)
-
-
-

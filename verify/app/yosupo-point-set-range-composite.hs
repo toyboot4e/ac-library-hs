@@ -1,4 +1,5 @@
-import AtCoder.Extra.Monoid (segAct, Affine1(..))
+import AtCoder.Extra.Monoid (Affine1(..))
+import AtCoder.Extra.Monoid.Affine1 qualified as Affine1
 import AtCoder.ModInt qualified as M
 import AtCoder.SegTree qualified as ST
 import Data.Monoid (Dual (..))
@@ -26,7 +27,7 @@ main = do
       pure Nothing
     (1, !l, !r, !x) -> do
       Dual f <- ST.prod seg l r
-      pure . Just . M.val $ f `segAct` modInt x
+      pure . Just . M.val $ Affine1.act f (modInt x)
     _ -> error "unreachable"
 
   printBSB $ unlinesBSB res

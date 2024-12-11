@@ -78,6 +78,8 @@ library
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid
     AtCoder.Extra.Monoid.Affine1
+    AtCoder.Extra.Monoid.RangeAdd
+    AtCoder.Extra.Monoid.RangeAddId
     AtCoder.Extra.Monoid.RangeSet
     AtCoder.Extra.Monoid.RangeSetId
     AtCoder.FenwickTree
@@ -146,7 +148,6 @@ test-suite ac-library-hs-test
     , mtl
     , QuickCheck
     , quickcheck-classes
-    , quickcheck-classes-base
     , random
     , tasty
     , tasty-hspec
