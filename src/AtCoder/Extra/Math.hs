@@ -1,6 +1,7 @@
 -- | Extra math module.
 module AtCoder.Extra.Math
   ( power,
+    stimes',
     mtimes',
   )
 where
@@ -30,6 +31,14 @@ power n0 op x1
       | n == 1 = x `op` z
       | otherwise = g (x `op` x) (n .>>. 1) (x `op` z)
 
+-- | \(O(\log n)\) Strict `Data.Semigroup.stimes`.
+--
+-- = Constraints
+-- - \(n \gt 0\)
+{-# INLINE stimes' #-}
+stimes' :: (Semigroup a) => Int -> a -> a
+stimes' n = power n (<>)
+
 -- | \(O(\log n)\) Strict `Data.Monoid.mtimes`.
 --
 -- = Constraints
@@ -37,7 +46,7 @@ power n0 op x1
 {-# INLINE mtimes' #-}
 mtimes' :: (Monoid a) => Int -> a -> a
 mtimes' n0 x1 = case compare n0 0 of
-  LT -> errorWithoutStackTrace "AtCoder.Extra.Mathmtimes: zero or positive multiplier expected"
+  LT -> errorWithoutStackTrace "AtCoder.Extra.Math.mtimes': zero or positive multiplier expected"
   EQ -> mempty
   GT -> power n0 (<>) x1
 
