@@ -116,6 +116,7 @@ test-suite ac-library-hs-test
   other-modules:
     Tests.Convolution
     Tests.Dsu
+    Tests.Extra.Math
     Tests.Extra.Monoid
     Tests.FenwickTree
     Tests.Internal.Bit
@@ -135,6 +136,7 @@ test-suite ac-library-hs-test
     Tests.SegTree
     Tests.String
     Tests.TwoSat
+    Tests.Util
     Util
 
   -- other-extensions:
