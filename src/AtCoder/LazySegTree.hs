@@ -72,14 +72,10 @@
 -- instance (Num a) => 'Monoid' (Affine1 a) where
 --   {-# INLINE 'mempty' #-}
 --   'mempty' = Affine1 (1, 0)
---   {-# INLINE mconcat #-}
---   mconcat = foldl' (<>) mempty
 --
--- instance (Integral a) => SegAct (Affine1 a) (Sum a) where
---   {-# INLINE 'segActWithLength' #-}
---   'segActWithLength' !len (Affine1 (!a, !b)) (Sum !x) = Sum $ a * x + b * fromIntegral len
---
--- -- Other 'SegAct' instances are ommited
+-- instance (Num a) => 'SegAct' (Affine1 a) (Sum a) where
+--   {-# INLINE segActWithLength #-}
+--   segActWithLength len (Affine1 (!a, !b)) !x = a * x + b * fromIntegral len
 --
 -- -- Derive Unbox:
 -- newtype instance VU.MVector s (Affine1 a) = MV_Affine1 (VU.MVector s (Affine1 a))

@@ -3,7 +3,14 @@
 -- | `AtCoder.LazySegTree.SegAct` instance of range set action over ideomponent monoids. It can set
 -- an interval \([l, r)\) to an idempotent monoid \(x\) such as @Max Int@.
 --
--- While this monoid is a `SegAct` sample, be warned that it's not guaanteed to be correct.
+-- = Example
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeSetId(..))
+-- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> import Data.Semigroup (Max(..))
+-- >>> seg <- LST.build @_ @(RangeSetId (Max Int)) @(Max Int) $ VU.generate 3 (Max . (+ 10)) -- [10, 11, 12]
+-- >>> LST.applyIn seg 0 2 $ RangeSetId (True, Max 5) -- [5, 5, 12]
+-- >>> getMax <$> LST.prod seg 0 3
+-- 12
 module AtCoder.Extra.Monoid.RangeSetId
   ( RangeSetId (..),
     new,

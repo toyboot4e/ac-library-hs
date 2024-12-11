@@ -2,6 +2,14 @@
 
 -- | `AtCoder.LazySegTree.SegAct` instance of one-dimensional affine transformation
 -- \(f: x \rightarrow a x + b\).
+--
+-- = Example
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..))
+-- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> seg <- LST.build @_ @(Affine1 Int) @(Sum Int) $ VU.generate 3 Sum -- [0, 1, 2]
+-- >>> LST.applyIn seg 0 3 $ Affine1 (2, 1) -- [1, 3, 5]
+-- >>> getSum <$> LST.allProd seg
+-- 9
 module AtCoder.Extra.Monoid.Affine1
   ( Affine1 (..),
     Affine1Repr,

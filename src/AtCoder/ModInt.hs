@@ -125,7 +125,7 @@ modVal p = fromIntegral $ natVal p
 --
 -- >>> :set -XMagicHash
 -- >>> import GHC.Exts (proxy#)
--- >>> modVal# (proxy# 42)
+-- >>> modVal# (proxy# @42)
 -- 42
 modVal# :: forall a. (KnownNat a) => Proxy# a -> Int
 modVal# p = fromIntegral $ natVal' p

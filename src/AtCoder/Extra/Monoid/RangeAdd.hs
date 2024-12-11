@@ -2,7 +2,14 @@
 
 -- | Monoid action for setting interval \([l, r)\).
 --
--- While this monoid is a `SegAct` sample, be warned that it's not guaanteed to be correct.
+-- = Example
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeAdd(..))
+-- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> import Data.Semigroup (Max(..))
+-- >>> seg <- LST.build @_ @(RangeAdd Int) @(Sum Int) $ VU.generate 3 Sum -- [0, 1, 2]
+-- >>> LST.applyIn seg 0 3 $ RangeAdd 5 -- [5, 6, 7]
+-- >>> getSum <$> LST.prod seg 0 3
+-- 18
 module AtCoder.Extra.Monoid.RangeAdd
   ( RangeAdd (..),
     new,

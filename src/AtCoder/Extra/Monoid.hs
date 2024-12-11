@@ -1,9 +1,8 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | Extra module of pre-defined monoids and operators. `SegAct` and monoids in submodules are
--- re-exported.
+-- | Extra module of pre-defined `SegAct` instances.
 --
--- While these monoids are `SegAct` samples, be warned that they're not guaanteed to be correct.
+-- Be warned that they're not 100% guaanteed to be correct.
 module AtCoder.Extra.Monoid
   ( SegAct (..),
     Affine1 (..),

@@ -168,7 +168,7 @@ unit_compareNaive = testCase "compareNaive" $ do
             x1 <- ST.prod seg1 l r
             assertEqual (show (l, r)) x0 x1
 
-        -- prodAll
+        -- allProd
         do
           x1 <- prodStn seg0 0 n
           x2 <- ST.prod seg1 0 n

@@ -5,10 +5,10 @@
 -- Reference: https://en.wikipedia.org/wiki/Barrett_reduction
 --
 -- = Example
--- >>> let bt = new 10 -- mod 10
+-- >>> let bt = new32 10 -- mod 10
 -- >>> umod bt
 -- 10
--- >>> mul bt 7 7
+-- >>> mulMod bt 7 7
 -- 9
 module AtCoder.Internal.Barrett
   ( Barrett,

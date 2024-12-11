@@ -3,7 +3,14 @@
 -- | `AtCoder.LazySegTree.SegAct` instance of range set action. It can set an interval \([l, r)\) to
 -- the same monoid \(x\) such as @Sum Int@.
 --
--- While this monoid is a `SegAct` sample, be warned that it's not guaanteed to be correct.
+-- = Example
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeSet(..))
+-- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> import Data.Semigroup (Product(..))
+-- >>> seg <- LST.build @_ @(RangeSet (Product Int)) @(Product Int) $ VU.generate 4 Product -- [0, 1, 2, 3]
+-- >>> LST.applyIn seg 0 3 $ RangeSet (True, Product 5) -- [5, 5, 5, 3]
+-- >>> getProduct <$> LST.prod seg 0 4
+-- 375
 module AtCoder.Extra.Monoid.RangeSet
   ( RangeSet (..),
     new,
