@@ -4,8 +4,8 @@
 -- \((S, \cdot: S \times S \to S, e \in S)\) and a set \(F\) of \(S \to S\) mappings that satisfies
 -- the following properties.
 --
--- - \(F\) contains the identity map \(\mathrm{id}\), where the identity map is the map that
---   satisfies \(\mathrm{id}(x) = x\) for all \(x \in S\).
+-- - \(F\) contains the identity map \(\mathrm{id}\) such that \(\mathrm{id}(x) = x\) holds for all
+-- \(x \in S\).
 -- - \(F\) is closed under composition, i.e., \(f \circ g \in F\) holds for all \(f, g \in F\).
 -- - \(f(x \cdot y) = f(x) \cdot f(y)\) holds for all \(f \in F\) and \(x, y \in S\).
 --
@@ -14,106 +14,84 @@
 -- - Acting the map \(f\in F\) (cf. \(x = f(x)\)) on all the elements of an interval
 -- - Calculating the product of the elements of an interval
 --
--- For simplicity, in this document, we assume that the oracles @op@, @e@, @mapping@, @composition@,
--- and @id@ work in constant time. If these oracles work in \(O(T)\) time, each time complexity
--- appear in this document is multipled by \(O(T)\).
+-- In Haskell types, \(F\) is a `SegAct` (@'segAct' f@) and \(S\) is a `Monoid`. For simplicity, in
+-- this document, we assume that the relevant methods work in constant time. If these they work in
+-- \(O(T)\) time, each time complexity appear in this document is multipled by \(O(T)\).
 --
--- = In Haskell types
--- - \(F\) is a `SegAct`, @composition@ is `<>` and `id` is `mempty`.
--- - \(S\) is a `Monoid` and \(op\) is `<>`.
---
--- = Example
---
--- == Usage
--- Here we'll use `AtCoder.Extra.Monoid.Affine1` as the monoid action and `Data.Semigroup.Sum` as
--- the acted monoid.
+-- ==== __Example__
+-- Here we'll use `AtCoder.Extra.Monoid.Affine1` as a monoid action \(F\) and `Data.Semigroup.Sum`
+-- as the acted monoid \(S\):
 --
 -- >>> import AtCoder.LazySegTree qualified as LST
--- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..)) -- `SegAct` is also re-exported in Extra.Monoid
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..)) -- `SegAct` is also re-exported in Extra.Monoid.
 -- >>> import Data.Semigroup (Sum(..))
+--
+-- Use `build` to construct a `LazySegTree` with initial values. @'build' \@_ \@f \@a@ constructs a
+-- `LazySegTree` of 'SegAct' @f a@:
+--
 -- >>> seg <- LST.build @_ @(Affine1 Int) @(Sum Int) $ VU.fromList [1, 2, 3, 4]
+--
+-- `applyIn` @seg l r f@ applies an action \(f\) to an interval \([l, r)\):
+--
 -- >>> LST.applyIn seg 1 3 $ Affine1 (2, 1) -- [1, 5, 7, 4]
+--
+-- Modify one element with `write`, `modify`, `modifyM` or `applyAt`:
+--
 -- >>> LST.write seg 3 $ Sum 10 -- [1, 5, 7, 10]
 -- >>> LST.modify seg (+ 1) 0   -- [2, 5, 7, 10]
+--
+-- Read the values with `read`, `prod` or `allProd`:
+--
 -- >>> LST.read seg 1
 -- Sum {getSum = 5}
--- >>> LST.prod seg 0 3
+-- >>> LST.prod seg 0 3 -- product (fold) of `Sum Int` in interval [0, 3)
 -- Sum {getSum = 14}
 -- >>> LST.allProd seg
 -- Sum {getSum = 24}
+--
+-- Run binary search in \(O(\log n\) time complexity:
+--
 -- >>> LST.maxRight seg 0 (<= (Sum 10)) -- sum [0, 2) = 7 <= 10
 -- 2
 -- >>> LST.minLeft seg 4 (<= (Sum 10)) -- sum [3, 4) = 10 <= 10
 -- 3
 --
--- == `SegAct` instance
--- `LazeSegTree` functions require `SegAct` instance. Take `AtCoder.Extra.Monoid.Affine1` as an
--- example.
+-- ==== Tips
 --
--- @
--- {-# LANGUAGE TypeFamilies #-}
---
--- import AtCoder.LazySegTree (SegAct (..))
--- import Data.Monoid
--- import Data.Vector.Generic qualified as VG
--- import Data.Vector.Generic.Mutable qualified as VGM
--- import Data.Vector.Unboxed qualified as VU
--- import Data.Vector.Unboxed.Mutable qualified as VUM
---
--- -- | f x = a * x + b
--- newtype Affine1 a = Affine1 (Affine1 a)
---   deriving newtype ('Eq', 'Ord', 'Show')
---
--- type Affine1 a = (a, a)
---
--- instance ('Num' a) => 'Semigroup' (Affine1 a) where
---   {-# INLINE ('<>') #-}
---   (Affine1 (!a1, !b1)) '<>' (Affine1 (!a2, !b2)) = Affine1 (a1 * a2, a1 * b2 + b1)
---
--- instance ('Num' a) => 'Monoid' (Affine1 a) where
---   {-# INLINE 'mempty' #-}
---   'mempty' = Affine1 (1, 0)
---
--- instance ('Num' a) => 'SegAct' (Affine1 a) (Sum a) where
---   {-# INLINE segActWithLength #-}
---   'segActWithLength' len (Affine1 (!a, !b)) !x = a * x + b * fromIntegral len
---
--- -- Derive Unbox:
--- newtype instance VU.MVector s (Affine1 a) = MV_Affine1 (VU.MVector s (Affine1 a))
--- newtype instance VU.Vector (Affine1 a) = V_Affine1 (VU.Vector (Affine1 a))
--- deriving instance (VU.Unbox a) => VGM.MVector VUM.MVector (Affine1 a)
--- deriving instance (VU.Unbox a) => VG.Vector VU.Vector (Affine1 a)
--- instance (VU.Unbox a) => VU.Unbox (Affine1 a)
--- @
---
--- == Tips
---
--- - In `SegAct` instances, new monoids always come from the left: @new '<>' old@.
--- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\).
--- - If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\), wrap your monoid in `Data.Monoid.Dual`.
--- - If you ever need to store boxed types to `LazySegTree`, wrap it in [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
+-- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\). If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\),
+-- wrap your monoid in `Data.Monoid.Dual`.
+-- - If you ever need to store boxed types to `LazySegTree`, wrap it in 'Data.Vector.Unboxed.DoNotUnboxStrict'
 -- or the like.
 --
--- = Major changes from the original @ac-library@
--- - The implementaion is `Monoid` and `SegAct` based.
--- - @get@ and @set@ are renamed to `read` and `write`.
--- - `modify` and `modifyM` are added.
+-- ==== Major changes from the original @ac-library@
+-- - The API is based on `Monoid` and `SegAct`, not the functions @op@, @e@, @mapping@,
+-- @composition@ and @id@.
+-- - The functions names follow the vector package: @get@ and @set@ are renamed to `read` and
+-- `write`. `modify` and `modifyM` are added.
 module AtCoder.LazySegTree
-  ( SegAct (..),
+  ( -- Lazy segment tree
+    SegAct (..),
     LazySegTree (..),
+    -- * Construction
     new,
     build,
+    -- * Accessing individual elements
     write,
     modify,
     modifyM,
     read,
+    -- * Products
     prod,
     allProd,
+    -- * Applications
     applyAt,
     applyIn,
+    -- * Binary searches
+    -- ** Pure binary searches
     maxRight,
-    maxRightM,
     minLeft,
+    -- ** Monadic binary searches
+    maxRightM,
     minLeftM,
   )
 where
@@ -133,23 +111,149 @@ import Prelude hiding (read)
 -- | Haskell reprentation of the `AtCoder.LazySegTree` properties. User can implement either
 -- `segAct` or `segActWithLength`.
 --
--- = Constraints
--- - Identity map: \(\mathrm{Id} a = a\).
--- - Left monoid action: \((f_2 \cdot f_1) a = f_2 (f_1 a)\)
--- - Endomorphism: \(f (a_1 \cdot a_2) = (f a_1) \cdot (f a_2)\)
+-- Instances should satisfy the follwing:
+--
+-- [Identity map] @`segAct` `mempty` x = x@
+-- [Left monoid action] @'segAct' (f2 '<>' f1) x = 'segAct' f2 ('segAct' f1 x)@
+-- [Endomorphism] @'segAct' f (x1 '<>' x2) = ('segAct' f x1) '<>' ('segAct' f x2)@
+--
+-- If you implement `segActWithLength`, satisfy one more propety:
+--
+-- [Linear monoid action] @'segActWithLength' len f a = 'Data.Semigroup.stimes' len ('segAct' f a)} a@.
+--
+-- Note that in `SegAct` instances, new semigroup values always come from the left: @new '<>' old@.
+--
+-- ==== __Example instance__
+-- Take `AtCoder.Extra.Monoid.Affine1` as an example of type \(F\).
+--
+-- @
+-- {-# LANGUAGE TypeFamilies #-}
+--
+-- import AtCoder.LazySegTree qualified as LST
+-- import AtCoder.LazySegTree (SegAct (..))
+-- import Data.Monoid
+-- import Data.Vector.Generic qualified as VG
+-- import Data.Vector.Generic.Mutable qualified as VGM
+-- import Data.Vector.Unboxed qualified as VU
+-- import Data.Vector.Unboxed.Mutable qualified as VUM
+--
+-- -- | f x = a * x + b. It's implemented as a newtype of `(a, a)` for easy `Unbox` deriving.
+-- newtype 'AtCoder.Extra.Monoid.Affine1.Affine1' a = 'AtCoder.Extra.Monoid.Affine1.Affine1' ('AtCoder.Extra.Monoid.Affine1.Affine1' a)
+--   deriving newtype ('Eq', 'Ord', 'Show')
+--
+-- -- | This type alias makes the 'Data.Vector.Unboxed.Unbox' deriving easier, described velow.
+-- type 'AtCoder.Extra.Monoid.Affine1.Affine1Repr' a = (a, a)
+--
+-- instance ('Num' a) => 'Semigroup' ('AtCoder.Extra.Monoid.Affine1.Affine1' a) where
+--   {-# INLINE ('<>') #-}
+--   ('AtCoder.Extra.Monoid.Affine1.Affine1' (!a1, !b1)) '<>' ('AtCoder.Extra.Monoid.Affine1.Affine1' (!a2, !b2)) = 'AtCoder.Extra.Monoid.Affine1.Affine1' (a1 * a2, a1 * b2 + b1)
+--
+-- instance ('Num' a) => 'Monoid' ('AtCoder.Extra.Monoid.Affine1.Affine1' a) where
+--   {-# INLINE 'mempty' #-}
+--   'mempty' = 'AtCoder.Extra.Monoid.Affine1.Affine1' (1, 0)
+--
+-- instance ('Num' a) => 'SegAct' ('AtCoder.Extra.Monoid.Affine1.Affine1' a) ('Sum' a) where
+--   {-# INLINE segActWithLength #-}
+--   'segActWithLength' len ('AtCoder.Extra.Monoid.Affine1.Affine1' (!a, !b)) !x = a * x + b * fromIntegral len
+-- @
+--
+-- Deriving 'Data.Vector.Unboxed.Unbox' is very easy for such a newtype (though the efficiency is
+-- not the maximum):
+--
+-- @
+-- newtype instance VU.MVector s ('AtCoder.Extra.Monoid.Affine1.Affine1' a) = MV_Affine1 (VU.MVector s ('AtCoder.Extra.Monoid.Affine1.Affine1' a))
+-- newtype instance VU.Vector ('AtCoder.Extra.Monoid.Affine1.Affine1' a) = V_Affine1 (VU.Vector ('AtCoder.Extra.Monoid.Affine1.Affine1' a))
+-- deriving instance (VU.Unbox a) => VGM.MVector VUM.MVector ('AtCoder.Extra.Monoid.Affine1.Affine1' a)
+-- deriving instance (VU.Unbox a) => VG.Vector VU.Vector ('AtCoder.Extra.Monoid.Affine1.Affine1' a)
+-- instance (VU.Unbox a) => VU.Unbox ('AtCoder.Extra.Monoid.Affine1.Affine1' a)
+-- @
+--
+-- ==== __Example contest template__
+-- Define your monoid action @F@ and your acted monoid @X@:
+--
+-- @
+-- {-# LANGUAGE TypeFamilies #-}
+--
+-- import AtCoder.LazySegTree qualified as LST
+-- import AtCoder.LazySegTree (SegAct (..))
+-- import Data.Vector.Generic qualified as VG
+-- import Data.Vector.Generic.Mutable qualified as VGM
+-- import Data.Vector.Unboxed qualified as VU
+-- import Data.Vector.Unboxed.Mutable qualified as VUM
+--
+-- {- ORMOLU_DISABLE -}
+-- -- | `F` is a custom monoid action, defined as a newtype of `FRepr`.
+-- newtype F = F FRepr deriving newtype (Eq, Ord, Show) ; unF :: F -> FRepr ; unF (F x) = x ; newtype instance VU.MVector s F = MV_F (VU.MVector s FRepr) ; newtype instance VU.Vector F = V_F (VU.Vector FRepr) ; deriving instance VGM.MVector VUM.MVector F ; deriving instance VG.Vector VU.Vector F ; instance VU.Unbox F ;
+-- {- ORMOLU_ENABLE -}
+--
+-- -- | Affine: f x = a * x + b
+-- type FRepr = (Int, Int)
+--
+-- instance Semigroup F where
+--   -- @new <> old@
+--   {-# INLINE (<>) #-}
+--   (F (!a1, !b1)) <> (F (!a2, !b2)) = F (a1 * a2, a1 * b2 + b1)
+--
+-- instance Monoid F where
+--   {-# INLINE mempty #-}
+--   mempty = F (1, 0)
+--
+-- {- ORMOLU_DISABLE -}
+-- -- | `X` is a custom acted monoid, defined as a newtype of `XRepr`.
+-- newtype X = X XRepr deriving newtype (Eq, Ord, Show) ; unX :: X -> XRepr ; unX (X x) = x; newtype instance VU.MVector s X = MV_X (VU.MVector s XRepr) ; newtype instance VU.Vector X = V_X (VU.Vector XRepr) ; deriving instance VGM.MVector VUM.MVector X ; deriving instance VG.Vector VU.Vector X ; instance VU.Unbox X ;
+-- {- ORMOLU_ENABLE -}
+--
+-- -- | Acted `Int` (same as `Sum Int`).
+-- type XRepr = Int
+--
+-- deriving instance Num X; -- in our case `X` is a `Num`.
+--
+-- instance Semigroup X where
+--   {-# INLINE (<>) #-}
+--   (X x1) <> (X x2) = X $! x1 + x2
+--
+-- instance Monoid X where
+--   {-# INLINE mempty #-}
+--   mempty = X 0
+--
+-- instance SegAct F X where
+--   -- {-# INLINE segAct #-}
+--   -- segAct len (F (!a, !b)) (X x) = X $! a * x + b
+--   {-# INLINE segActWithLength #-}
+--   segActWithLength len (F (!a, !b)) (X x) = X $! a * x + len * b
+-- @
+--
+-- It's tested as below:
+--
+-- @
+-- expect :: (Eq a, Show a) => String -> a -> a -> ()
+-- expect msg a b
+--   | a == b = ()
+--   | otherwise = error $ msg ++ ": expected " ++ show a ++ ", found " ++ show b
+--
+-- main :: IO ()
+-- main = do
+--   seg <- LST.build @_ @F @X $ VU.map X $ VU.fromList [1, 2, 3, 4]
+--   LST.applyIn seg 1 3 $ F (2, 1) -- [1, 5, 7, 4]
+--   LST.write seg 3 $ X 10 -- [1, 5, 7, 10]
+--   LST.modify seg (+ (X 1)) 0   -- [2, 5, 7, 10]
+--   !_ \<- (expect "test 1" (X 5)) \<$> LST.read seg 1
+--   !_ \<- (expect "test 2" (X 14)) \<$> LST.prod seg 0 3 -- reads an interval [0, 3)
+--   !_ \<- (expect "test 3" (X 24)) \<$> LST.allProd seg
+--   !_ \<- (expect "test 4" 2) \<$> LST.maxRight seg 0 (<= (X 10)) -- sum [0, 2) = 7 <= 10
+--   !_ \<- (expect "test 5" 3) \<$> LST.minLeft seg 4 (<= (X 10)) -- sum [3, 4) = 10 <= 10
+--   putStrLn "=> test passed!"
+-- @
 class (Monoid f) => SegAct f a where
-  -- | Lazy segment tree action.
+  -- | Lazy segment tree action \(f(x)\).
   {-# INLINE segAct #-}
   segAct :: f -> a -> a
   segAct = segActWithLength 1
 
-  -- | Lazy segment tree action with target monoid length.
+  -- | Lazy segment tree action \(f(x)\) with the target monoid's length.
   --
-  -- If you implement `SegAct` with this function, you don't have to store the monoid length, since
-  -- it's given externally.
-  --
-  -- = Constraints
-  -- - Linear monoid action: @'segActWithLength' len f a = 'Data.Semigroup.stimes' len ('segAct' f a)} a@.
+  -- If you implement `SegAct` with this function, you don't have to store the monoid's length,
+  -- since it's given externally.
   {-# INLINE segActWithLength #-}
   segActWithLength :: Int -> f -> a -> a
   segActWithLength _ = segAct
@@ -170,10 +274,10 @@ data LazySegTree s f a = LazySegTree
 
 -- | Creates an array of length @n@. All the elements are initialized to `mempty`.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 new :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Int -> m (LazySegTree (PrimState m) f a)
 new nLst
@@ -182,10 +286,10 @@ new nLst
 
 -- | Creates an array with initial values @vs@.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 build :: (PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => VU.Vector a -> m (LazySegTree (PrimState m) f a)
 build vs = do
@@ -203,10 +307,10 @@ build vs = do
 
 -- | Sets \(p\)-th value of the array to \(x\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq p \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 write :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> a -> m ()
 write self@LazySegTree {..} p x = do
@@ -220,10 +324,10 @@ write self@LazySegTree {..} p x = do
 
 -- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq p \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 modify :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> (a -> a) -> Int -> m ()
 modify self@LazySegTree {..} f p = do
@@ -237,10 +341,10 @@ modify self@LazySegTree {..} f p = do
 
 -- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq p \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 modifyM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> (a -> m a) -> Int -> m ()
 modifyM self@LazySegTree {..} f p = do
@@ -254,10 +358,10 @@ modifyM self@LazySegTree {..} f p = do
 
 -- | Returns \(p\)-th value of the array.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq p \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 read :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m a
 read self@LazySegTree {..} p = do
@@ -270,10 +374,10 @@ read self@LazySegTree {..} p = do
 -- | Returns the product of \([a[l], ..., a[r - 1]]\), assuming the properties of the monoid. It
 -- returns `mempty` if \(l = r\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq l \leq r \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 prod :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
 prod self@LazySegTree {..} l0 r0
@@ -304,17 +408,17 @@ prod self@LazySegTree {..} l0 r0
 -- | Returns the product of \([op(a[0], ..., a[n - 1])]\), assuming the properties of the monoid. It
 -- returns `mempty` if \(n = 0\).
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\)
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m a
 allProd LazySegTree {..} = VGM.read dLst 1
 
 -- | Applies @segAct f@ to an index @p@.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq p \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 applyAt :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
 applyAt self@LazySegTree {..} p f = do
@@ -331,10 +435,10 @@ applyAt self@LazySegTree {..} p f = do
 
 -- | Applies @segAct f@ to an interval @[l, r)@.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq l \leq r \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 applyIn :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
 applyIn self@LazySegTree {..} l0 r0 f
@@ -372,26 +476,46 @@ applyIn self@LazySegTree {..} l0 r0 f
 -- If \(g\) is monotone, this is the maximum \(r\) that satisfies
 -- \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
 --
--- = Constraints
+-- ==== Constraints
 --
 -- - If \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
 -- - @g mempty == True@.
 -- - \(0 \leq l \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 maxRight :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 maxRight seg l0 g = maxRightM seg l0 (pure . g)
 
+-- | Applies a binary search on the segment tree. It returns an index \(l\) that satisfies both of the
+-- following.
+--
+-- - \(l = r\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\) returns `True`.
+-- - \(l = 0\) or \(g(a[l - 1] \cdot a[l] \cdot ... \cdot a[r - 1])\) returns `False`.
+--
+-- If \(g\) is monotone, this is the minimum \(l\) that satisfies
+-- \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
+--
+-- ==== Constraints
+--
+-- - if \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
+-- - @g mempty == True@.
+-- - \(0 \leq r \leq n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+minLeft :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
+minLeft seg r0 g = minLeftM seg r0 (pure . g)
+
 -- | Monadic version of `maxRight`.
 --
--- = Constraints
+-- ==== Constraints
 --
 -- - If \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
 -- - @g mempty == True@.
 -- - \(0 \leq l \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 maxRightM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
 maxRightM self@LazySegTree {..} l0 g = do
@@ -434,35 +558,15 @@ maxRightM self@LazySegTree {..} l0 g = do
             else inner2 l' sm
       | otherwise = pure $ l - sizeLst
 
--- | Applies a binary search on the segment tree. It returns an index \(l\) that satisfies both of the
--- following.
---
--- - \(l = r\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\) returns `True`.
--- - \(l = 0\) or \(g(a[l - 1] \cdot a[l] \cdot ... \cdot a[r - 1])\) returns `False`.
---
--- If \(g\) is monotone, this is the minimum \(l\) that satisfies
--- \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
---
--- = Constraints
---
--- - if \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
--- - @g mempty == True@.
--- - \(0 \leq r \leq n\)
---
--- = Complexity
--- - \(O(\log n)\)
-minLeft :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
-minLeft seg r0 g = minLeftM seg r0 (pure . g)
-
 -- | Monadic version of `minLeft`.
 --
--- = Constraints
+-- ==== Constraints
 --
 -- - if \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
 -- - @g mempty == True@.
 -- - \(0 \leq r \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 minLeftM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
 minLeftM self@LazySegTree {..} r0 g = do

@@ -110,6 +110,13 @@ library
   -- other-extensions:
   hs-source-dirs:  src
 
+executable example-lazy-segtree
+  import:         warnings
+  import:         dependencies
+  hs-source-dirs: examples
+  main-is:        LazySegTree.hs
+  build-depends:  ac-library-hs
+
 test-suite ac-library-hs-test
   import:         warnings
   import:         dependencies
