@@ -3,7 +3,7 @@
 -- = Examples
 -- >>> import AtCoder.Extra.Math qualified as M
 -- >>> import Data.Semigroup (Product(..), Sum(..))
--- >>> getProduct $ M.power 32 (<>) (Product 2)
+-- >>> getProduct $ M.power (<>) 32 (Product 2)
 -- 4294967296
 -- >>> getProduct $ M.stimes' 32 (Product 2)
 -- 4294967296
@@ -18,6 +18,8 @@ where
 
 import Data.Bits ((.>>.))
 
+-- TODO: add `HasCallStack` and provide with `unsafePower`.
+
 -- | \(O(\log n)\) Calculates \(s^n\) with custom multiplication operator using the binary lifting
 -- technique.
 --
@@ -27,8 +29,8 @@ import Data.Bits ((.>>.))
 -- = Constraints
 -- - \(n \gt 0\)
 {-# INLINE power #-}
-power :: Int -> (a -> a -> a) -> a -> a
-power n0 op x1
+power :: (a -> a -> a) -> Int -> a -> a
+power op n0 x1
   | n0 <= 0 = errorWithoutStackTrace "AtCoder.Extra.Math.power: positive multiplier expected"
   | otherwise = f x1 n0
   where
@@ -47,7 +49,7 @@ power n0 op x1
 -- - \(n \gt 0\)
 {-# INLINE stimes' #-}
 stimes' :: (Semigroup a) => Int -> a -> a
-stimes' n = power n (<>)
+stimes' = power (<>)
 
 -- | \(O(\log n)\) Strict `Data.Monoid.mtimes`.
 --
@@ -55,8 +57,8 @@ stimes' n = power n (<>)
 -- - \(n \ge 0\)
 {-# INLINE mtimes' #-}
 mtimes' :: (Monoid a) => Int -> a -> a
-mtimes' n0 x1 = case compare n0 0 of
+mtimes' n x = case compare n 0 of
   LT -> errorWithoutStackTrace "AtCoder.Extra.Math.mtimes': non-negative multiplier expected"
   EQ -> mempty
-  GT -> power n0 (<>) x1
+  GT -> power (<>) n x
 

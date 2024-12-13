@@ -37,7 +37,7 @@ instance SegAct Op Acc where
   segActWithLength len (Op (!b, !f)) x
     | not b = x
     | len == 1 = Dual f
-    | otherwise = Dual $ EM.power len (<>) f
+    | otherwise = Dual $ EM.power (<>) len f
 
 type Acc = Dual (Affine1 Mint)
 

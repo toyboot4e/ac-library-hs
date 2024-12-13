@@ -105,10 +105,10 @@ powModRem x n0 m0
 powModPowerMod :: (HasCallStack) => Int -> Int -> Int -> Int
 powModPowerMod x n0 m0
   | m0 == 1 = 0
-  | otherwise = ACEM.power n0 (\ !a !b -> a * b `mod` m0) x
+  | otherwise = ACEM.power (\ !a !b -> a * b `mod` m0) n0 x
 
 -- | power-based
 powModPowerRem :: (HasCallStack) => Int -> Int -> Int -> Int
 powModPowerRem x n0 m0
   | m0 == 1 = 0
-  | otherwise = ACEM.power n0 (\ !a !b -> a * b `rem` m0) x
+  | otherwise = ACEM.power (\ !a !b -> a * b `rem` m0) n0 x

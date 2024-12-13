@@ -69,7 +69,7 @@ instance (Num a) => Semigroup (Affine1 a) where
   {-# INLINE sconcat #-}
   sconcat (x :| xs) = foldl' (<>) x xs
   {-# INLINE stimes #-}
-  stimes b = ACEM.power (fromIntegral b) (<>)
+  stimes b = ACEM.power (<>) (fromIntegral b)
 
 instance (Num a) => Monoid (Affine1 a) where
   {-# INLINE mempty #-}
