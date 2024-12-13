@@ -6,7 +6,7 @@ Haskell port of AtCoder Library (ACL).
 
 We're preparing for [the next language update (2024-2025)](https://atcoder.jp/posts/1342?lang=ja) ([#4](https://github.com/toyboot4e/ac-library-hs/issues/4)).
 
-**Currently only GHC 9.4.5 is supported**. GHC 9.8.3 will be available before long.
+**Currently only GHC 9.4.5 is supported**. GHC 9.8.4 will be available before long.
 
 ## Contributing
 
