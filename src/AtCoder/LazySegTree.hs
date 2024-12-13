@@ -113,15 +113,15 @@ import Prelude hiding (read)
 --
 -- Instances should satisfy the follwing:
 --
--- [Identity map] @`segAct` `mempty` x = x@
 -- [Left monoid action] @'segAct' (f2 '<>' f1) x = 'segAct' f2 ('segAct' f1 x)@
+-- [Identity map] @`segAct` `mempty` x = x@
 -- [Endomorphism] @'segAct' f (x1 '<>' x2) = ('segAct' f x1) '<>' ('segAct' f x2)@
 --
 -- If you implement `segActWithLength`, satisfy one more propety:
 --
--- [Linear monoid action] @'segActWithLength' len f a = 'Data.Semigroup.stimes' len ('segAct' f a)} a@.
+-- [Linear left monoid action] @'segActWithLength' len f a = 'Data.Semigroup.stimes' len ('segAct' f a) a@.
 --
--- Note that in `SegAct` instances, new semigroup values always come from the left: @new '<>' old@.
+-- Note that in `SegAct` instances, new semigroup values are always given from the left: @new '<>' old@.
 --
 -- ==== __Example instance__
 -- Take `AtCoder.Extra.Monoid.Affine1` as an example of type \(F\).
