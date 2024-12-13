@@ -2,15 +2,6 @@
 
 -- | `AtCoder.LazySegTree.SegAct` instance of range set action. It can set an interval \([l, r)\) to
 -- the same monoid \(x\) such as @Sum Int@.
---
--- = Example
--- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeSet(..))
--- >>> import AtCoder.LazySegTree qualified as LST
--- >>> import Data.Semigroup (Product(..))
--- >>> seg <- LST.build @_ @(RangeSet (Product Int)) @(Product Int) $ VU.generate 4 Product -- [0, 1, 2, 3]
--- >>> LST.applyIn seg 0 3 $ RangeSet (True, Product 5) -- [5, 5, 5, 3]
--- >>> getProduct <$> LST.prod seg 0 4
--- 375
 module AtCoder.Extra.Monoid.RangeSet
   ( RangeSet (..),
     new,
@@ -27,6 +18,15 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
 -- | `AtCoder.LazySegTree.SegAct` instance of range set action.
+--
+-- = Example
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeSet(..))
+-- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> import Data.Semigroup (Product(..))
+-- >>> seg <- LST.build @_ @(RangeSet (Product Int)) @(Product Int) $ VU.generate 4 Product -- [0, 1, 2, 3]
+-- >>> LST.applyIn seg 0 3 $ RangeSet (True, Product 5) -- [5, 5, 5, 3]
+-- >>> getProduct <$> LST.prod seg 0 4
+-- 375
 newtype RangeSet a = RangeSet (RangeSetRepr a)
   deriving newtype (Eq, Ord, Show)
 
@@ -49,7 +49,7 @@ act (RangeSet (False, !_)) x = x
 -- | Acts on @a@ with length in terms of `SegAct`.
 {-# INLINE actWithLength #-}
 actWithLength :: (Semigroup a) => Int -> RangeSet a -> a -> a
-actWithLength len (RangeSet (True, !f)) _ = ACEM.power len (<>) f
+actWithLength len (RangeSet (True, !f)) _ = ACEM.power (<>) len f
 actWithLength _ (RangeSet (False, !_)) x = x
 
 instance Semigroup (RangeSet a) where

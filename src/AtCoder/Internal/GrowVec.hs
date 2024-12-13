@@ -3,29 +3,30 @@
 -- | Growable vector with some runtime overhead (by `MutVar`).
 --
 -- = Example
--- >>> growVec <- new @_ @Int 0
--- >>> null growVec
+-- >>> import AtCoder.Internal.GrowVec qualified as GV
+-- >>> growVec <- GV.new @_ @Int 0
+-- >>> GV.null growVec
 -- True
--- >>> pushBack growVec 10
--- >>> pushBack growVec 11
--- >>> pushBack growVec 12
--- >>> freeze growVec
+-- >>> GV.pushBack growVec 10
+-- >>> GV.pushBack growVec 11
+-- >>> GV.pushBack growVec 12
+-- >>> GV.freeze growVec
 -- [10,11,12]
--- >>> length growVec
+-- >>> GV.length growVec
 -- 3
--- >>> capacity growVec
+-- >>> GV.capacity growVec
 -- 4
--- >>> write growVec 1 20
--- >>> read growVec 1
+-- >>> GV.write growVec 1 20
+-- >>> GV.read growVec 1
 -- 20
--- >>> popBack growVec
+-- >>> GV.popBack growVec
 -- Just 12
--- >>> popBack growVec
+-- >>> GV.popBack growVec
 -- Just 20
--- >>> reserve growVec 20
--- >>> capacity growVec
+-- >>> GV.reserve growVec 20
+-- >>> GV.capacity growVec
 -- 20
--- >>> unsafeFreeze growVec
+-- >>> GV.unsafeFreeze growVec
 -- [10]
 module AtCoder.Internal.GrowVec
   ( GrowVec (..),

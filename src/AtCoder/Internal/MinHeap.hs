@@ -5,22 +5,23 @@
 -- <https://en.wikipedia.org/wiki/Binary_heap>
 --
 -- = Example
--- >>> heap <- new @Int 4
--- >>> capacity heap
+-- >>> import AtCoder.Internal.MinHeap qualified as MH
+-- >>> heap <- MH.new @Int 4
+-- >>> MH.capacity heap
 -- 4
--- >>> push heap 10
--- >>> push heap 0
--- >>> push heap 5
--- >>> length heap
+-- >>> MH.push heap 10
+-- >>> MH.push heap 0
+-- >>> MH.push heap 5
+-- >>> MH.length heap -- [0, 5, 10]
 -- 3
--- >>> pop heap
+-- >>> MH.pop heap    -- [5, 10]
 -- Just 0
--- >>> peek heap
+-- >>> MH.peek heap   -- [5, 10]
 -- Just 5
--- >>> pop heap
+-- >>> MH.pop heap    -- [10]
 -- Just 5
--- >>> clear heap
--- >>> null heap
+-- >>> MH.clear heap  -- []
+-- >>> MH.null heap
 -- True
 module AtCoder.Internal.MinHeap
   ( Heap (..),
@@ -69,7 +70,7 @@ new n = do
   dataBH <- VUM.unsafeNew n
   pure Heap {..}
 
--- | \(O(1)\) Returns the number of elements the heap can hold.
+-- | \(O(1)\) Returns the maximum number of elements in the heap.
 capacity :: (VU.Unbox a) => Heap s a -> Int
 capacity = VUM.length . dataBH
 
@@ -146,7 +147,7 @@ pop heap@Heap {..} = do
       siftDown 0
       pure $ Just root
 
--- | \(O(\log n)\) Removes the last element from the heap and discards it.
+-- | \(O(\log n)\) `pop` with return value discarded.
 pop_ :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
 pop_ heap = do
   _ <- pop heap

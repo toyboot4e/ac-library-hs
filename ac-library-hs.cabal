@@ -21,7 +21,7 @@ extra-doc-files:
 
 -- extra-source-files:
 
-tested-with:     GHC ==9.4.5 || ==9.8.3
+tested-with:     GHC ==9.4.5 || ==9.8.4
 
 common warnings
   ghc-options: -Wall
@@ -44,12 +44,12 @@ common dependencies
       , bitvec
       , bytestring
       , primitive
-      -- FIXME: add it to GHC 9.4.5, too
       , tagged
       , vector
       , vector-algorithms
       , wide-word
 
+  -- FIXME: add it to GHC 9.4.5, too
   default-language:   GHC2021
 
   -- compatible with GHC2024:
@@ -163,6 +163,7 @@ library benchlib
   import:          dependencies
   ghc-options:     -O2
   exposed-modules:
+    BenchLib.AddMod
     BenchLib.ModInt.ModIntNats
     BenchLib.ModInt.Modulus
     BenchLib.MulMod.Barrett64
@@ -170,9 +171,10 @@ library benchlib
     BenchLib.MulMod.Montgomery
     BenchLib.PowMod
 
-  type:            exitcode-stdio-1.0
   hs-source-dirs:  benchlib
-  build-depends:   ac-library-hs
+  build-depends:
+    , ac-library-hs
+    , ghc-prim
 
 test-suite benchlib-test
   import:         warnings
@@ -206,7 +208,10 @@ benchmark ac-library-hs-benchmark
   type:           exitcode-stdio-1.0
   main-is:        Main.hs
   hs-source-dirs: benchmarks
-  other-modules:  Bench.PowMod
+  other-modules:
+    Bench.AddMod
+    Bench.PowMod
+
   build-depends:
     , ac-library-hs
     , ac-library-hs:benchlib

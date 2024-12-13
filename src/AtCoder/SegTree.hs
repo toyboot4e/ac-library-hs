@@ -167,7 +167,7 @@ read SegTree {..} p = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.read" p nSt
   VGM.read dSt $ p + sizeSt
 
--- | Returns \(a[l] \diamond ... \diamond a[r - 1]\), assuming the properties of the monoid. It
+-- | Returns \(a[l] \cdot ... \cdot a[r - 1]\), assuming the properties of the monoid. It
 -- returns `mempty` if \(l = r\).
 --
 -- = Constraints
@@ -204,11 +204,11 @@ allProd SegTree {..} = VGM.read dSt 1
 -- | Applies a binary search on the segment tree. It returns an index \(r\) that satisfies both of the
 -- following.
 --
--- - \(r = l\) or \(f(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\) returns `True`.
--- - \(r = n\) or \(f(a[l] \diamond a[l + 1] \diamond ... \diamond a[r]))\) returns `False`.
+-- - \(r = l\) or \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\) returns `True`.
+-- - \(r = n\) or \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r]))\) returns `False`.
 --
 -- If \(f\) is monotone, this is the maximum \(r\) that satisfies
--- \(f(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\).
+-- \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
 --
 -- = Constraints
 -- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
@@ -269,11 +269,11 @@ maxRightM SegTree {..} l0 f = do
 -- | Applies a binary search on the segment tree. It returns an index \(l\) that satisfies both of
 -- the following.
 --
--- - \(l = r\) or \(f(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\) returns `True`.
--- - \(l = 0\) or \(f(a[l - 1] \diamond a[l] \diamond ... \diamond a[r - 1])\) returns `False`.
+-- - \(l = r\) or \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\) returns `True`.
+-- - \(l = 0\) or \(f(a[l - 1] \cdot a[l] \cdot ... \cdot a[r - 1])\) returns `False`.
 --
 -- If \(f\) is monotone, this is the minimum \(l\) that satisfies
--- \(f(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\).
+-- \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
 --
 -- = Constraints
 --

@@ -32,10 +32,11 @@ data Barrett = Barrett
     imBarrett :: {-# UNPACK #-} !Word64
   }
 
--- | Creates barret reduction for modulus \(m\).
+-- | Creates barret reduction for modulus \(m\) from a `Word32` value.
 new32 :: Word32 -> Barrett
 new32 m = Barrett m $ maxBound @Word64 `div` (fromIntegral m :: Word64) + 1
 
+-- | Creates barret reduction for modulus \(m\) from a `Word64` value.
 new64 :: Word64 -> Barrett
 new64 m = Barrett (fromIntegral m) $ maxBound @Word64 `div` m + 1
 
@@ -43,7 +44,7 @@ new64 m = Barrett (fromIntegral m) $ maxBound @Word64 `div` m + 1
 umod :: Barrett -> Word32
 umod Barrett {mBarrett} = mBarrett
 
--- | Calculates \(a \cdot b \bmod m\).
+-- | Calculates \(a b \bmod m\).
 mulMod :: Barrett -> Word64 -> Word64 -> Word64
 mulMod Barrett {..} a b =
   let z :: Word64 = a * b

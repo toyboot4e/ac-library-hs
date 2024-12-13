@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | CSR for min cost flow.
+-- | Internal CSR for `AtCoder.MinCostFlow`.
 module AtCoder.Internal.McfCsr (Csr (..), build, adj) where
 
 import Control.Monad.Primitive (PrimMonad, PrimState)

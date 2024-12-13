@@ -77,7 +77,7 @@ crt r m = loop 0 1 [0 .. VU.length r - 1]
           | m0 < m1 = (m1, m0, r1, r0)
           | otherwise = (m0, m1, r0, r1)
 
--- | Returns \(\sum\limits_{i = 0}^{n - 1} \left\lfloor \frac{a \times i + b}{m} \right\rfloor\)
+-- | Returns \(\sum\limits_{i = 0}^{n - 1} \left\lfloor \frac{a \times i + b}{m} \right\rfloor\).
 --
 -- = Constraints
 -- - \(0 \le n\)

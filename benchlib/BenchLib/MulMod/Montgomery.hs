@@ -1,13 +1,5 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
--- | Fast modular multiplication by barrett reduction.
---
--- = Example
--- >>> let bt = new 10 -- mod 10
--- >>> umod bt
--- 10
--- >>> mul bt 7 7
--- 9
 module BenchLib.MulMod.Montgomery
   ( Montgomery (mMontgomery),
     new,

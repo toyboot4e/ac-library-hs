@@ -1,15 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- | Fast modular multiplication by barrett reduction.
--- Reference: https://en.wikipedia.org/wiki/Barrett_reduction
---
--- = Example
--- >>> let bt = new 10 -- mod 10
--- >>> umod bt
--- 10
--- >>> mul bt 7 7
--- 9
+-- | Fast modular multiplication by barrett reduction without 128 bit integer.
 module BenchLib.MulMod.Barrett64 (Barrett (mBarrett), new, umod, mulMod) where
 
 -- FIXME: test

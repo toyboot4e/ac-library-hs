@@ -18,21 +18,21 @@
 -- and @id@ work in constant time. If these oracles work in \(O(T)\) time, each time complexity
 -- appear in this document is multipled by \(O(T)\).
 --
--- = Storing boxed types
--- If you really need to store boxed types to `LazySegTree`, use [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
--- or other wrappers.
+-- = In Haskell types
+-- - \(F\) is a `SegAct`, @composition@ is `<>` and `id` is `mempty`.
+-- - \(S\) is a `Monoid` and \(op\) is `<>`.
 --
 -- = Example
 --
 -- == Usage
--- Here, we're using `AtCoder.Extra.Monoid.Affine1` as monoid action and `Data.Semigroup.Sum` as
--- acted monoid.
+-- Here we'll use `AtCoder.Extra.Monoid.Affine1` as the monoid action and `Data.Semigroup.Sum` as
+-- the acted monoid.
 --
 -- >>> import AtCoder.LazySegTree qualified as LST
--- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..))
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..)) -- `SegAct` is also re-exported in Extra.Monoid
 -- >>> import Data.Semigroup (Sum(..))
 -- >>> seg <- LST.build @_ @(Affine1 Int) @(Sum Int) $ VU.fromList [1, 2, 3, 4]
--- >>> LST.applyIn seg 1 3 $ Affine1 (2, 1) -- \x -> 2 * x + 1
+-- >>> LST.applyIn seg 1 3 $ Affine1 (2, 1) -- [1, 5, 7, 4]
 -- >>> LST.write seg 3 $ Sum 10 -- [1, 5, 7, 10]
 -- >>> LST.modify seg (+ 1) 0   -- [2, 5, 7, 10]
 -- >>> LST.read seg 1
@@ -53,29 +53,30 @@
 -- @
 -- {-# LANGUAGE TypeFamilies #-}
 --
--- import AtCoder.LazySegTree (SegAct (..)) -- also re-exported from AtCoder.Extra.Monoid.
+-- import AtCoder.LazySegTree (SegAct (..))
 -- import Data.Monoid
 -- import Data.Vector.Generic qualified as VG
 -- import Data.Vector.Generic.Mutable qualified as VGM
 -- import Data.Vector.Unboxed qualified as VU
 -- import Data.Vector.Unboxed.Mutable qualified as VUM
 --
+-- -- | f x = a * x + b
 -- newtype Affine1 a = Affine1 (Affine1 a)
---   deriving newtype (Eq, Ord, Show)
+--   deriving newtype ('Eq', 'Ord', 'Show')
 --
 -- type Affine1 a = (a, a)
 --
--- instance (Num a) => 'Semigroup' (Affine1 a) where
+-- instance ('Num' a) => 'Semigroup' (Affine1 a) where
 --   {-# INLINE ('<>') #-}
 --   (Affine1 (!a1, !b1)) '<>' (Affine1 (!a2, !b2)) = Affine1 (a1 * a2, a1 * b2 + b1)
 --
--- instance (Num a) => 'Monoid' (Affine1 a) where
+-- instance ('Num' a) => 'Monoid' (Affine1 a) where
 --   {-# INLINE 'mempty' #-}
 --   'mempty' = Affine1 (1, 0)
 --
--- instance (Num a) => 'SegAct' (Affine1 a) (Sum a) where
+-- instance ('Num' a) => 'SegAct' (Affine1 a) (Sum a) where
 --   {-# INLINE segActWithLength #-}
---   segActWithLength len (Affine1 (!a, !b)) !x = a * x + b * fromIntegral len
+--   'segActWithLength' len (Affine1 (!a, !b)) !x = a * x + b * fromIntegral len
 --
 -- -- Derive Unbox:
 -- newtype instance VU.MVector s (Affine1 a) = MV_Affine1 (VU.MVector s (Affine1 a))
@@ -85,11 +86,13 @@
 -- instance (VU.Unbox a) => VU.Unbox (Affine1 a)
 -- @
 --
--- Tips:
+-- == Tips
 --
--- - New monoid always come from the left: @new <> old@.
--- - `prod` returns \(a_l \diamond f_{l + 1} \diamond .. \diamond a_{r - 1}\).
--- - If you need \(a_{r - 1} \diamond a_{r - 2} \diamond .. \diamond f_{l}\), wrap your monoid in `Data.Monoid.Dual`.
+-- - In `SegAct` instances, new monoids always come from the left: @new '<>' old@.
+-- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\).
+-- - If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\), wrap your monoid in `Data.Monoid.Dual`.
+-- - If you ever need to store boxed types to `LazySegTree`, wrap it in [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
+-- or the like.
 --
 -- = Major changes from the original @ac-library@
 -- - The implementaion is `Monoid` and `SegAct` based.
@@ -131,9 +134,9 @@ import Prelude hiding (read)
 -- `segAct` or `segActWithLength`.
 --
 -- = Constraints
--- - Identity: \(\mathrm{segAct} \mathrm{mempty} a = a\).
--- - Left monoid action: \((f_2 \diamond f_1) a = f_2 (f_1 a)\)
--- - Endomorphism: \(f (a_1 \diamond a_2) = (f a_1) \diamond (f a_2)\)
+-- - Identity map: \(\mathrm{Id} a = a\).
+-- - Left monoid action: \((f_2 \cdot f_1) a = f_2 (f_1 a)\)
+-- - Endomorphism: \(f (a_1 \cdot a_2) = (f a_1) \cdot (f a_2)\)
 class (Monoid f) => SegAct f a where
   -- | Lazy segment tree action.
   {-# INLINE segAct #-}
@@ -142,11 +145,11 @@ class (Monoid f) => SegAct f a where
 
   -- | Lazy segment tree action with target monoid length.
   --
-  -- If you implement `SegAt` with this function, you don't have to store the monoid length, since
+  -- If you implement `SegAct` with this function, you don't have to store the monoid length, since
   -- it's given externally.
   --
   -- = Constraints
-  -- - Linear monoid action: @'segActWithLength' len f a = 'stimes' len ('segAct' f a)} a@.
+  -- - Linear monoid action: @'segActWithLength' len f a = 'Data.Semigroup.stimes' len ('segAct' f a)} a@.
   {-# INLINE segActWithLength #-}
   segActWithLength :: Int -> f -> a -> a
   segActWithLength _ = segAct
@@ -363,11 +366,11 @@ applyIn self@LazySegTree {..} l0 r0 f
 -- | Applies a binary search on the segment tree. It returns an index \(r\) that satisfies both of the
 -- followings.
 --
--- - \(r = l\) or \(g(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1]))\) returns `True`.
--- - \(r = n\) or \(g(a[l] \diamond a[l + 1] \diamond ... \diamond a[r]))\) returns `False`.
+-- - \(r = l\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1]))\) returns `True`.
+-- - \(r = n\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r]))\) returns `False`.
 --
 -- If \(g\) is monotone, this is the maximum \(r\) that satisfies
--- \(g(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\).
+-- \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
 --
 -- = Constraints
 --
@@ -434,11 +437,11 @@ maxRightM self@LazySegTree {..} l0 g = do
 -- | Applies a binary search on the segment tree. It returns an index \(l\) that satisfies both of the
 -- following.
 --
--- - \(l = r\) or \(g(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\) returns `True`.
--- - \(l = 0\) or \(g(a[l - 1] \diamond a[l] \diamond ... \diamond a[r - 1])\) returns `False`.
+-- - \(l = r\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\) returns `True`.
+-- - \(l = 0\) or \(g(a[l - 1] \cdot a[l] \cdot ... \cdot a[r - 1])\) returns `False`.
 --
 -- If \(g\) is monotone, this is the minimum \(l\) that satisfies
--- \(g(a[l] \diamond a[l + 1] \diamond ... \diamond a[r - 1])\).
+-- \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
 --
 -- = Constraints
 --

@@ -1,3 +1,4 @@
+-- | Internal implementation of `AtCoder.String` module.
 module AtCoder.Internal.String (saNaive, saDoubling, saIsImpl, saIs, saIsManual) where
 
 import Control.Monad (unless, when)
@@ -13,7 +14,7 @@ import GHC.Stack (HasCallStack)
 
 -- TODO: remove `HasCallStack` when we're 100% sure the input is guarded
 
--- | \(O(n^2)\) Internal implementation of suffix array creation.
+-- | \(O(n^2)\) Internal implementation of suffix array creation (naive).
 saNaive :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 saNaive s =
   let n = VU.length s
@@ -33,7 +34,7 @@ saNaive s =
    in -- modify + generate should fuse
       VU.modify (VAI.sortBy f) $ VU.generate n id
 
--- | \(O(n \log n)\) Internal implementation of suffix array creation.
+-- | \(O(n \log n)\) Internal implementation of suffix array creation (doubling).
 saDoubling :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 saDoubling s = VU.create $ do
   let n = VU.length s
@@ -69,7 +70,7 @@ saDoubling s = VU.create $ do
 
 -- TODO: use backpermute
 
--- | \(O(n)\) Internal implementation of suffix array creation.
+-- | \(O(n)\) Internal implementation of suffix array creation (suffix array induced sorting).
 saIsImpl :: (HasCallStack) => Int -> Int -> VU.Vector Int -> Int -> VU.Vector Int
 saIsImpl naiveThreshold doublingThreshold s upper = VU.create $ do
   let n = VU.length s
@@ -220,18 +221,18 @@ saIsImpl naiveThreshold doublingThreshold s upper = VU.create $ do
 
   pure sa
 
--- | \(O(n)\) Internal implementation of suffix array creation.
+-- | \(O(n)\) Internal implementation of suffix array creation (suffix array induced sorting).
 --
--- SA-IS, linear-time suffix array construction
+-- SA-IS, linear-time suffix array construction.
 -- Reference:
 -- G. Nong, S. Zhang, and W. H. Chan,
 -- Two Efficient Algorithms for Linear Time Suffix Array Construction
 saIs :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
 saIs = saIsManual 10 40
 
--- | \(O(n)\) Internal implementation of suffix array creation.
+-- | \(O(n)\) Internal implementation of suffix array creation (suffix array induced sorting).
 --
--- SA-IS, linear-time suffix array construction
+-- SA-IS, linear-time suffix array construction.
 -- Reference:
 -- G. Nong, S. Zhang, and W. H. Chan,
 -- Two Efficient Algorithms for Linear Time Suffix Array Construction

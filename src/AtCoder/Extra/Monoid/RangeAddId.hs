@@ -1,15 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
 -- | Monoid action for setting interval \([l, r)\) over ideomponent monoids.
---
--- = Example
--- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeAddId(..))
--- >>> import AtCoder.LazySegTree qualified as LST
--- >>> import Data.Semigroup (Max(..))
--- >>> seg <- LST.build @_ @(RangeAddId Int) @(Max Int) $ VU.generate 3 Max -- [0, 1, 2]
--- >>> LST.applyIn seg 0 3 $ RangeAddId 5 -- [5, 6, 7]
--- >>> getMax <$> LST.prod seg 0 3
--- 7
 module AtCoder.Extra.Monoid.RangeAddId
   ( RangeAddId (..),
     new,
@@ -25,6 +16,15 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
 -- | Range set monoid action.
+--
+-- = Example
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeAddId(..))
+-- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> import Data.Semigroup (Max(..))
+-- >>> seg <- LST.build @_ @(RangeAddId Int) @(Max Int) $ VU.generate 3 Max -- [0, 1, 2]
+-- >>> LST.applyIn seg 0 3 $ RangeAddId 5 -- [5, 6, 7]
+-- >>> getMax <$> LST.prod seg 0 3
+-- 7
 newtype RangeAddId a = RangeAddId a
   deriving newtype (Eq, Ord, Show)
 

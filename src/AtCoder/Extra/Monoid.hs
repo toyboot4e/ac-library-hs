@@ -2,7 +2,7 @@
 
 -- | Extra module of pre-defined `SegAct` instances.
 --
--- Be warned that they're not 100% guaanteed to be correct.
+-- Be warned that they're not 100% guaranteed to be correct.
 module AtCoder.Extra.Monoid
   ( SegAct (..),
     Affine1 (..),

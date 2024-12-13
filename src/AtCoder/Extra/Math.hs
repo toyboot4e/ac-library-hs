@@ -1,4 +1,14 @@
 -- | Extra math module.
+--
+-- = Examples
+-- >>> import AtCoder.Extra.Math qualified as M
+-- >>> import Data.Semigroup (Product(..), Sum(..))
+-- >>> getProduct $ M.power 32 (<>) (Product 2)
+-- 4294967296
+-- >>> getProduct $ M.stimes' 32 (Product 2)
+-- 4294967296
+-- >>> getProduct $ M.mtimes' 32 (Product 2)
+-- 4294967296
 module AtCoder.Extra.Math
   ( power,
     stimes',
@@ -11,7 +21,7 @@ import Data.Bits ((.>>.))
 -- | \(O(\log n)\) Calculates \(s^n\) with custom multiplication operator using the binary lifting
 -- technique.
 --
--- The internal implementation is taken from `Data.Semigroup.stimes`, but `powers` uses strict
+-- The internal implementation is taken from `Data.Semigroup.stimes`, but `power` uses strict
 -- evaluation and is often much faster.
 --
 -- = Constraints
@@ -46,7 +56,7 @@ stimes' n = power n (<>)
 {-# INLINE mtimes' #-}
 mtimes' :: (Monoid a) => Int -> a -> a
 mtimes' n0 x1 = case compare n0 0 of
-  LT -> errorWithoutStackTrace "AtCoder.Extra.Math.mtimes': zero or positive multiplier expected"
+  LT -> errorWithoutStackTrace "AtCoder.Extra.Math.mtimes': non-negative multiplier expected"
   EQ -> mempty
   GT -> power n0 (<>) x1
 

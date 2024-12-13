@@ -1,7 +1,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- | Internal convolution implementation.
+-- | Internal implementation of `AtCoder.Convolution` module.
 module AtCoder.Internal.Convolution
   ( FftInfo,
     newInfo,
@@ -36,7 +36,7 @@ data FftInfo p = FftInfo
     iRate3Fft :: !(VU.Vector (AM.ModInt p))
   }
 
--- | \(O(\log m)\)
+-- | \(O(\log m)\) Creates `FftInfo`.
 newInfo :: forall m p. (PrimMonad m, AM.Modulus p) => m (FftInfo p)
 newInfo = do
   let !g = AM.primitiveRootModulus (proxy# @p)

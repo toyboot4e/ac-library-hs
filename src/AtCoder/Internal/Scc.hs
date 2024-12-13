@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Strongly connected components.
+-- | Implementation of Strongly Connected Components calculation. Use `AtCoder.Scc` instead.
 module AtCoder.Internal.Scc (SccGraph (nScc), new, addEdge, sccIds, scc) where
 
 import AtCoder.Internal.Csr qualified as ACICSR

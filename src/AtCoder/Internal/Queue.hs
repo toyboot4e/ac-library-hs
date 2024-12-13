@@ -1,31 +1,32 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Queue with fixed size capacity.
+-- | Fixed-sized queue. Internally it has \(l, r\) pair of valid element bounds.
 --
 -- = Example
--- >>> que <- new @_ @Int 3
--- >>> capacity que
+-- >>> import AtCoder.Internal.Queue qualified as Q
+-- >>> que <- Q.new @_ @Int 3
+-- >>> Q.capacity que
 -- 3
--- >>> pushBack que 0
--- >>> pushBack que 1
--- >>> pushBack que 2
--- >>> length que
+-- >>> Q.pushBack que 0 -- [0  _  _  _]
+-- >>> Q.pushBack que 1 -- [0, 1  _  _]
+-- >>> Q.pushBack que 2 -- [0, 1, 2  _]
+-- >>> Q.length que
 -- 3
--- >>> popFront que
+-- >>> Q.popFront que   -- [_  1, 2  _]
 -- Just 0
--- >>> freeze que
+-- >>> Q.freeze que     -- [_  1, 2  _]
 -- [1,2]
--- >>> pushFront que 10
--- >>> pushFront que 1000
+-- >>> Q.pushFront que 10   -- [10, 1, 2  _]
+-- >>> Q.pushFront que 1000
 -- *** Exception: AtCoder.Internal.Queue.pushFront: no empty front space
 -- ...
--- >>> unsafeFreeze que
+-- >>> Q.unsafeFreeze que -- [10, 1, 2  _]
 -- [10,1,2]
--- >>> clear que
--- >>> pushBack que 0
--- >>> pushBack que 1
--- >>> pushBack que 2
--- >>> freeze que
+-- >>> Q.clear que      -- [_  _  _  _]
+-- >>> Q.pushBack que 0 -- [0  _  _  _]
+-- >>> Q.pushBack que 1 -- [0, 1  _  _]
+-- >>> Q.pushBack que 2 -- [0, 1, 2  _]
+-- >>> Q.freeze que
 -- [0,1,2]
 module AtCoder.Internal.Queue
   ( Queue (..),
@@ -33,6 +34,7 @@ module AtCoder.Internal.Queue
     pushBack,
     pushFront,
     popFront,
+    popFront_,
     capacity,
     length,
     null,
@@ -49,7 +51,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (length, null)
 
--- | Queue with fixed size capacity.
+-- | Fixed-sized queue. Internally it has \([l, r)\) pair of valid element bounds.
 data Queue s a = Queue
   { -- | Stores [l, r) range in the `vecQ`.
     posQ :: !(VUM.MVector s Int),
@@ -100,6 +102,12 @@ popFront Queue {..} = do
       x <- VGM.read vecQ l
       VGM.unsafeWrite posQ 0 (l + 1)
       pure $ Just x
+
+-- | \(O(1)\) `popFront` with return value discarded.
+popFront_ :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m ()
+popFront_ que = do
+  _ <- popFront que
+  pure ()
 
 -- | \(O(1)\) Returns the array size.
 capacity :: (VU.Unbox a) => Queue s a -> Int

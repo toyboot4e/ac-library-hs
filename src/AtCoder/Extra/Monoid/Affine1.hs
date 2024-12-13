@@ -2,14 +2,6 @@
 
 -- | `AtCoder.LazySegTree.SegAct` instance of one-dimensional affine transformation
 -- \(f: x \rightarrow a x + b\).
---
--- = Example
--- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..))
--- >>> import AtCoder.LazySegTree qualified as LST
--- >>> seg <- LST.build @_ @(Affine1 Int) @(Sum Int) $ VU.generate 3 Sum -- [0, 1, 2]
--- >>> LST.applyIn seg 0 3 $ Affine1 (2, 1) -- [1, 3, 5]
--- >>> getSum <$> LST.allProd seg
--- 9
 module AtCoder.Extra.Monoid.Affine1
   ( Affine1 (..),
     Affine1Repr,
@@ -36,8 +28,16 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- = Composition and dual
 --
--- \((f_1 \diamond f_2) v := (f_1 . f_2) v\). If you need @foldr@ \([f_l, .., f_r]\) on a segment
+-- \((f_1 \cdot f_2) v := (f_1 . f_2) v\). If you need @foldr@ \([f_l, .., f_r]\) on a segment
 -- tree, be sure to wrap `Affine1` with `Data.Monoid.Dual`.
+--
+-- = Example
+-- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..))
+-- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> seg <- LST.build @_ @(Affine1 Int) @(Sum Int) $ VU.generate 3 Sum -- [0, 1, 2]
+-- >>> LST.applyIn seg 0 3 $ Affine1 (2, 1) -- [1, 3, 5]
+-- >>> getSum <$> LST.allProd seg
+-- 9
 newtype Affine1 a = Affine1 (Affine1Repr a)
   deriving newtype (Eq, Ord, Show)
 

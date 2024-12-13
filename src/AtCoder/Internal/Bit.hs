@@ -1,4 +1,4 @@
--- | Bit operations not in `Data.Bits`.
+-- | Bit operations not in the `Data.Bits` module.
 --
 -- = Example
 -- >>> bitCeil 0

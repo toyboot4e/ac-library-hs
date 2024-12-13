@@ -1,29 +1,30 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Stack-like vector.
+-- | Pushable vector with fixed size capacity. Stack. Internally it has the number of elements.
 --
 -- = Example
 --
--- >>> buf <- new @_ @Int 16
--- >>> capacity buf
--- 16
--- >>> null buf
+-- >>> import AtCoder.Internal.Buffer qualified as B
+-- >>> buf <- B.new @_ @Int 4
+-- >>> B.capacity buf
+-- 4
+-- >>> B.null buf        -- [_   _  _  _]
 -- True
--- >>> pushBack buf 10
--- >>> pushBack buf 11
+-- >>> B.pushBack buf 10 -- [10  _  _ _]
+-- >>> B.pushBack buf 11 -- [10, 11  _  _]
 -- >>> length buf
 -- 2
--- >>> read buf 0
+-- >>> B.read buf 0
 -- 10
--- >>> write buf 1 0
--- >>> popBack buf
+-- >>> B.write buf 1 0   -- [10, 0,  _  _]
+-- >>> B.popBack buf     -- [10  _  _  _]
 -- Just 0
--- >>> freeze buf
+-- >>> B.freeze buf
 -- [10]
--- >>> clear buf
--- >>> null buf
+-- >>> B.clear buf       -- []
+-- >>> B.null buf
 -- True
--- >>> unsafeFreeze buf
+-- >>> B.unsafeFreeze buf
 -- []
 module AtCoder.Internal.Buffer
   ( Buffer (..),

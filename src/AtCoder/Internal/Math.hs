@@ -1,6 +1,7 @@
--- | Math.
+-- | Internal math implementation.
 --
 -- = Example
+-- >>> import AtCoder.Internal.Math
 -- >>> powMod 10 60 998244353 -- 10^60 mod 998244353
 -- 526662729
 -- >>> isPrime 998244353
@@ -80,7 +81,7 @@ isPrime n
       | t == n - 1 || y == 1 || y == n - 1 = not $ y /= n - 1 && even t
       | otherwise = inner (t .<<. 1) (y * y `mod` n)
 
--- | Returns @(g, x)@ such that \(g = \gcd(a, b), \mathrm{xa} = g(\bmod b), 0 \le x \le b/g\).
+-- | Returns \((g, x)\) such that \(g = \gcd(a, b), \mathrm{xa} = g(\bmod b), 0 \le x \le b/g\).
 --
 -- = Constraints
 -- - \(1 \le b\) (not asserted)
@@ -141,11 +142,14 @@ primitiveRoot m
           testG g divsI = powMod g ((m - 1) `div` divsI) m /= 1
       pure . fromJust $ find test [2 ..]
 
--- | \(O(\log m)\)
+-- | Returns \(\sum\limits_{i = 0}^{n - 1} \left\lfloor \frac{a \times i + b}{m} \right\rfloor\).
 --
 -- = Constraints
 -- - \(n \lt 2^{32}\)
 -- - \(1 \le m \lt 2^{32}\)
+--
+-- = Complexity
+-- - \(O(\log m)\)
 floorSumUnsigned :: Int -> Int -> Int -> Int -> Int
 floorSumUnsigned = inner 0
   where

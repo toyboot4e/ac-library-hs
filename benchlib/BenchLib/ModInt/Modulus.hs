@@ -26,6 +26,8 @@ import GHC.Exts (Proxy#, proxy#)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, natVal, natVal')
 
+-- TODO: how to make a benchmark for this. maybe (^) opertor?
+
 -- | `KnownNat` with meta information used for modulus.
 class (KnownNat a) => Modulus a where
   intModulus :: Tagged a Int
@@ -33,7 +35,7 @@ class (KnownNat a) => Modulus a where
   word64Modulus :: Tagged a Word64
   amb32Modulus :: Word32
   amb64Modulus :: Word64
-  isPrimeModulus :: (Proxy# a) -> Bool
+  isPrimeModulus :: Proxy# a -> Bool
 
 instance Modulus 998244353 where
   intModulus = Tagged 998244353

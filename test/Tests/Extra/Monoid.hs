@@ -9,11 +9,13 @@ import Test.Tasty
 import Test.Tasty.QuickCheck qualified as QC
 import Tests.Util (laws, myForAllShrink)
 
+-- TODO: (const True) should be removed
+
 segActLaw :: (Monoid a, Eq a) => (SegAct f a, QC.Arbitrary f, Eq f, Show f, QC.Arbitrary f, QC.Arbitrary a, Show a) => Proxy (f, a) -> QCC.Laws
 segActLaw p =
   QCC.Laws
     "SegAct"
-    [ ("Identity", segActIdentity p),
+    [ ("Identity map", segActIdentity p),
       ("Monoid Action", segActMonoidAction p),
       ("Linear Monoid Action", segActLinearMonoidAction p),
       ("Endomorphism", segActEndomorphism p)

@@ -107,8 +107,10 @@ instance Modulus 1000000007 where
   {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 5
 
+-- | `ModInt` with modulus value @998244353@.
 type ModInt998244353 = ModInt 998244353
 
+-- | `ModInt` with modulus value @1000000007@.
 type ModInt1000000007 = ModInt 1000000007
 
 -- type ModInt998244353 = DynamicModInt (-1);
