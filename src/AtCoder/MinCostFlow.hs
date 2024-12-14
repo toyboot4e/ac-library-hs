@@ -2,28 +2,45 @@
 
 -- | It solves [Minimum-cost flow problem](https://en.wikipedia.org/wiki/Minimum-cost_flow_problem).
 --
--- = Example
+-- ==== __Example__
+-- Create min cost flow graph (`McfGraph`):
+--
 -- >>> import AtCoder.MinCostFlow qualified as MCF
--- >>> g <- MCF.new @_ @Int @Int 4 -- new @s @cap @cost n
--- >>> MCF.addEdge g 0 1 2 3 -- addEdge g from to cap cost
+-- >>> g <- MCF.new @_ {- capacity -} @Int {- cost -} @Int 4
+--
+-- Build a simple graph with @'addEdge' g from to cap cost@ or `addEdge_`:
+--
+-- >>> MCF.addEdge g 0 1 2 3    --  0 --> 1     2
 -- 0
--- >>> MCF.addEdge_ g 1 2 2 5
+-- >>> MCF.addEdge_ g 1 2 2 5   --  0 --> 1 --> 2
+--
+-- Augument flow with `flow`, `maxFlow` or `slope`:
+--
 -- >>> MCF.slope g 0 2 maxBound -- slope g from to flowLimit
 -- [(0,0),(2,16)]
 --
 -- Note that you can't call `flow`, `maxFlow` or `slope` multiple times, or else you'll get wrong
 -- return value.
 module AtCoder.MinCostFlow
-  ( McfGraph (nG),
+  ( -- * Minimum cost flow
+    McfGraph (nG),
+
+    -- * Constructor
     new,
+
+    -- * Graph building
     addEdge,
     addEdge_,
-    getEdge,
-    edges,
-    unsafeEdges,
+
+    -- * Flow and slope
     flow,
     maxFlow,
     slope,
+
+    -- * Edge information
+    getEdge,
+    edges,
+    unsafeEdges,
   )
 where
 
@@ -59,10 +76,10 @@ data McfGraph s cap cost = McfGraph
 -- | Creates a directed graph with \(n\) vertices and \(0\) edges. @cap@ and @cost@ are the type of
 -- the capacity and the cost, respectively.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 new :: (PrimMonad m, VU.Unbox cap, VU.Unbox cost) => Int -> m (McfGraph (PrimState m) cap cost)
 new nG = do
@@ -72,11 +89,11 @@ new nG = do
 -- | Adds an edge oriented from @from@ to @to@ with capacity @cap@ and cost @cost@. It returns an
 -- integer \(k\) such that this is the \(k\)-th edge that is added.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq \mathrm{from}, \mathrm{to} \lt n\)
 -- - \(0 \leq \mathrm{cap}, \mathrm{cost}\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\) amortized
 addEdge ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
@@ -97,11 +114,11 @@ addEdge McfGraph {..} from to cap cost = do
 
 -- | `addEdge` with return value discarded.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq \mathrm{from}, \mathrm{to} \lt n\)
 -- - \(0 \leq \mathrm{cap}, \mathrm{cost}\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\) amortized
 addEdge_ ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
@@ -115,55 +132,13 @@ addEdge_ graph from to cap cost = do
   _ <- addEdge graph from to cap cost
   pure ()
 
--- | Returns the current internal state of the edges: @(from, to, cap, flow, cost)@. The edges are
--- ordered in the same order as added by `addEdge`.
---
--- = Constraints
--- - \(0 \leq i \lt m\)
---
--- = Complexity
--- - \(O(1)\)
-getEdge ::
-  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
-  McfGraph (PrimState m) cap cost ->
-  Int ->
-  m (Int, Int, cap, cap, cost)
-getEdge McfGraph {..} i = do
-  m <- ACIGV.length edgesG
-  let !_ = ACIA.checkEdge "AtCoder.MinCostFlow.getEdge" i m
-  ACIGV.read edgesG i
-
--- | Returns the current internal state of the edges: @(from, to, cap, flow, cost)@. The edges are
--- ordered in the same order as added by `addEdge`.
---
--- = Complexity
--- - \(O(m)\), where \(m\) is the number of added edges.
-edges ::
-  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
-  McfGraph (PrimState m) cap cost ->
-  m (VU.Vector (Int, Int, cap, cap, cost))
-edges McfGraph {..} = do
-  ACIGV.freeze edgesG
-
--- | Returns the current internal state of the edges: @(from, to, cap, flow, cost)@, but without
--- making copy. The edges are ordered in the same order as added by `addEdge`.
---
--- = Complexity
--- - \(O(1)\)
-unsafeEdges ::
-  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
-  McfGraph (PrimState m) cap cost ->
-  m (VU.Vector (Int, Int, cap, cap, cost))
-unsafeEdges McfGraph {..} = do
-  ACIGV.unsafeFreeze edgesG
-
 -- | Augments the flow from \(s\) to \(t\) as much as possible, until reaching the amount of
 -- @flowLimit@. It returns the amount of the flow and the cost.
 --
--- = Constraints
+-- ==== Constraints
 -- - Same as `slope`.
 --
--- = Complexity
+-- ==== Complexity
 -- - Same as `slope`.
 flow ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
@@ -178,10 +153,10 @@ flow graph s t flowLimit = do
 
 -- | `flow` with no capacity limit.
 --
--- = Constraints
+-- ==== Constraints
 -- - Same as `slope`.
 --
--- = Complexity
+-- ==== Complexity
 -- - Same as `slope`.
 maxFlow ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, Bounded cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
@@ -201,18 +176,18 @@ maxFlow graph s t = do
 -- - No three changepoints are on the same line.
 -- - The last element of the list is \(y, g(y))\), where \(y = \min(x, \mathrm{flowLimit})\).
 --
--- = Constraints
+-- ==== Constraints
 --
 -- Let \(x\) be the maximum cost among all edges.
 --
 -- - \(s \neq t\)
 -- - \(0 \leq s, t \lt n\)
--- - You can't call `slope` or `flow` multiple times.
+-- - You can't call `slope`, `flow` or `maxFlow` multiple times.
 -- - The total amount of the flow is in @cap@.
 -- - The total cost of the flow is in @cost@.
--- - (Cost : `Int`): \(0 \leq nx \leq 8 \times 10^{18} + 1000\)
+-- - \(0 \leq nx \leq 8 \times 10^{18} + 1000\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(F (n + m) \log (n + m))\), where \(F\) is the amount of the flow and \(m\) is the number of added edges.
 slope ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
@@ -353,3 +328,45 @@ internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
 
   inner 0 0 (-1)
   ACIGV.unsafeFreeze result
+
+-- | Returns the current internal state of the edges: @(from, to, cap, flow, cost)@. The edges are
+-- ordered in the same order as added by `addEdge`.
+--
+-- ==== Constraints
+-- - \(0 \leq i \lt m\)
+--
+-- ==== Complexity
+-- - \(O(1)\)
+getEdge ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
+  McfGraph (PrimState m) cap cost ->
+  Int ->
+  m (Int, Int, cap, cap, cost)
+getEdge McfGraph {..} i = do
+  m <- ACIGV.length edgesG
+  let !_ = ACIA.checkEdge "AtCoder.MinCostFlow.getEdge" i m
+  ACIGV.read edgesG i
+
+-- | Returns the current internal state of the edges: @(from, to, cap, flow, cost)@. The edges are
+-- ordered in the same order as added by `addEdge`.
+--
+-- ==== Complexity
+-- - \(O(m)\), where \(m\) is the number of added edges.
+edges ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
+  McfGraph (PrimState m) cap cost ->
+  m (VU.Vector (Int, Int, cap, cap, cost))
+edges McfGraph {..} = do
+  ACIGV.freeze edgesG
+
+-- | Returns the current internal state of the edges: @(from, to, cap, flow, cost)@, but without
+-- making copy. The edges are ordered in the same order as added by `addEdge`.
+--
+-- ==== Complexity
+-- - \(O(1)\)
+unsafeEdges ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
+  McfGraph (PrimState m) cap cost ->
+  m (VU.Vector (Int, Int, cap, cap, cost))
+unsafeEdges McfGraph {..} = do
+  ACIGV.unsafeFreeze edgesG

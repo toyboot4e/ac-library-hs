@@ -68,31 +68,40 @@
 -- @composition@ and @id@.
 -- - The functions names follow the vector package: @get@ and @set@ are renamed to `read` and
 -- `write`. `modify` and `modifyM` are added.
+--
+-- @since 1.0.0
 module AtCoder.LazySegTree
   ( -- Lazy segment tree
     SegAct (..),
-    LazySegTree (..),
-    -- * Construction
+    LazySegTree (nLst, sizeLst, logLst),
+
+    -- * Constructors
     new,
     build,
+
     -- * Accessing individual elements
     write,
     modify,
     modifyM,
     read,
+
     -- * Products
     prod,
     allProd,
+
     -- * Applications
     applyAt,
     applyIn,
+
     -- * Binary searches
-    -- ** Pure binary searches
-    maxRight,
+
+    -- ** Left binary searches
     minLeft,
-    -- ** Monadic binary searches
-    maxRightM,
     minLeftM,
+
+    -- ** Right binary searches
+    maxRight,
+    maxRightM,
   )
 where
 
@@ -108,8 +117,8 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
--- | Haskell reprentation of the `AtCoder.LazySegTree` properties. User can implement either
--- `segAct` or `segActWithLength`.
+-- | Typeclass reprentation of the `LazySegTree` properties. User can implement either `segAct` or
+-- `segActWithLength`.
 --
 -- Instances should satisfy the follwing:
 --
@@ -491,28 +500,6 @@ applyIn self@LazySegTree {..} l0 r0 f
             allApply self r f
           inner ((l + 1) .>>. 1) ((r - 1) .>>. 1)
 
--- | Applies a binary search on the segment tree. It returns an index \(r\) that satisfies both of the
--- followings.
---
--- - \(r = l\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1]))\) returns `True`.
--- - \(r = n\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r]))\) returns `False`.
---
--- If \(g\) is monotone, this is the maximum \(r\) that satisfies
--- \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
---
--- ==== Constraints
---
--- - If \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
--- - @g mempty == True@.
--- - \(0 \leq l \leq n\)
---
--- ==== Complexity
--- - \(O(\log n)\)
---
--- @since 1.0.0
-maxRight :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
-maxRight seg l0 g = maxRightM seg l0 (pure . g)
-
 -- | Applies a binary search on the segment tree. It returns an index \(l\) that satisfies both of the
 -- following.
 --
@@ -534,6 +521,79 @@ maxRight seg l0 g = maxRightM seg l0 (pure . g)
 -- @since 1.0.0
 minLeft :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 minLeft seg r0 g = minLeftM seg r0 (pure . g)
+
+-- | Monadic version of `minLeft`.
+--
+-- ==== Constraints
+--
+-- - if \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
+-- - @g mempty == True@.
+-- - \(0 \leq r \leq n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.0.0
+minLeftM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
+minLeftM self@LazySegTree {..} r0 g = do
+  b <- g mempty
+  let !_ = ACIA.runtimeAssert b "AtCoder.LazySegTree.minLeftM: `g empty` returned `False`"
+  if r0 == 0
+    then pure 0
+    else do
+      let r = r0 + sizeLst
+      for_ [logLst, logLst - 1 .. 1] $ \i -> do
+        push self $ (r - 1) .>>. i
+      inner r mempty
+  where
+    -- NOTE: Not ordinary bounds check!
+    !_ = ACIA.runtimeAssert (0 <= r0 && r0 <= nLst) $ "AtCoder.LazySegTree.minLeftM: given invalid `right` index `" ++ show r0 ++ "` over length `" ++ show nLst ++ "`"
+    inner r !sm = do
+      let r' = chooseBit $ r - 1
+      !sm' <- (<> sm) <$> VGM.read dLst r'
+      b <- g sm'
+      if not $ b
+        then do
+          inner2 r' sm
+        else do
+          if (r' .&. (-r')) /= r'
+            then inner r' sm'
+            else pure 0
+    chooseBit r
+      | r > 1 && odd r = chooseBit $ r .>>. 1
+      | otherwise = r
+    inner2 r sm
+      | r < sizeLst = do
+          push self r
+          let r' = 2 * r + 1
+          !sm' <- (<> sm) <$> VGM.read dLst r'
+          b <- g sm'
+          if b
+            then inner2 (r' - 1) sm'
+            else inner2 r' sm
+      | otherwise = pure $ r + 1 - sizeLst
+
+-- | Applies a binary search on the segment tree. It returns an index \(r\) that satisfies both of the
+-- followings.
+--
+-- - \(r = l\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1]))\) returns `True`.
+-- - \(r = n\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r]))\) returns `False`.
+--
+-- If \(g\) is monotone, this is the maximum \(r\) that satisfies
+-- \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
+--
+-- ==== Constraints
+--
+-- - If \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
+-- - @g mempty == True@.
+-- - \(0 \leq l \leq n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.0.0
+maxRight :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
+maxRight seg l0 g = maxRightM seg l0 (pure . g)
 
 -- | Monadic version of `maxRight`.
 --
@@ -587,57 +647,6 @@ maxRightM self@LazySegTree {..} l0 g = do
             then inner2 (l' + 1) sm'
             else inner2 l' sm
       | otherwise = pure $ l - sizeLst
-
--- | Monadic version of `minLeft`.
---
--- ==== Constraints
---
--- - if \(g\) is called with the same argument, it returns the same value, i.e., \(g\) has no side effect.
--- - @g mempty == True@.
--- - \(0 \leq r \leq n\)
---
--- ==== Complexity
--- - \(O(\log n)\)
---
--- @since 1.0.0
-minLeftM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
-minLeftM self@LazySegTree {..} r0 g = do
-  b <- g mempty
-  let !_ = ACIA.runtimeAssert b "AtCoder.LazySegTree.minLeftM: `g empty` returned `False`"
-  if r0 == 0
-    then pure 0
-    else do
-      let r = r0 + sizeLst
-      for_ [logLst, logLst - 1 .. 1] $ \i -> do
-        push self $ (r - 1) .>>. i
-      inner r mempty
-  where
-    -- NOTE: Not ordinary bounds check!
-    !_ = ACIA.runtimeAssert (0 <= r0 && r0 <= nLst) $ "AtCoder.LazySegTree.minLeftM: given invalid `right` index `" ++ show r0 ++ "` over length `" ++ show nLst ++ "`"
-    inner r !sm = do
-      let r' = chooseBit $ r - 1
-      !sm' <- (<> sm) <$> VGM.read dLst r'
-      b <- g sm'
-      if not $ b
-        then do
-          inner2 r' sm
-        else do
-          if (r' .&. (-r')) /= r'
-            then inner r' sm'
-            else pure 0
-    chooseBit r
-      | r > 1 && odd r = chooseBit $ r .>>. 1
-      | otherwise = r
-    inner2 r sm
-      | r < sizeLst = do
-          push self r
-          let r' = 2 * r + 1
-          !sm' <- (<> sm) <$> VGM.read dLst r'
-          b <- g sm'
-          if b
-            then inner2 (r' - 1) sm'
-            else inner2 r' sm
-      | otherwise = pure $ r + 1 - sizeLst
 
 -- | \(O(1)\)
 update :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m ()

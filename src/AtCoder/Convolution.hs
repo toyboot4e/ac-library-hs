@@ -38,6 +38,7 @@ module AtCoder.Convolution
   ( -- * Convolution with a modulus value
     convolution,
     convolutionRaw,
+
     -- * Convolution without a modulus value
     convolution64,
   )
@@ -109,8 +110,8 @@ convolutionRaw _ a b
       let z = ACIB.bitCeil (n + m - 1)
           !modulus = fromIntegral (natVal' (proxy# @p))
           !_ = ACIA.runtimeAssert ((modulus - 1) `mod` z == 0) $ "AtCoder.Convolution.convolutionRaw: not works when `(m - 1) mod z /= 0`: " ++ show (m, z)
-          -- `Vector a` -> `Vector (ModInt p)` -> `Vector a`
-       in VU.map fromIntegral $ convolution @p (VU.map fromIntegral a) (VU.map fromIntegral b)
+       in -- `Vector a` -> `Vector (ModInt p)` -> `Vector a`
+          VU.map fromIntegral $ convolution @p (VU.map fromIntegral a) (VU.map fromIntegral b)
   where
     n = VU.length a
     m = VU.length b

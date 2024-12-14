@@ -3,9 +3,9 @@
 -- Let @s@ be a string. We denote the substring of @s@ between \(a\)-th and \(b - 1\)-th character
 -- by @s[a..b)@.
 --
--- = Examples
+-- ==== Examples
 --
--- == Suffix Array
+-- ===== Suffix Array and LCP Array
 --
 -- >>> import AtCoder.String qualified as S
 -- >>> import Data.ByteString.Char8 qualified as BS
@@ -14,7 +14,7 @@
 -- >>> S.lcpArrayBS s sa
 -- [1,0]
 --
--- == Z Algorithm
+-- ===== Z Algorithm
 --
 -- >>> import AtCoder.String qualified as S
 -- >>> import Data.ByteString.Char8 qualified as BS
@@ -22,12 +22,15 @@
 -- >>> S.zAlgorithmBS s
 -- [4,0,2,0]
 module AtCoder.String
-  ( suffixArray,
+  ( -- * Suffix array
+    suffixArray,
     suffixArrayBS,
     suffixArrayOrd,
+    -- * LCP array
     lcpArray,
     lcpArrayBS,
     zAlgorithm,
+    -- * Z algorithm
     zAlgorithmBS,
   )
 where
@@ -52,12 +55,12 @@ import GHC.Stack (HasCallStack)
 -- @sa@ of @s@ is a permutation of \(0, \cdots, n-1\) such that @s[sa[i]..n) < s[sa[i+1]..n)@ holds
 -- for all \(i = 0,1, \cdots ,n-2\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq n\)
 -- - \(0 \leq \mathrm{upper} \leq 10^8\)
 -- - \(0 \leq x \leq \mathrm{upper}\) for all elements \(x\) of \(s\).
 --
--- = Complexity
+-- ==== Complexity
 -- - (3) \(O(n + \mathrm{upper})\)-time
 suffixArray :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
 suffixArray s upper =
@@ -70,10 +73,10 @@ suffixArray s upper =
 
 -- | Calculates suffix array for a @ByteString@.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - (1) \(O(n)\)-time
 suffixArrayBS :: (HasCallStack) => BS.ByteString -> VU.Vector Int
 suffixArrayBS s = do
@@ -84,10 +87,10 @@ suffixArrayBS s = do
 
 -- | Calculates suffix array for a `Ord` type vector.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - (2) \(O(n \log n)\)-time, \(O(n)\)-space
 suffixArrayOrd :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
 suffixArrayOrd s =
@@ -116,11 +119,11 @@ suffixArrayOrd s =
 -- @s@ is the array of length \(n-1\), such that the \(i\)-th element is the length of the LCP
 -- (Longest Common Prefix) of @s[sa[i]..n)@ and @s[sa[i+1]..n)@
 --
--- = Constraints
+-- ==== Constraints
 -- - The second argument is the suffix array of @s@.
 -- - \(1 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 lcpArray :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int -> VU.Vector Int
 lcpArray s sa =
@@ -154,11 +157,11 @@ lcpArray s sa =
 
 -- | @ByteString@ verison of `lcpArray`.
 --
--- = Constraints
+-- ==== Constraints
 -- - The second argument is the suffix array of @s@.
 -- - \(1 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 lcpArrayBS :: (HasCallStack) => BS.ByteString -> VU.Vector Int -> VU.Vector Int
 lcpArrayBS s sa =
@@ -169,9 +172,9 @@ lcpArrayBS s sa =
 -- | Given a `Ord` vector of length \(n\), it returns the array of length \(n\), such that the
 -- \(i\)-th element is the length of the LCP (Longest Common Prefix) of @s[0..n)@ and @s[i..n)@.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(n \leq n\)
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 zAlgorithm :: (Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
 zAlgorithm s
@@ -208,9 +211,9 @@ zAlgorithm s
 -- | Given a string of length \(n\), it returns the array of length \(n\), such that the \(i\)-th
 -- element is the length of the LCP (Longest Common Prefix) of @s[0..n)@ and @s[i..n)@.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(n \leq n\)
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 zAlgorithmBS :: BS.ByteString -> VU.Vector Int
 zAlgorithmBS s = zAlgorithm $ VU.fromListN (BS.length s) (BS.unpack s)

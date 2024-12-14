@@ -205,9 +205,13 @@ prop_conv18433 = QC.testProperty "prop_conv18433" $ do
   b <- VU.fromList <$> QC.vectorOf 1025 (QC.chooseInt (0, modulus - 1))
   pure $ convModNaive modulus a b QC.=== ACC.convolutionRaw (Proxy @18433) a b
 
+instance AM.Modulus 2 where
+  isPrimeModulus _ = True
+  primitiveRootModulus _ = 1
+
 unit_conv2 :: TestTree
 unit_conv2 = testCase "prop_conv2" $ do
-  VU.empty @Int @=? ACC.convolutionRaw (Proxy @2) VU.empty VU.empty
+  VU.empty @Int @=? ACC.convolutionRaw (Proxy @257) VU.empty VU.empty
 
 instance AM.Modulus 257 where
   isPrimeModulus _ = True
@@ -219,10 +223,6 @@ prop_conv257 = QC.testProperty "prop_conv257" $ do
   a <- VU.fromList <$> QC.vectorOf 128 (QC.chooseInt (0, modulus - 1))
   b <- VU.fromList <$> QC.vectorOf 129 (QC.chooseInt (0, modulus - 1))
   pure $ convModNaive modulus a b QC.=== ACC.convolutionRaw (Proxy @257) a b
-
-instance AM.Modulus 2147483647 where
-  isPrimeModulus _ = True
-  primitiveRootModulus _ = 7
 
 prop_conv2147483647 :: TestTree
 prop_conv2147483647 = QC.testProperty "prop_conv2147483647" $ do

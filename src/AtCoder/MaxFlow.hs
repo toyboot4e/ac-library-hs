@@ -2,29 +2,55 @@
 
 -- | It solves [maximum flow problem](https://en.wikipedia.org/wiki/Maximum_flow_problem).
 --
--- = Example
+-- ==== __Example__
+-- Create a max flow graph (`MfGraph`):
+--
 -- >>> import AtCoder.MaxFlow qualified as MF
--- >>> g <- MF.new @_ @Int 3        -- 0   1   2
--- >>> MF.addEdge g 0 1 (2 :: Int)  -- 0-->1   2
+-- >>> g <- MF.new @_ @Int 3        --  0     1     2
+--
+-- Build a simple graph with `'addEdge' g from to cap` or `addEdge_`:
+--
+-- >>> MF.addEdge g 0 1 (2 :: Int)  --  0 --> 1     2
 -- 0
--- >>> MF.addEdge_ g 1 2 (1 :: Int) -- 0-->1-->2
--- >>> MF.flow g 0 2 maxBound -- MF.maxFlow g 0 2
+-- >>> MF.addEdge_ g 1 2 (1 :: Int) --  0 --> 1 --> 2
+--
+-- Augument the flow with `flow`. `maxFlow` can also be used when there's no flow limit:
+--
+-- >>> MF.flow g 0 2 {- flowLimit -} maxBound -- same as `MF.maxFlow g 0 2`
 -- 1
+--
+-- Get the minimum cut with `minCut`. In this case, removing the second edge makes the minimum cut
+-- (note that the edge capacity (`1`) = max flow):
+--
+-- >>> MF.minCut g 0 -- returns a Bit vector. `1` (`Bit True`) is on the `s` side.
+-- [1,1,0]
+--
+-- Retrieve the edge state with `getEdge`. We can confirm the flow is @1@:
+--
 -- >>> MF.getEdge g 0 -- returns (from, to, cap, flow)
 -- (0,1,2,1)
--- >>> MF.minCut g 0 -- returns a bit vector
--- [1,1,0]
 module AtCoder.MaxFlow
-  ( MfGraph (nG),
+  ( -- * Max flow graph
+    MfGraph (nG),
+
+    -- * Constructor
     new,
+
+    -- * Graph building
     addEdge,
     addEdge_,
     getEdge,
-    edges,
-    changeEdge,
+
+    -- * Flow operations
     flow,
     maxFlow,
+
+    -- * Minimum cut
     minCut,
+
+    -- * Edge information
+    edges,
+    changeEdge,
   )
 where
 
@@ -57,10 +83,10 @@ data MfGraph s cap = MfGraph
 
 -- | Creates a graph of @n@ vertices and \(0\) edges. `cap` is the type of the capacity.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 new :: (PrimMonad m, VU.Unbox cap) => Int -> m (MfGraph (PrimState m) cap)
 new nG = do
@@ -71,11 +97,11 @@ new nG = do
 -- | Adds an edge oriented from the vertex @from@ to the vertex @to@ with the capacity @cap@ and the
 -- flow amount \(0\). It returns an integer \(k\) such that this is the \(k\)-th edge that is added.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq \mathrm{from}, \mathrm{to} \lt n\)
 -- - \(0 \leq \mathrm{cap}\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\) amortized
 addEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m Int
 addEdge MfGraph {..} from to cap = do
@@ -94,92 +120,25 @@ addEdge MfGraph {..} from to cap = do
 
 -- | `addEdge` with return value discarded.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq \mathrm{from}, \mathrm{to} \lt n\)
 -- - \(0 \leq \mathrm{cap}\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\) amortized
 addEdge_ :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m ()
 addEdge_ graph from to cap = do
   _ <- addEdge graph from to cap
   pure ()
 
--- | \(O(1)\) Changes the capacity and the flow amount of the $i$-th edge to @newCap@ and
--- @newFlow@, respectively. It doesn't change the capacity or the flow amount of other edges.
---
--- = Constraints
--- - \(0 \leq \mathrm{newflow} \leq \mathrm{newcap}\)
---
--- = Complexity
--- - \(O(1)\)
-changeEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> cap -> cap -> m ()
-changeEdge MfGraph {..} i newCap newFlow = do
-  m <- ACIGV.length posG
-  let !_ = ACIA.checkEdge "AtCoder.MaxFlow.changeEdge" i m
-  let !_ = ACIA.runtimeAssert (0 <= newFlow && newFlow <= newCap) "AtCoder.MaxFlow.changeEdge: invalid flow or capacity" -- not Show
-  (!from, !iEdge) <- ACIGV.read posG i
-  (!to, !iRevEdge, !_) <- ACIGV.read (gG VG.! from) iEdge
-  writeCapacity gG from iEdge $! newCap - newFlow
-  writeCapacity gG to iRevEdge $! newFlow
-
--- | \(O(1)\) Internal helper.
-{-# INLINE readCapacity #-}
-readCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACIGV.GrowVec (PrimState m) (Int, Int, cap)) -> Int -> Int -> m cap
-readCapacity gvs v i = do
-  (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV $ gvs VG.! v
-  VGM.read c i
-
--- | \(O(1)\) Internal helper.
-{-# INLINE writeCapacity #-}
-writeCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACIGV.GrowVec (PrimState m) (Int, Int, cap)) -> Int -> Int -> cap -> m ()
-writeCapacity gvs v i cap = do
-  (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV $ gvs VG.! v
-  VGM.write c i cap
-
--- | \(O(1)\) Internal helper.
-{-# INLINE modifyCapacity #-}
-modifyCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => ACIGV.GrowVec (PrimState m) (Int, Int, cap) -> (cap -> cap) -> Int -> m ()
-modifyCapacity gv f i = do
-  (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV gv
-  VUM.modify c f i
-
--- | \(O(1)\) Returns the current internal state of \(i\)-th edge: @(from, to, cap, flow)@. The
--- edges are ordered in the same order as added by `addEdge`.
---
--- = Constraints
--- - \(0 \leq i \lt m\)
---
--- = Complexity
--- - \(O(1)\)
-getEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (Int, Int, cap, cap)
-getEdge MfGraph {..} i = do
-  m <- ACIGV.length posG
-  let !_ = ACIA.checkEdge "AtCoder.MaxFlow.getEdge" i m
-  (!from, !iEdge) <- ACIGV.read posG i
-  (!to, !iRevEdge, !cap) <- ACIGV.read (gG VG.! from) iEdge
-  revCap <- readCapacity gG to iRevEdge
-  pure (from, to, cap + revCap, revCap)
-
--- | Returns the current internal state of the edges: @(from, to, cap, flow)@. The edges are ordered
--- in the same order as added by `addEdge`.
---
--- = Complexity
--- - \(O(m)\), where \(m\) is the number of added edges.
-edges :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> m (VU.Vector (Int, Int, cap, cap))
-edges g@MfGraph {posG} = do
-  len <- ACIGV.length posG
-  -- TODO: rewrite
-  VU.generateM len (getEdge g)
-
 -- | Augments the flow from \(s\) to \(t\) as much as possible, until reaching the amount of
 -- @flowLimit@. It returns the amount of the flow augmented. You may call it multiple times.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(s \neq t\)
 -- - \(0 \leq s, t \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O((n + m) \sqrt{m})\) (if all the capacities are \(1\)),
 -- - \(O(n^2 m)\) (general), or
 -- - \(O(F(n + m))\), where \(F\) is the returned value
@@ -264,11 +223,11 @@ flow MfGraph {..} s t flowLimit = do
 
 -- | `flow` with no capacity limit.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(s \neq t\)
 -- - \(0 \leq s, t \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O((n + m) \sqrt{m})\) (if all the capacities are \(1\)),
 -- - \(O(n^2 m)\) (general), or
 -- - \(O(F(n + m))\), where \(F\) is the returned value
@@ -276,10 +235,10 @@ maxFlow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, Bounded cap, VU.Unbox c
 maxFlow graph s t = flow graph s t maxBound
 
 -- | Returns a vector of length \(n\), such that the \(i\)-th element is `True` if and only if there
-  -- is a directed path from \(s\) to \(i\) in the residual network. The returned vector corresponds
--- to a \(s-t\) minimum cut after calling @flow(s, t)@ exactly once without @flow_limit@.
+-- is a directed path from \(s\) to \(i\) in the residual network. The returned vector corresponds
+-- to a \(s-t\) minimum cut after calling @'maxFlow' s t@.
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n + m)\), where \(m\) is the number of added edges.
 minCut :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (VU.Vector Bit)
 minCut MfGraph {..} s = do
@@ -300,3 +259,70 @@ minCut MfGraph {..} s = do
               ACIQ.pushBack que to
         loop
   VU.unsafeFreeze visited
+
+-- | \(O(1)\) Returns the current internal state of \(i\)-th edge: @(from, to, cap, flow)@. The
+-- edges are ordered in the same order as added by `addEdge`.
+--
+-- ==== Constraints
+-- - \(0 \leq i \lt m\)
+--
+-- ==== Complexity
+-- - \(O(1)\)
+getEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (Int, Int, cap, cap)
+getEdge MfGraph {..} i = do
+  m <- ACIGV.length posG
+  let !_ = ACIA.checkEdge "AtCoder.MaxFlow.getEdge" i m
+  (!from, !iEdge) <- ACIGV.read posG i
+  (!to, !iRevEdge, !cap) <- ACIGV.read (gG VG.! from) iEdge
+  revCap <- readCapacity gG to iRevEdge
+  pure (from, to, cap + revCap, revCap)
+
+-- | Returns the current internal state of the edges: @(from, to, cap, flow)@. The edges are ordered
+-- in the same order as added by `addEdge`.
+--
+-- ==== Complexity
+-- - \(O(m)\), where \(m\) is the number of added edges.
+edges :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> m (VU.Vector (Int, Int, cap, cap))
+edges g@MfGraph {posG} = do
+  len <- ACIGV.length posG
+  -- TODO: rewrite
+  VU.generateM len (getEdge g)
+
+-- | \(O(1)\) Changes the capacity and the flow amount of the $i$-th edge to @newCap@ and
+-- @newFlow@, respectively. It doesn't change the capacity or the flow amount of other edges.
+--
+-- ==== Constraints
+-- - \(0 \leq \mathrm{newflow} \leq \mathrm{newcap}\)
+--
+-- ==== Complexity
+-- - \(O(1)\)
+changeEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> cap -> cap -> m ()
+changeEdge MfGraph {..} i newCap newFlow = do
+  m <- ACIGV.length posG
+  let !_ = ACIA.checkEdge "AtCoder.MaxFlow.changeEdge" i m
+  let !_ = ACIA.runtimeAssert (0 <= newFlow && newFlow <= newCap) "AtCoder.MaxFlow.changeEdge: invalid flow or capacity" -- not Show
+  (!from, !iEdge) <- ACIGV.read posG i
+  (!to, !iRevEdge, !_) <- ACIGV.read (gG VG.! from) iEdge
+  writeCapacity gG from iEdge $! newCap - newFlow
+  writeCapacity gG to iRevEdge $! newFlow
+
+-- | \(O(1)\) Internal helper.
+{-# INLINE readCapacity #-}
+readCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACIGV.GrowVec (PrimState m) (Int, Int, cap)) -> Int -> Int -> m cap
+readCapacity gvs v i = do
+  (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV $ gvs VG.! v
+  VGM.read c i
+
+-- | \(O(1)\) Internal helper.
+{-# INLINE writeCapacity #-}
+writeCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACIGV.GrowVec (PrimState m) (Int, Int, cap)) -> Int -> Int -> cap -> m ()
+writeCapacity gvs v i cap = do
+  (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV $ gvs VG.! v
+  VGM.write c i cap
+
+-- | \(O(1)\) Internal helper.
+{-# INLINE modifyCapacity #-}
+modifyCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => ACIGV.GrowVec (PrimState m) (Int, Int, cap) -> (cap -> cap) -> Int -> m ()
+modifyCapacity gv f i = do
+  (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV gv
+  VUM.modify c f i

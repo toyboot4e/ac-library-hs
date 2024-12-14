@@ -1,7 +1,19 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | Math.
-module AtCoder.Math (powMod, invMod, crt, floorSum) where
+-- | Math module. It contains number-theoretic algorithms.
+module AtCoder.Math
+  ( -- * Modulus operations
+    -- These functions are internally used for `AtCoder.ModInt`.
+    powMod,
+    invMod,
+
+    -- * Chinese Remainder Theorem
+    crt,
+
+    -- * Floor sum
+    floorSum,
+  )
+where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Math (powMod)
@@ -10,16 +22,21 @@ import Data.Bits (bit)
 import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
 
--- `powMod` is re-exported from the internal math module
+-- `powMod` is re-exported from the internal math module.
 
 -- | Returns an integer \(y\) such that \(0 \le y < m\) and  \(xy \equiv 1 \pmod m\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(\gcd(x, m) = 1\)
 -- - \(1 \leq m\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log m)\)
+--
+-- ==== Example
+-- >>> let m = 998244353
+-- >>> (invMod 2 m) * 2 `mod` m -- (2^(-1) mod m) * 2 mod m
+-- 1
 invMod :: (HasCallStack) => Int -> Int -> Int
 invMod x m =
   let !_ = ACIA.runtimeAssert (1 <= m) $ "AtCoder.Math.invMod: given invalid `m` less than 1: " ++ show m
@@ -36,15 +53,30 @@ invMod x m =
 -- If there is no solution, it returns \((0, 0)\). Otherwise, all the solutions can be written as the form \(x \equiv y \pmod z\), using integers
 -- \(y, z\) \((0 \leq y < z = \mathrm{lcm}(m[i]))\). It returns this \((y, z)\) as a pair. If \(n=0\), it returns \((0, 1)\).
 --
--- Chinese Remainder Theorem.
---
--- = Constraints
+-- ==== Constraints
 -- - \(|r| = |m|\)
 -- - \(1 \le m[i]\)
--- - \(\mathrm{lcm}(m[i])\) is in `ll`.
+-- - \(\mathrm{lcm}(m[i])\) is in `Int` bounds.
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n \log{\mathrm{lcm}(m[i])})\)
+--
+-- ==== Example
+-- `crt` calculates \(y\) such that \(y \equiv r_i \pmod m_i, \forall i \in \lbrace 0,1,\cdots, n - 1 \rbrace\):
+--
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let rs = VU.fromList @Int [6, 7, 8, 9]
+-- >>> let ms = VU.fromList @Int [2, 3, 4, 5]
+-- >>> crt rs ms
+-- (4,60)
+--
+-- The property can be checked as follows:
+--
+-- >>> let (y, {- lcm ms -} _) = crt rs ms
+-- >>> VU.zipWith mod rs ms
+-- [0,1,0,4]
+-- >>> VU.zipWith mod rs ms == VU.map (y `mod`) ms
+-- True
 crt :: (HasCallStack) => VU.Vector Int -> VU.Vector Int -> (Int, Int)
 crt r m = loop 0 1 [0 .. VU.length r - 1]
   where
@@ -79,12 +111,33 @@ crt r m = loop 0 1 [0 .. VU.length r - 1]
 
 -- | Returns \(\sum\limits_{i = 0}^{n - 1} \left\lfloor \frac{a \times i + b}{m} \right\rfloor\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \le n\)
 -- - \(1 \le m\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log m)\)
+--
+-- ==== Example
+-- `floorSum` calculates the number of points surrounded by a line
+-- \(y = \frac {a \times x + b} {m} \) and \(x, y\) axes in \(O(\log m)\) time:
+--
+-- >>> floorSum 5 1 1 1 -- floorSum n {- line information -} m a b
+-- 15
+--
+-- @
+--   y
+--   ^
+-- 6 |
+-- 5 |           o           line: y = x + 1
+-- 4 |        o  o           The number of \`o\` is 15
+-- 3 |     o  o  o
+-- 2 |  o  o  o  o
+-- 1 |  o  o  o  o
+-- --+-----------------> x
+--   0  1  2  3  4  5
+--                  n = 5
+-- @
 floorSum :: (HasCallStack) => Int -> Int -> Int -> Int -> Int
 floorSum n m a b = ACIM.floorSumUnsigned n m a' b' - da - db
   where

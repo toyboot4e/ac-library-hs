@@ -12,8 +12,7 @@ import Test.Tasty.QuickCheck qualified as QC
 -- | Taken from `quickcheck-classes-base`.
 myForAllShrink ::
   (QC.Arbitrary a, Show b, Eq b) =>
-  Bool -> -- Should we show the RHS. It's better not to show it
-  -- if the RHS is equal to the input.
+  Bool -> -- Should we show the RHS. It's better not to show it if the RHS is equal to the input.
   (a -> Bool) -> -- is the value a valid input
   (a -> [String]) -> -- show the 'a' values
   String -> -- show the LHS

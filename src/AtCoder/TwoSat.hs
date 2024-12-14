@@ -8,19 +8,23 @@
 --
 -- it decides whether there is a truth assignment that satisfies all clauses.
 --
--- = Example
+-- ==== Example
 -- >>> import AtCoder.TwoSat qualified as TS
 -- >>> import Data.Bit (Bit(..))
 -- >>> ts <- TS.new 1
--- >>> TS.addClause ts 0 False 0 False
+-- >>> TS.addClause ts 0 False 0 False -- x_0 == False || x_0 == False
 -- >>> TS.satisfiable ts
 -- True
 -- >>> TS.answer ts
 -- [0]
 module AtCoder.TwoSat
-  ( TwoSat (..),
+  ( -- * TwoSat
+    TwoSat (..),
+    -- * Constructor
     new,
+    -- * Clause building
     addClause,
+    -- * Solvers
     satisfiable,
     answer,
     unsafeAnswer,
@@ -37,7 +41,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | 2-Sat state.
+-- | 2-SAT state.
 data TwoSat s = TwoSat
   { nTs :: {-# UNPACK #-} !Int,
     answerTs :: !(VUM.MVector s Bit),
@@ -46,10 +50,10 @@ data TwoSat s = TwoSat
 
 -- | Creates a 2-SAT of \(n\) variables and \(0\) clauses.
 --
--- = Constraints
--- - \(0 \leq n \leq 10^8\)
+-- ==== Constraints
+-- - \(0 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 new :: (PrimMonad m) => Int -> m (TwoSat (PrimState m))
 new nTs = do
@@ -59,11 +63,11 @@ new nTs = do
 
 -- | Adds a clause \((x_i = f) \lor (x_j = g)\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq i \lt n\)
 -- - \(0 \leq j \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\) amortized.
 addClause :: (HasCallStack, PrimMonad m) => TwoSat (PrimState m) -> Int -> Bool -> Int -> Bool -> m ()
 addClause TwoSat {..} i f j g = do
@@ -75,10 +79,10 @@ addClause TwoSat {..} i f j g = do
 -- | If there is a truth assignment that satisfies all clauses, it returns `True`. Otherwise, it
 -- returns `False`.
 --
--- = Constraints
+-- ==== Constraints
 -- - You may call it multiple times.
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n + m)\), where \(m\) is the number of added clauses.
 satisfiable :: (PrimMonad m) => TwoSat (PrimState m) -> m Bool
 satisfiable TwoSat {..} = do
@@ -95,14 +99,14 @@ satisfiable TwoSat {..} = do
 -- call it before calling `satisfiable` or when the last call of `satisfiable` returns `False`, it
 -- returns the vector of length \(n\) with undefined elements.
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 answer :: (PrimMonad m) => TwoSat (PrimState m) -> m (VU.Vector Bit)
 answer = VU.freeze . answerTs
 
 -- | `answer` without making copy.
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\)
 unsafeAnswer :: (PrimMonad m) => TwoSat (PrimState m) -> m (VU.Vector Bit)
 unsafeAnswer = VU.unsafeFreeze . answerTs

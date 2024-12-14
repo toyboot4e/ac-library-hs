@@ -17,50 +17,76 @@
 -- If these oracles work in \(O(T)\) time, each time complexity appear in this document is
 -- multipled by \(O(T)\).
 --
--- = Storing boxed types
--- If you really need to store boxed types to `LazySegTree`, use [@DoNotUnboxStrict a@](https://hackage.haskell.org/package/vector-0.13.2.0/docs/Data-Vector-Unboxed.html#t:DoNotUnboxStrict)
--- or other wrappers.
+-- ==== __Example__
+-- Create a `SegTree` of @'Sum' Int@:
 --
--- = Example
 -- >>> import AtCoder.SegTree qualified as ST
 -- >>> import Data.Monoid (Sum(..))
 -- >>> seg <- ST.new @_ @(Sum Int) 4
+--
+-- Modify the vertex values:
+--
 -- >>> ST.write seg 1 $ Sum 1
 -- >>> ST.modify seg (+ Sum 2) 2
 -- >>> ST.write seg 3 $ Sum 3 -- [0, 1, 2, 3]
 -- >>> ST.read seg 1
 -- Sum {getSum = 1}
+--
+-- Get product of the monoids:
+--
 -- >>> ST.prod seg 0 3
 -- Sum {getSum = 3}
 -- >>> ST.allProd seg
 -- Sum {getSum = 6}
+--
+-- Binary searches:
+--
 -- >>> ST.maxRight seg 0 (< (Sum 5)) -- sum [0, 3) = 2 < 5
 -- 3
 -- >>> ST.minLeft seg 4 (< (Sum 5)) -- sum [3, 4) = 3 < 5
 -- 3
 --
--- = Major changes from the original @ac-library@
+-- ==== Tips
+--
+-- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\). If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\),
+-- wrap your monoid in `Data.Monoid.Dual`.
+-- - If you ever need to store boxed types to `SegTree`, wrap it in 'Data.Vector.Unboxed.DoNotUnboxStrict'
+-- or the like.
+--
+--
+-- ==== Major changes from the original @ac-library@
 -- - The implementation is `Monoid` based.
 -- - @get@ and @set@ are renamed to `read` and `write`.
 -- - `modify` and `modifyM` are added.
 module AtCoder.SegTree
-  ( SegTree (nSt, sizeSt, logSt),
+  ( -- * Segment tree
+    SegTree (nSt, sizeSt, logSt),
+
+    -- * Constructors
     new,
     build,
+
+    -- * Accessing individual elements
     write,
     modify,
     modifyM,
     read,
+
+    -- * Products
     prod,
     allProd,
+
+    -- * Binary searches
+
+    -- ** Left binary searches
     maxRight,
     maxRightM,
+
+    -- ** Right binary searches
     minLeft,
     minLeftM,
   )
 where
-
--- FIXME: validate and write abount operator direction
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
@@ -73,6 +99,9 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
+-- TODO: freeze and unsafeFreeze
+
+-- | FIXME: write document
 data SegTree s a = SegTree
   { -- | Valid length.
     nSt :: {-# UNPACK #-} !Int,
@@ -86,10 +115,10 @@ data SegTree s a = SegTree
 
 -- | Creates an array @a@ of length @n@. All the elements are initialized to `mempty`.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 new :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (SegTree (PrimState m) a)
 new nSt
@@ -98,7 +127,7 @@ new nSt
 
 -- | Creates an array with initial values.
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 build :: (PrimMonad m, Monoid a, VU.Unbox a) => VU.Vector a -> m (SegTree (PrimState m) a)
 build vs = do
@@ -115,10 +144,10 @@ build vs = do
 
 -- | Writes \(p\)-th value of the array to \(x\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq p \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\)
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m ()
 write self@SegTree {..} p x = do
@@ -129,10 +158,10 @@ write self@SegTree {..} p x = do
 
 -- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq p \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\)
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> a) -> Int -> m ()
 modify self@SegTree {..} f p = do
@@ -143,10 +172,10 @@ modify self@SegTree {..} f p = do
 
 -- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq p \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\)
 modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> m a) -> Int -> m ()
 modifyM self@SegTree {..} f p = do
@@ -157,10 +186,10 @@ modifyM self@SegTree {..} f p = do
 
 -- | Returns \(p\)-th value of the array.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq p \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 read :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m a
 read SegTree {..} p = do
@@ -170,10 +199,10 @@ read SegTree {..} p = do
 -- | Returns \(a[l] \cdot ... \cdot a[r - 1]\), assuming the properties of the monoid. It
 -- returns `mempty` if \(l = r\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq l \leq r \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 prod :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m a
 prod SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
@@ -196,7 +225,7 @@ prod SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
 -- | Returns @a[0] <> ... <> a[n - 1]@, assuming the properties of the monoid. It returns `mempty`
 -- if \(n = 0\).
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\)
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> m a
 allProd SegTree {..} = VGM.read dSt 1
@@ -210,12 +239,12 @@ allProd SegTree {..} = VGM.read dSt 1
 -- If \(f\) is monotone, this is the maximum \(r\) that satisfies
 -- \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
 --
--- = Constraints
+-- ==== Constraints
 -- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
 -- - @f mempty == True@.
 -- - \(0 \leq l \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 {-# INLINE maxRight #-}
 maxRight :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
@@ -223,12 +252,12 @@ maxRight seg l0 f = maxRightM seg l0 (pure . f)
 
 -- | Moandic version of `maxRight`.
 --
--- = Constraints
+-- ==== Constraints
 -- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
 -- - @f mempty == True@.
 -- - \(0 \leq l \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 maxRightM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
 maxRightM SegTree {..} l0 f = do
@@ -275,14 +304,14 @@ maxRightM SegTree {..} l0 f = do
 -- If \(f\) is monotone, this is the minimum \(l\) that satisfies
 -- \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
 --
--- = Constraints
+-- ==== Constraints
 --
 -- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side
 --   effect.
 -- - @f mempty == True@.
 -- - \(0 \leq r \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 {-# INLINE minLeft #-}
 minLeft :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
@@ -290,14 +319,14 @@ minLeft seg r0 f = minLeftM seg r0 (pure . f)
 
 -- | Monadic version of `minLeft`.
 --
--- = Constraints
+-- ==== Constraints
 --
 -- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side
 --   effect.
 -- - @f mempty == True@.
 -- - \(0 \leq r \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
 minLeftM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
 minLeftM SegTree {..} r0 f = do

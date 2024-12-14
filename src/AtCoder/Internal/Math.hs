@@ -42,12 +42,17 @@ import GHC.Stack (HasCallStack)
 
 -- | Returns \(x^n \bmod m\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \le n\)
 -- - \(1 \le m\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
+--
+-- ==== Example
+-- >>> let m = 998244353
+-- >>> powMod 10 60 m -- 10^60 mod m
+-- 526662729
 powMod :: (HasCallStack) => Int -> Int -> Int -> Int
 powMod x n0 m0
   | m0 == 1 = 0

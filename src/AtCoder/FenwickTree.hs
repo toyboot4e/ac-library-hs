@@ -1,16 +1,21 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Given an array of length \(n\), it processes the following queries in \(O(\log n)\) time.
+-- | Fenwick tree, also known as binary index tree. Given an array of length \(n\), it processes the
+-- following queries in \(O(\log n)\) time.
 --
 -- - Updating an element
 -- - Calculating the sum of the elements of an interval
 --
--- = Example
+-- ==== __Example__
+-- You can create a `FenwickTree` with `new`:
 --
 -- >>> import AtCoder.FenwickTree qualified as FT
 -- >>> ft <- FT.new @_ @Int 4 -- [0, 0, 0, 0]
 -- >>> FT.nFt ft
 -- 4
+--
+-- It can perform point `add` and range `sum` in \(O(\log n)\) time:
+--
 -- >>> FT.add ft 0 3          -- [3, 0, 0, 0]
 -- >>> FT.sum ft 0 3
 -- 3
@@ -18,13 +23,29 @@
 -- >>> FT.sum ft 0 3
 -- 6
 --
--- >>> import AtCoder.FenwickTree qualified as FT
--- >>> import Data.Vector.Unboxed qualified as VU
+-- You can create a `FenwickTree` with initial values using `build`:
+--
 -- >>> ft <- FT.build @_ @Int $ VU.fromList [3, 0, 3, 0]
--- >>> FT.add ft 1 2
+-- >>> FT.add ft 1 2          -- [3, 2, 3, 0]
 -- >>> FT.sum ft 0 3
 -- 8
-module AtCoder.FenwickTree (FenwickTree (nFt), new, build, add, sum) where
+--
+-- @since 1.0.0
+module AtCoder.FenwickTree
+  ( -- * Fenwick tree
+    FenwickTree (nFt),
+
+    -- * Constructors
+    new,
+    build,
+
+    -- * Modifying the Fenwick tree
+    add,
+
+    -- * Accessor
+    sum,
+  )
+where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
@@ -38,6 +59,8 @@ import GHC.Stack (HasCallStack)
 import Prelude hiding (sum)
 
 -- | Fenwick tree.
+--
+-- @since 1.0.0
 data FenwickTree s a = FenwickTree
   { -- | The number of vertices.
     nFt :: {-# UNPACK #-} !Int,
@@ -45,14 +68,16 @@ data FenwickTree s a = FenwickTree
     dataFt :: !(VUM.MVector s a)
   }
 
--- | \(O(n)\) Creates an array \([a_0, a_1, \cdots, a_{n-1}]\) of length \(n\). All the elements are
+-- | Creates an array \([a_0, a_1, \cdots, a_{n-1}]\) of length \(n\). All the elements are
 -- initialized to \(0\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 new :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => Int -> m (FenwickTree (PrimState m) a)
 new nFt
   | nFt >= 0 = do
@@ -62,8 +87,10 @@ new nFt
 
 -- | Creates `FenwickTree` with initial values.
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 build :: (PrimMonad m, Num a, VU.Unbox a) => VU.Vector a -> m (FenwickTree (PrimState m) a)
 build xs = do
   ft <- new $ VU.length xs
@@ -72,11 +99,13 @@ build xs = do
 
 -- | Adds \(x\) to \(p\)-th value of the array.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq l \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
+--
+-- @since 1.0.0
 add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()
 add FenwickTree {..} p0 x = do
   let !_ = ACIA.checkIndex "AtCoder.FenwickTree.add" p0 nFt
@@ -90,6 +119,8 @@ add FenwickTree {..} p0 x = do
 -- TODO: modify, exchange?
 
 -- | \(O(\log n)\) Calculates the sum in half-open range @[0, r)@.
+--
+-- @since 1.0.0
 prefixSum :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> m a
 prefixSum FenwickTree {..} = inner 0
   where
@@ -99,13 +130,15 @@ prefixSum FenwickTree {..} = inner 0
           dx <- VGM.read dataFt (r - 1)
           inner (acc + dx) (r - r .&. (-r))
 
--- | Calculates the sum in half-open range @[l, r)@.
+-- | Calculates the sum in half-open range \([l, r)\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq l \leq r \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log n)\)
+--
+-- @since 1.0.0
 sum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
 sum ft@FenwickTree {..} l r = do
   let !_ = ACIA.checkInterval "AtCoder.FenwickTree.sum" l r nFt

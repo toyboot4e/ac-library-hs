@@ -1,6 +1,6 @@
 -- | It calculates the strongly connected components of directed graphs.
 --
--- = Example
+-- ==== Example
 -- >>> import AtCoder.Scc qualified as Scc
 -- >>> gr <- Scc.new 4     -- 0    1    2    3
 -- >>> Scc.nScc gr
@@ -28,21 +28,21 @@ nScc (SccGraph g) = ACISCC.nScc g
 
 -- | Creates a directed graph with \(n\) vertices and \(0\) edges.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
 new n = SccGraph <$> ACISCC.new n
 
 -- | Adds a directed edge from the vertex @from@ to the vertex @to@.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq \mathrm{from} \lt n\)
 -- - \(0 \leq \mathrm{to} \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(1)\) amortized
 addEdge :: (HasCallStack, PrimMonad m) => SccGraph (PrimState m) -> Int -> Int -> m ()
 addEdge (SccGraph gr) from to = do
@@ -57,7 +57,7 @@ addEdge (SccGraph gr) from to = do
 -- Each "list of the vertices" corresponds to the vertex set of a strongly connected component. The order of the vertices in the list is undefined.
 -- The list of "list of the vertices" are sorted in topological order, i.e., for two vertices \(u, v\) in different strongly connected components, if there is a directed path from \(u\) to \(v\), the list containing \(u\) appears earlier than the list containing \(v\).
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n + m)\), where \(m\) is the number of added edges.
 scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
 scc (SccGraph g) = ACISCC.scc g

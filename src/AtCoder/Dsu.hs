@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Disjoint set union (also known as Union-Find tree). It processes the following queries in
+-- | Disjoint set union, also known as Union-Find tree. It processes the following queries in
 -- amortized \(O(\alpha(n))\) time.
 --
 -- - Edge addition
@@ -10,16 +10,27 @@
 -- are merged by edge addition, one of the two representatives of these connected components
 -- becomes the representative of the new connected component.
 --
--- = Example
+-- ==== __Example__
+-- Create DSU:
+--
 -- >>> import AtCoder.Dsu qualified as Dsu
 -- >>> dsu <- Dsu.new 4   -- 0 1 2 3
 -- >>> Dsu.nDsu dsu
 -- 4
+--
+-- Merge some vertices into the same group: b:
+--
 -- >>> Dsu.merge dsu 0 1  -- 0=1 2 3
 -- 0
 -- >>> Dsu.merge_ dsu 1 2 -- 0=1=2 3
+--
+-- `leader` returns the internal representative vertex of the connected components:
+--
 -- >>> Dsu.leader dsu 2
 -- 0
+--
+-- Retrieve group information:
+--
 -- >>> Dsu.same dsu 0 2
 -- True
 -- >>> Dsu.size dsu 0
@@ -27,12 +38,21 @@
 -- >>> Dsu.groups dsu
 -- [[2,1,0],[3]]
 module AtCoder.Dsu
-  ( Dsu (nDsu),
+  ( -- * Disjoint set union
+    Dsu (nDsu),
+
+    -- * Constructor
     new,
+
+    -- * Merge
     merge,
     merge_,
+
+    -- * Leader
     leader,
     same,
+
+    -- * Component information
     size,
     groups,
   )
@@ -59,10 +79,10 @@ data Dsu s = Dsu
 
 -- | Creates an undirected graph with \(n\) vertices and \(0\) edges.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \le n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 new :: (PrimMonad m) => Int -> m (Dsu (PrimState m))
 new nDsu
@@ -75,11 +95,11 @@ new nDsu
 -- returns the representative of this connected component. Otherwise, it returns the
 -- representative of the new connected component.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq a < n\)
 -- - \(0 \leq b < n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 merge :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Int
 merge dsu@Dsu {..} a b = do
@@ -101,24 +121,24 @@ merge dsu@Dsu {..} a b = do
 
 -- | `merge` with return value discarded.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq a < n\)
 -- - \(0 \leq b < n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 merge_ :: (PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m ()
 merge_ dsu a b = do
   _ <- merge dsu a b
   pure ()
 
--- | Returns whether the vertices @a@ and @b@ are in the same connected component.
+-- | Returns whether the vertices \(a\) and \(b\) are in the same connected component.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq a < n\)
 -- - \(0 \leq b < n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 same :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Bool
 same dsu@Dsu {..} a b = do
@@ -128,12 +148,12 @@ same dsu@Dsu {..} a b = do
   lb <- leader dsu b
   pure $ la == lb
 
--- | Returns the representative of the connected component that contains the vertex @a@.
+-- | Returns the representative of the connected component that contains the vertex \(a\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(0 \leq a \lt n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 leader :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 leader dsu@Dsu {..} a = do
@@ -146,12 +166,12 @@ leader dsu@Dsu {..} a = do
       VGM.write parentOrSizeDsu a lpa
       pure lpa
 
--- | Returns the size of the connected component that contains the vertex @a@.
+-- | Returns the size of the connected component that contains the vertex \(a\).
 --
--- = Constraints
+-- ==== Constraints
 -- -  \(0 \leq a < n\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\alpha(n))\)
 size :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 size dsu@Dsu {..} a = do
@@ -165,7 +185,7 @@ size dsu@Dsu {..} a = do
 -- More precisely, it returns a vector of the "vector of the vertices in a connected component".
 -- Both of the orders of the connected components and the vertices are undefined.
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n)\)
 groups :: (PrimMonad m) => Dsu (PrimState m) -> m (V.Vector (VU.Vector Int))
 groups dsu@Dsu {..} = do
