@@ -173,6 +173,11 @@ executable aoj-GRL_6_B
   main-is:       aoj-GRL_6_B.hs
   build-depends: verify
 
+executable past202303-open-n
+  import:        app-local
+  main-is:       past202303-open-n.hs
+  build-depends: verify
+
 executable yosupo-point-add-range-sum
   import:        app-local
   main-is:       yosupo-point-add-range-sum.hs
