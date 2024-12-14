@@ -33,15 +33,15 @@
 -- >>> C.convolutionRaw (Proxy @998244353) a b
 -- [5,16,34,60,61,52,32]
 --
--- If you want to calculate large values without taking a mod, use `convolution64`.
+-- If you want to calculate large values without taking mod, use `convolution64`.
 --
 -- @since 1.0.0
 module AtCoder.Convolution
-  ( -- * Convolution with a modulus value
+  ( -- * Convolution in mod m
     convolution,
     convolutionRaw,
 
-    -- * Convolution without a modulus value
+    -- * Convolution
     convolution64,
   )
 where
@@ -92,7 +92,7 @@ convolution a b
     n = VU.length a
     m = VU.length b
 
--- | `convolution` for any `Integral` @a@.
+-- | Calculates `convolution` in \(\bmod m\) for any `Integral` @a@.
 --
 -- ==== Constraints
 -- - \(2 \leq m \leq 2 \times 10^9\)
@@ -122,8 +122,8 @@ convolutionRaw _ a b
     n = VU.length a
     m = VU.length b
 
--- | Calculates the convolution. It returns an empty array if at least one of \(a\) and \(b\) are
--- empty.
+-- | Calculates the convolution (without taking mod). It returns an empty array if at least one of
+-- \(a\) and \(b\) are empty.
 --
 -- ==== Constraints
 -- - \(|a| + |b| - 1 \leq 2^{24}\)

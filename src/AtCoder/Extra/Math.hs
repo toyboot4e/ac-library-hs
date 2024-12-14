@@ -22,11 +22,14 @@ import Data.Bits ((.>>.))
 
 -- TODO: add `HasCallStack` and provide with `unsafePower`.
 
--- | \(O(\log n)\) Calculates \(s^n\) with custom multiplication operator using the binary lifting
+-- | Calculates \(s^n\) with custom multiplication operator using the binary exponentiation
 -- technique.
 --
 -- The internal implementation is taken from `Data.Semigroup.stimes`, but `power` uses strict
 -- evaluation and is often much faster.
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
 --
 -- ==== Constraints
 -- - \(n \gt 0\)
@@ -47,7 +50,10 @@ power op n0 x1
       | n == 1 = x `op` z
       | otherwise = g (x `op` x) (n .>>. 1) (x `op` z)
 
--- | \(O(\log n)\) Strict `Data.Semigroup.stimes`.
+-- | Strict `Data.Semigroup.stimes`.
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
 --
 -- ==== Constraints
 -- - \(n \gt 0\)
@@ -57,7 +63,10 @@ power op n0 x1
 stimes' :: (Semigroup a) => Int -> a -> a
 stimes' = power (<>)
 
--- | \(O(\log n)\) Strict `Data.Monoid.mtimes`.
+-- | Strict `Data.Monoid.mtimes`.
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
 --
 -- ==== Constraints
 -- - \(n \ge 0\)

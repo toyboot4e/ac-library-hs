@@ -29,9 +29,10 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 -- \(f: x \rightarrow a x + b\).
 --
 -- ==== Composition and dual
---
--- \((f_1 \cdot f_2) v := (f_1 . f_2) v\). If you need @foldr@ \([f_l, .., f_r]\) on a segment
--- tree, be sure to wrap `Affine1` with `Data.Monoid.Dual`.
+-- `Semigroup` for `Affine1` is implemented like function composition, and rightmost affine
+-- transformation is applied first: \((f_1 \circ f_2) v := f_1 (f_2(v))\). If you need 'foldr'
+-- of \([f_l, f_{l+1}, .., f_r)\) on a segment tree, be sure to wrap `Affine1` in
+-- `Data.Monoid.Dual`.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..))
@@ -43,7 +44,14 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- @since 1.0.0
 newtype Affine1 a = Affine1 (Affine1Repr a)
-  deriving newtype (Eq, Ord, Show)
+  deriving newtype
+    ( -- | @since 1.0.0
+      Eq,
+      -- | @since 1.0.0
+      Ord,
+      -- | @since 1.0.0
+      Show
+    )
 
 -- | `Affine1` internal representation. Tuples are not the fastest representation, but it's easier
 -- to implement `Data.Vector.Unboxed.Unbox`.

@@ -31,7 +31,14 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- @since 1.0.0
 newtype RangeSetId a = RangeSetId (RangeSetIdRepr a)
-  deriving newtype (Eq, Ord, Show)
+  deriving newtype
+    ( -- | @since 1.0.0
+      Eq,
+      -- | @since 1.0.0
+      Ord,
+      -- | @since 1.0.0
+      Show
+    )
 
 -- | `RangeSetId` internal representation. The first value represents if it is an identity action.
 -- Tuples are not the fastest representation, but it's easier to implement
@@ -66,6 +73,7 @@ instance Semigroup (RangeSetId a) where
   stimes _ x = x
 
 -- The `Monoid` constraint is just for their default value.
+
 -- | @since 1.0.0
 instance (Monoid a) => Monoid (RangeSetId a) where
   {-# INLINE mempty #-}
@@ -78,6 +86,7 @@ instance (Monoid a) => Monoid (RangeSetId a) where
 
 -- The target is limited to ideomponent monoids. The `Monoid` constraint is just for their default
 -- value.
+
 -- | @since 1.0.0
 instance (Ord a, Bounded a) => SegAct (RangeSetId (Max a)) (Max a) where
   {-# INLINE segAct #-}
@@ -85,6 +94,7 @@ instance (Ord a, Bounded a) => SegAct (RangeSetId (Max a)) (Max a) where
 
 -- The target is limited to ideomponent monoids. The `Monoid` constraint is just for their default
 -- value.
+
 -- | @since 1.0.0
 instance (Ord a, Bounded a) => SegAct (RangeSetId (Min a)) (Min a) where
   {-# INLINE segAct #-}

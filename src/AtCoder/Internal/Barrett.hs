@@ -35,6 +35,12 @@ data Barrett = Barrett
     mBarrett :: {-# UNPACK #-} !Word32,
     imBarrett :: {-# UNPACK #-} !Word64
   }
+  deriving
+    ( -- | @since 1.0.0
+      Eq,
+      -- | @since 1.0.0
+      Show
+    )
 
 -- | Creates barret reduction for modulus \(m\) from a `Word32` value.
 --

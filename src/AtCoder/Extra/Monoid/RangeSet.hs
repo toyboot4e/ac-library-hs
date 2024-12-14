@@ -32,7 +32,14 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- @since 1.0.0
 newtype RangeSet a = RangeSet (RangeSetRepr a)
-  deriving newtype (Eq, Ord, Show)
+  deriving newtype
+    ( -- | @since 1.0.0
+      Eq,
+      -- | @since 1.0.0
+      Ord,
+      -- | @since 1.0.0
+      Show
+    )
 
 -- | `RangeSet` internal representation. The first value represents if it is an identity action.
 -- Tuples are not the fastest representation, but it's easier to implement

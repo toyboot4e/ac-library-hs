@@ -31,6 +31,12 @@ data Csr e = Csr
   { startCsr :: !(VU.Vector Int),
     elistCsr :: !(VU.Vector e)
   }
+  deriving
+    ( -- | @since 1.0.0
+      Eq,
+      -- | @since 1.0.0
+      Show
+    )
 
 -- | \(O(n + m)\) Creates `Csr`.
 --

@@ -111,7 +111,7 @@ read GrowVec {..} i = do
 --
 -- @since 1.0.0
 write :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> a -> m ()
-write GrowVec {..} i x= do
+write GrowVec {..} i x = do
   vec <- readMutVar vecGV
   let len = VUM.length vec
   let !_ = ACIA.checkIndex "AtCoder.Internal.GrowVec.write" i len

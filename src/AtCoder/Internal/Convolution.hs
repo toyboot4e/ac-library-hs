@@ -39,6 +39,12 @@ data FftInfo p = FftInfo
     rate3Fft :: !(VU.Vector (AM.ModInt p)),
     iRate3Fft :: !(VU.Vector (AM.ModInt p))
   }
+  deriving
+    ( -- | @since 1.0.0
+      Eq,
+      -- | @since 1.0.0
+      Show
+    )
 
 -- | \(O(\log m)\) Creates `FftInfo`.
 --

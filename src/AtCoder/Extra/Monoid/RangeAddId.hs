@@ -30,7 +30,14 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- @since 1.0.0
 newtype RangeAddId a = RangeAddId a
-  deriving newtype (Eq, Ord, Show)
+  deriving newtype
+    ( -- | @since 1.0.0
+      Eq,
+      -- | @since 1.0.0
+      Ord,
+      -- | @since 1.0.0
+      Show
+    )
 
 -- | Creates `RangeAddId`.
 --

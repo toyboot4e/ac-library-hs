@@ -22,25 +22,34 @@ module AtCoder.ModInt
     Modulus (..),
     ModInt998244353,
     ModInt1000000007,
+
     -- ** Helpers
     modVal,
     modVal#,
+
     -- * ModInt
     ModInt (..),
+
     -- * Constructors
+
     -- ** Safe constructors
     new,
     new32,
     new64,
+
     -- ** Unsafe constructor
     unsafeNew,
+
     -- * Accessors
+
     -- ** Modulus value
     modulus,
+
     -- ** Internal value
     val,
     val32,
     val64,
+
     -- * Operators
     pow,
     inv,
@@ -192,8 +201,20 @@ unsafeNew = ModInt
 
 -- | `Word32` value that treats the modula arithmetic.
 newtype ModInt a = ModInt {unModInt :: Word32}
-  deriving (P.Prim)
-  deriving newtype (Eq, Ord, Read, Show)
+  deriving
+    ( -- @since 1.0.0
+      P.Prim
+    )
+  deriving newtype
+    ( -- @since 1.0.0
+      Eq,
+      -- @since 1.0.0
+      Ord,
+      -- @since 1.0.0
+      Read,
+      -- @since 1.0.0
+      Show
+    )
 
 -- | Retrieve the mod from a `ModInt` object.
 --
