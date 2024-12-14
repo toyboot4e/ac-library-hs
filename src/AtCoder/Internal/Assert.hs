@@ -27,11 +27,14 @@
 --
 -- @since 1.0.0
 module AtCoder.Internal.Assert
-  ( runtimeAssert,
+  ( -- * Runtime assertion
+    runtimeAssert,
+    -- * Index assertions
     checkIndex,
     checkVertex,
     checkEdge,
     checkCustom,
+    -- * Interval assertion
     checkInterval,
   )
 where

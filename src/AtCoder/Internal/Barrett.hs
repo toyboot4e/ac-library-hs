@@ -13,10 +13,14 @@
 --
 -- @since 1.0.0
 module AtCoder.Internal.Barrett
-  ( Barrett,
+  ( -- * Barrett
+    Barrett,
+    -- * Constructors
     new32,
     new64,
+    -- * Accessors
     umod,
+    -- * Barrett reduction
     mulMod,
   )
 where

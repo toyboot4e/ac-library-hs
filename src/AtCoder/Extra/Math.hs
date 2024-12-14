@@ -12,7 +12,8 @@
 --
 -- @since 1.0.0
 module AtCoder.Extra.Math
-  ( power,
+  ( -- * Binary exponential
+    power,
     stimes',
     mtimes',
   )
@@ -78,4 +79,3 @@ mtimes' n x = case compare n 0 of
   LT -> errorWithoutStackTrace "AtCoder.Extra.Math.mtimes': non-negative multiplier expected"
   EQ -> mempty
   GT -> power (<>) n x
-

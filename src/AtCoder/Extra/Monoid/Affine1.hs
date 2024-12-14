@@ -1,13 +1,18 @@
 {-# LANGUAGE TypeFamilies #-}
 
 -- | `AtCoder.LazySegTree.SegAct` instance of one-dimensional affine transformation
--- \(f: x \rightarrow a x + b\).
+-- \(f: x \rightarrow a \times x + b\).
 --
 -- @since 1.0.0
 module AtCoder.Extra.Monoid.Affine1
-  ( Affine1 (..),
+  ( -- * Affine1
+    Affine1 (..),
     Affine1Repr,
+
+    -- * Constructor
     new,
+
+    -- * Action
     act,
   )
 where
@@ -26,7 +31,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 -- Tuple is not the fastest representation, but it's easier to implement `Unbox`.
 
 -- | `AtCoder.LazySegTree.SegAct` instance of one-dimensional affine transformation
--- \(f: x \rightarrow a x + b\).
+-- \(f: x \rightarrow a \times x + b\).
 --
 -- ==== Composition and dual
 -- `Semigroup` for `Affine1` is implemented like function composition, and rightmost affine
@@ -66,7 +71,7 @@ type Affine1Repr a = (a, a)
 new :: a -> a -> Affine1 a
 new !a !b = Affine1 (a, b)
 
--- | Acts on @a@.
+-- | Applies \(f: x \rightarrow a \times x + b\).
 --
 -- @since 1.0.0
 {-# INLINE act #-}

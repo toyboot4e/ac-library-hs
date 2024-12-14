@@ -31,18 +31,33 @@
 --
 -- @since 1.0.0
 module AtCoder.Internal.GrowVec
-  ( GrowVec (..),
+  ( -- * Growable vector
+    GrowVec (vecGV),
+
+    -- * Constructions
+
+    -- ** Initialization
     new,
     build,
+
+    -- ** Reserving
     reserve,
+
+    -- * Accessing individual elements
     read,
     write,
+
+    -- * Modifying the buffer
     pushBack,
     popBack,
     popBack_,
+
+    -- * Accessors
     length,
     capacity,
     null,
+
+    -- * Conversion
     freeze,
     unsafeFreeze,
   )
@@ -64,6 +79,7 @@ import Prelude hiding (length, null, read)
 data GrowVec s a = GrowVec
   { -- | Stores [l, r) range in the `vecGV`.
     posGV :: !(VUM.MVector s Int),
+    -- | @since 1.0.0
     vecGV :: !(MutVar s (VUM.MVector s a))
   }
 

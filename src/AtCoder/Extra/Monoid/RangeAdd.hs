@@ -4,8 +4,13 @@
 --
 -- @since 1.0.0
 module AtCoder.Extra.Monoid.RangeAdd
-  ( RangeAdd (..),
+  ( -- * RangeAdd
+    RangeAdd (..),
+
+    -- * Constructor
     new,
+
+    -- * Action
     act,
   )
 where
@@ -46,12 +51,12 @@ newtype RangeAdd a = RangeAdd a
 new :: a -> RangeAdd a
 new = RangeAdd
 
--- | Acts on @a@.
+-- | Applies one-length range add: \(f: x \rightarrow d + x\).
 --
 -- @since 1.0.0
 {-# INLINE act #-}
 act :: (Num a) => RangeAdd a -> a -> a
-act (RangeAdd f) x = f + x
+act (RangeAdd dx) x = dx + x
 
 -- | Acts on @a@ with length in terms of `SegAct`.
 --

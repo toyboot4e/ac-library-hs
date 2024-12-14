@@ -5,8 +5,13 @@
 --
 -- @since 1.0.0
 module AtCoder.Extra.Monoid.RangeSet
-  ( RangeSet (..),
+  ( -- * RangeSet
+    RangeSet (..),
+
+    -- * Constructor
     new,
+
+    -- * Action
     act,
   )
 where
@@ -55,7 +60,7 @@ type RangeSetRepr a = (Bool, a)
 new :: a -> RangeSet a
 new = RangeSet . (True,)
 
--- | Acts on @a@.
+-- | Applies one-length range set: \(f: x \rightarrow y\).
 --
 -- @since 1.0.0
 {-# INLINE act #-}

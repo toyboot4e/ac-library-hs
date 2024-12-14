@@ -72,6 +72,8 @@ import GHC.Stack (HasCallStack)
 -- @since 1.0.0
 data McfGraph s cap cost = McfGraph
   { -- | The number of vertices.
+    --
+    -- @since 1.0.0
     nG :: {-# UNPACK #-} !Int,
     -- | fromVertex -> vector of @(from, to, cap, flow, cost)@.
     edgesG :: !(ACIGV.GrowVec s (Int, Int, cap, cap, cost))

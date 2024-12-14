@@ -257,6 +257,8 @@ import Prelude hiding (read)
 -- @since 1.0.0
 class (Monoid f) => SegAct f a where
   -- | Lazy segment tree action \(f(x)\).
+  --
+  -- @since 1.0.0
   {-# INLINE segAct #-}
   segAct :: f -> a -> a
   segAct = segActWithLength 1
@@ -265,6 +267,8 @@ class (Monoid f) => SegAct f a where
   --
   -- If you implement `SegAct` with this function, you don't have to store the monoid's length,
   -- since it's given externally.
+  --
+  -- @since 1.0.0
   {-# INLINE segActWithLength #-}
   segActWithLength :: Int -> f -> a -> a
   segActWithLength _ = segAct
@@ -274,10 +278,16 @@ class (Monoid f) => SegAct f a where
 -- @since 1.0.0
 data LazySegTree s f a = LazySegTree
   { -- | Valid length.
+    --
+    -- @since 1.0.0
     nLst :: {-# UNPACK #-} !Int,
     -- | \(\lceil \log_2 \mathrm{nLst} \rceil\)
+    --
+    -- @since 1.0.0
     sizeLst :: {-# UNPACK #-} !Int,
     -- | \(\log_2 \mathrm{sizeLst}\).
+    --
+    -- @since 1.0.0
     logLst :: {-# UNPACK #-} !Int,
     -- | Data storage of length @2 * sizeLst@.
     dLst :: !(VUM.MVector s a),

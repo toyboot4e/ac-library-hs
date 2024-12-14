@@ -13,7 +13,11 @@
 -- 4
 --
 -- @since 1.0.0
-module AtCoder.Internal.Bit (bitCeil) where
+module AtCoder.Internal.Bit
+  ( -- * Utilities
+    bitCeil,
+  )
+where
 
 -- TODO: faster implmentation
 
@@ -28,4 +32,3 @@ bitCeil n = inner 1
       | otherwise = inner $ 2 * x
 
 -- countTrailingZeros from Data.Bits
-

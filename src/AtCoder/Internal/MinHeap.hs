@@ -26,12 +26,21 @@
 --
 -- @since 1.0.0
 module AtCoder.Internal.MinHeap
-  ( Heap (..),
+  ( -- * Heap
+    Heap,
+
+    -- * Constructor
     new,
+
+    -- * Accessors
     capacity,
     length,
     null,
+
+    -- * Accessors
     clear,
+
+    -- * Modifying the heap
     push,
     peek,
     pop,

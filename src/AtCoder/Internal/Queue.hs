@@ -31,16 +31,27 @@
 --
 -- @since 1.0.0
 module AtCoder.Internal.Queue
-  ( Queue (..),
+  ( -- * Queue
+    Queue,
+
+    -- * Constructor
     new,
+
+    -- * Modifying the queue
     pushBack,
     pushFront,
     popFront,
     popFront_,
+
+    -- * Accessors
     capacity,
     length,
     null,
+
+    -- * Clearing
     clear,
+
+    -- * Conversions
     freeze,
     unsafeFreeze,
   )

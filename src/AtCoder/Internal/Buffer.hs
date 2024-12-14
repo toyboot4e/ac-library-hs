@@ -2,7 +2,8 @@
 
 -- | Pushable vector with fixed size capacity. Stack. Internally it has the number of elements.
 --
--- ==== Example
+-- ==== __Example__
+-- Create a buffer with capacity @4@:
 --
 -- >>> import AtCoder.Internal.Buffer qualified as B
 -- >>> buf <- B.new @_ @Int 4
@@ -10,15 +11,27 @@
 -- 4
 -- >>> B.null buf        -- [_   _  _  _]
 -- True
+--
+-- Append elements with `pushBack`:
+--
 -- >>> B.pushBack buf 10 -- [10  _  _ _]
 -- >>> B.pushBack buf 11 -- [10, 11  _  _]
 -- >>> length buf
 -- 2
+--
+-- Access each elements with `read`, `write`, `modify` or `modifyM`:
+--
 -- >>> B.read buf 0
 -- 10
 -- >>> B.write buf 1 0   -- [10, 0,  _  _]
+--
+-- Remove elements with `pushBack`:
+--
 -- >>> B.popBack buf     -- [10  _  _  _]
 -- Just 0
+--
+-- Inspect the internal vector with `freeze`:
+--
 -- >>> B.freeze buf
 -- [10]
 -- >>> B.clear buf       -- []
@@ -29,18 +42,35 @@
 --
 -- @since 1.0.0
 module AtCoder.Internal.Buffer
-  ( Buffer (..),
+  ( -- * Buffer
+    Buffer,
+
+    -- * Constructors
     new,
     build,
+
+    -- * Push/pop
     pushBack,
     popBack,
+
+    -- * Inspection
     back,
+
+    -- * Accessing individual elements
     read,
     write,
+    modify,
+    modifyM,
+
+    -- * Accesssors
     capacity,
     length,
     null,
+
+    -- * Clearing
     clear,
+
+    -- * Conversions
     freeze,
     unsafeFreeze,
   )
@@ -133,6 +163,26 @@ write Buffer {..} i e = do
   len <- VGM.read lenB 0
   let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.write" i len
   VGM.write vecB i e
+
+-- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
+-- out of range.
+--
+-- @since 1.0.0
+modify :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> (a -> a) -> Int -> m ()
+modify Buffer {..} f i = do
+  len <- VGM.read lenB 0
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.modify" i len
+  VGM.modify vecB f i
+
+-- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
+-- out of range.
+--
+-- @since 1.0.0
+modifyM :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> (a -> m a) -> Int -> m ()
+modifyM Buffer {..} f i = do
+  len <- VGM.read lenB 0
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.modifyM" i len
+  VGM.modifyM vecB f i
 
 -- | \(O(1)\) Returns the array size.
 --

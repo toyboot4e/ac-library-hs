@@ -3,7 +3,21 @@
 -- | Implementation of Strongly Connected Components calculation. Use `AtCoder.Scc` instead.
 --
 -- @since 1.0.0
-module AtCoder.Internal.Scc (SccGraph (nScc), new, addEdge, sccIds, scc) where
+module AtCoder.Internal.Scc
+  ( -- * Internal SCC
+    SccGraph (nScc),
+
+    -- * Constructor
+    new,
+
+    -- * Modifying the graph
+    addEdge,
+
+    -- * SCC calculation
+    sccIds,
+    scc,
+  )
+where
 
 import AtCoder.Internal.Csr qualified as ACICSR
 import AtCoder.Internal.GrowVec qualified as ACIGV
@@ -22,7 +36,8 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- @since 1.0.0
 data SccGraph s = SccGraph
-  { nScc :: {-# UNPACK #-} !Int,
+  { -- | @since 1.0.0
+    nScc :: {-# UNPACK #-} !Int,
     edgesScc :: !(ACIGV.GrowVec s (Int, Int))
   }
 
@@ -117,6 +132,8 @@ sccIds SccGraph {..} = do
   pure (num, ids')
 
 -- | \(O(n + m)\) Returns the strongly connected components.
+--
+-- @since 1.0.0
 scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
 scc g = do
   (!groupNum, !ids) <- sccIds g

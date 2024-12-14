@@ -78,6 +78,8 @@ import GHC.Stack (HasCallStack)
 -- @since 1.0.0
 data MfGraph s cap = MfGraph
   { -- | The number of vertices.
+    --
+    -- @since 1.0.0
     nG :: {-# UNPACK #-} !Int,
     -- | MfGraph: fromVertex -> vector of @(toVertex, revEdgeIndex, capacity)@.
     gG :: !(V.Vector (ACIGV.GrowVec s (Int, Int, cap))),

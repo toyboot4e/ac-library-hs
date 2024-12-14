@@ -5,10 +5,15 @@
 --
 -- @since 1.0.0
 module AtCoder.Internal.Convolution
-  ( FftInfo,
+  ( -- * FFT information
+    FftInfo,
     newInfo,
+
+    -- * Butterfly operation
     butterfly,
     butterflyInv,
+
+    -- * Convolution implementation
     convolutionNaive,
     convolutionFft,
   )

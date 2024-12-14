@@ -13,7 +13,15 @@
 -- [3]
 --
 -- @since 1.0.0
-module AtCoder.Internal.Csr (Csr (..), build, adj) where
+module AtCoder.Internal.Csr
+  ( -- * Compressed sparse row
+    Csr,
+    -- * Constructor
+    build,
+    -- * Accessors
+    adj,
+  )
+where
 
 import Control.Monad.ST (runST)
 import Data.Foldable (for_)

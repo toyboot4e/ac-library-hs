@@ -1,5 +1,13 @@
 -- | Internal implementation of `AtCoder.String` module.
-module AtCoder.Internal.String (saNaive, saDoubling, saIsImpl, saIs, saIsManual) where
+module AtCoder.Internal.String
+  ( -- * Suffix array
+    saNaive,
+    saDoubling,
+    saIsImpl,
+    saIs,
+    saIsManual,
+  )
+where
 
 import Control.Monad (unless, when)
 import Control.Monad.ST (runST)
@@ -15,6 +23,8 @@ import GHC.Stack (HasCallStack)
 -- TODO: remove `HasCallStack` when we're 100% sure the input is guarded
 
 -- | \(O(n^2)\) Internal implementation of suffix array creation (naive).
+--
+-- @since 1.0.0
 saNaive :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 saNaive s =
   let n = VU.length s
@@ -35,6 +45,8 @@ saNaive s =
       VU.modify (VAI.sortBy f) $ VU.generate n id
 
 -- | \(O(n \log n)\) Internal implementation of suffix array creation (doubling).
+--
+-- @since 1.0.0
 saDoubling :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 saDoubling s = VU.create $ do
   let n = VU.length s
@@ -71,6 +83,8 @@ saDoubling s = VU.create $ do
 -- TODO: use backpermute
 
 -- | \(O(n)\) Internal implementation of suffix array creation (suffix array induced sorting).
+--
+-- @since 1.0.0
 saIsImpl :: (HasCallStack) => Int -> Int -> VU.Vector Int -> Int -> VU.Vector Int
 saIsImpl naiveThreshold doublingThreshold s upper = VU.create $ do
   let n = VU.length s
@@ -227,6 +241,8 @@ saIsImpl naiveThreshold doublingThreshold s upper = VU.create $ do
 -- Reference:
 -- G. Nong, S. Zhang, and W. H. Chan,
 -- Two Efficient Algorithms for Linear Time Suffix Array Construction
+--
+-- @since 1.0.0
 saIs :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
 saIs = saIsManual 10 40
 
@@ -236,6 +252,8 @@ saIs = saIsManual 10 40
 -- Reference:
 -- G. Nong, S. Zhang, and W. H. Chan,
 -- Two Efficient Algorithms for Linear Time Suffix Array Construction
+--
+-- @since 1.0.0
 saIsManual :: (HasCallStack) => Int -> Int -> VU.Vector Int -> Int -> VU.Vector Int
 saIsManual naiveThreshold doublingThreshold s upper
   | n == 0 = VU.empty

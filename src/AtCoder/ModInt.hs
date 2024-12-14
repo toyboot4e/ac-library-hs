@@ -78,10 +78,14 @@ import GHC.TypeNats (KnownNat, natVal, natVal')
 -- @since 1.0.0
 class (KnownNat a) => Modulus a where
   -- | Returns if the modulus is a prime value.
+  --
+  -- @since 1.0.0
   isPrimeModulus :: Proxy# a -> Bool
 
   -- | Returns the primitive root of the modulus value. Note that the default implementation is
   -- slow.
+  --
+  -- @since 1.0.0
   {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus :: Proxy# a -> Int
   -- we could use `AllowAmbigousTypes` or `Tagged` newtype, but `Proxy#` wasn't so slow.

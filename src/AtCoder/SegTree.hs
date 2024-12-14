@@ -108,10 +108,16 @@ import Prelude hiding (read)
 -- @since 1.0.0
 data SegTree s a = SegTree
   { -- | Valid length.
+    --
+    -- @since 1.0.0
     nSt :: {-# UNPACK #-} !Int,
     -- | \(\lceil \log_2 \mathrm{nSt} \rceil\)
+    --
+    -- @since 1.0.0
     sizeSt :: {-# UNPACK #-} !Int,
     -- | \(\log_2 \mathrm{sizeSt}\).
+    --
+    -- @since 1.0.0
     logSt :: {-# UNPACK #-} !Int,
     -- | Data storage of length @2 * sizeSt@.
     dSt :: !(VUM.MVector s a)

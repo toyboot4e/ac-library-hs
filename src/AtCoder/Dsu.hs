@@ -74,7 +74,9 @@ import GHC.Stack (HasCallStack)
 --
 -- @since 1.0.0
 data Dsu s = Dsu
-  { -- | The number of nodes.
+  { -- | 1.0.0 The number of nodes.
+    --
+    -- @since
     nDsu :: {-# UNPACK #-} !Int,
     -- | For root (leader) nodes it stores their size as a negative number. For child nodes it
     -- stores their parent node index.

@@ -3,7 +3,17 @@
 -- | Internal CSR for `AtCoder.MinCostFlow`.
 --
 -- @since 1.0.0
-module AtCoder.Internal.McfCsr (Csr (..), build, adj) where
+module AtCoder.Internal.McfCsr
+  ( -- * Compressed sparse row
+    Csr (..),
+
+    -- * Constructor
+    build,
+
+    -- * Accessor
+    adj,
+  )
+where
 
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Vector.Generic qualified as VG
@@ -17,11 +27,17 @@ import GHC.Stack (HasCallStack)
 --
 -- @since 1.0.0
 data Csr s cap cost = Csr
-  { startCsr :: !(VU.Vector Int),
+  { -- | @since 1.0.0
+    startCsr :: !(VU.Vector Int),
+    -- | @since 1.0.0
     toCsr :: !(VU.Vector Int),
+    -- | @since 1.0.0
     revCsr :: !(VU.Vector Int),
     -- | Mutable.
+    --
+    -- @since 1.0.0
     capCsr :: !(VUM.MVector s cap),
+    -- | @since 1.0.0
     costCsr :: !(VU.Vector cost)
   }
 

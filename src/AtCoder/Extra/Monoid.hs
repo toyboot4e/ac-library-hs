@@ -6,11 +6,18 @@
 --
 -- @since 1.0.0
 module AtCoder.Extra.Monoid
-  ( SegAct (..),
+  ( -- * SegAct (re-export)
+    SegAct (..),
+
+    -- * Affine1
     Affine1 (..),
     Affine1Repr,
+
+    -- * Range add
     RangeAdd (..),
     RangeAddId (..),
+
+    -- * Range set
     RangeSet (..),
     RangeSetId (..),
   )

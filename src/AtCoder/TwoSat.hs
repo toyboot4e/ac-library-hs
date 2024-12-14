@@ -21,7 +21,7 @@
 -- @since 1.0.0
 module AtCoder.TwoSat
   ( -- * TwoSat
-    TwoSat (..),
+    TwoSat (nTs),
     -- * Constructor
     new,
     -- * Clause building
@@ -47,7 +47,10 @@ import GHC.Stack (HasCallStack)
 --
 -- @since 1.0.0
 data TwoSat s = TwoSat
-  { nTs :: {-# UNPACK #-} !Int,
+  { -- | The number of clauses the `TwoSat` can hold.
+    --
+    -- @since 1.0.0
+    nTs :: {-# UNPACK #-} !Int,
     answerTs :: !(VUM.MVector s Bit),
     sccTs :: !(ACISCC.SccGraph s)
   }
