@@ -25,10 +25,10 @@ main = do
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !l, !r, !a, !b) -> do
       LST.applyIn seg l r $ Affine1 (modInt a, modInt b)
-      return Nothing
+      pure Nothing
     (1, !i, !_, !_, !_) -> do
       Sum x <- LST.read seg i
-      return $ Just $ M.val x
+      pure $ Just $ M.val x
     _ -> error "unreachable"
 
   printBSB $ unlinesBSB res
