@@ -4,7 +4,7 @@
 --
 -- <https://en.wikipedia.org/wiki/Binary_heap>
 --
--- = Example
+-- ==== Example
 -- >>> import AtCoder.Internal.MinHeap qualified as MH
 -- >>> heap <- MH.new @Int 4
 -- >>> MH.capacity heap
@@ -23,6 +23,8 @@
 -- >>> MH.clear heap  -- []
 -- >>> MH.null heap
 -- True
+--
+-- @since 1.0.0
 module AtCoder.Internal.MinHeap
   ( Heap (..),
     new,
@@ -56,6 +58,8 @@ import Prelude hiding (length, null)
 -- @
 --
 -- INVARIANT (min heap): child values are bigger than or equal to their parent value.
+--
+-- @since 1.0.0
 data Heap s a = Heap
   { -- | Size of the heap.
     sizeBH_ :: !(VUM.MVector s Int),
@@ -64,6 +68,8 @@ data Heap s a = Heap
   }
 
 -- | \(O(n)\) Creates `Heap` with capacity \(n\).
+--
+-- @since 1.0.0
 new :: (VU.Unbox a, PrimMonad m) => Int -> m (Heap (PrimState m) a)
 new n = do
   sizeBH_ <- VUM.replicate 1 0
@@ -71,22 +77,32 @@ new n = do
   pure Heap {..}
 
 -- | \(O(1)\) Returns the maximum number of elements in the heap.
+--
+-- @since 1.0.0
 capacity :: (VU.Unbox a) => Heap s a -> Int
 capacity = VUM.length . dataBH
 
 -- | \(O(1)\) Returns the number of elements in the heap.
+--
+-- @since 1.0.0
 length :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m Int
 length Heap {sizeBH_} = VGM.unsafeRead sizeBH_ 0
 
 -- | \(O(1)\) Returns `True` if the heap is empty.
+--
+-- @since 1.0.0
 null :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m Bool
 null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Sets the `length` to zero.
+--
+-- @since 1.0.0
 clear :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
 clear Heap {sizeBH_} = VGM.unsafeWrite sizeBH_ 0 0
 
 -- | \(O(\log n)\) Inserts an element to the heap.
+--
+-- @since 1.0.0
 push :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> a -> m ()
 push Heap {..} x = do
   i0 <- VGM.unsafeRead sizeBH_ 0
@@ -101,6 +117,8 @@ push Heap {..} x = do
   siftUp i0
 
 -- | \(O(1)\) Returns the smallest value in the heap, or `Nothing` if it is empty.
+--
+-- @since 1.0.0
 peek :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
 peek heap = do
   isNull <- null heap
@@ -110,6 +128,8 @@ peek heap = do
 
 -- | \(O(\log n)\) Removes the last element from the heap and returns it, or `Nothing` if it is
 -- empty.
+--
+-- @since 1.0.0
 pop :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
 pop heap@Heap {..} = do
   len <- length heap
@@ -148,6 +168,8 @@ pop heap@Heap {..} = do
       pure $ Just root
 
 -- | \(O(\log n)\) `pop` with return value discarded.
+--
+-- @since 1.0.0
 pop_ :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
 pop_ heap = do
   _ <- pop heap

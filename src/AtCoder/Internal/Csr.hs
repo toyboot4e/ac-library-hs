@@ -2,7 +2,7 @@
 
 -- | Immutable Compresed Sparse Row.
 --
--- = Example
+-- ==== Example
 -- >>> import AtCoder.Internal.Csr qualified as C
 -- >>> let csr = build 3 $ VU.fromList @(Int, Int) [(0, 1), (0, 2), (0, 3), (1, 2), (2, 3)]
 -- >>> csr `C.adj` 0
@@ -11,6 +11,8 @@
 -- [2]
 -- >>> csr `C.adj` 2
 -- [3]
+--
+-- @since 1.0.0
 module AtCoder.Internal.Csr (Csr (..), build, adj) where
 
 import Control.Monad.ST (runST)
@@ -23,12 +25,16 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
 -- | Comperssed Sparse Row.
+--
+-- @since 1.0.0
 data Csr e = Csr
   { startCsr :: !(VU.Vector Int),
     elistCsr :: !(VU.Vector e)
   }
 
 -- | \(O(n + m)\) Creates `Csr`.
+--
+-- @since 1.0.0
 build :: (HasCallStack, VU.Unbox e) => Int -> VU.Vector (Int, e) -> Csr e
 build n edges = runST $ do
   start <- VUM.replicate (n + 1) (0 :: Int)
@@ -54,6 +60,8 @@ build n edges = runST $ do
   pure Csr {..}
 
 -- | \(O(1)\) Returns adjacent vertices.
+--
+-- @since 1.0.0
 adj :: (HasCallStack, VU.Unbox e) => Csr e -> Int -> VU.Vector e
 adj Csr {..} i =
   let il = startCsr VG.! i

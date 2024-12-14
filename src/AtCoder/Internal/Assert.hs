@@ -1,6 +1,6 @@
 -- | Runtime assertion utility.
 --
--- = Example
+-- ==== Example
 -- >>> let !_ = runtimeAssert False "errorMessage"
 -- *** Exception: errorMessage
 -- ...
@@ -24,6 +24,8 @@
 -- >>> let !_ = checkInterval "AtCoder.Internal.Assert.test" 0 4 3
 -- *** Exception: AtCoder.Internal.Assert.test: given invalid interval `[0, 4)` over length `3`
 -- ...
+--
+-- @since 1.0.0
 module AtCoder.Internal.Assert
   ( runtimeAssert,
     checkIndex,
@@ -37,6 +39,8 @@ where
 import GHC.Stack (HasCallStack)
 
 -- | \(O(1)\) Assertion that is never erased at compile time.
+--
+-- @since 1.0.0
 {-# INLINE runtimeAssert #-}
 runtimeAssert :: (HasCallStack) => Bool -> String -> ()
 runtimeAssert p s
@@ -44,6 +48,8 @@ runtimeAssert p s
   | otherwise = error s
 
 -- | \(O(1)\) Asserts \(0 \leq i \lt n\) for an array index \(i\).
+--
+-- @since 1.0.0
 {-# INLINE checkIndex #-}
 checkIndex :: (HasCallStack) => String -> Int -> Int -> ()
 checkIndex funcName i n
@@ -51,6 +57,8 @@ checkIndex funcName i n
   | otherwise = error $ funcName ++ ": given invalid index `" ++ show i ++ "` over length `" ++ show n ++ "`"
 
 -- | \(O(1)\) Asserts \(0 \leq i \lt n\) for a graph vertex \(i\).
+--
+-- @since 1.0.0
 {-# INLINE checkVertex #-}
 checkVertex :: (HasCallStack) => String -> Int -> Int -> ()
 checkVertex funcName i n
@@ -58,6 +66,8 @@ checkVertex funcName i n
   | otherwise = error $ funcName ++ ": given invalid vertex `" ++ show i ++ "` over the number of vertices `" ++ show n ++ "`"
 
 -- | \(O(1)\) Asserts \(0 \leq i \lt m\) for an edge index \(i\).
+--
+-- @since 1.0.0
 {-# INLINE checkEdge #-}
 checkEdge :: (HasCallStack) => String -> Int -> Int -> ()
 checkEdge funcName i n
@@ -65,6 +75,8 @@ checkEdge funcName i n
   | otherwise = error $ funcName ++ ": given invalid edge index `" ++ show i ++ "` over the number of edges `" ++ show n ++ "`"
 
 -- | \(O(1)\) Asserts \(0 \leq i \lt n\) with custom index/set names.
+--
+-- @since 1.0.0
 {-# INLINE checkCustom #-}
 checkCustom :: (HasCallStack) => String -> String -> Int -> String -> Int -> ()
 checkCustom funcName indexName i setName n
@@ -72,6 +84,8 @@ checkCustom funcName indexName i setName n
   | otherwise = error $ funcName ++ ": given invalid " ++ indexName ++ " `" ++ show i ++ "` over " ++ setName ++ " `" ++ show n ++ "`"
 
 -- | \(O(1)\) Asserts \(0 \leq l \leq r \leq n\) for a half-open interval \([l, r)\).
+--
+-- @since 1.0.0
 {-# INLINE checkInterval #-}
 checkInterval :: (HasCallStack) => String -> Int -> Int -> Int -> ()
 checkInterval funcName l r n

@@ -2,7 +2,7 @@
 
 -- | Growable vector with some runtime overhead (by `MutVar`).
 --
--- = Example
+-- ==== Example
 -- >>> import AtCoder.Internal.GrowVec qualified as GV
 -- >>> growVec <- GV.new @_ @Int 0
 -- >>> GV.null growVec
@@ -28,6 +28,8 @@
 -- 20
 -- >>> GV.unsafeFreeze growVec
 -- [10]
+--
+-- @since 1.0.0
 module AtCoder.Internal.GrowVec
   ( GrowVec (..),
     new,
@@ -57,6 +59,8 @@ import GHC.Stack (HasCallStack)
 import Prelude hiding (length, null, read)
 
 -- | Growable vector with some runtime overhead.
+--
+-- @since 1.0.0
 data GrowVec s a = GrowVec
   { -- | Stores [l, r) range in the `vecGV`.
     posGV :: !(VUM.MVector s Int),
@@ -64,6 +68,8 @@ data GrowVec s a = GrowVec
   }
 
 -- | \(O(n)\) Creates `GrowVec` with initial capacity \(n\).
+--
+-- @since 1.0.0
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (GrowVec (PrimState m) a)
 new n = do
   posGV <- VUM.replicate 1 (0 :: Int)
@@ -71,6 +77,8 @@ new n = do
   pure GrowVec {..}
 
 -- | \(O(n)\) Creates `GrowVec` with initial values.
+--
+-- @since 1.0.0
 build :: (PrimMonad m, VU.Unbox a) => VU.Vector a -> m (GrowVec (PrimState m) a)
 build xs = do
   posGV <- VUM.replicate 1 $ VU.length xs
@@ -78,6 +86,8 @@ build xs = do
   pure GrowVec {..}
 
 -- | \(O(n)\) Reserves the internal storage capacity.
+--
+-- @since 1.0.0
 reserve :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> m ()
 reserve GrowVec {..} len = do
   vec <- readMutVar vecGV
@@ -87,6 +97,8 @@ reserve GrowVec {..} len = do
 
 -- | \(O(1)\) Yields the element at the given position. Will throw an exception if the index is out
 -- of range.
+--
+-- @since 1.0.0
 read :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> m a
 read GrowVec {..} i = do
   vec <- readMutVar vecGV
@@ -96,6 +108,8 @@ read GrowVec {..} i = do
 
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
 -- out of range.
+--
+-- @since 1.0.0
 write :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> a -> m ()
 write GrowVec {..} i x= do
   vec <- readMutVar vecGV
@@ -104,6 +118,8 @@ write GrowVec {..} i x= do
   VGM.write vec i x
 
 -- | Amortized \(O(1)\). Grow the capacity twice
+--
+-- @since 1.0.0
 pushBack :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> a -> m ()
 pushBack GrowVec {..} e = do
   len <- VGM.unsafeRead posGV 0
@@ -126,6 +142,8 @@ pushBack GrowVec {..} e = do
     0
 
 -- | \(O(1)\) Removes the last element from the buffer and returns it, or `Nothing` if it is empty.
+--
+-- @since 1.0.0
 popBack :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m (Maybe a)
 popBack GrowVec {..} = do
   pos <- VGM.unsafeRead posGV 0
@@ -137,27 +155,37 @@ popBack GrowVec {..} = do
       Just <$> VGM.read vec (pos - 1)
 
 -- | \(O(1)\) `popBack` with return value discarded.
+--
+-- @since 1.0.0
 popBack_ :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m ()
 popBack_ GrowVec {..} = do
   pos <- VGM.unsafeRead posGV 0
   VGM.unsafeWrite posGV 0 $ max 0 $ pos - 1
 
 -- | \(O(1)\) Returns the number of elements in the vector.
+--
+-- @since 1.0.0
 length :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Int
 length GrowVec {posGV} = do
   VGM.unsafeRead posGV 0
 
 -- | \(O(1)\) Returns the capacity of the internal the vector.
+--
+-- @since 1.0.0
 capacity :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Int
 capacity GrowVec {vecGV} = do
   vec <- readMutVar vecGV
   pure $ VUM.length vec
 
 -- | \(O(1)\) Returns `True` if the vector is empty.
+--
+-- @since 1.0.0
 null :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Bool
 null = (<$>) (== 0) . length
 
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
+--
+-- @since 1.0.0
 freeze :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m (VU.Vector a)
 freeze GrowVec {..} = do
   len <- VGM.unsafeRead posGV 0
@@ -166,6 +194,8 @@ freeze GrowVec {..} = do
 
 -- | \(O(1)\) Unsafely converts a mutable vector to an immutable one without copying. The mutable
 -- vector may not be used after this operation.
+--
+-- @since 1.0.0
 unsafeFreeze :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m (VU.Vector a)
 unsafeFreeze GrowVec {..} = do
   len <- VGM.unsafeRead posGV 0

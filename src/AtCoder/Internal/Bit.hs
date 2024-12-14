@@ -1,6 +1,6 @@
 -- | Bit operations not in the `Data.Bits` module.
 --
--- = Example
+-- ==== Example
 -- >>> bitCeil 0
 -- 1
 -- >>> bitCeil 1
@@ -11,11 +11,15 @@
 -- 4
 -- >>> bitCeil 4
 -- 4
+--
+-- @since 1.0.0
 module AtCoder.Internal.Bit (bitCeil) where
 
 -- TODO: faster implmentation
 
 -- | \(O(w)\) Returns minimum \(2^i s.t. 2^i \geq n\).
+--
+-- @since 1.0.0
 bitCeil :: Int -> Int
 bitCeil n = inner 1
   where

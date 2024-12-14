@@ -1,6 +1,6 @@
 -- | Internal math implementation.
 --
--- = Example
+-- ==== Example
 -- >>> import AtCoder.Internal.Math
 -- >>> powMod 10 60 998244353 -- 10^60 mod 998244353
 -- 526662729
@@ -16,6 +16,8 @@
 -- 3
 -- >>> floorSumUnsigned 8 12 3 5
 -- 6
+--
+-- @since 1.0.0
 module AtCoder.Internal.Math
   ( powMod,
     isPrime,
@@ -71,6 +73,8 @@ powMod x n0 m0
            in inner (n .>>. 1) r' y'
 
 -- | M. Forisek and J. Jancina, Fast Primality Testing for Integers That Fit into a Machine Word
+--
+-- @since 1.0.0
 isPrime :: Int -> Bool
 isPrime n
   | n <= 1 = False
@@ -90,8 +94,10 @@ isPrime n
 
 -- | Returns \((g, x)\) such that \(g = \gcd(a, b), \mathrm{xa} = g(\bmod b), 0 \le x \le b/g\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(1 \le b\) (not asserted)
+--
+-- @since 1.0.0
 invGcd :: Int -> Int -> (Int, Int)
 invGcd a0 b
   | a == 0 = (b, 0)
@@ -114,6 +120,8 @@ invGcd a0 b
            in inner t s' m1 m0'
 
 -- | Returns primitive root.
+--
+-- @since 1.0.0
 primitiveRoot :: Int -> Int
 primitiveRoot m
   | m == 2 = 1
@@ -151,12 +159,14 @@ primitiveRoot m
 
 -- | Returns \(\sum\limits_{i = 0}^{n - 1} \left\lfloor \frac{a \times i + b}{m} \right\rfloor\).
 --
--- = Constraints
+-- ==== Constraints
 -- - \(n \lt 2^{32}\)
 -- - \(1 \le m \lt 2^{32}\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(\log m)\)
+--
+-- @since 1.0.0
 floorSumUnsigned :: Int -> Int -> Int -> Int -> Int
 floorSumUnsigned = inner 0
   where

@@ -1,6 +1,8 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Internal CSR for `AtCoder.MinCostFlow`.
+--
+-- @since 1.0.0
 module AtCoder.Internal.McfCsr (Csr (..), build, adj) where
 
 import Control.Monad.Primitive (PrimMonad, PrimState)
@@ -12,6 +14,8 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
 -- | CSR for min cost flow.
+--
+-- @since 1.0.0
 data Csr s cap cost = Csr
   { startCsr :: !(VU.Vector Int),
     toCsr :: !(VU.Vector Int),
@@ -22,6 +26,8 @@ data Csr s cap cost = Csr
   }
 
 -- | \(O(n + m)\) Creates `Csr`.
+--
+-- @since 1.0.0
 build :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost, PrimMonad m) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> m (VU.Vector Int, Csr (PrimState m) cap cost)
 build n edges = do
   let m = VU.length edges
@@ -69,6 +75,8 @@ build n edges = do
   pure (edgeIdx, Csr {..})
 
 -- | \(O(1)\) Returns a vector of @(to, rev, cost)@.
+--
+-- @since 1.0.0
 adj :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost) => Csr s cap cost -> Int -> VU.Vector (Int, Int, cost)
 adj Csr {..} v = VU.slice offset len vec
   where

@@ -1,6 +1,8 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Implementation of Strongly Connected Components calculation. Use `AtCoder.Scc` instead.
+--
+-- @since 1.0.0
 module AtCoder.Internal.Scc (SccGraph (nScc), new, addEdge, sccIds, scc) where
 
 import AtCoder.Internal.Csr qualified as ACICSR
@@ -17,23 +19,31 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
 -- | Graph for collecting strongly connected components.
+--
+-- @since 1.0.0
 data SccGraph s = SccGraph
   { nScc :: {-# UNPACK #-} !Int,
     edgesScc :: !(ACIGV.GrowVec s (Int, Int))
   }
 
 -- | \(O(n)\) Creates `SccGraph` of \(n\) vertices.
+--
+-- @since 1.0.0
 new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
 new nScc = do
   edgesScc <- ACIGV.new 0
   pure SccGraph {..}
 
 -- | \(O(1)\) amortized. Adds an edge to the graph.
+--
+-- @since 1.0.0
 addEdge :: (PrimMonad m) => SccGraph (PrimState m) -> Int -> Int -> m ()
 addEdge SccGraph {edgesScc} from to = do
   ACIGV.pushBack edgesScc (from, to)
 
 -- | \(O(n + m)\) Returns a pair of @(# of scc, scc id)@.
+--
+-- @since 1.0.0
 sccIds :: (PrimMonad m) => SccGraph (PrimState m) -> m (Int, VU.Vector Int)
 sccIds SccGraph {..} = do
   -- see also the Wikipedia: https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm#The_algorithm_in_pseudocode

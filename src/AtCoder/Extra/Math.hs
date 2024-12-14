@@ -1,6 +1,6 @@
 -- | Extra math module.
 --
--- = Examples
+-- ==== Examples
 -- >>> import AtCoder.Extra.Math qualified as M
 -- >>> import Data.Semigroup (Product(..), Sum(..))
 -- >>> getProduct $ M.power (<>) 32 (Product 2)
@@ -28,7 +28,7 @@ import Data.Bits ((.>>.))
 -- The internal implementation is taken from `Data.Semigroup.stimes`, but `power` uses strict
 -- evaluation and is often much faster.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(n \gt 0\)
 --
 -- @since 1.0.0
@@ -49,7 +49,7 @@ power op n0 x1
 
 -- | \(O(\log n)\) Strict `Data.Semigroup.stimes`.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(n \gt 0\)
 --
 -- @since 1.0.0
@@ -59,7 +59,7 @@ stimes' = power (<>)
 
 -- | \(O(\log n)\) Strict `Data.Monoid.mtimes`.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(n \ge 0\)
 --
 -- @since 1.0.0

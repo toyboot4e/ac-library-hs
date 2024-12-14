@@ -2,6 +2,8 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Internal implementation of `AtCoder.Convolution` module.
+--
+-- @since 1.0.0
 module AtCoder.Internal.Convolution
   ( FftInfo,
     newInfo,
@@ -27,6 +29,8 @@ import GHC.Exts (proxy#)
 import GHC.TypeNats (natVal')
 
 -- | Data for FFT calculation.
+--
+-- @since 1.0.0
 data FftInfo p = FftInfo
   { rootFft :: !(VU.Vector (AM.ModInt p)),
     iRootFft :: !(VU.Vector (AM.ModInt p)),
@@ -37,6 +41,8 @@ data FftInfo p = FftInfo
   }
 
 -- | \(O(\log m)\) Creates `FftInfo`.
+--
+-- @since 1.0.0
 newInfo :: forall m p. (PrimMonad m, AM.Modulus p) => m (FftInfo p)
 newInfo = do
   let !g = AM.primitiveRootModulus (proxy# @p)
@@ -88,6 +94,7 @@ newInfo = do
   iRate3Fft <- VU.unsafeFreeze iRate3
   pure FftInfo {..}
 
+-- | @since 1.0.0
 butterfly ::
   forall m p.
   (PrimMonad m, AM.Modulus p) =>
@@ -150,6 +157,7 @@ butterfly FftInfo {..} a = do
             (VU.generate (bit len) id)
           loop $ len + 2
 
+-- | @since 1.0.0
 butterflyInv ::
   forall m p.
   (PrimMonad m, AM.Modulus p) =>
@@ -212,6 +220,7 @@ butterflyInv FftInfo {..} a = do
             (VU.generate (bit (len - 2)) id)
           loop $ len - 2
 
+-- | @since 1.0.0
 convolutionNaive ::
   forall p.
   (AM.Modulus p) =>
@@ -233,6 +242,7 @@ convolutionNaive a b = VU.create $ do
           VGM.modify ans (+ a VG.! i * b VG.! j) (i + j)
   pure ans
 
+-- | @since 1.0.0
 convolutionFft ::
   forall p.
   (AM.Modulus p) =>
