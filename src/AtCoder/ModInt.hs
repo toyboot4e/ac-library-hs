@@ -15,6 +15,8 @@
 --
 -- ==== Major changes from the original @ac-library@
 -- - @DynamicModInt@ is removed.
+--
+-- @since 1.0.0
 module AtCoder.ModInt
   ( -- * Modulus
     Modulus (..),
@@ -63,6 +65,8 @@ import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, natVal, natVal')
 
 -- | `KnownNat` with meta information used for modulus.
+--
+-- @since 1.0.0
 class (KnownNat a) => Modulus a where
   -- | Returns if the modulus is a prime value.
   isPrimeModulus :: Proxy# a -> Bool
@@ -76,12 +80,16 @@ class (KnownNat a) => Modulus a where
   primitiveRootModulus _ = ACIM.primitiveRoot $ fromIntegral (natVal' (proxy# @a))
 
 -- | \(2^{24} - 1\).
+--
+-- @since 1.0.0
 instance Modulus 167772161 where
   isPrimeModulus _ = True
   {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 3
 
 -- | \(2^{25} - 1\).
+--
+-- @since 1.0.0
 instance Modulus 469762049 where
   {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
@@ -89,6 +97,8 @@ instance Modulus 469762049 where
   primitiveRootModulus _ = 3
 
 -- | \(2^{26} - 1\).
+--
+-- @since 1.0.0
 instance Modulus 754974721 where
   {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
@@ -96,6 +106,8 @@ instance Modulus 754974721 where
   primitiveRootModulus _ = 11
 
 -- | \(119 \times 2^{23} + 1\). It is often used in contest problems
+--
+-- @since 1.0.0
 instance Modulus 998244353 where
   {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
@@ -103,6 +115,8 @@ instance Modulus 998244353 where
   primitiveRootModulus _ = 3
 
 -- | It used to be used in contest problems.
+--
+-- @since 1.0.0
 instance Modulus 1000000007 where
   {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
@@ -110,18 +124,22 @@ instance Modulus 1000000007 where
   primitiveRootModulus _ = 5
 
 -- | \(2^{31} - 1\), suitable for boundary testing.
+--
+-- @since 1.0.0
 instance Modulus 2147483647 where
   {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
   {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 7
 
--- TODO: 2^31 - 1?
-
 -- | `ModInt` with modulus value @998244353@.
+--
+-- @since 1.0.0
 type ModInt998244353 = ModInt 998244353
 
 -- | `ModInt` with modulus value @1000000007@.
+--
+-- @since 1.0.0
 type ModInt1000000007 = ModInt 1000000007
 
 -- | Retrieves `Int` from `KnownNat`.
@@ -129,6 +147,8 @@ type ModInt1000000007 = ModInt 1000000007
 -- >>> import Data.Proxy (Proxy(..))
 -- >>> modVal (Proxy @42)
 -- 42
+--
+-- @since 1.0.0
 modVal :: forall a. (KnownNat a) => Proxy a -> Int
 modVal p = fromIntegral $ natVal p
 
@@ -138,18 +158,26 @@ modVal p = fromIntegral $ natVal p
 -- >>> import GHC.Exts (proxy#)
 -- >>> modVal# (proxy# @42)
 -- 42
+--
+-- @since 1.0.0
 modVal# :: forall a. (KnownNat a) => Proxy# a -> Int
 modVal# p = fromIntegral $ natVal' p
 
 -- | Creates `ModInt` from an `Int` value taking mod.
+--
+-- @since 1.0.0
 new :: forall a. (KnownNat a) => Int -> ModInt a
 new v = ModInt . fromIntegral $ v `mod` fromIntegral (natVal' (proxy# @a))
 
 -- | Creates `ModInt` from a `Word32` value taking mod.
+--
+-- @since 1.0.0
 new32 :: forall a. (KnownNat a) => Word32 -> ModInt a
 new32 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
 
 -- | Creates `ModInt` from a `Word64` value taking mod.
+--
+-- @since 1.0.0
 new64 :: forall a. (KnownNat a) => Word32 -> ModInt a
 new64 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
 
@@ -157,27 +185,50 @@ new64 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
 --
 -- ==== Constraints
 -- - \(0 \leq x \lt \mathrm{mod}\) (not asserted at runtime)
+--
+-- @since 1.0.0
 unsafeNew :: (KnownNat a) => Word32 -> ModInt a
 unsafeNew = ModInt
 
+-- | `Word32` value that treats the modula arithmetic.
 newtype ModInt a = ModInt {unModInt :: Word32}
   deriving (P.Prim)
   deriving newtype (Eq, Ord, Read, Show)
 
--- | \(O(1)\) Retrieve the mod from a `ModInt` object.
+-- | Retrieve the mod from a `ModInt` object.
+--
+-- ==== Complecity
+-- - \(O(1)\)
+--
+-- @since 1.0.0
 modulus :: forall a. (KnownNat a) => ModInt a -> Int
 modulus _ = fromIntegral (natVal' (proxy# @a))
 
--- | \(O(1)\) Returns the internal value converted to `Int`.
+-- | Returns the internal value converted to `Int`.
+--
+-- ==== Complecity
+-- - \(O(1)\)
+--
+-- @since 1.0.0
 val :: (KnownNat a) => ModInt a -> Int
 val = fromIntegral . unModInt
 
--- | \(O(1)\) Returns the internal value as `Word32` without type conversion. It is the function for
+-- | Returns the internal value as `Word32` without type conversion. It is the function for
 -- constant-factor speedup.
+--
+-- ==== Complecity
+-- - \(O(1)\)
+--
+-- @since 1.0.0
 val32 :: (KnownNat a) => ModInt a -> Word32
 val32 = unModInt
 
--- | \(O(1)\) Returns the internal value converted to `Word32`.
+-- | Returns the internal value converted to `Word32`.
+--
+-- ==== Complecity
+-- - \(O(1)\)
+--
+-- @since 1.0.0
 val64 :: (KnownNat a) => ModInt a -> Word32
 val64 = fromIntegral . unModInt
 
@@ -188,6 +239,8 @@ val64 = fromIntegral . unModInt
 --
 -- ==== Complexity
 -- - \(O(\log n)\)
+--
+-- @since 1.0.0
 pow :: forall a. (HasCallStack, KnownNat a) => ModInt a -> Int -> ModInt a
 pow (ModInt x0) n0 = ModInt . fromIntegral $ inner n0 1 (fromIntegral x0)
   where
@@ -220,6 +273,8 @@ pow (ModInt x0) n0 = ModInt . fromIntegral $ inner n0 1 (fromIntegral x0)
 --
 -- ==== Complexity
 -- - \(O(\log \mathrm{mod})\)
+--
+-- @since 1.0.0
 inv :: forall a. (HasCallStack, Modulus a) => ModInt a -> ModInt a
 inv self@(ModInt x)
   | isPrimeModulus (proxy# @a) =
@@ -230,8 +285,10 @@ inv self@(ModInt x)
           !_ = ACIA.runtimeAssert (eg1 == 1) "AtCoder.ModInt.inv: `x^(-1) mod m` cannot be calculated when `gcd x modulus /= 1`"
        in fromIntegral eg2
 
+-- | -- @since 1.0.0
 deriving newtype instance (KnownNat p) => Real (ModInt p)
 
+-- | -- @since 1.0.0
 instance (KnownNat p) => Num (ModInt p) where
   (ModInt !x1) + (ModInt !x2)
     | x' >= m = ModInt $! x' - m
@@ -254,28 +311,37 @@ instance (KnownNat p) => Num (ModInt p) where
   signum _ = ModInt 1
   fromInteger = ModInt . fromInteger . (`mod` fromIntegral (natVal' (proxy# @p)))
 
+-- | -- @since 1.0.0
 instance (KnownNat p) => Bounded (ModInt p) where
   minBound = ModInt 0
   maxBound = ModInt $! fromIntegral (natVal' (proxy# @p)) - 1
 
+-- | -- @since 1.0.0
 instance (KnownNat p) => Enum (ModInt p) where
   toEnum = new
   fromEnum = fromIntegral . unModInt
 
+-- | -- @since 1.0.0
 instance (Modulus p) => Integral (ModInt p) where
   quotRem x y = (x / y, x - x / y * y)
   toInteger = coerce (toInteger @Word32)
 
+-- | -- @since 1.0.0
 instance (Modulus p) => Fractional (ModInt p) where
   recip = inv
   fromRational q = fromInteger (numerator q) / fromInteger (denominator q)
 
+-- | -- @since 1.0.0
 newtype instance VU.MVector s (ModInt a) = MV_ModInt (VU.MVector s Word32)
 
+-- | -- @since 1.0.0
 newtype instance VU.Vector (ModInt a) = V_ModInt (VU.Vector Word32)
 
+-- | -- @since 1.0.0
 deriving newtype instance VGM.MVector VU.MVector (ModInt a)
 
+-- | -- @since 1.0.0
 deriving newtype instance VG.Vector VU.Vector (ModInt a)
 
+-- | -- @since 1.0.0
 instance VU.Unbox (ModInt a)

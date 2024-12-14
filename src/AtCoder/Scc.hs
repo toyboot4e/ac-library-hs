@@ -10,6 +10,8 @@
 -- >>> Scc.addEdge gr 1 2  -- 0 == 1 -> 2    3
 -- >>> Scc.scc gr
 -- [[3],[0,1],[2]]
+--
+-- @since 1.0.0
 module AtCoder.Scc (SccGraph, nScc, new, addEdge, scc) where
 
 import AtCoder.Internal.Assert qualified as ACIA
@@ -20,9 +22,13 @@ import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
 
 -- | Directed graph for calculating strongly connected components.
+--
+-- @since 1.0.0
 newtype SccGraph s = SccGraph (ACISCC.SccGraph s)
 
 -- | Returns the number of vertices in the SCC graph.
+--
+-- @since 1.0.0
 nScc :: SccGraph s -> Int
 nScc (SccGraph g) = ACISCC.nScc g
 
@@ -33,6 +39,8 @@ nScc (SccGraph g) = ACISCC.nScc g
 --
 -- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
 new n = SccGraph <$> ACISCC.new n
 
@@ -44,6 +52,8 @@ new n = SccGraph <$> ACISCC.new n
 --
 -- ==== Complexity
 -- - \(O(1)\) amortized
+--
+-- @since 1.0.0
 addEdge :: (HasCallStack, PrimMonad m) => SccGraph (PrimState m) -> Int -> Int -> m ()
 addEdge (SccGraph gr) from to = do
   let n = ACISCC.nScc gr
@@ -59,5 +69,7 @@ addEdge (SccGraph gr) from to = do
 --
 -- ==== Complexity
 -- - \(O(n + m)\), where \(m\) is the number of added edges.
+--
+-- @since 1.0.0
 scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
 scc (SccGraph g) = ACISCC.scc g

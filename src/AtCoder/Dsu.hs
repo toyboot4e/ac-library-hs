@@ -37,6 +37,8 @@
 -- 3
 -- >>> Dsu.groups dsu
 -- [[2,1,0],[3]]
+--
+-- @since 1.0.0
 module AtCoder.Dsu
   ( -- * Disjoint set union
     Dsu (nDsu),
@@ -69,6 +71,8 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
 -- | Disjoint set union. Akso known as Union-Find tree.
+--
+-- @since 1.0.0
 data Dsu s = Dsu
   { -- | The number of nodes.
     nDsu :: {-# UNPACK #-} !Int,
@@ -84,6 +88,8 @@ data Dsu s = Dsu
 --
 -- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 new :: (PrimMonad m) => Int -> m (Dsu (PrimState m))
 new nDsu
   | nDsu >= 0 = do
@@ -101,6 +107,8 @@ new nDsu
 --
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
+--
+-- @since 1.0.0
 merge :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Int
 merge dsu@Dsu {..} a b = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" a nDsu
@@ -127,6 +135,8 @@ merge dsu@Dsu {..} a b = do
 --
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
+--
+-- @since 1.0.0
 merge_ :: (PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m ()
 merge_ dsu a b = do
   _ <- merge dsu a b
@@ -140,6 +150,8 @@ merge_ dsu a b = do
 --
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
+--
+-- @since 1.0.0
 same :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Bool
 same dsu@Dsu {..} a b = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.same" a nDsu
@@ -155,6 +167,8 @@ same dsu@Dsu {..} a b = do
 --
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
+--
+-- @since 1.0.0
 leader :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 leader dsu@Dsu {..} a = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.leader" a nDsu
@@ -173,6 +187,8 @@ leader dsu@Dsu {..} a = do
 --
 -- ==== Complexity
 -- - \(O(\alpha(n))\)
+--
+-- @since 1.0.0
 size :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 size dsu@Dsu {..} a = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.size" a nDsu
@@ -187,6 +203,8 @@ size dsu@Dsu {..} a = do
 --
 -- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 groups :: (PrimMonad m) => Dsu (PrimState m) -> m (V.Vector (VU.Vector Int))
 groups dsu@Dsu {..} = do
   groupSize <- VUM.replicate nDsu (0 :: Int)

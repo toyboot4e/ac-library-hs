@@ -21,6 +21,8 @@
 -- >>> let s = BS.pack "abab"
 -- >>> S.zAlgorithmBS s
 -- [4,0,2,0]
+--
+-- @since 1.0.0
 module AtCoder.String
   ( -- * Suffix array
     suffixArray,
@@ -62,6 +64,8 @@ import GHC.Stack (HasCallStack)
 --
 -- ==== Complexity
 -- - (3) \(O(n + \mathrm{upper})\)-time
+--
+-- @since 1.0.0
 suffixArray :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
 suffixArray s upper =
   let !_ = ACIA.runtimeAssert (0 <= upper) $ "AtCoder.String.suffixArray: given negative `upper`: " ++ show upper
@@ -78,6 +82,8 @@ suffixArray s upper =
 --
 -- ==== Complexity
 -- - (1) \(O(n)\)-time
+--
+-- @since 1.0.0
 suffixArrayBS :: (HasCallStack) => BS.ByteString -> VU.Vector Int
 suffixArrayBS s = do
   let n = BS.length s
@@ -92,6 +98,8 @@ suffixArrayBS s = do
 --
 -- ==== Complexity
 -- - (2) \(O(n \log n)\)-time, \(O(n)\)-space
+--
+-- @since 1.0.0
 suffixArrayOrd :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
 suffixArrayOrd s =
   let n = VU.length s
@@ -125,6 +133,8 @@ suffixArrayOrd s =
 --
 -- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 lcpArray :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int -> VU.Vector Int
 lcpArray s sa =
   let n = VU.length s
@@ -163,6 +173,8 @@ lcpArray s sa =
 --
 -- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 lcpArrayBS :: (HasCallStack) => BS.ByteString -> VU.Vector Int -> VU.Vector Int
 lcpArrayBS s sa =
   let n = BS.length s
@@ -176,6 +188,8 @@ lcpArrayBS s sa =
 -- - \(n \leq n\)
 -- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 zAlgorithm :: (Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
 zAlgorithm s
   | n == 0 = VU.empty
@@ -215,5 +229,7 @@ zAlgorithm s
 -- - \(n \leq n\)
 -- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 zAlgorithmBS :: BS.ByteString -> VU.Vector Int
 zAlgorithmBS s = zAlgorithm $ VU.fromListN (BS.length s) (BS.unpack s)

@@ -17,6 +17,8 @@
 -- True
 -- >>> TS.answer ts
 -- [0]
+--
+-- @since 1.0.0
 module AtCoder.TwoSat
   ( -- * TwoSat
     TwoSat (..),
@@ -42,6 +44,8 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
 -- | 2-SAT state.
+--
+-- @since 1.0.0
 data TwoSat s = TwoSat
   { nTs :: {-# UNPACK #-} !Int,
     answerTs :: !(VUM.MVector s Bit),
@@ -55,6 +59,8 @@ data TwoSat s = TwoSat
 --
 -- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 new :: (PrimMonad m) => Int -> m (TwoSat (PrimState m))
 new nTs = do
   answerTs <- VUM.unsafeNew nTs
@@ -69,6 +75,8 @@ new nTs = do
 --
 -- ==== Complexity
 -- - \(O(1)\) amortized.
+--
+-- @since 1.0.0
 addClause :: (HasCallStack, PrimMonad m) => TwoSat (PrimState m) -> Int -> Bool -> Int -> Bool -> m ()
 addClause TwoSat {..} i f j g = do
   let !_ = ACIA.checkVertex "AtCoder.TwoSat.addClause" i nTs
@@ -84,6 +92,8 @@ addClause TwoSat {..} i f j g = do
 --
 -- ==== Complexity
 -- - \(O(n + m)\), where \(m\) is the number of added clauses.
+--
+-- @since 1.0.0
 satisfiable :: (PrimMonad m) => TwoSat (PrimState m) -> m Bool
 satisfiable TwoSat {..} = do
   (!_, !ids) <- ACISCC.sccIds sccTs
@@ -101,6 +111,8 @@ satisfiable TwoSat {..} = do
 --
 -- ==== Complexity
 -- - \(O(n)\)
+--
+-- @since 1.0.0
 answer :: (PrimMonad m) => TwoSat (PrimState m) -> m (VU.Vector Bit)
 answer = VU.freeze . answerTs
 
@@ -108,5 +120,7 @@ answer = VU.freeze . answerTs
 --
 -- ==== Complexity
 -- - \(O(1)\)
+--
+-- @since 1.0.0
 unsafeAnswer :: (PrimMonad m) => TwoSat (PrimState m) -> m (VU.Vector Bit)
 unsafeAnswer = VU.unsafeFreeze . answerTs

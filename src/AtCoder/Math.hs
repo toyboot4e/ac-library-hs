@@ -1,6 +1,8 @@
 {-# LANGUAGE TypeFamilies #-}
 
 -- | Math module. It contains number-theoretic algorithms.
+--
+-- @since 1.0.0
 module AtCoder.Math
   ( -- * Modulus operations
     -- These functions are internally used for `AtCoder.ModInt`.
@@ -37,6 +39,8 @@ import GHC.Stack (HasCallStack)
 -- >>> let m = 998244353
 -- >>> (invMod 2 m) * 2 `mod` m -- (2^(-1) mod m) * 2 mod m
 -- 1
+--
+-- @since 1.0.0
 invMod :: (HasCallStack) => Int -> Int -> Int
 invMod x m =
   let !_ = ACIA.runtimeAssert (1 <= m) $ "AtCoder.Math.invMod: given invalid `m` less than 1: " ++ show m
@@ -77,6 +81,8 @@ invMod x m =
 -- [0,1,0,4]
 -- >>> VU.zipWith mod rs ms == VU.map (y `mod`) ms
 -- True
+--
+-- @since 1.0.0
 crt :: (HasCallStack) => VU.Vector Int -> VU.Vector Int -> (Int, Int)
 crt r m = loop 0 1 [0 .. VU.length r - 1]
   where
@@ -138,6 +144,8 @@ crt r m = loop 0 1 [0 .. VU.length r - 1]
 --   0  1  2  3  4  5
 --                  n = 5
 -- @
+--
+-- @since 1.0.0
 floorSum :: (HasCallStack) => Int -> Int -> Int -> Int -> Int
 floorSum n m a b = ACIM.floorSumUnsigned n m a' b' - da - db
   where
