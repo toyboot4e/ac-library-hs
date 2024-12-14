@@ -56,6 +56,12 @@
 -- >>> LST.minLeft seg 4 (<= (Sum 10)) -- sum [3, 4) = 10 <= 10
 -- 3
 --
+-- Inspect all the values in \(O(n \log n)\) with `freeze` or `unsafeFreeze`. Note that they
+-- propagete all the applied actions:
+--
+-- >>> VU.map getSum <$> LST.freeze seg
+-- [2,5,7,10]
+--
 -- ==== Tips
 --
 -- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\). If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\),
@@ -67,7 +73,7 @@
 -- - The API is based on `Monoid` and `SegAct`, not the functions @op@, @e@, @mapping@,
 -- @composition@ and @id@.
 -- - The functions names follow the vector package: @get@ and @set@ are renamed to `read` and
--- `write`. `modify` and `modifyM` are added.
+-- `write`. `modify`, `modifyM`, `freeze` and `unsafeFreeze` are added.
 --
 -- @since 1.0.0
 module AtCoder.LazySegTree

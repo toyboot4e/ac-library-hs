@@ -46,6 +46,11 @@
 -- >>> ST.minLeft seg 4 (< (Sum 5)) -- sum [3, 4) = 3 < 5
 -- 3
 --
+-- Inspect all the values in \(O(n)\) with `freeze` or in \(O(1)\) with `unsafeFreeze`:
+--
+-- >>> VU.map getSum <$> ST.freeze seg
+-- [0,1,2,3]
+--
 -- ==== Tips
 --
 -- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\). If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\),
