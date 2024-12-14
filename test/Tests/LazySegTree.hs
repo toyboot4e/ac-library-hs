@@ -26,9 +26,19 @@ unit_zero = testCase "zero" $ do
   do
     s <- LST.new @_ @(Sum Int) @(Max Int) 0
     (@?= mempty) =<< LST.allProd s
+    (@?= VU.empty) =<< LST.unsafeFreeze s
+    (@?= VU.empty) =<< LST.freeze s
   do
     s <- LST.new @_ @(Sum Int) @(Max Int) 10
     (@?= mempty) =<< LST.allProd s
+
+-- Extra test for freeze
+unit_one :: TestTree
+unit_one = testCase "one" $ do
+  s <- LST.build @_ @(Sum Int) @(Max Int) $ VU.singleton (Max 10)
+  (@?= Max 10) =<< LST.allProd s
+  (@?= VU.singleton (Max 10)) =<< LST.unsafeFreeze s
+  (@?= VU.singleton (Max 10)) =<< LST.freeze s
 
 -- assign
 
@@ -65,9 +75,14 @@ unit_naiveProd = testCase "naiveProd" $ do
         let expected = VU.foldl' (<>) mempty $ VU.slice l (r - l) p'
         (@?= expected) =<< LST.prod seg l r
 
-    -- read (extra test)
-    for_ [0 .. n - 1] $ \i -> do
-      (@?= p' VG.! i) =<< LST.read seg i
+    if even n
+      then do
+        -- read (extra test)
+        for_ [0 .. n - 1] $ \i -> do
+          (@?= p' VG.! i) =<< LST.read seg i
+      else do
+        -- freeze (extra test)
+        (@?= p') =<< LST.unsafeFreeze seg
 
 unit_usage :: TestTree
 unit_usage = testCase "usage" $ do
@@ -84,6 +99,7 @@ unit_usage = testCase "usage" $ do
 tests :: [TestTree]
 tests =
   [ unit_zero,
+    unit_one,
     unsafePerformIO spec_invalid,
     unit_naiveProd,
     unit_usage

@@ -53,11 +53,10 @@
 -- - If you ever need to store boxed types to `SegTree`, wrap it in 'Data.Vector.Unboxed.DoNotUnboxStrict'
 -- or the like.
 --
---
 -- ==== Major changes from the original @ac-library@
 -- - The implementation is `Monoid` based.
 -- - @get@ and @set@ are renamed to `read` and `write`.
--- - `modify` and `modifyM` are added.
+-- - `modify`, `modifyM`, `freeze` and `unsafeFreeze` are added.
 --
 -- @since 1.0.0
 module AtCoder.SegTree
@@ -87,6 +86,10 @@ module AtCoder.SegTree
     -- ** Right binary searches
     minLeft,
     minLeftM,
+
+    -- * Conversions
+    freeze,
+    unsafeFreeze,
   )
 where
 
@@ -101,17 +104,15 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
--- TODO: freeze and unsafeFreeze
-
 -- | Segment tree.
 --
 -- @since 1.0.0
 data SegTree s a = SegTree
-  { -- | Valid length.
+  { -- | THe number of vertices.
     --
     -- @since 1.0.0
     nSt :: {-# UNPACK #-} !Int,
-    -- | \(\lceil \log_2 \mathrm{nSt} \rceil\)
+    -- | \(\lceil \log_2 \mathrm{nSt} \rceil\).
     --
     -- @since 1.0.0
     sizeSt :: {-# UNPACK #-} !Int,
@@ -162,7 +163,7 @@ build vs = do
 -- - \(0 \leq p \lt n\)
 --
 -- ==== Complexity
--- - \(O(1)\)
+-- - \(O(\log n)\)
 --
 -- @since 1.0.0
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m ()
@@ -178,7 +179,7 @@ write self@SegTree {..} p x = do
 -- - \(0 \leq p \lt n\)
 --
 -- ==== Complexity
--- - \(O(1)\)
+-- - \(O(\log n)\)
 --
 -- @since 1.0.0
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> a) -> Int -> m ()
@@ -194,7 +195,7 @@ modify self@SegTree {..} f p = do
 -- - \(0 \leq p \lt n\)
 --
 -- ==== Complexity
--- - \(O(1)\)
+-- - \(O(\log n)\)
 --
 -- @since 1.0.0
 modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> m a) -> Int -> m ()
@@ -210,7 +211,7 @@ modifyM self@SegTree {..} f p = do
 -- - \(0 \leq p \lt n\)
 --
 -- ==== Complexity
--- - \(O(\log n)\)
+-- - \(O(1)\)
 --
 -- @since 1.0.0
 read :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m a
@@ -395,6 +396,21 @@ minLeftM SegTree {..} r0 f = do
             then inner2 (r' - 1) sm'
             else inner2 r' sm
       | otherwise = pure $ r + 1 - sizeSt
+
+-- | \(O(n)\) Yields an immutable copy of the mutable vector.
+--
+-- @since 1.0.0
+freeze :: (PrimMonad m, VU.Unbox a) => SegTree (PrimState m) a -> m (VU.Vector a)
+freeze SegTree {..} = do
+  VU.freeze . VUM.take nSt $ VUM.drop sizeSt dSt
+
+-- | \(O(1)\) Unsafely converts a mutable vector to an immutable one without copying. The mutable
+-- vector may not be used after this operation.
+--
+-- @since 1.0.0
+unsafeFreeze :: (PrimMonad m, VU.Unbox a) => SegTree (PrimState m) a -> m (VU.Vector a)
+unsafeFreeze SegTree {..} = do
+  VU.unsafeFreeze . VUM.take nSt $ VUM.drop sizeSt dSt
 
 -- | \(O(1)\)
 update :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m ()

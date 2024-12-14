@@ -7,7 +7,7 @@ module Tests.LazySegTreeStress (tests) where
 
 import AtCoder.LazySegTree qualified as LST
 import Control.Monad.Primitive (PrimMonad, PrimState)
-import Control.Monad.State (liftIO)
+import Control.Monad.State (MonadIO, liftIO)
 import Control.Monad.State.Strict (StateT (..))
 import Data.Foldable
 import Data.Vector.Generic qualified as VG
@@ -35,6 +35,9 @@ prod (TimeManager vec) l r =
     )
     (-1 :: Int)
     (VU.generate (r - l) (+ l))
+
+freezeTM :: (PrimMonad m) => TimeManager (PrimState m) -> m (VU.Vector Int)
+freezeTM (TimeManager vec) = VU.freeze vec
 
 -- | S (l, r, time): half-open interval with generation.
 newtype S = S SRepr
@@ -108,7 +111,7 @@ uniformPairM rng@(!lower, !upper) g
 -- testDriver :: Int ->
 --    (Int -> LST.LazySegTree (PrimState (StateT UniformGen IO )
 testDriver ::
-  (PrimMonad m) =>
+  (MonadIO m, PrimMonad m) =>
   (Int, Int) ->
   Int ->
   (Int -> LST.LazySegTree (PrimState m) T S -> TimeManager (PrimState m) -> Int -> Int -> Int -> StateT StdGen m Int) ->
@@ -127,6 +130,14 @@ testDriver tyRange@(!_, !_) nRepeat f = do
           )
           (0 :: Int)
           (VU.generate nRepeat id)
+
+      -- extra test (freeze)
+      expected <- freezeTM tm
+      actual <-
+        if even n
+          then VU.map (\(S (!_, !_, !t)) -> t) <$> LST.freeze seg0
+          else VU.map (\(S (!_, !_, !t)) -> t) <$> LST.unsafeFreeze seg0
+      liftIO $ actual @?= expected
 
 -- | prod, read, applyIn, applyAt
 unit_naiveTest :: TestTree
@@ -163,7 +174,7 @@ unit_maxRightTest = testCase "maxRightTest" $ do
   testDriver (0, 2) 1000 $ \now seg0 tm ty l r -> case ty of
     0 -> do
       -- maxRight
-      LST.maxRight seg0 l $ \(S (!lS, !rS, !_)) -> case lS of
+      !_ <- LST.maxRight seg0 l $ \(S (!lS, !rS, !_)) -> case lS of
         _
           | lS == -1 -> True
           | lS /= l -> error "unreachable"
@@ -181,7 +192,7 @@ unit_minLeftTest = testCase "minLeftTest" $ do
   testDriver (0, 2) 1000 $ \now seg0 tm ty l r -> case ty of
     0 -> do
       -- minLeft
-      LST.minLeft seg0 r $ \(S (!lS, !rS, !_)) -> case lS of
+      !_ <- LST.minLeft seg0 r $ \(S (!lS, !rS, !_)) -> case lS of
         _
           | lS == -1 -> True
           | rS /= r -> error "unreachable"

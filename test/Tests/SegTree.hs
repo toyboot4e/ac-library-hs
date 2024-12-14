@@ -68,6 +68,9 @@ minLeftStn SegTreeNaive {..} r0 f = do
   d <- VU.unsafeFreeze dStn
   pure . loop (r0 - 1) mempty . VU.toList . VU.reverse $ VU.take r0 d
 
+freezeStn :: (Monoid a, VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> m (VU.Vector a)
+freezeStn = VU.freeze . dStn
+
 type FooRepr = DoNotUnboxLazy String
 
 newtype Foo = Foo String
@@ -201,12 +204,21 @@ unit_compareNaive = testCase "compareNaive" $ do
           expected <- readStn seg0 i
           (@?= expected) =<< ST.read seg1 i
 
--- TODO: verify yosupo
+        -- freeze (extra test)
+        expected <- freezeStn seg0
+        (@?= expected) =<< ST.freeze seg1
+
+unit_freezeZero :: TestTree
+unit_freezeZero = testCase "freezeZero" $ do
+  seg <- ST.new @_ @(Sum Int) 0
+  (VU.empty @=?) =<< ST.freeze seg
+  (VU.empty @=?) =<< ST.unsafeFreeze seg
 
 tests :: [TestTree]
 tests =
   [ unit_zero,
     unsafePerformIO spec_invalid,
     unit_one,
-    unit_compareNaive
+    unit_compareNaive,
+    unit_freezeZero
   ]

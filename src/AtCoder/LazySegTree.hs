@@ -102,6 +102,10 @@ module AtCoder.LazySegTree
     -- ** Right binary searches
     maxRight,
     maxRightM,
+
+    -- * Conversions
+    freeze,
+    unsafeFreeze,
   )
 where
 
@@ -657,6 +661,27 @@ maxRightM self@LazySegTree {..} l0 g = do
             then inner2 (l' + 1) sm'
             else inner2 l' sm
       | otherwise = pure $ l - sizeLst
+
+-- | \(O(n)\) Yields an immutable copy of the mutable vector.
+--
+-- @since 1.0.0
+freeze :: (PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m (VU.Vector a)
+freeze self@LazySegTree {..} = do
+  -- push all (we _could_ skip some elements)
+  for_ [1 .. sizeLst - 1] $ \i -> do
+    push self i
+  VU.freeze . VUM.take nLst $ VUM.drop sizeLst dLst
+
+-- | \(O(n)\) Unsafely converts a mutable vector to an immutable one without copying. The mutable
+-- vector may not be used after this operation.
+--
+-- @since 1.0.0
+unsafeFreeze :: (PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m (VU.Vector a)
+unsafeFreeze self@LazySegTree {..} = do
+  -- push all (we _could_ skip some elements)
+  for_ [1 .. sizeLst - 1] $ \i -> do
+    push self i
+  VU.unsafeFreeze . VUM.take nLst $ VUM.drop sizeLst dLst
 
 -- | \(O(1)\)
 update :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m ()
