@@ -45,20 +45,20 @@ conv64Naive a b = VU.create $ do
 unit_empty :: TestTree
 unit_empty = testCase "empty" $ do
   -- any `Integral a` is allowed
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.empty @Int) (VU.empty @Int)
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.empty @Int) (VU.fromList @Int [1, 2])
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @Int [1, 2]) (VU.empty @Int)
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @Int [1]) (VU.empty @Int)
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.empty @Int) (VU.empty @Int)
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.empty @Int) (VU.fromList @Int [1, 2])
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.fromList @Int [1, 2]) (VU.empty @Int)
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.fromList @Int [1]) (VU.empty @Int)
 
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.empty @Word64) (VU.empty @Word64)
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.empty @Word64) (VU.fromList @Word64 [1, 2])
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @Word64 [1, 2]) (VU.empty @Word64)
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @Word64 [1]) (VU.empty @Word64)
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.empty @Word64) (VU.empty @Word64)
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.empty @Word64) (VU.fromList @Word64 [1, 2])
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.fromList @Word64 [1, 2]) (VU.empty @Word64)
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.fromList @Word64 [1]) (VU.empty @Word64)
 
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.empty @(AM.ModInt 998244353)) (VU.empty @(AM.ModInt 998244353))
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.empty @(AM.ModInt 998244353)) (VU.fromList @(AM.ModInt 998244353) [1, 2])
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @(AM.ModInt 998244353) [1, 2]) (VU.empty @(AM.ModInt 998244353))
-  VU.empty @=? ACC.convolutionMod (Proxy @998244353) (VU.fromList @(AM.ModInt 998244353) [1]) (VU.empty @(AM.ModInt 998244353))
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.empty @(AM.ModInt 998244353)) (VU.empty @(AM.ModInt 998244353))
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.empty @(AM.ModInt 998244353)) (VU.fromList @(AM.ModInt 998244353) [1, 2])
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.fromList @(AM.ModInt 998244353) [1, 2]) (VU.empty @(AM.ModInt 998244353))
+  VU.empty @=? ACC.convolutionRaw (Proxy @998244353) (VU.fromList @(AM.ModInt 998244353) [1]) (VU.empty @(AM.ModInt 998244353))
 
 -- FIXME: the naive calculation seems like too slow
 prop_mid :: TestTree
@@ -132,14 +132,14 @@ prop_simpleInt0 = QC.testProperty "simpleInt0"
 prop_simpleInt1 :: TestTree
 prop_simpleInt1 = QC.testProperty "simpleInt1"
   . testWithRangeInt (Proxy @998244353)
-  $ \a b -> convModNaive modulus a b QC.=== ACC.convolutionMod (Proxy @998244353) a b
+  $ \a b -> convModNaive modulus a b QC.=== ACC.convolutionRaw (Proxy @998244353) a b
   where
     !modulus = AM.modVal (Proxy @998244353)
 
 prop_simpleInt2 :: TestTree
 prop_simpleInt2 = QC.testProperty "simpleInt2"
   . testWithRangeInt (Proxy @924844033)
-  $ \a b -> convModNaive modulus a b QC.=== ACC.convolutionMod (Proxy @924844033) a b
+  $ \a b -> convModNaive modulus a b QC.=== ACC.convolutionRaw (Proxy @924844033) a b
   where
     !modulus = AM.modVal (Proxy @924844033)
 
@@ -192,7 +192,7 @@ prop_conv641 = QC.testProperty "prop_conv641" $ do
   let modulus = 641
   a <- VU.fromList <$> QC.vectorOf 64 (QC.chooseInt (0, modulus - 1))
   b <- VU.fromList <$> QC.vectorOf 65 (QC.chooseInt (0, modulus - 1))
-  pure $ convModNaive modulus a b QC.=== ACC.convolutionMod (Proxy @641) a b
+  pure $ convModNaive modulus a b QC.=== ACC.convolutionRaw (Proxy @641) a b
 
 instance AM.Modulus 18433 where
   isPrimeModulus _ = True
@@ -203,11 +203,11 @@ prop_conv18433 = QC.testProperty "prop_conv18433" $ do
   let modulus = 18433
   a <- VU.fromList <$> QC.vectorOf 1024 (QC.chooseInt (0, modulus - 1))
   b <- VU.fromList <$> QC.vectorOf 1025 (QC.chooseInt (0, modulus - 1))
-  pure $ convModNaive modulus a b QC.=== ACC.convolutionMod (Proxy @18433) a b
+  pure $ convModNaive modulus a b QC.=== ACC.convolutionRaw (Proxy @18433) a b
 
 unit_conv2 :: TestTree
 unit_conv2 = testCase "prop_conv2" $ do
-  VU.empty @Int @=? ACC.convolutionMod (Proxy @2) VU.empty VU.empty
+  VU.empty @Int @=? ACC.convolutionRaw (Proxy @2) VU.empty VU.empty
 
 instance AM.Modulus 257 where
   isPrimeModulus _ = True
@@ -218,7 +218,7 @@ prop_conv257 = QC.testProperty "prop_conv257" $ do
   let modulus = 257
   a <- VU.fromList <$> QC.vectorOf 128 (QC.chooseInt (0, modulus - 1))
   b <- VU.fromList <$> QC.vectorOf 129 (QC.chooseInt (0, modulus - 1))
-  pure $ convModNaive modulus a b QC.=== ACC.convolutionMod (Proxy @257) a b
+  pure $ convModNaive modulus a b QC.=== ACC.convolutionRaw (Proxy @257) a b
 
 instance AM.Modulus 2147483647 where
   isPrimeModulus _ = True

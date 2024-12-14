@@ -6,28 +6,39 @@
 -- c_i = \sum_{j = 0}^i a_j b_{i - j}
 -- \]
 --
--- = Example
+-- ==== __Example__
+-- The convolution module basically works with `AtCoder.ModInt`:
+--
 -- >>> import AtCoder.Convolution qualified as C
 -- >>> import AtCoder.ModInt qualified as M
 -- >>> import Data.Proxy (Proxy)
 -- >>> import Data.Vector.Unboxed qualified as VU
+--
+-- It's handy to define specific items for interested modulus values:
+--
 -- >>> type Mint = M.ModInt998244353
 -- >>> let modInt :: Int -> Mint; modInt = M.new
--- >>>
--- >>> -- Convolution for mod int:
+--
+-- Calculate convolution:
+--
 -- >>> let a = VU.map modInt $ VU.fromList [1, 2, 3, 4]
 -- >>> let b = VU.map modInt $ VU.fromList [5, 6, 7, 8]
 -- >>> C.convolution a b
 -- [5,16,34,60,61,52,32]
--- >>>
--- >>> -- Convolution for any `Integral a`:
+--
+-- You can also target any @'Integral' a@ (with some runtime overhead for conversion to modint):
+--
 -- >>> let a = VU.fromList @Int [1, 2, 3, 4]
 -- >>> let b = VU.fromList @Int [5, 6, 7, 8]
--- >>> C.convolutionMod (Proxy @998244353) a b
+-- >>> C.convolutionRaw (Proxy @998244353) a b
 -- [5,16,34,60,61,52,32]
+--
+-- If you want to calculate large values without taking a mod, use `convolution64`.
 module AtCoder.Convolution
-  ( convolution,
-    convolutionMod,
+  ( -- * Convolution with a modulus value
+    convolution,
+    convolutionRaw,
+    -- * Convolution without a modulus value
     convolution64,
   )
 where
@@ -50,12 +61,12 @@ import GHC.TypeNats (natVal')
 -- | Calculates the convolution in \(\bmod m\) for a vector of `ACIM.ModInt`. It returns an empty
 -- array if at least one of \(a\) and \(b\) are empty.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(2 \leq m \leq 2 \times 10^9\)
 -- - \(m\) is prime.
 -- - There is an integer \(c\) with \(2^c | (m - 1)\) and \(|a| + |b| - 1 \leq 2^c\).
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 convolution ::
   forall p.
@@ -78,28 +89,28 @@ convolution a b
 
 -- | `convolution` for any `Integral` @a@.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(2 \leq m \leq 2 \times 10^9\)
 -- - \(m\) is prime.
 -- - There is an integer \(c\) with \(2^c | (m - 1)\) and \(|a| + |b| - 1 \leq 2^c\).
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
-convolutionMod ::
+convolutionRaw ::
   forall p a.
   (HasCallStack, AM.Modulus p, Integral a, VU.Unbox a) =>
   Proxy p ->
   VU.Vector a ->
   VU.Vector a ->
   VU.Vector a
-convolutionMod _ a b
+convolutionRaw _ a b
   | n == 0 || m == 0 = VU.empty
   | otherwise =
       let z = ACIB.bitCeil (n + m - 1)
           !modulus = fromIntegral (natVal' (proxy# @p))
-          !_ = ACIA.runtimeAssert ((modulus - 1) `mod` z == 0) $ "AtCoder.Convolution.convolutionMod: not works when `(m - 1) mod z /= 0`: " ++ show (m, z)
-          c2 = convolution @p (VU.map fromIntegral a) (VU.map fromIntegral b)
-       in VU.map fromIntegral c2
+          !_ = ACIA.runtimeAssert ((modulus - 1) `mod` z == 0) $ "AtCoder.Convolution.convolutionRaw: not works when `(m - 1) mod z /= 0`: " ++ show (m, z)
+          -- `Vector a` -> `Vector (ModInt p)` -> `Vector a`
+       in VU.map fromIntegral $ convolution @p (VU.map fromIntegral a) (VU.map fromIntegral b)
   where
     n = VU.length a
     m = VU.length b
@@ -107,10 +118,10 @@ convolutionMod _ a b
 -- | Calculates the convolution. It returns an empty array if at least one of \(a\) and \(b\) are
 -- empty.
 --
--- = Constraints
+-- ==== Constraints
 -- - \(|a| + |b| - 1 \leq 2^{24}\)
 --
--- = Complexity
+-- ==== Complexity
 -- - \(O(n\log{n})\), where \(n = |a| + |b|\).
 convolution64 ::
   (HasCallStack) =>
@@ -138,7 +149,7 @@ convolution64 a b
           -- !_ = ACIA.runtimeAssert (mod2 `mod` bit maxAbBit == 1) $ "AtCoder.Convolution.convolution64: `mod2` isn't enough to support an array of length `2^25`."
           -- !_ = ACIA.runtimeAssert (mod3 `mod` bit maxAbBit == 1) $ "AtCoder.Convolution.convolution64: `mod3` isn't enough to support an array of length `2^26`."
           !_ = ACIA.runtimeAssert (n + m - 1 <= bit maxAbBit) "AtCoder.Convolution.convolution64: given too long vector as input"
-          -- TODO: convolution vs convolutionMod for the speed. I think the former is faster.
+          -- TODO: convolution vs convolutionRaw for the speed. I think the former is faster.
           c1 = convolution {- mod1 -} (VU.map (AM.new @754974721) a) (VU.map (AM.new @754974721) b)
           c2 = convolution {- mod2 -} (VU.map (AM.new @167772161) a) (VU.map (AM.new @167772161) b)
           c3 = convolution {- mod3 -} (VU.map (AM.new @469762049) a) (VU.map (AM.new @469762049) b)

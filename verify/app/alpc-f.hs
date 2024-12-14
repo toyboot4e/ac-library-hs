@@ -10,5 +10,5 @@ main = do
   _ <- BS.getLine
   a <- ints
   b <- ints
-  let c = C.convolutionMod (Proxy @998244353) a b
+  let c = C.convolutionRaw (Proxy @998244353) a b
   printBSB $ unwordsBSB $ VU.map fromIntegral c
