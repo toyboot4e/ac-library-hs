@@ -23,7 +23,7 @@ import AtCoder.Internal.Bit qualified as ACIB
 import AtCoder.ModInt qualified as AM
 import Control.Monad (when)
 import Control.Monad.Fix (fix)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Data.Bits (bit, complement, countTrailingZeros, (.<<.), (.>>.))
 import Data.Foldable
 import Data.Vector.Generic qualified as VG
@@ -54,9 +54,9 @@ data FftInfo p = FftInfo
 -- | \(O(\log m)\) Creates `FftInfo`.
 --
 -- @since 1.0.0
-{-# INLINE newInfo #-}
+-- {-# INLINE newInfo #-}
 newInfo :: forall m p. (PrimMonad m, AM.Modulus p) => m (FftInfo p)
-newInfo = do
+newInfo = stToPrim $ do
   let !g = AM.primitiveRootModulus (proxy# @p)
   let !m = fromIntegral $ natVal' (proxy# @p)
   let !rank2 = countTrailingZeros $ m - 1
@@ -107,14 +107,14 @@ newInfo = do
   pure FftInfo {..}
 
 -- | @since 1.0.0
-{-# INLINE butterfly #-}
+-- {-# INLINE butterfly #-}
 butterfly ::
   forall m p.
   (PrimMonad m, AM.Modulus p) =>
   FftInfo p ->
   VUM.MVector (PrimState m) (AM.ModInt p) ->
   m ()
-butterfly FftInfo {..} a = do
+butterfly FftInfo {..} a = stToPrim $ do
   let n = VUM.length a
   let h = countTrailingZeros n
   let !m = fromIntegral $ natVal' (proxy# @p)
@@ -171,14 +171,14 @@ butterfly FftInfo {..} a = do
           loop $ len + 2
 
 -- | @since 1.0.0
-{-# INLINE butterflyInv #-}
+-- {-# INLINE butterflyInv #-}
 butterflyInv ::
   forall m p.
   (PrimMonad m, AM.Modulus p) =>
   FftInfo p ->
   VUM.MVector (PrimState m) (AM.ModInt p) ->
   m ()
-butterflyInv FftInfo {..} a = do
+butterflyInv FftInfo {..} a = stToPrim $ do
   let n = VUM.length a
   let h = countTrailingZeros n
   let !m = fromIntegral $ natVal' (proxy# @p)
@@ -235,7 +235,7 @@ butterflyInv FftInfo {..} a = do
           loop $ len - 2
 
 -- | @since 1.0.0
-{-# INLINE convolutionNaive #-}
+-- {-# INLINE convolutionNaive #-}
 convolutionNaive ::
   forall p.
   (AM.Modulus p) =>
@@ -258,7 +258,7 @@ convolutionNaive a b = VU.create $ do
   pure ans
 
 -- | @since 1.0.0
-{-# INLINE convolutionFft #-}
+-- {-# INLINE convolutionFft #-}
 convolutionFft ::
   forall p.
   (AM.Modulus p) =>
