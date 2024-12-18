@@ -1,16 +1,13 @@
 # ac-library-hs
 
-Haskell port of AtCoder Library (ACL).
+Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive programming on [AtCoder](https://atcoder.jp/).
 
-## Status
+## Notes
 
-We're preparing for [the next language update (2024-2025)](https://atcoder.jp/posts/1342?lang=ja) ([#4](https://github.com/toyboot4e/ac-library-hs/issues/4)).
+- The library is mainly for AtCoder and only GHC 9.8.4 is guaranteed to be supported.
+- The `Internal` module is unstable and does not follow PVP.
 
-**Currently only GHC 9.4.5 is supported**. GHC 9.8.4 will be available before long.
+## Usage
 
-## Contributing
-
-Feel free to open issues/PRs! Feel free to contact with me on [haskell-jp](https://haskell.jp/) slack, [the AtCoder Discord](https://atcoder.jp/posts/1342?lang=ja) or anywhere you find me.
-
-日本語でも全く問題ありません。
+See the API documentation for more information.
 
