@@ -49,6 +49,7 @@ data Csr e = Csr
 -- | \(O(n + m)\) Creates `Csr`.
 --
 -- @since 1.0.0
+{-# INLINE build #-}
 build :: (HasCallStack, VU.Unbox e) => Int -> VU.Vector (Int, e) -> Csr e
 build n edges = runST $ do
   start <- VUM.replicate (n + 1) (0 :: Int)
@@ -76,6 +77,7 @@ build n edges = runST $ do
 -- | \(O(1)\) Returns adjacent vertices.
 --
 -- @since 1.0.0
+{-# INLINE adj #-}
 adj :: (HasCallStack, VU.Unbox e) => Csr e -> Int -> VU.Vector e
 adj Csr {..} i =
   let il = startCsr VG.! i

@@ -54,6 +54,7 @@ data FftInfo p = FftInfo
 -- | \(O(\log m)\) Creates `FftInfo`.
 --
 -- @since 1.0.0
+{-# INLINE newInfo #-}
 newInfo :: forall m p. (PrimMonad m, AM.Modulus p) => m (FftInfo p)
 newInfo = do
   let !g = AM.primitiveRootModulus (proxy# @p)
@@ -106,6 +107,7 @@ newInfo = do
   pure FftInfo {..}
 
 -- | @since 1.0.0
+{-# INLINE butterfly #-}
 butterfly ::
   forall m p.
   (PrimMonad m, AM.Modulus p) =>
@@ -169,6 +171,7 @@ butterfly FftInfo {..} a = do
           loop $ len + 2
 
 -- | @since 1.0.0
+{-# INLINE butterflyInv #-}
 butterflyInv ::
   forall m p.
   (PrimMonad m, AM.Modulus p) =>
@@ -232,6 +235,7 @@ butterflyInv FftInfo {..} a = do
           loop $ len - 2
 
 -- | @since 1.0.0
+{-# INLINE convolutionNaive #-}
 convolutionNaive ::
   forall p.
   (AM.Modulus p) =>
@@ -254,6 +258,7 @@ convolutionNaive a b = VU.create $ do
   pure ans
 
 -- | @since 1.0.0
+{-# INLINE convolutionFft #-}
 convolutionFft ::
   forall p.
   (AM.Modulus p) =>

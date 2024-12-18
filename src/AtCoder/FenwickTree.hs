@@ -80,6 +80,7 @@ data FenwickTree s a = FenwickTree
 -- - \(O(n)\)
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => Int -> m (FenwickTree (PrimState m) a)
 new nFt
   | nFt >= 0 = do
@@ -94,6 +95,7 @@ new nFt
 --
 -- @since 1.0.0
 build :: (PrimMonad m, Num a, VU.Unbox a) => VU.Vector a -> m (FenwickTree (PrimState m) a)
+{-# INLINE build #-}
 build xs = do
   ft <- new $ VU.length xs
   VU.iforM_ xs $ add ft
@@ -108,6 +110,7 @@ build xs = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE add #-}
 add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()
 add FenwickTree {..} p0 x = do
   let !_ = ACIA.checkIndex "AtCoder.FenwickTree.add" p0 nFt
@@ -123,6 +126,7 @@ add FenwickTree {..} p0 x = do
 -- | \(O(\log n)\) Calculates the sum in half-open range @[0, r)@.
 --
 -- @since 1.0.0
+{-# INLINE prefixSum #-}
 prefixSum :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> m a
 prefixSum FenwickTree {..} = inner 0
   where
@@ -141,6 +145,7 @@ prefixSum FenwickTree {..} = inner 0
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE sum #-}
 sum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
 sum ft@FenwickTree {..} l r = do
   let !_ = ACIA.checkInterval "AtCoder.FenwickTree.sum" l r nFt

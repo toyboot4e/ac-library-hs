@@ -57,6 +57,7 @@ import GHC.Stack (HasCallStack)
 -- 526662729
 --
 -- @since 1.0.0
+{-# INLINE powMod #-}
 powMod :: (HasCallStack) => Int -> Int -> Int -> Int
 powMod x n0 m0
   | m0 == 1 = 0
@@ -75,6 +76,7 @@ powMod x n0 m0
 -- | M. Forisek and J. Jancina, Fast Primality Testing for Integers That Fit into a Machine Word
 --
 -- @since 1.0.0
+{-# INLINE isPrime #-}
 isPrime :: Int -> Bool
 isPrime n
   | n <= 1 = False
@@ -98,6 +100,7 @@ isPrime n
 -- - \(1 \le b\) (not asserted)
 --
 -- @since 1.0.0
+{-# INLINE invGcd #-}
 invGcd :: Int -> Int -> (Int, Int)
 invGcd a0 b
   | a == 0 = (b, 0)
@@ -122,6 +125,7 @@ invGcd a0 b
 -- | Returns primitive root.
 --
 -- @since 1.0.0
+{-# INLINE primitiveRoot #-}
 primitiveRoot :: Int -> Int
 primitiveRoot m
   | m == 2 = 1
@@ -167,6 +171,7 @@ primitiveRoot m
 -- - \(O(\log m)\)
 --
 -- @since 1.0.0
+{-# INLINE floorSumUnsigned #-}
 floorSumUnsigned :: Int -> Int -> Int -> Int -> Int
 floorSumUnsigned = inner 0
   where

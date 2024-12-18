@@ -96,6 +96,7 @@ data MfGraph s cap = MfGraph
 -- - \(O(n)\)
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox cap) => Int -> m (MfGraph (PrimState m) cap)
 new nG = do
   gG <- V.replicateM nG (ACIGV.new 0)
@@ -113,6 +114,7 @@ new nG = do
 -- - \(O(1)\) amortized
 --
 -- @since 1.0.0
+{-# INLINE addEdge #-}
 addEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m Int
 addEdge MfGraph {..} from to cap = do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdge" "`from` vertex" from "the number of vertices" nG
@@ -138,6 +140,7 @@ addEdge MfGraph {..} from to cap = do
 -- - \(O(1)\) amortized
 --
 -- @since 1.0.0
+{-# INLINE addEdge_ #-}
 addEdge_ :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m ()
 addEdge_ graph from to cap = do
   _ <- addEdge graph from to cap
@@ -156,6 +159,7 @@ addEdge_ graph from to cap = do
 -- - \(O(F(n + m))\), where \(F\) is the returned value
 --
 -- @since 1.0.0
+{-# INLINE flow #-}
 flow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m cap
 flow MfGraph {..} s t flowLimit = do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`source` vertex" s "the number of vertices" nG
@@ -247,6 +251,7 @@ flow MfGraph {..} s t flowLimit = do
 -- - \(O(F(n + m))\), where \(F\) is the returned value
 --
 -- @since 1.0.0
+{-# INLINE maxFlow #-}
 maxFlow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, Bounded cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> m cap
 maxFlow graph s t = flow graph s t maxBound
 
@@ -258,6 +263,7 @@ maxFlow graph s t = flow graph s t maxBound
 -- - \(O(n + m)\), where \(m\) is the number of added edges.
 --
 -- @since 1.0.0
+{-# INLINE minCut #-}
 minCut :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (VU.Vector Bit)
 minCut MfGraph {..} s = do
   visited <- VUM.replicate nG $ Bit False
@@ -288,6 +294,7 @@ minCut MfGraph {..} s = do
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE getEdge #-}
 getEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (Int, Int, cap, cap)
 getEdge MfGraph {..} i = do
   m <- ACIGV.length posG
@@ -304,6 +311,7 @@ getEdge MfGraph {..} i = do
 -- - \(O(m)\), where \(m\) is the number of added edges.
 --
 -- @since 1.0.0
+{-# INLINE edges #-}
 edges :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> m (VU.Vector (Int, Int, cap, cap))
 edges g@MfGraph {posG} = do
   len <- ACIGV.length posG
@@ -320,6 +328,7 @@ edges g@MfGraph {posG} = do
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE changeEdge #-}
 changeEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> cap -> cap -> m ()
 changeEdge MfGraph {..} i newCap newFlow = do
   m <- ACIGV.length posG

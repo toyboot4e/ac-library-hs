@@ -138,6 +138,7 @@ data SegTree s a = SegTree
 -- - \(O(n)\)
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (SegTree (PrimState m) a)
 new nSt
   | nSt >= 0 = build $ VU.replicate nSt mempty
@@ -149,6 +150,7 @@ new nSt
 -- - \(O(n)\)
 --
 -- @since 1.0.0
+{-# INLINE build #-}
 build :: (PrimMonad m, Monoid a, VU.Unbox a) => VU.Vector a -> m (SegTree (PrimState m) a)
 build vs = do
   let nSt = VU.length vs
@@ -171,6 +173,7 @@ build vs = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m ()
 write self@SegTree {..} p x = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.write" p nSt
@@ -187,6 +190,7 @@ write self@SegTree {..} p x = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> a) -> Int -> m ()
 modify self@SegTree {..} f p = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.modify" p nSt
@@ -203,6 +207,7 @@ modify self@SegTree {..} f p = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> m a) -> Int -> m ()
 modifyM self@SegTree {..} f p = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.modifyM" p nSt
@@ -219,6 +224,7 @@ modifyM self@SegTree {..} f p = do
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m a
 read SegTree {..} p = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.read" p nSt
@@ -234,6 +240,7 @@ read SegTree {..} p = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE prod #-}
 prod :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m a
 prod SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
   where
@@ -259,6 +266,7 @@ prod SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE allProd #-}
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> m a
 allProd SegTree {..} = VGM.read dSt 1
 
@@ -295,6 +303,7 @@ maxRight seg l0 f = maxRightM seg l0 (pure . f)
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE maxRightM #-}
 maxRightM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
 maxRightM SegTree {..} l0 f = do
   b <- f mempty
@@ -368,6 +377,7 @@ minLeft seg r0 f = minLeftM seg r0 (pure . f)
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE minLeftM #-}
 minLeftM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
 minLeftM SegTree {..} r0 f = do
   b <- f mempty
@@ -405,6 +415,7 @@ minLeftM SegTree {..} r0 f = do
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --
 -- @since 1.0.0
+{-# INLINE freeze #-}
 freeze :: (PrimMonad m, VU.Unbox a) => SegTree (PrimState m) a -> m (VU.Vector a)
 freeze SegTree {..} = do
   VU.freeze . VUM.take nSt $ VUM.drop sizeSt dSt
@@ -413,11 +424,13 @@ freeze SegTree {..} = do
 -- vector may not be used after this operation.
 --
 -- @since 1.0.0
+{-# INLINE unsafeFreeze #-}
 unsafeFreeze :: (PrimMonad m, VU.Unbox a) => SegTree (PrimState m) a -> m (VU.Vector a)
 unsafeFreeze SegTree {..} = do
   VU.unsafeFreeze . VUM.take nSt $ VUM.drop sizeSt dSt
 
 -- | \(O(1)\)
+{-# INLINE update #-}
 update :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m ()
 update SegTree {..} k = do
   opL <- VGM.read dSt $ 2 * k

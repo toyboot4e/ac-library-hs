@@ -95,6 +95,7 @@ data Buffer s a = Buffer
 -- | \(O(n)\) Creates a buffer with capacity \(n\).
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (Buffer (PrimState m) a)
 new n = do
   lenB <- VUM.replicate 1 (0 :: Int)
@@ -104,6 +105,7 @@ new n = do
 -- | \(O(n)\) Creates a buffer with capacity \(n\) with initial values.
 --
 -- @since 1.0.0
+{-# INLINE build #-}
 build :: (PrimMonad m, VU.Unbox a) => VU.Vector a -> m (Buffer (PrimState m) a)
 build xs = do
   lenB <- VUM.replicate 1 $ VU.length xs
@@ -113,6 +115,7 @@ build xs = do
 -- | \(O(1)\) Appends an element to the back.
 --
 -- @since 1.0.0
+{-# INLINE pushBack #-}
 pushBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> a -> m ()
 pushBack Buffer {..} e = do
   len <- VGM.read lenB 0
@@ -122,6 +125,7 @@ pushBack Buffer {..} e = do
 -- | \(O(1)\) Removes the last element from the buffer and returns it, or `Nothing` if it is empty.
 --
 -- @since 1.0.0
+{-# INLINE popBack #-}
 popBack :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (Maybe a)
 popBack Buffer {..} = do
   len <- VGM.read lenB 0
@@ -135,6 +139,7 @@ popBack Buffer {..} = do
 -- | \(O(1)\) Returns the last value in the buffer, or `Nothing` if it is empty.
 --
 -- @since 1.0.0
+{-# INLINE back #-}
 back :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (Maybe a)
 back Buffer {..} = do
   len <- VGM.read lenB 0
@@ -148,6 +153,7 @@ back Buffer {..} = do
 -- of range.
 --
 -- @since 1.0.0
+{-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> Int -> m a
 read Buffer {..} i = do
   len <- VGM.read lenB 0
@@ -158,6 +164,7 @@ read Buffer {..} i = do
 -- out of range.
 --
 -- @since 1.0.0
+{-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> Int -> a -> m ()
 write Buffer {..} i e = do
   len <- VGM.read lenB 0
@@ -168,6 +175,7 @@ write Buffer {..} i e = do
 -- out of range.
 --
 -- @since 1.0.0
+{-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> (a -> a) -> Int -> m ()
 modify Buffer {..} f i = do
   len <- VGM.read lenB 0
@@ -178,6 +186,7 @@ modify Buffer {..} f i = do
 -- out of range.
 --
 -- @since 1.0.0
+{-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> (a -> m a) -> Int -> m ()
 modifyM Buffer {..} f i = do
   len <- VGM.read lenB 0
@@ -187,12 +196,14 @@ modifyM Buffer {..} f i = do
 -- | \(O(1)\) Returns the array size.
 --
 -- @since 1.0.0
+{-# INLINE capacity #-}
 capacity :: (VU.Unbox a) => Buffer s a -> Int
 capacity = VUM.length . vecB
 
 -- | \(O(1)\) Returns the number of elements in the buffer.
 --
 -- @since 1.0.0
+{-# INLINE length #-}
 length :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m Int
 length Buffer {..} = do
   VGM.read lenB 0
@@ -200,12 +211,14 @@ length Buffer {..} = do
 -- | \(O(1)\) Returns `True` if the buffer is empty.
 --
 -- @since 1.0.0
+{-# INLINE null #-}
 null :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m Bool
 null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Sets the `length` to zero.
 --
 -- @since 1.0.0
+{-# INLINE clear #-}
 clear :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m ()
 clear Buffer {..} = do
   VGM.write lenB 0 0
@@ -213,6 +226,7 @@ clear Buffer {..} = do
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --
 -- @since 1.0.0
+{-# INLINE freeze #-}
 freeze :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (VU.Vector a)
 freeze Buffer {..} = do
   len <- VGM.read lenB 0
@@ -222,6 +236,7 @@ freeze Buffer {..} = do
 -- vector may not be used after this operation.
 --
 -- @since 1.0.0
+{-# INLINE unsafeFreeze #-}
 unsafeFreeze :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (VU.Vector a)
 unsafeFreeze Buffer {..} = do
   len <- VGM.read lenB 0

@@ -29,6 +29,7 @@ newtype SccGraph s = SccGraph (ACISCC.SccGraph s)
 -- | Returns the number of vertices in the SCC graph.
 --
 -- @since 1.0.0
+{-# INLINE nScc #-}
 nScc :: SccGraph s -> Int
 nScc (SccGraph g) = ACISCC.nScc g
 
@@ -41,6 +42,7 @@ nScc (SccGraph g) = ACISCC.nScc g
 -- - \(O(n)\)
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
 new n = SccGraph <$> ACISCC.new n
 
@@ -54,6 +56,7 @@ new n = SccGraph <$> ACISCC.new n
 -- - \(O(1)\) amortized
 --
 -- @since 1.0.0
+{-# INLINE addEdge #-}
 addEdge :: (HasCallStack, PrimMonad m) => SccGraph (PrimState m) -> Int -> Int -> m ()
 addEdge (SccGraph gr) from to = do
   let n = ACISCC.nScc gr
@@ -71,5 +74,6 @@ addEdge (SccGraph gr) from to = do
 -- - \(O(n + m)\), where \(m\) is the number of added edges.
 --
 -- @since 1.0.0
+{-# INLINE scc #-}
 scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
 scc (SccGraph g) = ACISCC.scc g

@@ -89,6 +89,7 @@ data McfGraph s cap cost = McfGraph
 -- - \(O(n)\)
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox cap, VU.Unbox cost) => Int -> m (McfGraph (PrimState m) cap cost)
 new nG = do
   edgesG <- ACIGV.new 0
@@ -105,6 +106,7 @@ new nG = do
 -- - \(O(1)\) amortized
 --
 -- @since 1.0.0
+{-# INLINE addEdge #-}
 addEdge ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
@@ -132,6 +134,7 @@ addEdge McfGraph {..} from to cap cost = do
 -- - \(O(1)\) amortized
 --
 -- @since 1.0.0
+{-# INLINE addEdge_ #-}
 addEdge_ ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
@@ -154,6 +157,7 @@ addEdge_ graph from to cap cost = do
 -- - Same as `slope`.
 --
 -- @since 1.0.0
+{-# INLINE flow #-}
 flow ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
@@ -174,6 +178,7 @@ flow graph s t flowLimit = do
 -- - Same as `slope`.
 --
 -- @since 1.0.0
+{-# INLINE maxFlow #-}
 maxFlow ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, Bounded cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
@@ -207,6 +212,7 @@ maxFlow graph s t = do
 -- - \(O(F (n + m) \log (n + m))\), where \(F\) is the amount of the flow and \(m\) is the number of added edges.
 --
 -- @since 1.0.0
+{-# INLINE slope #-}
 slope ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
@@ -230,6 +236,7 @@ slope McfGraph {..} s t flowLimit = do
 
   pure result
 
+{-# INLINE internalSlopeMCF #-}
 internalSlopeMCF ::
   forall cap cost m.
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
@@ -357,6 +364,7 @@ internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE getEdge #-}
 getEdge ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
@@ -374,6 +382,7 @@ getEdge McfGraph {..} i = do
 -- - \(O(m)\), where \(m\) is the number of added edges.
 --
 -- @since 1.0.0
+{-# INLINE edges #-}
 edges ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->
@@ -388,6 +397,7 @@ edges McfGraph {..} = do
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE unsafeEdges #-}
 unsafeEdges ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
   McfGraph (PrimState m) cap cost ->

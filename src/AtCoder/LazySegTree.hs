@@ -314,6 +314,7 @@ data LazySegTree s f a = LazySegTree
 -- - \(O(n)\)
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Int -> m (LazySegTree (PrimState m) f a)
 new nLst
   | nLst >= 0 = build $ VU.replicate nLst mempty
@@ -328,6 +329,7 @@ new nLst
 -- - \(O(n)\)
 --
 -- @since 1.0.0
+{-# INLINE build #-}
 build :: (PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => VU.Vector a -> m (LazySegTree (PrimState m) f a)
 build vs = do
   let nLst = VU.length vs
@@ -351,6 +353,7 @@ build vs = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> a -> m ()
 write self@LazySegTree {..} p x = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.write" p nLst
@@ -370,6 +373,7 @@ write self@LazySegTree {..} p x = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> (a -> a) -> Int -> m ()
 modify self@LazySegTree {..} f p = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.modify" p nLst
@@ -389,6 +393,7 @@ modify self@LazySegTree {..} f p = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> (a -> m a) -> Int -> m ()
 modifyM self@LazySegTree {..} f p = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.modify" p nLst
@@ -408,6 +413,7 @@ modifyM self@LazySegTree {..} f p = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m a
 read self@LazySegTree {..} p = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.read" p nLst
@@ -426,6 +432,7 @@ read self@LazySegTree {..} p = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE prod #-}
 prod :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
 prod self@LazySegTree {..} l0 r0
   | l0 == r0 = pure mempty
@@ -459,6 +466,7 @@ prod self@LazySegTree {..} l0 r0
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE allProd #-}
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m a
 allProd LazySegTree {..} = VGM.read dLst 1
 
@@ -471,6 +479,7 @@ allProd LazySegTree {..} = VGM.read dLst 1
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE applyAt #-}
 applyAt :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
 applyAt self@LazySegTree {..} p f = do
   let !_ = ACIA.checkIndex "AtCoder.LazySegTree.applyAt" p nLst
@@ -493,6 +502,7 @@ applyAt self@LazySegTree {..} p f = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE applyIn #-}
 applyIn :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
 applyIn self@LazySegTree {..} l0 r0 f
   | l0 == r0 = pure ()
@@ -539,6 +549,7 @@ applyIn self@LazySegTree {..} l0 r0 f
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE minLeft #-}
 minLeft :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 minLeft seg r0 g = minLeftM seg r0 (pure . g)
 
@@ -554,6 +565,7 @@ minLeft seg r0 g = minLeftM seg r0 (pure . g)
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE minLeftM #-}
 minLeftM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
 minLeftM self@LazySegTree {..} r0 g = do
   b <- g mempty
@@ -612,6 +624,7 @@ minLeftM self@LazySegTree {..} r0 g = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE maxRight #-}
 maxRight :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 maxRight seg l0 g = maxRightM seg l0 (pure . g)
 
@@ -627,6 +640,7 @@ maxRight seg l0 g = maxRightM seg l0 (pure . g)
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE maxRightM #-}
 maxRightM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
 maxRightM self@LazySegTree {..} l0 g = do
   b <- g mempty
@@ -671,6 +685,7 @@ maxRightM self@LazySegTree {..} l0 g = do
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --
 -- @since 1.0.0
+{-# INLINE freeze #-}
 freeze :: (PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m (VU.Vector a)
 freeze self@LazySegTree {..} = do
   -- push all (we _could_ skip some elements)
@@ -682,6 +697,7 @@ freeze self@LazySegTree {..} = do
 -- vector may not be used after this operation.
 --
 -- @since 1.0.0
+{-# INLINE unsafeFreeze #-}
 unsafeFreeze :: (PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m (VU.Vector a)
 unsafeFreeze self@LazySegTree {..} = do
   -- push all (we _could_ skip some elements)
@@ -690,6 +706,7 @@ unsafeFreeze self@LazySegTree {..} = do
   VU.unsafeFreeze . VUM.take nLst $ VUM.drop sizeLst dLst
 
 -- | \(O(1)\)
+{-# INLINE update #-}
 update :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m ()
 update LazySegTree {..} k = do
   opL <- VGM.read dLst $ 2 * k
@@ -697,6 +714,7 @@ update LazySegTree {..} k = do
   VGM.write dLst k $! opL <> opR
 
 -- | \(O(1)\)
+{-# INLINE allApply #-}
 allApply :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
 allApply LazySegTree {..} k f = do
   let !len = bit $! logLst - (63 - countLeadingZeros k)
@@ -705,6 +723,7 @@ allApply LazySegTree {..} k f = do
     VGM.modify lzLst (f <>) k
 
 -- | \(O(1)\)
+{-# INLINE push #-}
 push :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m ()
 push self@LazySegTree {..} k = do
   lzK <- VGM.read lzLst k

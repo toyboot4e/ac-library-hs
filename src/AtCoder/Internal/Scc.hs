@@ -44,6 +44,7 @@ data SccGraph s = SccGraph
 -- | \(O(n)\) Creates `SccGraph` of \(n\) vertices.
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
 new nScc = do
   edgesScc <- ACIGV.new 0
@@ -52,6 +53,7 @@ new nScc = do
 -- | \(O(1)\) amortized. Adds an edge to the graph.
 --
 -- @since 1.0.0
+{-# INLINE addEdge #-}
 addEdge :: (PrimMonad m) => SccGraph (PrimState m) -> Int -> Int -> m ()
 addEdge SccGraph {edgesScc} from to = do
   ACIGV.pushBack edgesScc (from, to)
@@ -59,6 +61,7 @@ addEdge SccGraph {edgesScc} from to = do
 -- | \(O(n + m)\) Returns a pair of @(# of scc, scc id)@.
 --
 -- @since 1.0.0
+{-# INLINE sccIds #-}
 sccIds :: (PrimMonad m) => SccGraph (PrimState m) -> m (Int, VU.Vector Int)
 sccIds SccGraph {..} = do
   -- see also the Wikipedia: https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm#The_algorithm_in_pseudocode
@@ -134,6 +137,7 @@ sccIds SccGraph {..} = do
 -- | \(O(n + m)\) Returns the strongly connected components.
 --
 -- @since 1.0.0
+{-# INLINE scc #-}
 scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
 scc g = do
   (!groupNum, !ids) <- sccIds g

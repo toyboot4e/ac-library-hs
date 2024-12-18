@@ -41,6 +41,7 @@ import GHC.Stack (HasCallStack)
 -- 1
 --
 -- @since 1.0.0
+{-# INLINE invMod #-}
 invMod :: (HasCallStack) => Int -> Int -> Int
 invMod x m =
   let !_ = ACIA.runtimeAssert (1 <= m) $ "AtCoder.Math.invMod: given invalid `m` less than 1: " ++ show m
@@ -83,6 +84,7 @@ invMod x m =
 -- True
 --
 -- @since 1.0.0
+{-# INLINE crt #-}
 crt :: (HasCallStack) => VU.Vector Int -> VU.Vector Int -> (Int, Int)
 crt r m = loop 0 1 [0 .. VU.length r - 1]
   where
@@ -146,6 +148,7 @@ crt r m = loop 0 1 [0 .. VU.length r - 1]
 -- @
 --
 -- @since 1.0.0
+{-# INLINE floorSum #-}
 floorSum :: (HasCallStack) => Int -> Int -> Int -> Int -> Int
 floorSum n m a b = ACIM.floorSumUnsigned n m a' b' - da - db
   where

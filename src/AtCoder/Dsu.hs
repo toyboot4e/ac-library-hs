@@ -92,6 +92,7 @@ data Dsu s = Dsu
 -- - \(O(n)\)
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: (PrimMonad m) => Int -> m (Dsu (PrimState m))
 new nDsu
   | nDsu >= 0 = do
@@ -111,6 +112,7 @@ new nDsu
 -- - \(O(\alpha(n))\) amortized
 --
 -- @since 1.0.0
+{-# INLINE merge #-}
 merge :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Int
 merge dsu@Dsu {..} a b = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" a nDsu
@@ -139,6 +141,7 @@ merge dsu@Dsu {..} a b = do
 -- - \(O(\alpha(n))\) amortized
 --
 -- @since 1.0.0
+{-# INLINE merge_ #-}
 merge_ :: (PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m ()
 merge_ dsu a b = do
   _ <- merge dsu a b
@@ -154,6 +157,7 @@ merge_ dsu a b = do
 -- - \(O(\alpha(n))\) amortized
 --
 -- @since 1.0.0
+{-# INLINE same #-}
 same :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Bool
 same dsu@Dsu {..} a b = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.same" a nDsu
@@ -171,6 +175,7 @@ same dsu@Dsu {..} a b = do
 -- - \(O(\alpha(n))\) amortized
 --
 -- @since 1.0.0
+{-# INLINE leader #-}
 leader :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 leader dsu@Dsu {..} a = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.leader" a nDsu
@@ -191,6 +196,7 @@ leader dsu@Dsu {..} a = do
 -- - \(O(\alpha(n))\)
 --
 -- @since 1.0.0
+{-# INLINE size #-}
 size :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 size dsu@Dsu {..} a = do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.size" a nDsu
@@ -207,6 +213,7 @@ size dsu@Dsu {..} a = do
 -- - \(O(n)\)
 --
 -- @since 1.0.0
+{-# INLINE groups #-}
 groups :: (PrimMonad m) => Dsu (PrimState m) -> m (V.Vector (VU.Vector Int))
 groups dsu@Dsu {..} = do
   groupSize <- VUM.replicate nDsu (0 :: Int)

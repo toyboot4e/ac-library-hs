@@ -96,6 +96,7 @@ class (KnownNat a) => Modulus a where
 --
 -- @since 1.0.0
 instance Modulus 167772161 where
+  {-# INLINE isPrimeModulus #-}
   isPrimeModulus _ = True
   {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 3
@@ -162,6 +163,7 @@ type ModInt1000000007 = ModInt 1000000007
 -- 42
 --
 -- @since 1.0.0
+{-# INLINE modVal #-}
 modVal :: forall a. (KnownNat a) => Proxy a -> Int
 modVal p = fromIntegral $ natVal p
 
@@ -173,24 +175,28 @@ modVal p = fromIntegral $ natVal p
 -- 42
 --
 -- @since 1.0.0
+{-# INLINE modVal# #-}
 modVal# :: forall a. (KnownNat a) => Proxy# a -> Int
 modVal# p = fromIntegral $ natVal' p
 
 -- | Creates `ModInt` from an `Int` value taking mod.
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: forall a. (KnownNat a) => Int -> ModInt a
 new v = ModInt . fromIntegral $ v `mod` fromIntegral (natVal' (proxy# @a))
 
 -- | Creates `ModInt` from a `Word32` value taking mod.
 --
 -- @since 1.0.0
+{-# INLINE new32 #-}
 new32 :: forall a. (KnownNat a) => Word32 -> ModInt a
 new32 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
 
 -- | Creates `ModInt` from a `Word64` value taking mod.
 --
 -- @since 1.0.0
+{-# INLINE new64 #-}
 new64 :: forall a. (KnownNat a) => Word32 -> ModInt a
 new64 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
 
@@ -200,6 +206,7 @@ new64 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
 -- - \(0 \leq x \lt \mathrm{mod}\) (not asserted at runtime)
 --
 -- @since 1.0.0
+{-# INLINE unsafeNew #-}
 unsafeNew :: (KnownNat a) => Word32 -> ModInt a
 unsafeNew = ModInt
 
@@ -226,6 +233,7 @@ newtype ModInt a = ModInt {unModInt :: Word32}
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE modulus #-}
 modulus :: forall a. (KnownNat a) => ModInt a -> Int
 modulus _ = fromIntegral (natVal' (proxy# @a))
 
@@ -235,6 +243,7 @@ modulus _ = fromIntegral (natVal' (proxy# @a))
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE val #-}
 val :: (KnownNat a) => ModInt a -> Int
 val = fromIntegral . unModInt
 
@@ -245,6 +254,7 @@ val = fromIntegral . unModInt
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE val32 #-}
 val32 :: (KnownNat a) => ModInt a -> Word32
 val32 = unModInt
 
@@ -254,6 +264,7 @@ val32 = unModInt
 -- - \(O(1)\)
 --
 -- @since 1.0.0
+{-# INLINE val64 #-}
 val64 :: (KnownNat a) => ModInt a -> Word32
 val64 = fromIntegral . unModInt
 
@@ -266,6 +277,7 @@ val64 = fromIntegral . unModInt
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
+{-# INLINE pow #-}
 pow :: forall a. (HasCallStack, KnownNat a) => ModInt a -> Int -> ModInt a
 pow (ModInt x0) n0 = ModInt . fromIntegral $ inner n0 1 (fromIntegral x0)
   where
@@ -300,6 +312,7 @@ pow (ModInt x0) n0 = ModInt . fromIntegral $ inner n0 1 (fromIntegral x0)
 -- - \(O(\log \mathrm{mod})\)
 --
 -- @since 1.0.0
+{-# INLINE inv #-}
 inv :: forall a. (HasCallStack, Modulus a) => ModInt a -> ModInt a
 inv self@(ModInt x)
   | isPrimeModulus (proxy# @a) =
@@ -315,45 +328,60 @@ deriving newtype instance (KnownNat p) => Real (ModInt p)
 
 -- | -- @since 1.0.0
 instance (KnownNat p) => Num (ModInt p) where
+  {-# INLINE (+) #-}
   (ModInt !x1) + (ModInt !x2)
     | x' >= m = ModInt $! x' - m
     | otherwise = ModInt x'
     where
       !x' = x1 + x2
       !m = fromIntegral (natVal' (proxy# @p))
+  {-# INLINE (-) #-}
   (ModInt !x1) - (ModInt !x2)
     | x' >= m = ModInt $! x' + m -- loops
     | otherwise = ModInt x'
     where
       !x' = x1 - x2
       !m = fromIntegral (natVal' (proxy# @p))
+  {-# INLINE (*) #-}
   (ModInt !x1) * (ModInt !x2) = ModInt $! fromIntegral (x' `rem` m)
     where
       !x' :: Word64 = fromIntegral x1 * fromIntegral x2
       !m :: Word64 = fromIntegral (natVal' (proxy# @p))
+  {-# INLINE negate #-}
   negate x = 0 - x
+  {-# INLINE abs #-}
   abs = id
+  {-# INLINE signum #-}
   signum _ = ModInt 1
+  {-# INLINE fromInteger #-}
   fromInteger = ModInt . fromInteger . (`mod` fromIntegral (natVal' (proxy# @p)))
 
 -- | -- @since 1.0.0
 instance (KnownNat p) => Bounded (ModInt p) where
+  {-# INLINE minBound #-}
   minBound = ModInt 0
+  {-# INLINE maxBound #-}
   maxBound = ModInt $! fromIntegral (natVal' (proxy# @p)) - 1
 
 -- | -- @since 1.0.0
 instance (KnownNat p) => Enum (ModInt p) where
+  {-# INLINE toEnum #-}
   toEnum = new
+  {-# INLINE fromEnum #-}
   fromEnum = fromIntegral . unModInt
 
 -- | -- @since 1.0.0
 instance (Modulus p) => Integral (ModInt p) where
+  {-# INLINE quotRem #-}
   quotRem x y = (x / y, x - x / y * y)
+  {-# INLINE toInteger #-}
   toInteger = coerce (toInteger @Word32)
 
 -- | -- @since 1.0.0
 instance (Modulus p) => Fractional (ModInt p) where
+  {-# INLINE recip #-}
   recip = inv
+  {-# INLINE fromRational #-}
   fromRational q = fromInteger (numerator q) / fromInteger (denominator q)
 
 -- | -- @since 1.0.0

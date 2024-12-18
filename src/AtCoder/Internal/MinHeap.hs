@@ -79,6 +79,7 @@ data Heap s a = Heap
 -- | \(O(n)\) Creates `Heap` with capacity \(n\).
 --
 -- @since 1.0.0
+{-# INLINE new #-}
 new :: (VU.Unbox a, PrimMonad m) => Int -> m (Heap (PrimState m) a)
 new n = do
   sizeBH_ <- VUM.replicate 1 0
@@ -88,30 +89,35 @@ new n = do
 -- | \(O(1)\) Returns the maximum number of elements in the heap.
 --
 -- @since 1.0.0
+{-# INLINE capacity #-}
 capacity :: (VU.Unbox a) => Heap s a -> Int
 capacity = VUM.length . dataBH
 
 -- | \(O(1)\) Returns the number of elements in the heap.
 --
 -- @since 1.0.0
+{-# INLINE length #-}
 length :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m Int
 length Heap {sizeBH_} = VGM.unsafeRead sizeBH_ 0
 
 -- | \(O(1)\) Returns `True` if the heap is empty.
 --
 -- @since 1.0.0
+{-# INLINE null #-}
 null :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m Bool
 null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Sets the `length` to zero.
 --
 -- @since 1.0.0
+{-# INLINE clear #-}
 clear :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
 clear Heap {sizeBH_} = VGM.unsafeWrite sizeBH_ 0 0
 
 -- | \(O(\log n)\) Inserts an element to the heap.
 --
 -- @since 1.0.0
+{-# INLINE push #-}
 push :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> a -> m ()
 push Heap {..} x = do
   i0 <- VGM.unsafeRead sizeBH_ 0
@@ -128,6 +134,7 @@ push Heap {..} x = do
 -- | \(O(1)\) Returns the smallest value in the heap, or `Nothing` if it is empty.
 --
 -- @since 1.0.0
+{-# INLINE peek #-}
 peek :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
 peek heap = do
   isNull <- null heap
@@ -139,6 +146,7 @@ peek heap = do
 -- empty.
 --
 -- @since 1.0.0
+{-# INLINE pop #-}
 pop :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
 pop heap@Heap {..} = do
   len <- length heap
@@ -179,6 +187,7 @@ pop heap@Heap {..} = do
 -- | \(O(\log n)\) `pop` with return value discarded.
 --
 -- @since 1.0.0
+{-# INLINE pop_ #-}
 pop_ :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
 pop_ heap = do
   _ <- pop heap
