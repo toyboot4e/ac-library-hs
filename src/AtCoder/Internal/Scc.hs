@@ -23,7 +23,7 @@ import AtCoder.Internal.Csr qualified as ACICSR
 import AtCoder.Internal.GrowVec qualified as ACIGV
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Data.Foldable (for_)
 import Data.Maybe (fromJust)
 import Data.Vector qualified as V
@@ -61,9 +61,9 @@ addEdge SccGraph {edgesScc} from to = do
 -- | \(O(n + m)\) Returns a pair of @(# of scc, scc id)@.
 --
 -- @since 1.0.0
-{-# INLINE sccIds #-}
+-- {-# INLINE sccIds #-}
 sccIds :: (PrimMonad m) => SccGraph (PrimState m) -> m (Int, VU.Vector Int)
-sccIds SccGraph {..} = do
+sccIds SccGraph {..} = stToPrim $ do
   -- see also the Wikipedia: https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm#The_algorithm_in_pseudocode
   g <- ACICSR.build nScc <$> ACIGV.unsafeFreeze edgesScc
   -- next SCC ID

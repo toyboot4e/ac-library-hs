@@ -62,7 +62,7 @@ where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -112,9 +112,9 @@ new nDsu
 -- - \(O(\alpha(n))\) amortized
 --
 -- @since 1.0.0
-{-# INLINE merge #-}
+-- {-# INLINE merge #-}
 merge :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Int
-merge dsu@Dsu {..} a b = do
+merge dsu@Dsu {..} a b = stToPrim $ do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" a nDsu
   let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" b nDsu
   x <- leader dsu a
@@ -213,9 +213,9 @@ size dsu@Dsu {..} a = do
 -- - \(O(n)\)
 --
 -- @since 1.0.0
-{-# INLINE groups #-}
+-- {-# INLINE groups #-}
 groups :: (PrimMonad m) => Dsu (PrimState m) -> m (V.Vector (VU.Vector Int))
-groups dsu@Dsu {..} = do
+groups dsu@Dsu {..} = stToPrim $ do
   groupSize <- VUM.replicate nDsu (0 :: Int)
   leaders <- VU.generateM nDsu $ \i -> do
     li <- leader dsu i
