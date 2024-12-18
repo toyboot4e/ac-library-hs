@@ -25,8 +25,6 @@ module AtCoder.Internal.Barrett
   )
 where
 
--- TODO: Use MagicHash?
-
 import Data.WideWord.Word128 (Word128 (..))
 import Data.Word (Word32, Word64)
 
@@ -35,8 +33,7 @@ import Data.Word (Word32, Word64)
 --
 -- @since 1.0.0
 data Barrett = Barrett
-  { -- TODO: should we have it as `Word64`?
-    mBarrett :: {-# UNPACK #-} !Word32,
+  { mBarrett :: {-# UNPACK #-} !Word32,
     imBarrett :: {-# UNPACK #-} !Word64
   }
   deriving

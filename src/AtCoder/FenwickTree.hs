@@ -121,8 +121,6 @@ add FenwickTree {..} p0 x = do
       VGM.modify dataFt (+ x) (p - 1)
       loop $! p + (p .&. (-p))
 
--- TODO: modify, exchange?
-
 -- | \(O(\log n)\) Calculates the sum in half-open range @[0, r)@.
 --
 -- @since 1.0.0

@@ -15,8 +15,11 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import System.IO.Unsafe (unsafePerformIO)
+import Test.Hspec
 import Test.Tasty
 import Test.Tasty.HUnit
+import Test.Tasty.Hspec
 
 saNaive :: VU.Vector Int -> VU.Vector Int
 saNaive s = VU.create $ do
@@ -237,6 +240,30 @@ unit_zNaive = testCase "zNaive" $ do
             pure s
       zNaive s' @=? AS.zAlgorithm s'
 
+spec_invalid :: IO TestTree
+spec_invalid = testSpec "invalid" $ do
+  -- safe:
+  let !_ = AS.suffixArray (VU.fromList [0, 10]) 10
+  it "throws error" $ (`shouldThrow` anyException) $ do
+    let !_ = AS.suffixArray VU.empty (-1)
+    pure ()
+  it "throws error" $ (`shouldThrow` anyException) $ do
+    let !_ = AS.suffixArray (VU.singleton (-1)) 10
+    pure ()
+  it "throws error" $ (`shouldThrow` anyException) $ do
+    let !_ = AS.suffixArray (VU.singleton 11) 10
+    pure ()
+  it "throws error" $ (`shouldThrow` anyException) $ do
+    let !_ = AS.suffixArray (VU.fromList [0, 11]) 10
+    pure ()
+  it "throws error" $ (`shouldThrow` anyException) $ do
+    let !_ = AS.suffixArray (VU.fromList [0, -1]) 10
+    pure ()
+
+  -- safe:
+  let !_ = AS.suffixArrayOrd (VU.fromList [-999 :: Int, 999])
+  pure ()
+
 tests :: [TestTree]
 tests =
   [ unit_empty,
@@ -250,5 +277,6 @@ tests =
     unit_saSingle,
     unit_lcp,
     unit_zAlgo,
-    unit_zNaive
+    unit_zNaive,
+    unsafePerformIO spec_invalid
   ]

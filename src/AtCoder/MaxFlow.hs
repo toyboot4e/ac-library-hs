@@ -315,7 +315,6 @@ getEdge MfGraph {..} i = do
 edges :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> m (VU.Vector (Int, Int, cap, cap))
 edges g@MfGraph {posG} = do
   len <- ACIGV.length posG
-  -- TODO: rewrite
   VU.generateM len (getEdge g)
 
 -- | \(O(1)\) Changes the capacity and the flow amount of the $i$-th edge to @newCap@ and
