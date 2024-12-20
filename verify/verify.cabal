@@ -52,7 +52,8 @@ extra-doc-files: CHANGELOG.md
 -- extra-source-files:
 
 common dependencies
-  ghc-options:        -Wall
+  -- optimized
+  ghc-options:        -Wall -O2
 
   if impl(ghc ==9.4.5)
     build-depends:

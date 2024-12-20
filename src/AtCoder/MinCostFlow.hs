@@ -252,7 +252,7 @@ internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
   prevE <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) Int)
   vis <- VUM.unsafeNew n :: m (VUM.MVector (PrimState m) Bit)
 
-  -- FIXME: maximum capacity?
+  -- FIXME: maximum capacity of heap?
   let nEdges = VU.length toCsr
   queMin <- ACIB.new nEdges :: m (ACIB.Buffer (PrimState m) Int)
   heap <- ACIMH.new nEdges :: m (ACIMH.Heap (PrimState m) (cost, Int))

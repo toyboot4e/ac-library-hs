@@ -4,25 +4,25 @@
 -- >>> let !_ = runtimeAssert False "errorMessage"
 -- *** Exception: errorMessage
 -- ...
--- >>> let !_ = checkIndex "AtCoder.Internal.Assert.test" 0 3
--- >>> let !_ = checkIndex "AtCoder.Internal.Assert.test" (-1) 3
--- *** Exception: AtCoder.Internal.Assert.test: given invalid index `-1` over length `3`
+-- >>> let !_ = checkIndex "AtCoder.Internal.Assert.doctest" 0 3
+-- >>> let !_ = checkIndex "AtCoder.Internal.Assert.doctest" (-1) 3
+-- *** Exception: AtCoder.Internal.Assert.doctest: given invalid index `-1` over length `3`
 -- ...
--- >>> let !_ = checkVertex "AtCoder.Internal.Assert.test" 0 3
--- >>> let !_ = checkVertex "AtCoder.Internal.Assert.test" (-1) 3
--- *** Exception: AtCoder.Internal.Assert.test: given invalid vertex `-1` over the number of vertices `3`
+-- >>> let !_ = checkVertex "AtCoder.Internal.Assert.doctest" 0 3
+-- >>> let !_ = checkVertex "AtCoder.Internal.Assert.doctest" (-1) 3
+-- *** Exception: AtCoder.Internal.Assert.doctest: given invalid vertex `-1` over the number of vertices `3`
 -- ...
--- >>> let !_ = checkEdge "AtCoder.Internal.Assert.test" 0 3
--- >>> let !_ = checkEdge "AtCoder.Internal.Assert.test" (-1) 3
--- *** Exception: AtCoder.Internal.Assert.test: given invalid edge index `-1` over the number of edges `3`
+-- >>> let !_ = checkEdge "AtCoder.Internal.Assert.doctest" 0 3
+-- >>> let !_ = checkEdge "AtCoder.Internal.Assert.doctest" (-1) 3
+-- *** Exception: AtCoder.Internal.Assert.doctest: given invalid edge index `-1` over the number of edges `3`
 -- ...
--- >>> let !_ = checkCustom "AtCoder.Internal.Assert.test" "index" 0 "set" 3
--- >>> let !_ = checkCustom "AtCoder.Internal.Assert.test" "index" (-1) "set" 3
--- *** Exception: AtCoder.Internal.Assert.test: given invalid index `-1` over set `3`
+-- >>> let !_ = checkCustom "AtCoder.Internal.Assert.doctest" "index" 0 "set" 3
+-- >>> let !_ = checkCustom "AtCoder.Internal.Assert.doctest" "index" (-1) "set" 3
+-- *** Exception: AtCoder.Internal.Assert.doctest: given invalid index `-1` over set `3`
 -- ...
--- >>> let !_ = checkInterval "AtCoder.Internal.Assert.test" 0 3 3
--- >>> let !_ = checkInterval "AtCoder.Internal.Assert.test" 0 4 3
--- *** Exception: AtCoder.Internal.Assert.test: given invalid interval `[0, 4)` over length `3`
+-- >>> let !_ = checkInterval "AtCoder.Internal.Assert.doctest" 0 3 3
+-- >>> let !_ = checkInterval "AtCoder.Internal.Assert.doctest" 0 4 3
+-- *** Exception: AtCoder.Internal.Assert.doctest: given invalid interval `[0, 4)` over length `3`
 -- ...
 --
 -- @since 1.0.0

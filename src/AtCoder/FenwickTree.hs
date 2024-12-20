@@ -117,7 +117,6 @@ add FenwickTree {..} p0 x = do
   let p1 = p0 + 1
   flip fix p1 $ \loop p -> do
     when (p <= nFt) $ do
-      -- FIXME: to unsigned?
       VGM.modify dataFt (+ x) (p - 1)
       loop $! p + (p .&. (-p))
 

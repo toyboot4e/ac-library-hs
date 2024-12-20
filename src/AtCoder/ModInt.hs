@@ -282,7 +282,6 @@ pow :: forall a. (HasCallStack, KnownNat a) => ModInt a -> Int -> ModInt a
 pow (ModInt x0) n0 = ModInt . fromIntegral $ inner n0 1 (fromIntegral x0)
   where
     !_ = ACIA.runtimeAssert (0 <= n0) $ "AtCoder.ModInt.pow: given negative exponential `n`: " ++ show n0 ++ show "`"
-    -- FIXME: cannot calculate correctly
     bt = ACIBT.new64 $ fromIntegral (natVal' (proxy# @a))
     inner :: Int -> Word64 -> Word64 -> Word64
     inner !n !r !y
