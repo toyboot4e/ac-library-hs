@@ -10,8 +10,8 @@ import Tests.FenwickTree qualified
 import Tests.Internal.Bit qualified
 import Tests.Internal.Buffer qualified
 import Tests.Internal.GrowVec qualified
-import Tests.Internal.McfCsr qualified
 import Tests.Internal.Math qualified
+import Tests.Internal.McfCsr qualified
 import Tests.Internal.MinHeap qualified
 import Tests.Internal.Queue qualified
 import Tests.LazySegTree qualified
@@ -29,26 +29,29 @@ main :: IO ()
 main =
   defaultMainWithRerun
     . testGroup "toplevel"
-    $ [ testGroup "Tests.Convolution" Tests.Convolution.tests,
-        testGroup "Tests.Dsu" Tests.Dsu.tests,
-        testGroup "Tests.Extra.Math" Tests.Extra.Math.tests,
-        testGroup "Tests.Extra.Monoid" Tests.Extra.Monoid.tests,
-        testGroup "Tests.FenwickTree" Tests.FenwickTree.tests,
-        testGroup "Tests.Internal.Bit" Tests.Internal.Bit.tests,
-        testGroup "Tests.Internal.Buffer" Tests.Internal.Buffer.tests,
-        testGroup "Tests.Internal.GrowVec" Tests.Internal.GrowVec.tests,
-        testGroup "Tests.Internal.Math" Tests.Internal.Math.tests,
-        testGroup "Tests.Internal.MinHeap" Tests.Internal.MinHeap.tests,
-        testGroup "Tests.Internal.McfCsr" Tests.Internal.McfCsr.tests,
-        testGroup "Tests.Internal.Queue" Tests.Internal.Queue.tests,
-        testGroup "Tests.LazySegTree" Tests.LazySegTree.tests,
-        testGroup "Tests.LazySegTreeStress" Tests.LazySegTreeStress.tests,
-        testGroup "Tests.Math" Tests.Math.tests,
-        testGroup "Tests.MaxFlow" Tests.MaxFlow.tests,
-        testGroup "Tests.MinCostFlow" Tests.MinCostFlow.tests,
-        testGroup "Tests.ModInt" Tests.ModInt.tests,
-        testGroup "Tests.Scc" Tests.Scc.tests,
-        testGroup "Tests.SegTree" Tests.SegTree.tests,
-        testGroup "Tests.String" Tests.String.tests,
-        testGroup "Tests.TwoSat" Tests.TwoSat.tests
+    $ [ testGroup "Convolution" Tests.Convolution.tests,
+        testGroup "Dsu" Tests.Dsu.tests,
+        testGroup "Extra.Math" Tests.Extra.Math.tests,
+        testGroup "Extra.Monoid" Tests.Extra.Monoid.tests,
+        testGroup "FenwickTree" Tests.FenwickTree.tests,
+        testGroup
+          "Internal"
+          [ testGroup "Bit" Tests.Internal.Bit.tests,
+            testGroup "Buffer" Tests.Internal.Buffer.tests,
+            testGroup "GrowVec" Tests.Internal.GrowVec.tests,
+            testGroup "Math" Tests.Internal.Math.tests,
+            testGroup "MinHeap" Tests.Internal.MinHeap.tests,
+            testGroup "McfCsr" Tests.Internal.McfCsr.tests,
+            testGroup "Queue" Tests.Internal.Queue.tests
+          ],
+        testGroup "LazySegTree" Tests.LazySegTree.tests,
+        testGroup "LazySegTreeStress" Tests.LazySegTreeStress.tests,
+        testGroup "Math" Tests.Math.tests,
+        testGroup "MaxFlow" Tests.MaxFlow.tests,
+        testGroup "MinCostFlow" Tests.MinCostFlow.tests,
+        testGroup "ModInt" Tests.ModInt.tests,
+        testGroup "Scc" Tests.Scc.tests,
+        testGroup "SegTree" Tests.SegTree.tests,
+        testGroup "String" Tests.String.tests,
+        testGroup "TwoSat" Tests.TwoSat.tests
       ]

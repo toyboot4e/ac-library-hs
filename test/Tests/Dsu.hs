@@ -53,4 +53,9 @@ spec_invalid = testSpec "invalid" $ do
 
 tests :: [TestTree]
 tests =
-  [unit_zero, unit_simple, unit_line, unit_lineReverse, unsafePerformIO spec_invalid]
+  [ unit_zero,
+    unit_simple,
+    unit_line,
+    unit_lineReverse,
+    unsafePerformIO spec_invalid
+  ]
