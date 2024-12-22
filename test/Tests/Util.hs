@@ -1,8 +1,6 @@
 module Tests.Util (myForAllShrink, laws) where
 
-import AtCoder.Extra.Monoid
 import Data.Proxy (Proxy (..))
-import Data.Semigroup (Max (..), Min (..), Product (..), Sum (..), stimes)
 import Data.Typeable (Typeable, typeRep)
 import Test.QuickCheck.Classes qualified as QCC
 import Test.QuickCheck.Property qualified as QC

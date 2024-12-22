@@ -106,10 +106,8 @@ tests =
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
-        laws @(Affine1 (Sum Int))
-          [ QCC.semigroupLaws,
-            QCC.monoidLaws,
-            QCC.semigroupMonoidLaws
+        laws @(Affine1 (Sum Int), Sum Int)
+          [ segActLaw
           ]
       ],
     testGroup
