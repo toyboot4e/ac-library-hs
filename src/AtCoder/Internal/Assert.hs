@@ -4,22 +4,27 @@
 -- >>> let !_ = runtimeAssert False "errorMessage"
 -- *** Exception: errorMessage
 -- ...
+--
 -- >>> let !_ = checkIndex "AtCoder.Internal.Assert.doctest" 0 3
 -- >>> let !_ = checkIndex "AtCoder.Internal.Assert.doctest" (-1) 3
 -- *** Exception: AtCoder.Internal.Assert.doctest: given invalid index `-1` over length `3`
 -- ...
+--
 -- >>> let !_ = checkVertex "AtCoder.Internal.Assert.doctest" 0 3
 -- >>> let !_ = checkVertex "AtCoder.Internal.Assert.doctest" (-1) 3
 -- *** Exception: AtCoder.Internal.Assert.doctest: given invalid vertex `-1` over the number of vertices `3`
 -- ...
+--
 -- >>> let !_ = checkEdge "AtCoder.Internal.Assert.doctest" 0 3
 -- >>> let !_ = checkEdge "AtCoder.Internal.Assert.doctest" (-1) 3
 -- *** Exception: AtCoder.Internal.Assert.doctest: given invalid edge index `-1` over the number of edges `3`
 -- ...
+--
 -- >>> let !_ = checkCustom "AtCoder.Internal.Assert.doctest" "index" 0 "set" 3
 -- >>> let !_ = checkCustom "AtCoder.Internal.Assert.doctest" "index" (-1) "set" 3
 -- *** Exception: AtCoder.Internal.Assert.doctest: given invalid index `-1` over set `3`
 -- ...
+--
 -- >>> let !_ = checkInterval "AtCoder.Internal.Assert.doctest" 0 3 3
 -- >>> let !_ = checkInterval "AtCoder.Internal.Assert.doctest" 0 4 3
 -- *** Exception: AtCoder.Internal.Assert.doctest: given invalid interval `[0, 4)` over length `3`
@@ -47,10 +52,22 @@ module AtCoder.Internal.Assert
     -- * Interval assertion
     checkInterval,
     errorInterval,
+    f,
   )
 where
 
 import GHC.Stack (HasCallStack)
+
+-- | My function.
+--
+-- >>> let g = (* 3)
+-- >>> 1
+-- 1
+--
+-- >>> g $ f 1
+-- 6
+f :: Int -> Int
+f = (* 2)
 
 -- | \(O(1)\) Assertion that is never erased at compile time.
 --
@@ -72,7 +89,7 @@ testIndex i n = 0 <= i && i < n
 --
 -- @since 1.0.0
 {-# INLINE testInterval #-}
-testInterval :: (HasCallStack) => Int -> Int -> Int -> Bool
+testInterval :: Int -> Int -> Int -> Bool
 testInterval l r n = 0 <= l && l <= r && r <= n
 
 -- | \(O(1)\) Asserts \(0 \leq i \lt n\) for an array index \(i\).
