@@ -105,7 +105,7 @@ checkIndex funcName i n
 --
 -- @since 1.0.0
 {-# INLINE errorIndex #-}
-errorIndex :: (HasCallStack) => String -> Int -> Int -> ()
+errorIndex :: (HasCallStack) => String -> Int -> Int -> a
 errorIndex funcName i n =
   error $ funcName ++ ": given invalid index `" ++ show i ++ "` over length `" ++ show n ++ "`"
 
@@ -122,7 +122,7 @@ checkVertex funcName i n
 --
 -- @since 1.0.0
 {-# INLINE errorVertex #-}
-errorVertex :: (HasCallStack) => String -> Int -> Int -> ()
+errorVertex :: (HasCallStack) => String -> Int -> Int -> a
 errorVertex funcName i n =
   error $ funcName ++ ": given invalid vertex `" ++ show i ++ "` over the number of vertices `" ++ show n ++ "`"
 
@@ -139,7 +139,7 @@ checkEdge funcName i n
 --
 -- @since 1.0.0
 {-# INLINE errorEdge #-}
-errorEdge :: (HasCallStack) => String -> Int -> Int -> ()
+errorEdge :: (HasCallStack) => String -> Int -> Int -> a
 errorEdge funcName i n =
   error $ funcName ++ ": given invalid edge index `" ++ show i ++ "` over the number of edges `" ++ show n ++ "`"
 
@@ -156,7 +156,7 @@ checkCustom funcName indexName i setName n
 --
 -- @since 1.0.0
 {-# INLINE errorCustom #-}
-errorCustom :: (HasCallStack) => String -> String -> Int -> String -> Int -> ()
+errorCustom :: (HasCallStack) => String -> String -> Int -> String -> Int -> a
 errorCustom funcName indexName i setName n = error $ funcName ++ ": given invalid " ++ indexName ++ " `" ++ show i ++ "` over " ++ setName ++ " `" ++ show n ++ "`"
 
 -- | \(O(1)\) Asserts \(0 \leq l \leq r \leq n\) for a half-open interval \([l, r)\).
@@ -172,5 +172,5 @@ checkInterval funcName l r n
 --
 -- @since 1.0.0
 {-# INLINE errorInterval #-}
-errorInterval :: (HasCallStack) => String -> Int -> Int -> Int -> ()
+errorInterval :: (HasCallStack) => String -> Int -> Int -> Int -> a
 errorInterval funcName l r n = error $ funcName ++ ": given invalid interval `[" ++ show l ++ ", " ++ show r ++ ")` over length `" ++ show n ++ "`"
