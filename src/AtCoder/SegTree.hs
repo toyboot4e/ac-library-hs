@@ -80,6 +80,7 @@ module AtCoder.SegTree
 
     -- * Products
     prod,
+    prodMaybe,
     allProd,
 
     -- * Binary searches
@@ -242,9 +243,54 @@ read SegTree {..} p = do
 -- @since 1.0.0
 {-# INLINE prod #-}
 prod :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m a
-prod SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
+prod self@SegTree {nSt} l0 r0
+  | ACIA.testInterval l0 r0 nSt = unsafeProd self l0 r0
+  | otherwise = ACIA.errorInterval "AtCoder.SegTree.prod" l0 r0 nSt
+
+-- | Total version of `prod`. Returns \(a[l] \cdot ... \cdot a[r - 1]\), assuming the properties of
+-- the monoid. It returns `'Just' 'mempty'` if \(l = r\). It return `Nothing` for invalid intervals.
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.0.0
+--
+-- $
+-- >>> -- (hidden from haddock) boundary tests
+-- >>> import Data.Monoid (Sum(..))
+-- >>> seg <- new @_ @(Sum Int) 4
+-- >>> prodMaybe seg 0 0
+-- Just (Sum {getSum = 0})
+--
+-- >>> prodMaybe seg 0 4
+-- Just (Sum {getSum = 0})
+--
+-- >>> prodMaybe seg 4 4
+-- Just (Sum {getSum = 0})
+--
+-- >>> prodMaybe seg 0 (-1)
+-- Nothing
+--
+-- >>> prodMaybe seg (-1) (-1)
+-- Nothing
+--
+-- >>> prodMaybe seg (-1) 0
+-- Nothing
+--
+-- >>> prodMaybe seg 4 5
+-- Nothing
+{-# INLINE prodMaybe #-}
+prodMaybe :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m (Maybe a)
+prodMaybe self@SegTree {nSt} l0 r0
+  | ACIA.testInterval l0 r0 nSt = Just <$> unsafeProd self l0 r0
+  -- l0 == r0 = pure (Just mempty)
+  | otherwise = pure Nothing
+
+-- | Internal implementation of `prod`.
+{-# INLINE unsafeProd #-}
+unsafeProd :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m a
+unsafeProd SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
   where
-    !_ = ACIA.checkInterval "AtCoder.SegTree.prod" l0 r0 nSt
     -- NOTE: we're using inclusive range [l, r] for simplicity
     inner l r !smL !smR
       | l > r = pure $! smL <> smR

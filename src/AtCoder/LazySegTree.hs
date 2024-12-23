@@ -93,6 +93,7 @@ module AtCoder.LazySegTree
 
     -- * Products
     prod,
+    prodMaybe,
     allProd,
 
     -- * Applications
@@ -118,7 +119,7 @@ where
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
 import Control.Monad (unless, when)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Data.Bits (bit, countLeadingZeros, countTrailingZeros, testBit, (.&.), (.<<.), (.>>.))
 import Data.Foldable (for_)
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -434,17 +435,63 @@ read self@LazySegTree {..} p = do
 -- @since 1.0.0
 {-# INLINE prod #-}
 prod :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
-prod self@LazySegTree {..} l0 r0
+prod self@LazySegTree {nLst} l0 r0
+  | not (ACIA.testInterval l0 r0 nLst) = ACIA.errorInterval "AtCoder.LazySegTree.prod" l0 r0 nLst
   | l0 == r0 = pure mempty
-  | otherwise = do
-      let l = l0 + sizeLst
-      let r = r0 + sizeLst
-      for_ [logLst, logLst - 1 .. 1] $ \i -> do
-        when (((l .>>. i) .<<. i) /= l) $ push self $ l .>>. i
-        when (((r .>>. i) .<<. i) /= r) $ push self $ (r - 1) .>>. i
-      inner l (r - 1) mempty mempty
+  | otherwise = unsafeProd self l0 r0
+
+-- | Total version of `prod`. Returns the product of \([a[l], ..., a[r - 1]]\), assuming the
+-- properties of the monoid. It returns `'Just' 'mempty'` if \(l = r\). It returns `Nothing` for
+-- invalid intervals.
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.0.0
+--
+-- $
+-- >>> -- (hidden from haddock) boundary tests
+-- >>> import Data.Monoid (Sum(..))
+-- >>> import AtCoder.Extra.Monoid (Affine1(..))
+-- >>> seg <- new @_ @(Affine1 Int) @(Sum Int) 4
+-- >>> prodMaybe seg 0 0
+-- Just (Sum {getSum = 0})
+--
+-- >>> prodMaybe seg 0 4
+-- Just (Sum {getSum = 0})
+--
+-- >>> prodMaybe seg 4 4
+-- Just (Sum {getSum = 0})
+--
+-- >>> prodMaybe seg 0 (-1)
+-- Nothing
+--
+-- >>> prodMaybe seg (-1) (-1)
+-- Nothing
+--
+-- >>> prodMaybe seg (-1) 0
+-- Nothing
+--
+-- >>> prodMaybe seg 4 5
+-- Nothing
+{-# INLINE prodMaybe #-}
+prodMaybe :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m (Maybe a)
+prodMaybe self@LazySegTree {nLst} l0 r0
+  | not (ACIA.testInterval l0 r0 nLst) = pure Nothing
+  | l0 == r0 = pure (Just mempty)
+  | otherwise = Just <$> unsafeProd self l0 r0
+
+-- | Internal implementation of `prod`.
+-- {-# INLINE unsafeProd #-}
+unsafeProd :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
+unsafeProd self@LazySegTree {..} l0 r0 = stToPrim $ do
+  let l = l0 + sizeLst
+  let r = r0 + sizeLst
+  for_ [logLst, logLst - 1 .. 1] $ \i -> do
+    when (((l .>>. i) .<<. i) /= l) $ push self $ l .>>. i
+    when (((r .>>. i) .<<. i) /= r) $ push self $ (r - 1) .>>. i
+  inner l (r - 1) mempty mempty
   where
-    !_ = ACIA.checkInterval "AtCoder.LazySegTree.prod" l0 r0 nLst
     -- NOTE: we're using inclusive range [l, r] for simplicity
     inner l r !smL !smR
       | l > r = pure $! smL <> smR
@@ -502,11 +549,11 @@ applyAt self@LazySegTree {..} p f = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
-{-# INLINE applyIn #-}
+-- {-# INLINE applyIn #-}
 applyIn :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
 applyIn self@LazySegTree {..} l0 r0 f
   | l0 == r0 = pure ()
-  | otherwise = do
+  | otherwise = stToPrim $ do
       let l = l0 + sizeLst
       let r = r0 + sizeLst
       -- propagate

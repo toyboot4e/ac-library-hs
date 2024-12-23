@@ -44,6 +44,7 @@ module AtCoder.FenwickTree
 
     -- * Accessor
     sum,
+    sumMaybe,
   )
 where
 
@@ -144,8 +145,27 @@ prefixSum FenwickTree {..} = inner 0
 -- @since 1.0.0
 {-# INLINE sum #-}
 sum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
-sum ft@FenwickTree {..} l r = do
-  let !_ = ACIA.checkInterval "AtCoder.FenwickTree.sum" l r nFt
+sum ft@FenwickTree {nFt} l r
+  | not (ACIA.testInterval l r nFt) = ACIA.errorInterval "AtCoder.FenwickTree.sum" l r nFt
+  | otherwise = unsafeSum ft l r
+
+-- | Total version of `sum`. Calculates the sum in half-open range \([l, r)\). It returns `Nothing`
+-- for invalid intervals.
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.0.0
+{-# INLINE sumMaybe #-}
+sumMaybe :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m (Maybe a)
+sumMaybe ft@FenwickTree {nFt} l r
+  | not (ACIA.testInterval l r nFt) = pure Nothing
+  | otherwise = Just <$> unsafeSum ft l r
+
+-- | Internal implementation of `sum`.
+{-# INLINE unsafeSum #-}
+unsafeSum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
+unsafeSum ft l r = do
   xr <- prefixSum ft r
   xl <- prefixSum ft l
   pure $! xr - xl
