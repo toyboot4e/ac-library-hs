@@ -17,6 +17,7 @@ module AtCoder.Extra.Monoid.RangeSetId
 where
 
 import AtCoder.LazySegTree (SegAct (..))
+import Data.Bit (Bit (..))
 import Data.Semigroup (Max (..), Min (..), stimes)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -50,29 +51,29 @@ newtype RangeSetId a = RangeSetId (RangeSetIdRepr a)
 -- `Data.Vector.Unboxed.Unbox`.
 --
 -- @since 1.0.0
-type RangeSetIdRepr a = (Bool, a)
+type RangeSetIdRepr a = (Bit, a)
 
 -- | Creates a new `RangeSet` action.
 --
 -- @since 1.0.0
 {-# INLINE new #-}
 new :: a -> RangeSetId a
-new = RangeSetId . (True,)
+new = RangeSetId . (Bit True,)
 
 -- | Applies one-length range set: \(f: x \rightarrow y\).
 --
 -- @since 1.0.0
 {-# INLINE act #-}
 act :: RangeSetId a -> a -> a
-act (RangeSetId (True, !f)) _ = f
-act (RangeSetId (False, !_)) x = x
+act (RangeSetId (Bit True, !f)) _ = f
+act (RangeSetId (Bit False, !_)) x = x
 
 -- segActWithLength works for ideomponent monoids only.
 
 -- | @since 1.0.0
 instance Semigroup (RangeSetId a) where
   {-# INLINE (<>) #-}
-  RangeSetId (False, !_) <> old = old
+  RangeSetId (Bit False, !_) <> old = old
   new_ <> _ = new_
   {-# INLINE stimes #-}
   stimes _ x = x
@@ -82,11 +83,11 @@ instance Semigroup (RangeSetId a) where
 -- | @since 1.0.0
 instance (Monoid a) => Monoid (RangeSetId a) where
   {-# INLINE mempty #-}
-  mempty = RangeSetId (False, mempty)
+  mempty = RangeSetId (Bit False, mempty)
   {-# INLINE mconcat #-}
   -- find the first non-mempty
   mconcat [] = mempty
-  mconcat (RangeSetId (False, !_) : as) = mconcat as
+  mconcat (RangeSetId (Bit False, !_) : as) = mconcat as
   mconcat (a : _) = a
 
 -- The target is limited to ideomponent monoids. The `Monoid` constraint is just for their default

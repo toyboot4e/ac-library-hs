@@ -18,6 +18,7 @@ where
 
 import AtCoder.Extra.Math qualified as ACEM
 import AtCoder.LazySegTree (SegAct (..))
+import Data.Bit (Bit (..))
 import Data.Semigroup (stimes)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -51,22 +52,22 @@ newtype RangeSet a = RangeSet (RangeSetRepr a)
 -- `Data.Vector.Unboxed.Unbox`.
 --
 -- @since 1.0.0
-type RangeSetRepr a = (Bool, a)
+type RangeSetRepr a = (Bit, a)
 
 -- | Creates a new `RangeSet` action.
 --
 -- @since 1.0.0
 {-# INLINE new #-}
 new :: a -> RangeSet a
-new = RangeSet . (True,)
+new = RangeSet . (Bit True,)
 
 -- | Applies one-length range set: \(f: x \rightarrow y\).
 --
 -- @since 1.0.0
 {-# INLINE act #-}
 act :: RangeSet a -> a -> a
-act (RangeSet (True, !f)) _ = f
-act (RangeSet (False, !_)) x = x
+act (RangeSet (Bit True, !f)) _ = f
+act (RangeSet (Bit False, !_)) x = x
 
 -- | Acts on @a@ with length in terms of `SegAct`.
 --
@@ -79,7 +80,7 @@ actWithLength _ (RangeSet (False, !_)) x = x
 -- | @since 1.0.0
 instance Semigroup (RangeSet a) where
   {-# INLINE (<>) #-}
-  RangeSet (False, !_) <> old = old
+  RangeSet (Bit False, !_) <> old = old
   new_ <> _ = new_
   {-# INLINE stimes #-}
   stimes _ x = x
@@ -87,11 +88,11 @@ instance Semigroup (RangeSet a) where
 -- | @since 1.0.0
 instance (Monoid a) => Monoid (RangeSet a) where
   {-# INLINE mempty #-}
-  mempty = RangeSet (False, mempty)
+  mempty = RangeSet (Bit False, mempty)
   {-# INLINE mconcat #-}
   -- find the first non-mempty
   mconcat [] = mempty
-  mconcat (RangeSet (False, !_) : as) = mconcat as
+  mconcat (RangeSet (Bit False, !_) : as) = mconcat as
   mconcat (a : _) = a
 
 -- | @since 1.0.0
