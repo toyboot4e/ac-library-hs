@@ -30,6 +30,7 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import Data.Word (Word64)
 import GHC.Exts (proxy#)
 import GHC.TypeNats (natVal')
 
@@ -117,7 +118,7 @@ butterfly ::
 butterfly FftInfo {..} a = do
   let n = VUM.length a
   let h = countTrailingZeros n
-  let !m = fromIntegral $ natVal' (proxy# @p)
+  let !m :: Word64 = fromIntegral $ natVal' (proxy# @p)
 
   flip fix 0 $ \loop len -> do
     when (len < h) $ do
@@ -142,26 +143,26 @@ butterfly FftInfo {..} a = do
         else do
           -- 4-base
           let p = bit $ h - len - 2
-          let !imag = AM.val $ rootFft VG.! 2
+          let !imag = AM.val64 $ rootFft VG.! 2
           VU.foldM'_
             ( \ !rot s -> do
-                let !rot1 :: Int = AM.val rot
+                let !rot1 = AM.val64 rot
                 let !rot2_ = rot * rot
-                let !rot2 :: Int = AM.val rot2_
-                let !rot3 :: Int = AM.val $ rot2_ * rot
+                let !rot2 = AM.val64 rot2_
+                let !rot3 = AM.val64 $ rot2_ * rot
                 let !offset = s .<<. (h - len)
-                let !mod2 = m * m
+                let !mod2 :: Word64 = m * m
                 for_ [0 .. p - 1] $ \i -> do
-                  !a0 :: Int <- AM.val <$> VGM.read a (i + offset)
-                  !a1 :: Int <- (`mod` m) . (* rot1) . AM.val <$> VGM.read a (i + offset + p)
-                  !a2 :: Int <- (`mod` m) . (* rot2) . AM.val <$> VGM.read a (i + offset + 2 * p)
-                  !a3 :: Int <- (`mod` m) . (* rot3) . AM.val <$> VGM.read a (i + offset + 3 * p)
+                  !a0 <- AM.val64 <$> VGM.read a (i + offset)
+                  !a1 <- (* rot1) . AM.val64 <$> VGM.read a (i + offset + p)
+                  !a2 <- (* rot2) . AM.val64 <$> VGM.read a (i + offset + 2 * p)
+                  !a3 <- (* rot3) . AM.val64 <$> VGM.read a (i + offset + 3 * p)
                   let !a1na3imag = (a1 + mod2 - a3) `mod` m * imag `mod` m
                   let !na2 = mod2 - a2
-                  VGM.write a (i + offset) . AM.new $! a0 + a2 + a1 + a3
-                  VGM.write a (i + offset + 1 * p) . AM.new $! a0 + a2 + (2 * mod2 `mod` m - (a1 + a3))
-                  VGM.write a (i + offset + 2 * p) . AM.new $! a0 + na2 + a1na3imag
-                  VGM.write a (i + offset + 3 * p) . AM.new $! a0 + na2 + (mod2 - a1na3imag)
+                  VGM.write a (i + offset) . AM.new64 $! a0 + a2 + a1 + a3
+                  VGM.write a (i + offset + 1 * p) . AM.new64 $! a0 + a2 + (2 * mod2 - (a1 + a3))
+                  VGM.write a (i + offset + 2 * p) . AM.new64 $! a0 + na2 + a1na3imag
+                  VGM.write a (i + offset + 3 * p) . AM.new64 $! a0 + na2 + (mod2 - a1na3imag)
                 if s + 1 /= bit len
                   then pure . (rot *) $ rate3Fft VG.! countTrailingZeros (complement s)
                   else pure rot
@@ -181,7 +182,8 @@ butterflyInv ::
 butterflyInv FftInfo {..} a = do
   let n = VUM.length a
   let h = countTrailingZeros n
-  let !m = fromIntegral $ natVal' (proxy# @p)
+  let !m :: Word64 = fromIntegral $ natVal' (proxy# @p)
+  let !mInt :: Int = fromIntegral $ natVal' (proxy# @p)
 
   flip fix h $ \loop len -> do
     when (len /= 0) $ do
@@ -195,7 +197,7 @@ butterflyInv FftInfo {..} a = do
                   l <- VGM.read a $ i + offset
                   r <- VGM.read a $ i + offset + p
                   VGM.write a (i + offset) $! l + r
-                  VGM.write a (i + offset + p) . AM.new $! (m + AM.val l - AM.val r) * AM.val irot
+                  VGM.write a (i + offset + p) . AM.new $! (mInt + AM.val l - AM.val r) * AM.val irot
                 if s + 1 /= bit (len - 1)
                   then pure . (irot *) $ iRate2Fft VG.! countTrailingZeros (complement s)
                   else pure irot
@@ -206,26 +208,26 @@ butterflyInv FftInfo {..} a = do
         else do
           -- 4-base
           let p = bit $ h - len
-          let !iimag = AM.val $ iRootFft VG.! 2
+          let !iimag = AM.val64 $ iRootFft VG.! 2
           VU.foldM'_
             ( \ !irot s -> do
-                let !irot1 :: Int = AM.val irot
+                let !irot1 = AM.val64 irot
                 let !irot2_ = irot * irot
-                let !irot2 :: Int = AM.val irot2_
-                let !irot3 :: Int = AM.val $ irot2_ * irot
+                let !irot2 = AM.val64 irot2_
+                let !irot3 = AM.val64 $ irot2_ * irot
                 let !offset = s .<<. (h - len + 2)
                 for_ [0 .. p - 1] $ \i -> do
-                  !a0 :: Int <- AM.val <$> VGM.read a (i + offset + 0 * p)
-                  !a1 :: Int <- AM.val <$> VGM.read a (i + offset + 1 * p)
-                  !a2 :: Int <- AM.val <$> VGM.read a (i + offset + 2 * p)
-                  !a3 :: Int <- AM.val <$> VGM.read a (i + offset + 3 * p)
+                  !a0 <- AM.val64 <$> VGM.read a (i + offset + 0 * p)
+                  !a1 <- AM.val64 <$> VGM.read a (i + offset + 1 * p)
+                  !a2 <- AM.val64 <$> VGM.read a (i + offset + 2 * p)
+                  !a3 <- AM.val64 <$> VGM.read a (i + offset + 3 * p)
 
-                  let !a2na3iimag = (m + a2 - a3) `mod` m * iimag `mod` m
+                  let !a2na3iimag = (m + a2 - a3) * iimag `mod` m
 
-                  VGM.write a (i + offset) . AM.new $! a0 + a1 + a2 + a3
-                  VGM.write a (i + offset + 1 * p) . AM.new $! (a0 + (m - a1) + a2na3iimag) `mod` m * irot1
-                  VGM.write a (i + offset + 2 * p) . AM.new $! (a0 + a1 + (m - a2) + (m - a3)) `mod` m * irot2
-                  VGM.write a (i + offset + 3 * p) . AM.new $! (a0 + (m - a1) + (m - a2na3iimag)) `mod` m * irot3
+                  VGM.write a (i + offset) . AM.new64 $! a0 + a1 + a2 + a3
+                  VGM.write a (i + offset + 1 * p) . AM.new64 $! (a0 + (m - a1) + a2na3iimag) * irot1
+                  VGM.write a (i + offset + 2 * p) . AM.new64 $! (a0 + a1 + (m - a2) + (m - a3)) * irot2
+                  VGM.write a (i + offset + 3 * p) . AM.new64 $! (a0 + (m - a1) + (m - a2na3iimag)) * irot3
                 if s + 1 /= bit (len - 2)
                   then pure . (irot *) $ iRate3Fft VG.! countTrailingZeros (complement s)
                   else pure irot
