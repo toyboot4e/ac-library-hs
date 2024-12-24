@@ -100,7 +100,7 @@ suffixArrayBS s = do
 -- - (2) \(O(n \log n)\)-time, \(O(n)\)-space
 --
 -- @since 1.0.0
--- {-# INLINE suffixArrayOrd #-}
+{-# INLINE suffixArrayOrd #-}
 suffixArrayOrd :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
 suffixArrayOrd s =
   let n = VU.length s
@@ -136,7 +136,7 @@ suffixArrayOrd s =
 -- - \(O(n)\)
 --
 -- @since 1.0.0
--- {-# INLINE lcpArray #-}
+{-# INLINE lcpArray #-}
 lcpArray :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int -> VU.Vector Int
 lcpArray s sa =
   let n = VU.length s
@@ -193,7 +193,7 @@ lcpArrayBS s sa =
 -- - \(O(n)\)
 --
 -- @since 1.0.0
--- {-# INLINE zAlgorithm #-}
+{-# INLINE zAlgorithm #-}
 zAlgorithm :: (Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
 zAlgorithm s
   | n == 0 = VU.empty

@@ -119,7 +119,7 @@ where
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
 import Control.Monad (unless, when)
-import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Bits (bit, countLeadingZeros, countTrailingZeros, testBit, (.&.), (.<<.), (.>>.))
 import Data.Foldable (for_)
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -456,9 +456,9 @@ prodMaybe self@LazySegTree {nLst} l0 r0
   | otherwise = Just <$> unsafeProd self l0 r0
 
 -- | Internal implementation of `prod`.
--- {-# INLINE unsafeProd #-}
+{-# INLINE unsafeProd #-}
 unsafeProd :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
-unsafeProd self@LazySegTree {..} l0 r0 = stToPrim $ do
+unsafeProd self@LazySegTree {..} l0 r0 = do
   let l = l0 + sizeLst
   let r = r0 + sizeLst
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
@@ -523,11 +523,11 @@ applyAt self@LazySegTree {..} p f = do
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
--- {-# INLINE applyIn #-}
+{-# INLINE applyIn #-}
 applyIn :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
 applyIn self@LazySegTree {..} l0 r0 f
   | l0 == r0 = pure ()
-  | otherwise = stToPrim $ do
+  | otherwise = do
       let l = l0 + sizeLst
       let r = r0 + sizeLst
       -- propagate

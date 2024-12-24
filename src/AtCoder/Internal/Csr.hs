@@ -49,7 +49,7 @@ data Csr e = Csr
 -- | \(O(n + m)\) Creates `Csr`.
 --
 -- @since 1.0.0
--- {-# INLINE build #-}
+{-# INLINE build #-}
 build :: (HasCallStack, VU.Unbox e) => Int -> VU.Vector (Int, e) -> Csr e
 build n edges = runST $ do
   start <- VUM.replicate (n + 1) (0 :: Int)

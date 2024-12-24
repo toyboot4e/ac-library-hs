@@ -63,7 +63,7 @@ import AtCoder.Internal.GrowVec qualified as ACIGV
 import AtCoder.Internal.Queue qualified as ACIQ
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
-import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Bit (Bit (..))
 import Data.Primitive.MutVar (readMutVar)
 import Data.Vector qualified as V
@@ -159,9 +159,9 @@ addEdge_ graph from to cap = do
 -- - \(O(F(n + m))\), where \(F\) is the returned value
 --
 -- @since 1.0.0
--- {-# INLINE flow #-}
+{-# INLINE flow #-}
 flow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m cap
-flow MfGraph {..} s t flowLimit = stToPrim $ do
+flow MfGraph {..} s t flowLimit = do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`source` vertex" s "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`sink` vertex" t "the number of vertices" nG
   let !_ = ACIA.runtimeAssert (s /= t) $ "AtCoder.MaxFlow.flow: `source` and `sink` vertex have to be distinct: `" ++ show s ++ "`"
@@ -263,9 +263,9 @@ maxFlow graph s t = flow graph s t maxBound
 -- - \(O(n + m)\), where \(m\) is the number of added edges.
 --
 -- @since 1.0.0
--- {-# INLINE minCut #-}
+{-# INLINE minCut #-}
 minCut :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (VU.Vector Bit)
-minCut MfGraph {..} s = stToPrim $ do
+minCut MfGraph {..} s = do
   visited <- VUM.replicate nG $ Bit False
   que <- ACIQ.new nG -- we could use a growable queue here
   ACIQ.pushBack que s

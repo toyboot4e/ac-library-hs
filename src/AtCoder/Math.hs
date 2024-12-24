@@ -84,7 +84,7 @@ invMod x m =
 -- True
 --
 -- @since 1.0.0
--- {-# INLINE crt #-}
+{-# INLINE crt #-}
 crt :: (HasCallStack) => VU.Vector Int -> VU.Vector Int -> (Int, Int)
 crt r m = loop 0 1 [0 .. VU.length r - 1]
   where

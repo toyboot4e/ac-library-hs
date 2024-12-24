@@ -15,7 +15,7 @@ module AtCoder.Internal.McfCsr
   )
 where
 
-import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -44,9 +44,9 @@ data Csr s cap cost = Csr
 -- | \(O(n + m)\) Creates `Csr`.
 --
 -- @since 1.0.0
--- {-# INLINE build #-}
+{-# INLINE build #-}
 build :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost, PrimMonad m) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> m (VU.Vector Int, Csr (PrimState m) cap cost)
-build n edges = stToPrim $ do
+build n edges = do
   let m = VU.length edges
   -- craete the offsets first (this is a different step from ac-librar)
   let startCsr = VU.create $ do

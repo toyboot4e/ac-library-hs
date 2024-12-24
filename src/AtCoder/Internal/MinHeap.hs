@@ -49,7 +49,7 @@ module AtCoder.Internal.MinHeap
 where
 
 import Control.Monad (when)
-import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -146,9 +146,9 @@ peek heap = do
 -- empty.
 --
 -- @since 1.0.0
--- {-# INLINE pop #-}
+{-# INLINE pop #-}
 pop :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
-pop heap@Heap {..} = stToPrim $ do
+pop heap@Heap {..} = do
   len <- length heap
   if len == 0
     then pure Nothing
