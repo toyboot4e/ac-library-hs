@@ -3,6 +3,7 @@
 
 module Tests.LazySegTree (tests) where
 
+import AtCoder.Extra.Monoid (Affine1)
 import AtCoder.LazySegTree qualified as LST
 import Data.Foldable (for_)
 import Data.Semigroup (Max (..), Sum (..))
@@ -94,6 +95,20 @@ unit_usage = testCase "usage" $ do
   (@?= Max (-5)) =<< LST.prod seg 2 3
   (@?= Max 0) =<< LST.prod seg 2 4
 
+unit_prodMaybeBounds :: TestTree
+unit_prodMaybeBounds = testCase "prodMaybeBounds" $ do
+  seg <- LST.new @_ @(Affine1 Int) @(Sum Int) 4
+  (@?= Just (Sum {getSum = 0})) =<< LST.prodMaybe seg 0 0
+  (@?= Just (Sum {getSum = 0})) =<< LST.prodMaybe seg 0 4
+  (@?= Just (Sum {getSum = 0})) =<< LST.prodMaybe seg 4 4
+  (@?= Nothing) =<< LST.prodMaybe seg (-1) 4
+  (@?= Nothing) =<< LST.prodMaybe seg 0 5
+  (@?= Nothing) =<< LST.prodMaybe seg 0 (-1)
+  (@?= Nothing) =<< LST.prodMaybe seg (-1) (-1)
+  (@?= Nothing) =<< LST.prodMaybe seg (-1) 0
+  (@?= Nothing) =<< LST.prodMaybe seg 4 5
+  (@?= Nothing) =<< LST.prodMaybe seg 5 5
+
 -- maxRight and minLeft are tested in the stress test file.
 
 tests :: [TestTree]
@@ -102,5 +117,6 @@ tests =
     unit_one,
     unsafePerformIO spec_invalid,
     unit_naiveProd,
-    unit_usage
+    unit_usage,
+    unit_prodMaybeBounds
   ]

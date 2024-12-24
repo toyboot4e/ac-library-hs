@@ -448,32 +448,6 @@ prod self@LazySegTree {nLst} l0 r0
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
---
--- $
--- >>> -- (hidden from haddock) boundary tests
--- >>> import Data.Monoid (Sum(..))
--- >>> import AtCoder.Extra.Monoid (Affine1(..))
--- >>> seg <- new @_ @(Affine1 Int) @(Sum Int) 4
--- >>> prodMaybe seg 0 0
--- Just (Sum {getSum = 0})
---
--- >>> prodMaybe seg 0 4
--- Just (Sum {getSum = 0})
---
--- >>> prodMaybe seg 4 4
--- Just (Sum {getSum = 0})
---
--- >>> prodMaybe seg 0 (-1)
--- Nothing
---
--- >>> prodMaybe seg (-1) (-1)
--- Nothing
---
--- >>> prodMaybe seg (-1) 0
--- Nothing
---
--- >>> prodMaybe seg 4 5
--- Nothing
 {-# INLINE prodMaybe #-}
 prodMaybe :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m (Maybe a)
 prodMaybe self@LazySegTree {nLst} l0 r0

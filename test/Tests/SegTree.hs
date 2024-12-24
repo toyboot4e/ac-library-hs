@@ -5,6 +5,7 @@
 
 module Tests.SegTree (tests) where
 
+import Data.Monoid (Sum(..))
 import AtCoder.Internal.Assert
 import AtCoder.SegTree qualified as ST
 import Control.Monad.Primitive (PrimMonad, PrimState)
@@ -214,11 +215,26 @@ unit_freezeZero = testCase "freezeZero" $ do
   (VU.empty @=?) =<< ST.freeze seg
   (VU.empty @=?) =<< ST.unsafeFreeze seg
 
+unit_prodMaybeBounds :: TestTree
+unit_prodMaybeBounds = testCase "prodMaybeBounds" $ do
+  seg <- ST.new @_ @(Sum Int) 4
+  (@?= Just (Sum {getSum = 0})) =<< ST.prodMaybe seg 0 0
+  (@?= Just (Sum {getSum = 0})) =<< ST.prodMaybe seg 0 4
+  (@?= Just (Sum {getSum = 0})) =<< ST.prodMaybe seg 4 4
+  (@?= Nothing) =<< ST.prodMaybe seg (-1) 4
+  (@?= Nothing) =<< ST.prodMaybe seg 0 5
+  (@?= Nothing) =<< ST.prodMaybe seg 0 (-1)
+  (@?= Nothing) =<< ST.prodMaybe seg (-1) (-1)
+  (@?= Nothing) =<< ST.prodMaybe seg (-1) 0
+  (@?= Nothing) =<< ST.prodMaybe seg 4 5
+  (@?= Nothing) =<< ST.prodMaybe seg 5 5
+
 tests :: [TestTree]
 tests =
   [ unit_zero,
     unsafePerformIO spec_invalid,
     unit_one,
     unit_compareNaive,
-    unit_freezeZero
+    unit_freezeZero,
+    unit_prodMaybeBounds
   ]

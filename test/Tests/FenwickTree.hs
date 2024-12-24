@@ -3,6 +3,7 @@ module Tests.FenwickTree (tests) where
 
 import AtCoder.FenwickTree qualified as FT
 import Data.Foldable
+import Data.Vector.Unboxed qualified as VU
 import System.IO.Unsafe (unsafePerformIO)
 import Test.Hspec
 import Test.Tasty
@@ -46,6 +47,20 @@ unit_naive = testCase "naive" $ do
 -- TODO: smint
 -- TODO: mint
 
+unit_sumMaybeBounds :: TestTree
+unit_sumMaybeBounds = testCase "sumMaybeBounds" $ do
+  ft <- FT.build @_ @Int (VU.generate 4 id)
+  (@?= Just 0) =<< FT.sumMaybe ft 0 0
+  (@?= Just 3) =<< FT.sumMaybe ft 3 4
+  (@?= Just 6) =<< FT.sumMaybe ft 0 4
+  (@?= Nothing) =<< FT.sumMaybe ft (-1) 4
+  (@?= Nothing) =<< FT.sumMaybe ft 0 5
+  (@?= Nothing) =<< FT.sumMaybe ft 0 (-1)
+  (@?= Nothing) =<< FT.sumMaybe ft (-1) (-1)
+  (@?= Nothing) =<< FT.sumMaybe ft (-1) 0
+  (@?= Nothing) =<< FT.sumMaybe ft 4 5
+  (@?= Nothing) =<< FT.sumMaybe ft 5 5
+
 spec_invalid :: IO TestTree
 spec_invalid = testSpec "invalid" $ do
   it "throws error" $ do
@@ -66,4 +81,8 @@ spec_invalid = testSpec "invalid" $ do
 
 tests :: [TestTree]
 tests =
-  [unit_zero {- overFlowInt -}, unit_naive, unsafePerformIO spec_invalid]
+  [ unit_zero {- overFlowInt -},
+    unit_naive,
+    unsafePerformIO spec_invalid,
+    unit_sumMaybeBounds
+  ]

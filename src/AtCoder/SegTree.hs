@@ -254,31 +254,6 @@ prod self@SegTree {nSt} l0 r0
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0
---
--- $
--- >>> -- (hidden from haddock) boundary tests
--- >>> import Data.Monoid (Sum(..))
--- >>> seg <- new @_ @(Sum Int) 4
--- >>> prodMaybe seg 0 0
--- Just (Sum {getSum = 0})
---
--- >>> prodMaybe seg 0 4
--- Just (Sum {getSum = 0})
---
--- >>> prodMaybe seg 4 4
--- Just (Sum {getSum = 0})
---
--- >>> prodMaybe seg 0 (-1)
--- Nothing
---
--- >>> prodMaybe seg (-1) (-1)
--- Nothing
---
--- >>> prodMaybe seg (-1) 0
--- Nothing
---
--- >>> prodMaybe seg 4 5
--- Nothing
 {-# INLINE prodMaybe #-}
 prodMaybe :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m (Maybe a)
 prodMaybe self@SegTree {nSt} l0 r0
