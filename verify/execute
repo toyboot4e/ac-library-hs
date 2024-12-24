@@ -1,5 +1,7 @@
 #!/usr/bin/env -S bash
 
-dir="$(basename "$1" .hs)"
-cabal run "$dir"
+# dir="$(basename "$1" .hs)"
+# cabal run "$dir"
+
+./main
 
