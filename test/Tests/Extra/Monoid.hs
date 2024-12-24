@@ -1,6 +1,7 @@
 module Tests.Extra.Monoid (tests) where
 
 import AtCoder.Extra.Monoid
+import Data.Bit (Bit(..))
 import Data.Proxy (Proxy (..))
 import Data.Semigroup (Max (..), Min (..), Product (..), Sum (..), stimes)
 import Test.QuickCheck.Classes qualified as QCC
@@ -78,7 +79,7 @@ instance (QC.Arbitrary a, Monoid a) => QC.Arbitrary (RangeSet a) where
   arbitrary = do
     b <- (== 1) <$> QC.chooseInt (1, 30)
     if b
-      then RangeSet . (True,) <$> QC.arbitrary
+      then RangeSet . (Bit True,) <$> QC.arbitrary
       else pure mempty
 
 -- orphan instance
@@ -86,7 +87,7 @@ instance (QC.Arbitrary a, Monoid a) => QC.Arbitrary (RangeSetId a) where
   arbitrary = do
     b <- (== 1) <$> QC.chooseInt (1, 30)
     if b
-      then RangeSetId . (True,) <$> QC.arbitrary
+      then RangeSetId . (Bit True,) <$> QC.arbitrary
       else pure mempty
 
 -- orphan instance
