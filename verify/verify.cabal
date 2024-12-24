@@ -53,7 +53,7 @@ extra-doc-files: CHANGELOG.md
 
 common dependencies
   -- optimized
-  ghc-options:        -Wall -O2
+  ghc-options:        -Wall -fllvm -O2
 
   if impl(ghc ==9.4.5)
     build-depends:
@@ -71,15 +71,15 @@ common dependencies
   if (impl(ghc >9.4.5) || impl(ghc <9.4.5))
     build-depends:
       , ac-library-hs
-      , base
-      , bitvec
-      , bytestring
+      , base               >=4.9     && <4.22
+      , bitvec             <1.2
+      , bytestring         <0.14
       , mtl
-      , primitive
+      , primitive          >=0.6.4.0 && <0.10
       , transformers
-      , vector
-      , vector-algorithms
-      , wide-word
+      , vector             >=0.13.0  && <0.14
+      , vector-algorithms  <0.10
+      , wide-word          <0.1.7.0
 
   default-language:   GHC2021
 
