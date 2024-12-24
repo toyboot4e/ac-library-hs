@@ -197,8 +197,8 @@ new32 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
 --
 -- @since 1.0.0
 {-# INLINE new64 #-}
-new64 :: forall a. (KnownNat a) => Word32 -> ModInt a
-new64 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
+new64 :: forall a. (KnownNat a) => Word64 -> ModInt a
+new64 v = ModInt . fromIntegral $ v `mod` fromIntegral (natVal' (proxy# @a))
 
 -- | Creates `ModInt` without taking mod. It is the function for constant-factor speedup.
 --
@@ -265,7 +265,7 @@ val32 = unModInt
 --
 -- @since 1.0.0
 {-# INLINE val64 #-}
-val64 :: (KnownNat a) => ModInt a -> Word32
+val64 :: (KnownNat a) => ModInt a -> Word64
 val64 = fromIntegral . unModInt
 
 -- | Returns \(x^n\). The implementation is a bit more efficient than `^`.
