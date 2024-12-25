@@ -79,7 +79,7 @@ common dependencies
       , transformers
       , vector             >=0.13.0  && <0.14
       , vector-algorithms  <0.10
-      , wide-word          <0.1.7.0
+      , wide-word          <0.2
 
   default-language:   GHC2021
 
