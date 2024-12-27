@@ -61,6 +61,9 @@ import GHC.Exts (proxy#)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (natVal')
 
+-- NOTE(pref): Inlining `convolution` functions makes the compile time extremely too slow, while it
+-- surely makes beter runtime performance (#51).
+
 -- | Calculates the convolution in \(\bmod m\) for a vector of `ACIM.ModInt`. It returns an empty
 -- array if at least one of \(a\) and \(b\) are empty.
 --
@@ -73,7 +76,7 @@ import GHC.TypeNats (natVal')
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 --
 -- @since 1.0.0
-{-# INLINE convolution #-}
+-- {-# INLINE convolution #-}
 convolution ::
   forall p.
   (HasCallStack, AM.Modulus p) =>
@@ -104,7 +107,7 @@ convolution a b
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 --
 -- @since 1.0.0
-{-# INLINE convolutionRaw #-}
+-- {-# INLINE convolutionRaw #-}
 convolutionRaw ::
   forall p a.
   (HasCallStack, AM.Modulus p, Integral a, VU.Unbox a) =>
@@ -134,7 +137,7 @@ convolutionRaw _ a b
 -- - \(O(n\log{n})\), where \(n = |a| + |b|\).
 --
 -- @since 1.0.0
-{-# INLINE convolution64 #-}
+--- {-# INLINE convolution64 #-}
 convolution64 ::
   (HasCallStack) =>
   VU.Vector Int ->

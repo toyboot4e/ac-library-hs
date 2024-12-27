@@ -20,6 +20,8 @@ module AtCoder.Internal.Convolution
   )
 where
 
+-- NOTE(pref): Inlining `butterfly` and `butterflyInv` is required, or else too slow! (#52)
+
 import AtCoder.Internal.Bit qualified as ACIB
 import AtCoder.ModInt qualified as AM
 import Control.Monad (when)
