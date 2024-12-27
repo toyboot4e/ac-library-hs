@@ -1,3 +1,5 @@
+{-# OPTIONS_HADDOCK hide #-}
+
 -- | Bit operations not in the `Data.Bits` module.
 --
 -- ==== Example

@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# OPTIONS_HADDOCK hide #-}
 
 -- | Internal CSR for `AtCoder.MinCostFlow`.
 --
