@@ -157,11 +157,13 @@ test-suite ac-library-hs-test
     , tasty-rerun
     , transformers
 
-library benchlib
+benchmark ac-library-hs-benchmark
   import:          warnings
   import:          dependencies
-  visibility: private
   ghc-options:     -O2
+  type:            exitcode-stdio-1.0
+  main-is:         Main.hs
+  hs-source-dirs:  benchmarks
   exposed-modules:
     BenchLib.AddMod
     BenchLib.ModInt.ModIntNats
@@ -171,48 +173,41 @@ library benchlib
     BenchLib.MulMod.Montgomery
     BenchLib.PowMod
 
-  hs-source-dirs:  benchlib
-  build-depends:
-    , ac-library-hs
-    , ghc-prim
-    , tagged
-
-test-suite benchlib-test
-  import:         warnings
-  import:         dependencies
-  other-modules:  Tests.MulMod
-  type:           exitcode-stdio-1.0
-  hs-source-dirs: benchlib-test
-  main-is:        Main.hs
-  build-depends:
-    , ac-library-hs:benchlib
-    , hspec
-    , mtl
-    , QuickCheck
-    , quickcheck-classes
-    , quickcheck-classes-base
-    , random
-    , tasty
-    , tasty-hspec
-    , tasty-hunit
-    , tasty-quickcheck
-    , tasty-rerun
-    , transformers
-
-benchmark ac-library-hs-benchmark
-  import:         warnings
-  import:         dependencies
-  ghc-options:    -O2
-  type:           exitcode-stdio-1.0
-  main-is:        Main.hs
-  hs-source-dirs: benchmarks
   other-modules:
     Bench.AddMod
     Bench.PowMod
 
   build-depends:
     , ac-library-hs
-    , ac-library-hs:benchlib
     , base
     , criterion
     , random
+    , tagged
+
+test-suite benchlib-test
+  import:         warnings
+  import:         dependencies
+  other-modules:
+    BenchLib.AddMod
+    BenchLib.ModInt.ModIntNats
+    BenchLib.ModInt.Modulus
+    BenchLib.MulMod.Barrett64
+    BenchLib.MulMod.BarrettWideWord
+    BenchLib.MulMod.Montgomery
+    BenchLib.PowMod
+    Tests.MulMod
+
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: benchmarks
+  main-is:        TestMain.hs
+  build-depends:
+    , ac-library-hs
+    , hspec
+    , mtl
+    , QuickCheck
+    , random
+    , tagged
+    , tasty
+    , tasty-hunit
+    , tasty-quickcheck
+    , tasty-rerun
