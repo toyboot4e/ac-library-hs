@@ -160,6 +160,7 @@ test-suite ac-library-hs-test
 library benchlib
   import:          warnings
   import:          dependencies
+  visibility: private
   ghc-options:     -O2
   exposed-modules:
     BenchLib.AddMod
