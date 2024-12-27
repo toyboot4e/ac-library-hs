@@ -18,8 +18,8 @@ maintainer:      toyboot4e <toyboot4e@gmail.com>
 build-type:      Simple
 extra-doc-files:
   CHANGELOG.md
-  README.md
   examples/README.md
+  README.md
 
 tested-with:     GHC ==9.8.4
 
@@ -159,13 +159,15 @@ test-suite ac-library-hs-test
     , transformers
 
 benchmark ac-library-hs-benchmark
-  import:          warnings
-  import:          dependencies
-  ghc-options:     -O2
-  type:            exitcode-stdio-1.0
-  main-is:         Main.hs
-  hs-source-dirs:  benchmarks
-  exposed-modules:
+  import:         warnings
+  import:         dependencies
+  ghc-options:    -O2
+  type:           exitcode-stdio-1.0
+  main-is:        Main.hs
+  hs-source-dirs: benchmarks
+  other-modules:
+    Bench.AddMod
+    Bench.PowMod
     BenchLib.AddMod
     BenchLib.ModInt.ModIntNats
     BenchLib.ModInt.Modulus
@@ -173,10 +175,6 @@ benchmark ac-library-hs-benchmark
     BenchLib.MulMod.BarrettWideWord
     BenchLib.MulMod.Montgomery
     BenchLib.PowMod
-
-  other-modules:
-    Bench.AddMod
-    Bench.PowMod
 
   build-depends:
     , ac-library-hs
