@@ -52,22 +52,10 @@ module AtCoder.Internal.Assert
     -- * Interval assertion
     checkInterval,
     errorInterval,
-    f,
   )
 where
 
 import GHC.Stack (HasCallStack)
-
--- | My function.
---
--- >>> let g = (* 3)
--- >>> 1
--- 1
---
--- >>> g $ f 1
--- 6
-f :: Int -> Int
-f = (* 2)
 
 -- | \(O(1)\) Assertion that is never erased at compile time.
 --
@@ -78,7 +66,7 @@ runtimeAssert p s
   | p = ()
   | otherwise = error s
 
--- | \(O(1)\) Tests \(i \n [0, n)\).
+-- | \(O(1)\) Tests \(i \in [0, n)\).
 --
 -- @since 1.0.0
 {-# INLINE testIndex #-}
