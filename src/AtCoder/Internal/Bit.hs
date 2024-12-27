@@ -5,12 +5,16 @@
 -- ==== Example
 -- >>> bitCeil 0
 -- 1
+--
 -- >>> bitCeil 1
 -- 1
+--
 -- >>> bitCeil 2
 -- 2
+--
 -- >>> bitCeil 3
 -- 4
+--
 -- >>> bitCeil 4
 -- 4
 --

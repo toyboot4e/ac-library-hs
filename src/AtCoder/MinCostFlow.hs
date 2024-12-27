@@ -12,6 +12,7 @@
 --
 -- >>> MCF.addEdge g 0 1 2 3    --  0 --> 1     2
 -- 0
+--
 -- >>> MCF.addEdge_ g 1 2 2 5   --  0 --> 1 --> 2
 --
 -- Augument flow with `flow`, `maxFlow` or `slope`:

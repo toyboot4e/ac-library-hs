@@ -15,6 +15,7 @@
 -- >>> TS.addClause ts 0 False 0 False -- x_0 == False || x_0 == False
 -- >>> TS.satisfiable ts
 -- True
+--
 -- >>> TS.answer ts
 -- [0]
 --

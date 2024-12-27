@@ -12,6 +12,7 @@
 --
 -- >>> MF.addEdge g 0 1 (2 :: Int)  --  0 --> 1     2
 -- 0
+--
 -- >>> MF.addEdge_ g 1 2 (1 :: Int) --  0 --> 1 --> 2
 --
 -- Augument the flow with `flow`. `maxFlow` can also be used when there's no flow limit:

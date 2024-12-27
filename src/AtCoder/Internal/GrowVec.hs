@@ -7,25 +7,33 @@
 -- >>> growVec <- GV.new @_ @Int 0
 -- >>> GV.null growVec
 -- True
+--
 -- >>> GV.pushBack growVec 10
 -- >>> GV.pushBack growVec 11
 -- >>> GV.pushBack growVec 12
 -- >>> GV.freeze growVec
 -- [10,11,12]
+--
 -- >>> GV.length growVec
 -- 3
+--
 -- >>> GV.capacity growVec
 -- 4
+--
 -- >>> GV.write growVec 1 20
 -- >>> GV.read growVec 1
 -- 20
+--
 -- >>> GV.popBack growVec
 -- Just 12
+--
 -- >>> GV.popBack growVec
 -- Just 20
+--
 -- >>> GV.reserve growVec 20
 -- >>> GV.capacity growVec
 -- 20
+--
 -- >>> GV.unsafeFreeze growVec
 -- [10]
 --

@@ -9,17 +9,22 @@
 -- >>> heap <- MH.new @Int 4
 -- >>> MH.capacity heap
 -- 4
+--
 -- >>> MH.push heap 10
 -- >>> MH.push heap 0
 -- >>> MH.push heap 5
 -- >>> MH.length heap -- [0, 5, 10]
 -- 3
+--
 -- >>> MH.pop heap    -- [5, 10]
 -- Just 0
+--
 -- >>> MH.peek heap   -- [5, 10]
 -- Just 5
+--
 -- >>> MH.pop heap    -- [10]
 -- Just 5
+--
 -- >>> MH.clear heap  -- []
 -- >>> MH.null heap
 -- True

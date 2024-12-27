@@ -7,21 +7,27 @@
 -- >>> que <- Q.new @_ @Int 3
 -- >>> Q.capacity que
 -- 3
+--
 -- >>> Q.pushBack que 0 -- [0  _  _  _]
 -- >>> Q.pushBack que 1 -- [0, 1  _  _]
 -- >>> Q.pushBack que 2 -- [0, 1, 2  _]
 -- >>> Q.length que
 -- 3
+--
 -- >>> Q.popFront que   -- [_  1, 2  _]
 -- Just 0
+--
 -- >>> Q.freeze que     -- [_  1, 2  _]
 -- [1,2]
+--
 -- >>> Q.pushFront que 10   -- [10, 1, 2  _]
 -- >>> Q.pushFront que 1000
 -- *** Exception: AtCoder.Internal.Queue.pushFront: no empty front space
 -- ...
+--
 -- >>> Q.unsafeFreeze que -- [10, 1, 2  _]
 -- [10,1,2]
+--
 -- >>> Q.clear que      -- [_  _  _  _]
 -- >>> Q.pushBack que 0 -- [0  _  _  _]
 -- >>> Q.pushBack que 1 -- [0, 1  _  _]

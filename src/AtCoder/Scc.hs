@@ -5,6 +5,7 @@
 -- >>> gr <- Scc.new 4     -- 0    1    2    3
 -- >>> Scc.nScc gr
 -- 4
+--
 -- >>> Scc.addEdge gr 0 1  -- 0 -> 1    2    3
 -- >>> Scc.addEdge gr 1 0  -- 0 == 1    2    3
 -- >>> Scc.addEdge gr 1 2  -- 0 == 1 -> 2    3

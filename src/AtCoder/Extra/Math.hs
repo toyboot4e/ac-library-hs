@@ -5,8 +5,10 @@
 -- >>> import Data.Semigroup (Product(..), Sum(..))
 -- >>> getProduct $ M.power (<>) 32 (Product 2)
 -- 4294967296
+--
 -- >>> getProduct $ M.stimes' 32 (Product 2)
 -- 4294967296
+--
 -- >>> getProduct $ M.mtimes' 32 (Product 2)
 -- 4294967296
 --

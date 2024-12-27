@@ -10,6 +10,7 @@
 -- >>> buf <- B.new @_ @Int 4
 -- >>> B.capacity buf
 -- 4
+--
 -- >>> B.null buf        -- [_   _  _  _]
 -- True
 --
@@ -24,6 +25,7 @@
 --
 -- >>> B.read buf 0
 -- 10
+--
 -- >>> B.write buf 1 0   -- [10, 0,  _  _]
 --
 -- Remove elements with `pushBack`:
@@ -35,9 +37,11 @@
 --
 -- >>> B.freeze buf
 -- [10]
+--
 -- >>> B.clear buf       -- []
 -- >>> B.null buf
 -- True
+--
 -- >>> B.unsafeFreeze buf
 -- []
 --

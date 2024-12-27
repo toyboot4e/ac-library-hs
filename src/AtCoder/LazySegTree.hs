@@ -44,8 +44,10 @@
 --
 -- >>> LST.read seg 1
 -- Sum {getSum = 5}
+--
 -- >>> LST.prod seg 0 3 -- product (fold) of `Sum Int` in interval [0, 3)
 -- Sum {getSum = 14}
+--
 -- >>> LST.allProd seg
 -- Sum {getSum = 24}
 --
@@ -53,6 +55,7 @@
 --
 -- >>> LST.maxRight seg 0 (<= (Sum 10)) -- sum [0, 2) = 7 <= 10
 -- 2
+--
 -- >>> LST.minLeft seg 4 (<= (Sum 10)) -- sum [3, 4) = 10 <= 10
 -- 3
 --

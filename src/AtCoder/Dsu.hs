@@ -22,6 +22,7 @@
 --
 -- >>> Dsu.merge dsu 0 1  -- 0=1 2 3
 -- 0
+--
 -- >>> Dsu.merge_ dsu 1 2 -- 0=1=2 3
 --
 -- `leader` returns the internal representative vertex of the connected components:
@@ -33,8 +34,10 @@
 --
 -- >>> Dsu.same dsu 0 2
 -- True
+--
 -- >>> Dsu.size dsu 0
 -- 3
+--
 -- >>> Dsu.groups dsu
 -- [[2,1,0],[3]]
 --

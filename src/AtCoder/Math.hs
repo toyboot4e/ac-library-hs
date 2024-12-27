@@ -80,6 +80,7 @@ invMod x m =
 -- >>> let (y, {- lcm ms -} _) = crt rs ms
 -- >>> VU.zipWith mod rs ms
 -- [0,1,0,4]
+--
 -- >>> VU.zipWith mod rs ms == VU.map (y `mod`) ms
 -- True
 --

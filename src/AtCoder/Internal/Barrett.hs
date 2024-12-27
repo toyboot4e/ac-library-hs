@@ -8,6 +8,7 @@
 -- >>> let bt = new32 10 -- mod 10
 -- >>> umod bt
 -- 10
+--
 -- >>> mulMod bt 7 7
 -- 9
 --

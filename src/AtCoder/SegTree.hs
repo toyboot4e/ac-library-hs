@@ -36,6 +36,7 @@
 --
 -- >>> ST.prod seg 0 3
 -- Sum {getSum = 3}
+--
 -- >>> ST.allProd seg
 -- Sum {getSum = 6}
 --
@@ -43,6 +44,7 @@
 --
 -- >>> ST.maxRight seg 0 (< (Sum 5)) -- sum [0, 3) = 2 < 5
 -- 3
+--
 -- >>> ST.minLeft seg 4 (< (Sum 5)) -- sum [3, 4) = 3 < 5
 -- 3
 --
