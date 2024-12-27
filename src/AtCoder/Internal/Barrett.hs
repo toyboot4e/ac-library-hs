@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- | Fast modular multiplication by barrett reduction.
+-- | Fast modular multiplication for `Word32` by barrett reduction.
 -- Reference: https://en.wikipedia.org/wiki/Barrett_reduction
 --
 -- ==== Example

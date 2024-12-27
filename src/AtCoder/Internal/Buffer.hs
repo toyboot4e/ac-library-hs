@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Pushable vector with fixed size capacity. Stack. Internally it has the number of elements.
+-- | Pushable vector with fixed size capacity. Stack. Internally it tracks the number of elements
+-- in the vector.
 --
 -- ==== __Example__
 -- Create a buffer with capacity @4@:

@@ -32,7 +32,7 @@ import Data.Vector.Unboxed.Base qualified as VU -- V_2
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | Comperssed Sparse Row.
+-- | Comperssed Sparse Row representation of a graph.
 --
 -- @since 1.0.0
 data Csr e = Csr

@@ -65,7 +65,7 @@ import Prelude hiding (sum)
 data FenwickTree s a = FenwickTree
   { -- | 1.0.0 The number of vertices.
     --
-    -- @since
+    -- @since 1.0.0
     nFt :: {-# UNPACK #-} !Int,
     -- | The data storage.
     dataFt :: !(VUM.MVector s a)
