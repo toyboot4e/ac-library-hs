@@ -20,11 +20,11 @@ extra-doc-files:
   CHANGELOG.md
   README.md
 
+tested-with:     GHC ==9.8.4
+
 source-repository head
   type:     git
   location: https://github.com/toyboot4e/ac-library-hs.git
-
-tested-with:     GHC ==9.8.4
 
 common warnings
   ghc-options: -Wall
