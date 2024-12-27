@@ -19,6 +19,7 @@ build-type:      Simple
 extra-doc-files:
   CHANGELOG.md
   README.md
+  examples/README.md
 
 tested-with:     GHC ==9.8.4
 
