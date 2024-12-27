@@ -36,7 +36,9 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- @since 1.0.0
 data SccGraph s = SccGraph
-  { -- | @since 1.0.0
+  { -- | The number of vertices.
+    --
+    -- @since 1.0.0
     nScc :: {-# UNPACK #-} !Int,
     edgesScc :: !(ACIGV.GrowVec s (Int, Int))
   }
@@ -65,7 +67,7 @@ addEdge SccGraph {edgesScc} from to = do
 sccIds :: (PrimMonad m) => SccGraph (PrimState m) -> m (Int, VU.Vector Int)
 sccIds SccGraph {..} = do
   -- see also the Wikipedia: https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm#The_algorithm_in_pseudocode
-  g <- ACICSR.build nScc <$> ACIGV.unsafeFreeze edgesScc
+  g <- ACICSR.build' nScc <$> ACIGV.unsafeFreeze edgesScc
   -- next SCC ID
   groupNum <- VUM.replicate 1 (0 :: Int)
   -- stack of vertices
