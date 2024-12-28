@@ -71,6 +71,8 @@ library
     AtCoder.Convolution
     AtCoder.Dsu
     AtCoder.Extra.HashMap
+    AtCoder.Extra.IntMap
+    AtCoder.Extra.IntSet
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid
     AtCoder.Extra.Monoid.Affine1
@@ -118,6 +120,8 @@ test-suite ac-library-hs-test
     Tests.Convolution
     Tests.Dsu
     Tests.Extra.HashMap
+    Tests.Extra.IntMap
+    Tests.Extra.IntSet
     Tests.Extra.Math
     Tests.Extra.Monoid
     Tests.FenwickTree
@@ -146,17 +150,19 @@ test-suite ac-library-hs-test
   main-is:        Main.hs
   build-depends:
     , ac-library-hs
+    , containers
     , hspec
     , mtl
-    , QuickCheck
-    , quickcheck-classes
-    , random
     , tasty
     , tasty-hspec
     , tasty-hunit
     , tasty-quickcheck
     , tasty-rerun
     , transformers
+    , QuickCheck
+    , quickcheck-classes
+    , random
+    , unordered-containers
 
 benchmark ac-library-hs-benchmark
   import:         warnings

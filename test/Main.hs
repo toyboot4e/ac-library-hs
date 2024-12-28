@@ -5,6 +5,8 @@ import Test.Tasty.Ingredients.Rerun
 import Tests.Convolution qualified
 import Tests.Dsu qualified
 import Tests.Extra.HashMap qualified
+import Tests.Extra.IntMap qualified
+import Tests.Extra.IntSet qualified
 import Tests.Extra.Math qualified
 import Tests.Extra.Monoid qualified
 import Tests.FenwickTree qualified
@@ -35,6 +37,8 @@ main =
         testGroup
           "Extra"
           [ testGroup "HashMap" Tests.Extra.HashMap.tests,
+            testGroup "IntMap" Tests.Extra.IntMap.tests,
+            testGroup "IntSet" Tests.Extra.IntSet.tests,
             testGroup "Math" Tests.Extra.Math.tests,
             testGroup "Monoid" Tests.Extra.Monoid.tests
           ],
