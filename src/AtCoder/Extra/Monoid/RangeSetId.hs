@@ -1,7 +1,8 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | `AtCoder.LazySegTree.SegAct` instance of range set action over ideomponent monoids. It can set
--- an interval \([l, r)\) to an idempotent monoid \(x\) such as @Max Int@.
+-- | Range set monoid action for \([l, r)\) intervals. Works on ideomponent monoids such as `Max`
+-- or `Min` only.
+--
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Monoid.RangeSetId
@@ -24,7 +25,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- | `AtCoder.LazySegTree.SegAct` instance of range set action over ideomponent monoids.
+-- | Range set monoid action.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeSetId(..))

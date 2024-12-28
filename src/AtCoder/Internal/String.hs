@@ -1,4 +1,4 @@
--- | Internal implementation of `AtCoder.String` module.
+-- | Internal implementation of @AtCoder.String@ module.
 module AtCoder.Internal.String
   ( -- * Suffix array
     saNaive,

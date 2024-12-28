@@ -1,7 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | `AtCoder.LazySegTree.SegAct` instance of one-dimensional affine transformation
--- \(f: x \rightarrow a \times x + b\).
+-- | Range add monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\).
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Monoid.Affine1
@@ -30,8 +29,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 
 -- Tuple is not the fastest representation, but it's easier to implement `Unbox`.
 
--- | `AtCoder.LazySegTree.SegAct` instance of one-dimensional affine transformation
--- \(f: x \rightarrow a \times x + b\).
+-- | Range add monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\).
 --
 -- ==== Composition and dual
 -- `Semigroup` for `Affine1` is implemented like function composition, and rightmost affine

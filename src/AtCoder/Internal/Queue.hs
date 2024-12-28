@@ -2,7 +2,7 @@
 
 -- | Fixed-sized queue. Internally it has \(l, r\) pair of valid element bounds.
 --
--- ==== Example
+-- ==== __Example__
 -- >>> import AtCoder.Internal.Queue qualified as Q
 -- >>> que <- Q.new @_ @Int 3
 -- >>> Q.capacity que

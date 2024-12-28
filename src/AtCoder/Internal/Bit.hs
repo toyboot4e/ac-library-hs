@@ -2,7 +2,7 @@
 
 -- | Bit operations not in the `Data.Bits` module.
 --
--- ==== Example
+-- ==== __Example__
 -- >>> bitCeil 0
 -- 1
 --

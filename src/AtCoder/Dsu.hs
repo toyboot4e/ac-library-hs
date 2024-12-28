@@ -18,7 +18,7 @@
 -- >>> Dsu.nDsu dsu
 -- 4
 --
--- Merge some vertices into the same group: b:
+-- Merge some vertices into the same group:
 --
 -- >>> Dsu.merge dsu 0 1  -- 0=1 2 3
 -- 0

@@ -1,6 +1,6 @@
 -- | Internal math implementation.
 --
--- ==== Example
+-- ==== __Example__
 -- >>> import AtCoder.Internal.Math
 -- >>> powMod 10 60 998244353 -- 10^60 mod 998244353
 -- 526662729

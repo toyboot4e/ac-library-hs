@@ -4,7 +4,7 @@
 -- | Fast modular multiplication for `Word32` by barrett reduction.
 -- Reference: https://en.wikipedia.org/wiki/Barrett_reduction
 --
--- ==== Example
+-- ==== __Example__
 -- >>> let bt = new32 10 -- mod 10
 -- >>> umod bt
 -- 10

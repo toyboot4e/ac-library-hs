@@ -309,7 +309,7 @@ data LazySegTree s f a = LazySegTree
     lzLst :: !(VUM.MVector s f)
   }
 
--- | Creates an array of length @n@. All the elements are initialized to `mempty`.
+-- | Creates an array of length \(n\). All the elements are initialized to `mempty`.
 --
 -- ==== Constraints
 -- - \(0 \leq n\)
@@ -324,7 +324,7 @@ new nLst
   | nLst >= 0 = build $ VU.replicate nLst mempty
   | otherwise = error $ "new: given negative size `" ++ show nLst ++ "`"
 
--- | Creates an array with initial values @vs@.
+-- | Creates an array with initial values \(vs\).
 --
 -- ==== Constraints
 -- - \(0 \leq n\)

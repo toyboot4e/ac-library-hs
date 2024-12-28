@@ -8,7 +8,7 @@
 -- >>> import AtCoder.MaxFlow qualified as MF
 -- >>> g <- MF.new @_ @Int 3        --  0     1     2
 --
--- Build a simple graph with `'addEdge' g from to cap` or `addEdge_`:
+-- Build a simple graph with @'addEdge' g from to cap@ or `addEdge_`:
 --
 -- >>> MF.addEdge g 0 1 (2 :: Int)  --  0 --> 1     2
 -- 0
@@ -21,7 +21,7 @@
 -- 1
 --
 -- Get the minimum cut with `minCut`. In this case, removing the second edge makes the minimum cut
--- (note that the edge capacity (`1`) = max flow):
+-- (note that the edge capacity (\(1\)) = max flow):
 --
 -- >>> MF.minCut g 0 -- returns a Bit vector. `1` (`Bit True`) is on the `s` side.
 -- [1,1,0]
@@ -88,7 +88,7 @@ data MfGraph s cap = MfGraph
     posG :: !(ACIGV.GrowVec s (Int, Int))
   }
 
--- | Creates a graph of @n@ vertices and \(0\) edges. `cap` is the type of the capacity.
+-- | Creates a graph of \(n\) vertices and \(0\) edges. `cap` is the type of the capacity.
 --
 -- ==== Constraints
 -- - \(0 \leq n\)

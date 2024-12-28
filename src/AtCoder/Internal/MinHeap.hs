@@ -4,7 +4,7 @@
 --
 -- <https://en.wikipedia.org/wiki/Binary_heap>
 --
--- ==== Example
+-- ==== __Example__
 -- >>> import AtCoder.Internal.MinHeap qualified as MH
 -- >>> heap <- MH.new @Int 4
 -- >>> MH.capacity heap

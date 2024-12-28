@@ -1,6 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | Monoid action for setting interval \([l, r)\) over ideomponent monoids.
+-- | Range add monoid action for \([l, r)\) intervals. Works on ideomponent monoids such as `Max`
+-- or `Min` only.
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Monoid.RangeAddId
@@ -20,7 +21,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- | Range set monoid action.
+-- | Range add monoid action.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeAddId(..))

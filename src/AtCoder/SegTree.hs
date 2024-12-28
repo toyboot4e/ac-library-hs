@@ -132,7 +132,7 @@ data SegTree s a = SegTree
     dSt :: !(VUM.MVector s a)
   }
 
--- | Creates an array @a@ of length @n@. All the elements are initialized to `mempty`.
+-- | Creates an array \(a\) of length \(n\). All the elements are initialized to `mempty`.
 --
 -- ==== Constraints
 -- - \(0 \leq n\)

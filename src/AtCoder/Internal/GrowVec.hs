@@ -2,7 +2,7 @@
 
 -- | Growable vector with some runtime overhead (by `MutVar`).
 --
--- ==== Example
+-- ==== __Example__
 -- >>> import AtCoder.Internal.GrowVec qualified as GV
 -- >>> growVec <- GV.new @_ @Int 0
 -- >>> GV.null growVec

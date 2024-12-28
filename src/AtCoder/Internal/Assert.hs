@@ -1,6 +1,6 @@
 -- | Runtime assertion utility.
 --
--- ==== Example
+-- ==== __Example__
 -- >>> let !_ = runtimeAssert False "errorMessage"
 -- *** Exception: errorMessage
 -- ...

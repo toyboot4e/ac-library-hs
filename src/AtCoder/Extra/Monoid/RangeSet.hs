@@ -1,7 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | `AtCoder.LazySegTree.SegAct` instance of range set action. It can set an interval \([l, r)\) to
--- the same monoid \(x\) such as @Sum Int@.
+-- | Range set monoid action for \([l, r)\) intervals.
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Monoid.RangeSet
@@ -25,7 +24,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- | `AtCoder.LazySegTree.SegAct` instance of range set action.
+-- | Range set monoid action.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeSet(..))
