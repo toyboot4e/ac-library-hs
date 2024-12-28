@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# OPTIONS_HADDOCK hide #-}
 
 -- | Implementation of Strongly Connected Components calculation. Use `AtCoder.Scc` instead.
 --
