@@ -151,7 +151,7 @@ sum ft@FenwickTree {nFt} l r
   | otherwise = unsafeSum ft l r
 
 -- | Total version of `sum`. Calculates the sum in half-open range \([l, r)\). It returns `Nothing`
--- for invalid intervals.
+-- if the interval is invalid.
 --
 -- ==== Complexity
 -- - \(O(\log n)\)

@@ -57,7 +57,7 @@
 --
 -- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\). If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\),
 -- wrap your monoid in `Data.Monoid.Dual`.
--- - If you ever need to store boxed types to `SegTree`, wrap it in 'Data.Vector.Unboxed.DoNotUnboxStrict'
+-- - If you ever need to store boxed types to `LazySegTree`, wrap it in 'vector:Data.Vector.Unboxed.DoNotUnboxStrict'
 -- or the like.
 --
 -- ==== Major changes from the original @ac-library@
@@ -88,12 +88,12 @@ module AtCoder.SegTree
     -- * Binary searches
 
     -- ** Left binary searches
-    maxRight,
-    maxRightM,
-
-    -- ** Right binary searches
     minLeft,
     minLeftM,
+
+    -- ** Right binary searches
+    maxRight,
+    maxRightM,
 
     -- * Conversions
     freeze,
@@ -184,7 +184,7 @@ write self@SegTree {..} p x = do
   for_ [1 .. logSt] $ \i -> do
     update self ((p + sizeSt) .>>. i)
 
--- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
+-- | (Extra API) Modifies \(p\)-th value with a function \(f\).
 --
 -- ==== Constraints
 -- - \(0 \leq p \lt n\)
@@ -201,7 +201,7 @@ modify self@SegTree {..} f p = do
   for_ [1 .. logSt] $ \i -> do
     update self ((p + sizeSt) .>>. i)
 
--- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
+-- | (Extra API) Modifies \(p\)-th value with a monadic function \(f\).
 --
 -- ==== Constraints
 -- - \(0 \leq p \lt n\)
@@ -250,7 +250,8 @@ prod self@SegTree {nSt} l0 r0
   | otherwise = ACIA.errorInterval "AtCoder.SegTree.prod" l0 r0 nSt
 
 -- | Total version of `prod`. Returns \(a[l] \cdot ... \cdot a[r - 1]\), assuming the properties of
--- the monoid. It returns `'Just' 'mempty'` if \(l = r\). It return `Nothing` for invalid intervals.
+-- the monoid. It returns `Just` `mempty` if \(l = r\). It return `Nothing` if the interval is
+-- invalid.
 --
 -- ==== Complexity
 -- - \(O(\log n)\)
@@ -292,76 +293,6 @@ unsafeProd SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mem
 {-# INLINE allProd #-}
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> m a
 allProd SegTree {..} = VGM.read dSt 1
-
--- | Applies a binary search on the segment tree. It returns an index \(r\) that satisfies both of the
--- following.
---
--- - \(r = l\) or \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\) returns `True`.
--- - \(r = n\) or \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r]))\) returns `False`.
---
--- If \(f\) is monotone, this is the maximum \(r\) that satisfies
--- \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
---
--- ==== Constraints
--- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
--- - @f mempty == True@.
--- - \(0 \leq l \leq n\)
---
--- ==== Complexity
--- - \(O(\log n)\)
---
--- @since 1.0.0.0
-{-# INLINE maxRight #-}
-maxRight :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
-maxRight seg l0 f = maxRightM seg l0 (pure . f)
-
--- | Moandic version of `maxRight`.
---
--- ==== Constraints
--- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
--- - @f mempty == True@.
--- - \(0 \leq l \leq n\)
---
--- ==== Complexity
--- - \(O(\log n)\)
---
--- @since 1.0.0.0
-{-# INLINE maxRightM #-}
-maxRightM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
-maxRightM SegTree {..} l0 f = do
-  b <- f mempty
-  let !_ = ACIA.runtimeAssert b "AtCoder.SegTree.maxRightM: `f mempty` returned `False`"
-  if l0 == nSt
-    then pure nSt
-    else inner (l0 + sizeSt) mempty
-  where
-    -- NOTE: Not ordinary bounds check!
-    !_ = ACIA.runtimeAssert (0 <= l0 && l0 <= nSt) $ "AtCoder.SegTree.maxRightM: given invalid `left` index `" ++ show l0 ++ "` over length `" ++ show nSt ++ "`"
-    inner l !sm = do
-      let l' = chooseBit l
-      !sm' <- (sm <>) <$> VGM.read dSt l'
-      b <- f sm'
-      if not b
-        then do
-          inner2 l' sm
-        else do
-          let l'' = l' + 1
-          if (l'' .&. (-l'')) /= l''
-            then inner l'' sm'
-            else pure nSt
-    chooseBit :: Int -> Int
-    chooseBit l
-      | even l = chooseBit $ l .>>. 1
-      | otherwise = l
-    inner2 l !sm
-      | l < sizeSt = do
-          let l' = 2 * l
-          !sm' <- (sm <>) <$> VGM.read dSt l'
-          b <- f sm'
-          if b
-            then inner2 (l' + 1) sm'
-            else inner2 l' sm
-      | otherwise = pure $ l - sizeSt
 
 -- | Applies a binary search on the segment tree. It returns an index \(l\) that satisfies both of
 -- the following.
@@ -434,6 +365,76 @@ minLeftM SegTree {..} r0 f = do
             then inner2 (r' - 1) sm'
             else inner2 r' sm
       | otherwise = pure $ r + 1 - sizeSt
+
+-- | Applies a binary search on the segment tree. It returns an index \(r\) that satisfies both of the
+-- following.
+--
+-- - \(r = l\) or \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\) returns `True`.
+-- - \(r = n\) or \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r]))\) returns `False`.
+--
+-- If \(f\) is monotone, this is the maximum \(r\) that satisfies
+-- \(f(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1])\).
+--
+-- ==== Constraints
+-- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
+-- - @f mempty == True@.
+-- - \(0 \leq l \leq n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.0.0.0
+{-# INLINE maxRight #-}
+maxRight :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
+maxRight seg l0 f = maxRightM seg l0 (pure . f)
+
+-- | Moandic version of `maxRight`.
+--
+-- ==== Constraints
+-- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
+-- - @f mempty == True@.
+-- - \(0 \leq l \leq n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.0.0.0
+{-# INLINE maxRightM #-}
+maxRightM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
+maxRightM SegTree {..} l0 f = do
+  b <- f mempty
+  let !_ = ACIA.runtimeAssert b "AtCoder.SegTree.maxRightM: `f mempty` returned `False`"
+  if l0 == nSt
+    then pure nSt
+    else inner (l0 + sizeSt) mempty
+  where
+    -- NOTE: Not ordinary bounds check!
+    !_ = ACIA.runtimeAssert (0 <= l0 && l0 <= nSt) $ "AtCoder.SegTree.maxRightM: given invalid `left` index `" ++ show l0 ++ "` over length `" ++ show nSt ++ "`"
+    inner l !sm = do
+      let l' = chooseBit l
+      !sm' <- (sm <>) <$> VGM.read dSt l'
+      b <- f sm'
+      if not b
+        then do
+          inner2 l' sm
+        else do
+          let l'' = l' + 1
+          if (l'' .&. (-l'')) /= l''
+            then inner l'' sm'
+            else pure nSt
+    chooseBit :: Int -> Int
+    chooseBit l
+      | even l = chooseBit $ l .>>. 1
+      | otherwise = l
+    inner2 l !sm
+      | l < sizeSt = do
+          let l' = 2 * l
+          !sm' <- (sm <>) <$> VGM.read dSt l'
+          b <- f sm'
+          if b
+            then inner2 (l' + 1) sm'
+            else inner2 l' sm
+      | otherwise = pure $ l - sizeSt
 
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --

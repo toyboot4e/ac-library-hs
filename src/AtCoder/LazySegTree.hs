@@ -69,14 +69,14 @@
 --
 -- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\). If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\),
 -- wrap your monoid in `Data.Monoid.Dual`.
--- - If you ever need to store boxed types to `LazySegTree`, wrap it in 'Data.Vector.Unboxed.DoNotUnboxStrict'
+-- - If you ever need to store boxed types to `LazySegTree`, wrap it in 'vector:Data.Vector.Unboxed.DoNotUnboxStrict'
 -- or the like.
 --
 -- ==== Major changes from the original @ac-library@
 -- - The API is based on `Monoid` and `SegAct`, not the functions @op@, @e@, @mapping@,
 -- @composition@ and @id@.
--- - The functions names follow the vector package: @get@ and @set@ are renamed to `read` and
--- `write`. `modify`, `modifyM`, `freeze` and `unsafeFreeze` are added.
+-- - @get@ and @set@ are renamed to `read` and `write`.
+-- - `modify`, `modifyM`, `freeze` and `unsafeFreeze` are added.
 --
 -- @since 1.0.0.0
 module AtCoder.LazySegTree
@@ -368,7 +368,7 @@ write self@LazySegTree {..} p x = do
   for_ [1 .. logLst] $ \i -> do
     update self $ p' .>>. i
 
--- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
+-- | (Extra API) Modifies \(p\)-th value with a function \(f\).
 --
 -- ==== Constraints
 -- - \(0 \leq p \lt n\)
@@ -388,7 +388,7 @@ modify self@LazySegTree {..} f p = do
   for_ [1 .. logLst] $ \i -> do
     update self $ p' .>>. i
 
--- | (Extra API) Modifies \(p\)-th value of the array to \(x\).
+-- | (Extra API) Modifies \(p\)-th value with a monadic function \(f\).
 --
 -- ==== Constraints
 -- - \(0 \leq p \lt n\)
@@ -444,8 +444,8 @@ prod self@LazySegTree {nLst} l0 r0
   | otherwise = unsafeProd self l0 r0
 
 -- | Total version of `prod`. Returns the product of \([a[l], ..., a[r - 1]]\), assuming the
--- properties of the monoid. It returns `'Just' 'mempty'` if \(l = r\). It returns `Nothing` for
--- invalid intervals.
+-- properties of the monoid. It returns `Just` `mempty` if \(l = r\). It returns `Nothing` if the
+-- interval is invalid.
 --
 -- ==== Complexity
 -- - \(O(\log n)\)
