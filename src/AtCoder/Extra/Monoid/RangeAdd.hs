@@ -70,22 +70,22 @@ instance (Semigroup a) => Semigroup (RangeAdd a) where
   {-# INLINE (<>) #-}
   (RangeAdd a) <> (RangeAdd b) = RangeAdd $! a <> b
 
--- | @since 1.0.0.0
+-- | @since 1.1.0.0
 instance (Monoid a) => Monoid (RangeAdd a) where
   {-# INLINE mempty #-}
   mempty = RangeAdd mempty
 
--- | @since 1.0.0.0
+-- | @since 1.1.0.0
 instance (Monoid (Sum a)) => SegAct (RangeAdd (Sum a)) (Sum a) where
   {-# INLINE segActWithLength #-}
   segActWithLength len f x = actWithLength len f x
 
--- | @since 1.0.0.0
+-- | @since 1.1.0.0
 instance (Monoid (Max a)) => SegAct (RangeAdd (Max a)) (Max a) where
   {-# INLINE segActWithLength #-}
   segActWithLength len f x = actWithLength len f x
 
--- | @since 1.0.0.0
+-- | @since 1.1.0.0
 instance (Monoid (Min a)) => SegAct (RangeAdd (Min a)) (Min a) where
   {-# INLINE segActWithLength #-}
   segActWithLength len f x = actWithLength len f x
