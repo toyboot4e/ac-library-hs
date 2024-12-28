@@ -179,6 +179,11 @@ executable past202303-open-n
   main-is:       past202303-open-n.hs
   build-depends: verify
 
+executable typical90_ac
+  import:        app-local
+  main-is:       typical90_ac.hs
+  build-depends: verify
+
 executable yosupo-point-add-range-sum
   import:        app-local
   main-is:       yosupo-point-add-range-sum.hs
@@ -246,7 +251,3 @@ executable alpc-h
   main-is:       alpc-h.hs
   build-depends: verify
 
-executable typical90_ac
-  import:        app-online
-  main-is:       typical90_ac.hs
-  build-depends: verify
