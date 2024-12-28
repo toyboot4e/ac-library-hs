@@ -22,7 +22,7 @@
 -- >>> S.zAlgorithmBS s
 -- [4,0,2,0]
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.String
   ( -- * Suffix array
     suffixArray,
@@ -67,7 +67,7 @@ import GHC.Stack (HasCallStack)
 -- ==== Complexity
 -- - (3) \(O(n + \mathrm{upper})\)-time
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE suffixArray #-}
 suffixArray :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
 suffixArray s upper =
@@ -83,7 +83,7 @@ suffixArray s upper =
 -- ==== Complexity
 -- - (1) \(O(n)\)-time
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE suffixArrayBS #-}
 suffixArrayBS :: (HasCallStack) => BS.ByteString -> VU.Vector Int
 suffixArrayBS s = do
@@ -99,7 +99,7 @@ suffixArrayBS s = do
 -- ==== Complexity
 -- - (2) \(O(n \log n)\)-time, \(O(n)\)-space
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE suffixArrayOrd #-}
 suffixArrayOrd :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
 suffixArrayOrd s =
@@ -135,7 +135,7 @@ suffixArrayOrd s =
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE lcpArray #-}
 lcpArray :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int -> VU.Vector Int
 lcpArray s sa =
@@ -176,7 +176,7 @@ lcpArray s sa =
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE lcpArrayBS #-}
 lcpArrayBS :: (HasCallStack) => BS.ByteString -> VU.Vector Int -> VU.Vector Int
 lcpArrayBS s sa =
@@ -192,7 +192,7 @@ lcpArrayBS s sa =
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE zAlgorithm #-}
 zAlgorithm :: (Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
 zAlgorithm s
@@ -234,7 +234,7 @@ zAlgorithm s
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE zAlgorithmBS #-}
 zAlgorithmBS :: BS.ByteString -> VU.Vector Int
 zAlgorithmBS s = zAlgorithm $ VU.fromListN (BS.length s) (BS.unpack s)

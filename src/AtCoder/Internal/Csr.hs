@@ -29,7 +29,7 @@
 -- >>> csr `C.adjW` 2
 -- [(3,123)]
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Internal.Csr
   ( -- * Compressed sparse row
     Csr,
@@ -53,22 +53,22 @@ import GHC.Stack (HasCallStack)
 
 -- | Comperssed Sparse Row representation of a graph.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 data Csr w = Csr
   { startCsr :: !(VU.Vector Int),
     adjCsr :: !(VU.Vector Int),
     wCsr :: !(VU.Vector w)
   }
   deriving
-    ( -- | @since 1.0.0
+    ( -- | @since 1.0.0.0
       Eq,
-      -- | @since 1.0.0
+      -- | @since 1.0.0.0
       Show
     )
 
 -- | \(O(n + m)\) Creates `Csr`.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE build #-}
 build :: (HasCallStack, VU.Unbox w) => Int -> VU.Vector (Int, Int, w) -> Csr w
 build n edges = runST $ do
@@ -99,7 +99,7 @@ build n edges = runST $ do
 
 -- | \(O(n + m)\) Creates `Csr` with no weight.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE build' #-}
 build' :: (HasCallStack) => Int -> VU.Vector (Int, Int) -> Csr ()
 build' n edges = build n $ VU.zip3 us vs (VU.replicate (VU.length us) ())
@@ -108,7 +108,7 @@ build' n edges = build n $ VU.zip3 us vs (VU.replicate (VU.length us) ())
 
 -- | \(O(1)\) Returns adjacent vertices.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE adj #-}
 adj :: (HasCallStack, VU.Unbox w) => Csr w -> Int -> VU.Vector Int
 adj Csr {..} i =
@@ -118,7 +118,7 @@ adj Csr {..} i =
 
 -- | \(O(1)\) Returns adjacent vertices with weights.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE adjW #-}
 adjW :: (HasCallStack, VU.Unbox w) => Csr w -> Int -> VU.Vector (Int, w)
 adjW Csr {..} i =
@@ -128,7 +128,7 @@ adjW Csr {..} i =
 
 -- | \(O(1)\) Returns a vector of @(edgeId, adjacentVertex)@.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE eAdj #-}
 eAdj :: (HasCallStack, VU.Unbox w) => Csr w -> Int -> VU.Vector (Int, Int)
 eAdj Csr {..} i =

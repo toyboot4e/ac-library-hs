@@ -18,7 +18,7 @@
 -- >>> bitCeil 4
 -- 4
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Internal.Bit
   ( -- * Utilities
     bitCeil,
@@ -29,7 +29,7 @@ where
 
 -- | \(O(w)\) Returns minimum \(2^i s.t. 2^i \geq n\).
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE bitCeil #-}
 bitCeil :: Int -> Int
 bitCeil n = inner 1

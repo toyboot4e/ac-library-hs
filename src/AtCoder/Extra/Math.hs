@@ -12,7 +12,7 @@
 -- >>> getProduct $ M.mtimes' 32 (Product 2)
 -- 4294967296
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Extra.Math
   ( -- * Binary exponential
     power,
@@ -37,7 +37,7 @@ import Data.Bits ((.>>.))
 -- ==== Constraints
 -- - \(n \gt 0\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE power #-}
 power :: (a -> a -> a) -> Int -> a -> a
 power op n0 x1
@@ -61,7 +61,7 @@ power op n0 x1
 -- ==== Constraints
 -- - \(n \gt 0\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE stimes' #-}
 stimes' :: (Semigroup a) => Int -> a -> a
 stimes' = power (<>)
@@ -74,7 +74,7 @@ stimes' = power (<>)
 -- ==== Constraints
 -- - \(n \ge 0\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE mtimes' #-}
 mtimes' :: (Monoid a) => Int -> a -> a
 mtimes' n x = case compare n 0 of

@@ -23,7 +23,7 @@
 -- Note that you can't call `flow`, `maxFlow` or `slope` multiple times, or else you'll get wrong
 -- return value.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.MinCostFlow
   ( -- * Minimum cost flow
     McfGraph (nG),
@@ -70,11 +70,11 @@ import GHC.Stack (HasCallStack)
 
 -- | Min cost flow graph.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 data McfGraph s cap cost = McfGraph
   { -- | The number of vertices.
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     nG :: {-# UNPACK #-} !Int,
     -- | fromVertex -> vector of @(from, to, cap, flow, cost)@.
     edgesG :: !(ACIGV.GrowVec s (Int, Int, cap, cap, cost))
@@ -89,7 +89,7 @@ data McfGraph s cap cost = McfGraph
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox cap, VU.Unbox cost) => Int -> m (McfGraph (PrimState m) cap cost)
 new nG = do
@@ -106,7 +106,7 @@ new nG = do
 -- ==== Complexity
 -- - \(O(1)\) amortized
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE addEdge #-}
 addEdge ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
@@ -134,7 +134,7 @@ addEdge McfGraph {..} from to cap cost = do
 -- ==== Complexity
 -- - \(O(1)\) amortized
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE addEdge_ #-}
 addEdge_ ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
@@ -157,7 +157,7 @@ addEdge_ graph from to cap cost = do
 -- ==== Complexity
 -- - Same as `slope`.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE flow #-}
 flow ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
@@ -178,7 +178,7 @@ flow graph s t flowLimit = do
 -- ==== Complexity
 -- - Same as `slope`.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE maxFlow #-}
 maxFlow ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, Bounded cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
@@ -212,7 +212,7 @@ maxFlow graph s t = do
 -- ==== Complexity
 -- - \(O(F (n + m) \log (n + m))\), where \(F\) is the amount of the flow and \(m\) is the number of added edges.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE slope #-}
 slope ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
@@ -364,7 +364,7 @@ internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
 -- ==== Complexity
 -- - \(O(1)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE getEdge #-}
 getEdge ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
@@ -382,7 +382,7 @@ getEdge McfGraph {..} i = do
 -- ==== Complexity
 -- - \(O(m)\), where \(m\) is the number of added edges.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE edges #-}
 edges ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
@@ -397,7 +397,7 @@ edges McfGraph {..} = do
 -- ==== Complexity
 -- - \(O(1)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE unsafeEdges #-}
 unsafeEdges ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>

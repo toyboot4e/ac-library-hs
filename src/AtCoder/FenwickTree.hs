@@ -31,7 +31,7 @@
 -- >>> FT.sum ft 0 3
 -- 8
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.FenwickTree
   ( -- * Fenwick tree
     FenwickTree (nFt),
@@ -62,11 +62,11 @@ import Prelude hiding (sum)
 
 -- | Fenwick tree.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 data FenwickTree s a = FenwickTree
   { -- | 1.0.0 The number of vertices.
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     nFt :: {-# UNPACK #-} !Int,
     -- | The data storage.
     dataFt :: !(VUM.MVector s a)
@@ -81,7 +81,7 @@ data FenwickTree s a = FenwickTree
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => Int -> m (FenwickTree (PrimState m) a)
 new nFt
@@ -95,7 +95,7 @@ new nFt
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 build :: (PrimMonad m, Num a, VU.Unbox a) => VU.Vector a -> m (FenwickTree (PrimState m) a)
 {-# INLINE build #-}
 build xs = do
@@ -111,7 +111,7 @@ build xs = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE add #-}
 add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()
 add FenwickTree {..} p0 x = do
@@ -124,7 +124,7 @@ add FenwickTree {..} p0 x = do
 
 -- | \(O(\log n)\) Calculates the sum in half-open range @[0, r)@.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE prefixSum #-}
 prefixSum :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> m a
 prefixSum FenwickTree {..} = inner 0
@@ -143,7 +143,7 @@ prefixSum FenwickTree {..} = inner 0
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE sum #-}
 sum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
 sum ft@FenwickTree {nFt} l r
@@ -156,7 +156,7 @@ sum ft@FenwickTree {nFt} l r
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE sumMaybe #-}
 sumMaybe :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m (Maybe a)
 sumMaybe ft@FenwickTree {nFt} l r

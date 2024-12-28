@@ -2,7 +2,7 @@
 
 -- | Math module. It contains number-theoretic algorithms.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Math
   ( -- * Modulus operations
     -- These functions are internally used for `AtCoder.ModInt`.
@@ -40,7 +40,7 @@ import GHC.Stack (HasCallStack)
 -- >>> (invMod 2 m) * 2 `mod` m -- (2^(-1) mod m) * 2 mod m
 -- 1
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE invMod #-}
 invMod :: (HasCallStack) => Int -> Int -> Int
 invMod x m =
@@ -84,7 +84,7 @@ invMod x m =
 -- >>> VU.zipWith mod rs ms == VU.map (y `mod`) ms
 -- True
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE crt #-}
 crt :: (HasCallStack) => VU.Vector Int -> VU.Vector Int -> (Int, Int)
 crt r m = loop 0 1 [0 .. VU.length r - 1]
@@ -148,7 +148,7 @@ crt r m = loop 0 1 [0 .. VU.length r - 1]
 --                  n = 5
 -- @
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE floorSum #-}
 floorSum :: (HasCallStack) => Int -> Int -> Int -> Int -> Int
 floorSum n m a b = ACIM.floorSumUnsigned n m a' b' - da - db

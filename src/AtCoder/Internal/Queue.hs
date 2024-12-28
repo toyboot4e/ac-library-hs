@@ -35,7 +35,7 @@
 -- >>> Q.freeze que
 -- [0,1,2]
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Internal.Queue
   ( -- * Queue
     Queue,
@@ -72,7 +72,7 @@ import Prelude hiding (length, null)
 
 -- | Fixed-sized queue. Internally it has \([l, r)\) pair of valid element bounds.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 data Queue s a = Queue
   { -- | Stores [l, r) range in the `vecQ`.
     posQ :: !(VUM.MVector s Int),
@@ -81,7 +81,7 @@ data Queue s a = Queue
 
 -- | \(O(n)\) Creates `Queue` with capacity \(n\).
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (Queue (PrimState m) a)
 new n = do
@@ -91,7 +91,7 @@ new n = do
 
 -- | \(O(1)\) Appends an element to the back. Will throw an exception if the index is out of range.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE pushBack #-}
 pushBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> a -> m ()
 pushBack Queue {..} e = do
@@ -105,7 +105,7 @@ pushBack Queue {..} e = do
 
 -- | \(O(1)\) Appends an element to the back. Will throw an exception if the index is out of range.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE pushFront #-}
 pushFront :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> a -> m ()
 pushFront Queue {..} e = do
@@ -123,7 +123,7 @@ pushFront Queue {..} e = do
 
 -- | \(O(1)\) Removes the first element from the queue and returns it, or `Nothing` if it is empty.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE popFront #-}
 popFront :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m (Maybe a)
 popFront Queue {..} = do
@@ -138,7 +138,7 @@ popFront Queue {..} = do
 
 -- | \(O(1)\) `popFront` with return value discarded.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE popFront_ #-}
 popFront_ :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m ()
 popFront_ que = do
@@ -147,14 +147,14 @@ popFront_ que = do
 
 -- | \(O(1)\) Returns the array size.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE capacity #-}
 capacity :: (VU.Unbox a) => Queue s a -> Int
 capacity = VUM.length . vecQ
 
 -- | \(O(1)\) Returns the number of elements in the queue.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE length #-}
 length :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Int
 length Queue {..} = do
@@ -164,14 +164,14 @@ length Queue {..} = do
 
 -- | \(O(1)\) Returns `True` if the buffer is empty.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE null #-}
 null :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Bool
 null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Sets the `length` to zero.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE clear #-}
 clear :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m ()
 clear Queue {..} = do
@@ -179,7 +179,7 @@ clear Queue {..} = do
 
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE freeze #-}
 freeze :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m (VU.Vector a)
 freeze Queue {..} = do
@@ -190,7 +190,7 @@ freeze Queue {..} = do
 -- | \(O(1)\) Unsafely converts a mutable vector to an immutable one without copying. The mutable
 -- vector may not be used after this operation.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE unsafeFreeze #-}
 unsafeFreeze :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m (VU.Vector a)
 unsafeFreeze Queue {..} = do

@@ -4,7 +4,7 @@
 --
 -- Be warned that they're not 100% guaranteed to be correct.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Extra.Monoid
   ( -- * SegAct (re-export)
     SegAct (..),

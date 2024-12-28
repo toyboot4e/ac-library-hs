@@ -3,7 +3,7 @@
 -- | `AtCoder.LazySegTree.SegAct` instance of one-dimensional affine transformation
 -- \(f: x \rightarrow a \times x + b\).
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Extra.Monoid.Affine1
   ( -- * Affine1
     Affine1 (..),
@@ -47,45 +47,45 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 -- >>> getSum <$> LST.allProd seg
 -- 9
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 newtype Affine1 a = Affine1 (Affine1Repr a)
   deriving newtype
-    ( -- | @since 1.0.0
+    ( -- | @since 1.0.0.0
       Eq,
-      -- | @since 1.0.0
+      -- | @since 1.0.0.0
       Ord,
-      -- | @since 1.0.0
+      -- | @since 1.0.0.0
       Show
     )
 
 -- | `Affine1` internal representation. Tuples are not the fastest representation, but it's easier
 -- to implement `Data.Vector.Unboxed.Unbox`.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 type Affine1Repr a = (a, a)
 
 -- | Creates `Affine1`.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE new #-}
 new :: a -> a -> Affine1 a
 new !a !b = Affine1 (a, b)
 
 -- | Applies \(f: x \rightarrow a \times x + b\).
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE act #-}
 act :: (Num a) => Affine1 a -> a -> a
 act (Affine1 (!a, !b)) x = a * x + b
 
 -- | Acts on @a@ with length in terms of `SegAct`. Works for `Sum a` only.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE actWithLength #-}
 actWithLength :: (Num a) => Int -> Affine1 a -> a -> a
 actWithLength len (Affine1 (!a, !b)) !x = a * x + b * fromIntegral len
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 instance (Num a) => Semigroup (Affine1 a) where
   {-# INLINE (<>) #-}
   (Affine1 (!a1, !b1)) <> (Affine1 (!a2, !b2)) = Affine1 (a', b')
@@ -97,7 +97,7 @@ instance (Num a) => Semigroup (Affine1 a) where
   {-# INLINE stimes #-}
   stimes b = ACEM.power (<>) (fromIntegral b)
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 instance (Num a) => Monoid (Affine1 a) where
   {-# INLINE mempty #-}
   mempty = Affine1 (1, 0)
@@ -105,39 +105,39 @@ instance (Num a) => Monoid (Affine1 a) where
   mconcat [] = mempty
   mconcat (x : xs) = foldl' (<>) x xs
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 instance (Num a) => SegAct (Affine1 a) (Sum a) where
   {-# INLINE segActWithLength #-}
   segActWithLength !len f (Sum !x) = Sum $! actWithLength len f x
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 instance (Num a) => SegAct (Affine1 (Sum a)) (Sum a) where
   {-# INLINE segActWithLength #-}
   segActWithLength = actWithLength
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 instance (Num a) => SegAct (Dual (Affine1 a)) (Sum a) where
   {-# INLINE segActWithLength #-}
   segActWithLength !len (Dual f) (Sum !x) = Sum $! actWithLength len f x
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 instance (Num a) => SegAct (Dual (Affine1 (Sum a))) (Sum a) where
   {-# INLINE segActWithLength #-}
   segActWithLength !len (Dual f) (Sum !x) = Sum $! actWithLength len (coerce f) x
 
 -- not works as SegAct for Product, Min, and Max.
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 newtype instance VU.MVector s (Affine1 a) = MV_Affine1 (VU.MVector s (Affine1Repr a))
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 newtype instance VU.Vector (Affine1 a) = V_Affine1 (VU.Vector (Affine1Repr a))
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 deriving instance (VU.Unbox a) => VGM.MVector VUM.MVector (Affine1 a)
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 deriving instance (VU.Unbox a) => VG.Vector VU.Vector (Affine1 a)
 
--- | @since 1.0.0
+-- | @since 1.0.0.0
 instance (VU.Unbox a) => VU.Unbox (Affine1 a)

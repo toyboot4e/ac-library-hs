@@ -24,7 +24,7 @@ import GHC.Stack (HasCallStack)
 
 -- | \(O(n^2)\) Internal implementation of suffix array creation (naive).
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE saNaive #-}
 saNaive :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 saNaive s =
@@ -47,7 +47,7 @@ saNaive s =
 
 -- | \(O(n \log n)\) Internal implementation of suffix array creation (doubling).
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE saDoubling #-}
 saDoubling :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 saDoubling s = VU.create $ do
@@ -86,7 +86,7 @@ saDoubling s = VU.create $ do
 
 -- | \(O(n)\) Internal implementation of suffix array creation (suffix array induced sorting).
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE saIsImpl #-}
 saIsImpl :: (HasCallStack) => Int -> Int -> VU.Vector Int -> Int -> VU.Vector Int
 saIsImpl naiveThreshold doublingThreshold s upper = VU.create $ do
@@ -245,7 +245,7 @@ saIsImpl naiveThreshold doublingThreshold s upper = VU.create $ do
 -- G. Nong, S. Zhang, and W. H. Chan,
 -- Two Efficient Algorithms for Linear Time Suffix Array Construction
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE saIs #-}
 saIs :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
 saIs = saIsManual 10 40
@@ -257,7 +257,7 @@ saIs = saIsManual 10 40
 -- G. Nong, S. Zhang, and W. H. Chan,
 -- Two Efficient Algorithms for Linear Time Suffix Array Construction
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE saIsManual #-}
 saIsManual :: (HasCallStack) => Int -> Int -> VU.Vector Int -> Int -> VU.Vector Int
 saIsManual naiveThreshold doublingThreshold s upper

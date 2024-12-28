@@ -35,7 +35,7 @@
 --
 -- If you want to calculate large values without taking mod, use `convolution64`.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Convolution
   ( -- * Convolution in mod m
     convolution,
@@ -75,7 +75,7 @@ import GHC.TypeNats (natVal')
 -- ==== Complexity
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 convolution ::
   forall p.
   (HasCallStack, AM.Modulus p) =>
@@ -105,7 +105,7 @@ convolution a b
 -- ==== Complexity
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 convolutionRaw ::
   forall p a.
   (HasCallStack, AM.Modulus p, Integral a, VU.Unbox a) =>
@@ -134,7 +134,7 @@ convolutionRaw _ a b
 -- ==== Complexity
 -- - \(O(n\log{n})\), where \(n = |a| + |b|\).
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 convolution64 ::
   (HasCallStack) =>
   VU.Vector Int ->

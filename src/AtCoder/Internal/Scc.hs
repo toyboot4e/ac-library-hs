@@ -2,7 +2,7 @@
 
 -- | Implementation of Strongly Connected Components calculation. Use `AtCoder.Scc` instead.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Internal.Scc
   ( -- * Internal SCC
     SccGraph (nScc),
@@ -34,18 +34,18 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 
 -- | Graph for collecting strongly connected components.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 data SccGraph s = SccGraph
   { -- | The number of vertices.
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     nScc :: {-# UNPACK #-} !Int,
     edgesScc :: !(ACIGV.GrowVec s (Int, Int))
   }
 
 -- | \(O(n)\) Creates `SccGraph` of \(n\) vertices.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (PrimMonad m) => Int -> m (SccGraph (PrimState m))
 new nScc = do
@@ -54,7 +54,7 @@ new nScc = do
 
 -- | \(O(1)\) amortized. Adds an edge to the graph.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE addEdge #-}
 addEdge :: (PrimMonad m) => SccGraph (PrimState m) -> Int -> Int -> m ()
 addEdge SccGraph {edgesScc} from to = do
@@ -62,7 +62,7 @@ addEdge SccGraph {edgesScc} from to = do
 
 -- | \(O(n + m)\) Returns a pair of @(# of scc, scc id)@.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE sccIds #-}
 sccIds :: (PrimMonad m) => SccGraph (PrimState m) -> m (Int, VU.Vector Int)
 sccIds SccGraph {..} = do
@@ -138,7 +138,7 @@ sccIds SccGraph {..} = do
 
 -- | \(O(n + m)\) Returns the strongly connected components.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE scc #-}
 scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
 scc g = do

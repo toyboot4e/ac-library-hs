@@ -41,7 +41,7 @@
 -- >>> Dsu.groups dsu
 -- [[2,1,0],[3]]
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Dsu
   ( -- * Disjoint set union
     Dsu (nDsu),
@@ -75,7 +75,7 @@ import GHC.Stack (HasCallStack)
 
 -- | Disjoint set union. Akso known as Union-Find tree.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 data Dsu s = Dsu
   { -- | 1.0.0 The number of nodes.
     --
@@ -94,7 +94,7 @@ data Dsu s = Dsu
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (PrimMonad m) => Int -> m (Dsu (PrimState m))
 new nDsu
@@ -114,7 +114,7 @@ new nDsu
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE merge #-}
 merge :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Int
 merge dsu@Dsu {..} a b = do
@@ -143,7 +143,7 @@ merge dsu@Dsu {..} a b = do
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE merge_ #-}
 merge_ :: (PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m ()
 merge_ dsu a b = do
@@ -159,7 +159,7 @@ merge_ dsu a b = do
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE same #-}
 same :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Bool
 same dsu@Dsu {..} a b = do
@@ -177,7 +177,7 @@ same dsu@Dsu {..} a b = do
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE leader #-}
 leader :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 leader dsu@Dsu {..} a = do
@@ -198,7 +198,7 @@ leader dsu@Dsu {..} a = do
 -- ==== Complexity
 -- - \(O(\alpha(n))\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE size #-}
 size :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 size dsu@Dsu {..} a = do
@@ -215,7 +215,7 @@ size dsu@Dsu {..} a = do
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE groups #-}
 groups :: (PrimMonad m) => Dsu (PrimState m) -> m (V.Vector (VU.Vector Int))
 groups dsu@Dsu {..} = do

@@ -31,7 +31,7 @@
 -- >>> MF.getEdge g 0 -- returns (from, to, cap, flow)
 -- (0,1,2,1)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.MaxFlow
   ( -- * Max flow graph
     MfGraph (nG),
@@ -76,11 +76,11 @@ import GHC.Stack (HasCallStack)
 
 -- | Max flow graph.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 data MfGraph s cap = MfGraph
   { -- | The number of vertices.
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     nG :: {-# UNPACK #-} !Int,
     -- | MfGraph: fromVertex -> vector of @(toVertex, revEdgeIndex, capacity)@.
     gG :: !(V.Vector (ACIGV.GrowVec s (Int, Int, cap))),
@@ -96,7 +96,7 @@ data MfGraph s cap = MfGraph
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox cap) => Int -> m (MfGraph (PrimState m) cap)
 new nG = do
@@ -114,7 +114,7 @@ new nG = do
 -- ==== Complexity
 -- - \(O(1)\) amortized
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE addEdge #-}
 addEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m Int
 addEdge MfGraph {..} from to cap = do
@@ -140,7 +140,7 @@ addEdge MfGraph {..} from to cap = do
 -- ==== Complexity
 -- - \(O(1)\) amortized
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE addEdge_ #-}
 addEdge_ :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m ()
 addEdge_ graph from to cap = do
@@ -159,7 +159,7 @@ addEdge_ graph from to cap = do
 -- - \(O(n^2 m)\) (general), or
 -- - \(O(F(n + m))\), where \(F\) is the returned value
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE flow #-}
 flow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m cap
 flow MfGraph {..} s t flowLimit = do
@@ -251,7 +251,7 @@ flow MfGraph {..} s t flowLimit = do
 -- - \(O(n^2 m)\) (general), or
 -- - \(O(F(n + m))\), where \(F\) is the returned value
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE maxFlow #-}
 maxFlow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, Bounded cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> m cap
 maxFlow graph s t = flow graph s t maxBound
@@ -263,7 +263,7 @@ maxFlow graph s t = flow graph s t maxBound
 -- ==== Complexity
 -- - \(O(n + m)\), where \(m\) is the number of added edges.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE minCut #-}
 minCut :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (VU.Vector Bit)
 minCut MfGraph {..} s = do
@@ -294,7 +294,7 @@ minCut MfGraph {..} s = do
 -- ==== Complexity
 -- - \(O(1)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE getEdge #-}
 getEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (Int, Int, cap, cap)
 getEdge MfGraph {..} i = do
@@ -311,7 +311,7 @@ getEdge MfGraph {..} i = do
 -- ==== Complexity
 -- - \(O(m)\), where \(m\) is the number of added edges.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE edges #-}
 edges :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> m (VU.Vector (Int, Int, cap, cap))
 edges g@MfGraph {posG} = do
@@ -327,7 +327,7 @@ edges g@MfGraph {posG} = do
 -- ==== Complexity
 -- - \(O(1)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE changeEdge #-}
 changeEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> cap -> cap -> m ()
 changeEdge MfGraph {..} i newCap newFlow = do

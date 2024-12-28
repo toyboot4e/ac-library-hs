@@ -23,7 +23,7 @@
 -- >>> floorSumUnsigned 8 12 3 5
 -- 6
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Internal.Math
   ( powMod,
     isPrime,
@@ -62,7 +62,7 @@ import GHC.Stack (HasCallStack)
 -- >>> powMod 10 60 m -- 10^60 mod m
 -- 526662729
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE powMod #-}
 powMod :: (HasCallStack) => Int -> Int -> Int -> Int
 powMod x n0 m0
@@ -81,7 +81,7 @@ powMod x n0 m0
 
 -- | M. Forisek and J. Jancina, Fast Primality Testing for Integers That Fit into a Machine Word
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE isPrime #-}
 isPrime :: Int -> Bool
 isPrime n
@@ -105,7 +105,7 @@ isPrime n
 -- ==== Constraints
 -- - \(1 \le b\) (not asserted)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE invGcd #-}
 invGcd :: Int -> Int -> (Int, Int)
 invGcd a0 b
@@ -130,7 +130,7 @@ invGcd a0 b
 
 -- | Returns primitive root.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE primitiveRoot #-}
 primitiveRoot :: Int -> Int
 primitiveRoot m
@@ -176,7 +176,7 @@ primitiveRoot m
 -- ==== Complexity
 -- - \(O(\log m)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE floorSumUnsigned #-}
 floorSumUnsigned :: Int -> Int -> Int -> Int -> Int
 floorSumUnsigned = inner 0

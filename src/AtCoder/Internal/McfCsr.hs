@@ -3,7 +3,7 @@
 
 -- | Internal CSR for `AtCoder.MinCostFlow`.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.Internal.McfCsr
   ( -- * Compressed sparse row
     Csr (..),
@@ -26,25 +26,25 @@ import GHC.Stack (HasCallStack)
 
 -- | CSR for min cost flow.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 data Csr s cap cost = Csr
-  { -- | @since 1.0.0
+  { -- | @since 1.0.0.0
     startCsr :: !(VU.Vector Int),
-    -- | @since 1.0.0
+    -- | @since 1.0.0.0
     toCsr :: !(VU.Vector Int),
-    -- | @since 1.0.0
+    -- | @since 1.0.0.0
     revCsr :: !(VU.Vector Int),
     -- | Mutable.
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     capCsr :: !(VUM.MVector s cap),
-    -- | @since 1.0.0
+    -- | @since 1.0.0.0
     costCsr :: !(VU.Vector cost)
   }
 
 -- | \(O(n + m)\) Creates `Csr`.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE build #-}
 build :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost, PrimMonad m) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> m (VU.Vector Int, Csr (PrimState m) cap cost)
 build n edges = do
@@ -94,7 +94,7 @@ build n edges = do
 
 -- | \(O(1)\) Returns a vector of @(to, rev, cost)@.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE adj #-}
 adj :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost) => Csr s cap cost -> Int -> VU.Vector (Int, Int, cost)
 adj Csr {..} v = VU.slice offset len vec

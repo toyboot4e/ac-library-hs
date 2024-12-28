@@ -65,7 +65,7 @@
 -- - @get@ and @set@ are renamed to `read` and `write`.
 -- - `modify`, `modifyM`, `freeze` and `unsafeFreeze` are added.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.SegTree
   ( -- * Segment tree
     SegTree (nSt, sizeSt, logSt),
@@ -114,19 +114,19 @@ import Prelude hiding (read)
 
 -- | Segment tree.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 data SegTree s a = SegTree
   { -- | THe number of vertices.
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     nSt :: {-# UNPACK #-} !Int,
     -- | \(\lceil \log_2 \mathrm{nSt} \rceil\).
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     sizeSt :: {-# UNPACK #-} !Int,
     -- | \(\log_2 \mathrm{sizeSt}\).
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     logSt :: {-# UNPACK #-} !Int,
     -- | Data storage of length @2 * sizeSt@.
     dSt :: !(VUM.MVector s a)
@@ -140,7 +140,7 @@ data SegTree s a = SegTree
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (SegTree (PrimState m) a)
 new nSt
@@ -152,7 +152,7 @@ new nSt
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE build #-}
 build :: (PrimMonad m, Monoid a, VU.Unbox a) => VU.Vector a -> m (SegTree (PrimState m) a)
 build vs = do
@@ -175,7 +175,7 @@ build vs = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m ()
 write self@SegTree {..} p x = do
@@ -192,7 +192,7 @@ write self@SegTree {..} p x = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> a) -> Int -> m ()
 modify self@SegTree {..} f p = do
@@ -209,7 +209,7 @@ modify self@SegTree {..} f p = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> m a) -> Int -> m ()
 modifyM self@SegTree {..} f p = do
@@ -226,7 +226,7 @@ modifyM self@SegTree {..} f p = do
 -- ==== Complexity
 -- - \(O(1)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m a
 read SegTree {..} p = do
@@ -242,7 +242,7 @@ read SegTree {..} p = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE prod #-}
 prod :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m a
 prod self@SegTree {nSt} l0 r0
@@ -255,7 +255,7 @@ prod self@SegTree {nSt} l0 r0
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE prodMaybe #-}
 prodMaybe :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m (Maybe a)
 prodMaybe self@SegTree {nSt} l0 r0
@@ -288,7 +288,7 @@ unsafeProd SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mem
 -- ==== Complexity
 -- - \(O(1)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE allProd #-}
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> m a
 allProd SegTree {..} = VGM.read dSt 1
@@ -310,7 +310,7 @@ allProd SegTree {..} = VGM.read dSt 1
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE maxRight #-}
 maxRight :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
 maxRight seg l0 f = maxRightM seg l0 (pure . f)
@@ -325,7 +325,7 @@ maxRight seg l0 f = maxRightM seg l0 (pure . f)
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE maxRightM #-}
 maxRightM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
 maxRightM SegTree {..} l0 f = do
@@ -382,7 +382,7 @@ maxRightM SegTree {..} l0 f = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE minLeft #-}
 minLeft :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
 minLeft seg r0 f = minLeftM seg r0 (pure . f)
@@ -399,7 +399,7 @@ minLeft seg r0 f = minLeftM seg r0 (pure . f)
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE minLeftM #-}
 minLeftM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
 minLeftM SegTree {..} r0 f = do
@@ -437,7 +437,7 @@ minLeftM SegTree {..} r0 f = do
 
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE freeze #-}
 freeze :: (PrimMonad m, VU.Unbox a) => SegTree (PrimState m) a -> m (VU.Vector a)
 freeze SegTree {..} = do
@@ -446,7 +446,7 @@ freeze SegTree {..} = do
 -- | \(O(1)\) Unsafely converts a mutable vector to an immutable one without copying. The mutable
 -- vector may not be used after this operation.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE unsafeFreeze #-}
 unsafeFreeze :: (PrimMonad m, VU.Unbox a) => SegTree (PrimState m) a -> m (VU.Vector a)
 unsafeFreeze SegTree {..} = do

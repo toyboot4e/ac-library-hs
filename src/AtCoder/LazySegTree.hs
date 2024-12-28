@@ -78,7 +78,7 @@
 -- - The functions names follow the vector package: @get@ and @set@ are renamed to `read` and
 -- `write`. `modify`, `modifyM`, `freeze` and `unsafeFreeze` are added.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 module AtCoder.LazySegTree
   ( -- Lazy segment tree
     SegAct (..),
@@ -268,11 +268,11 @@ import Prelude hiding (read)
 --   putStrLn "=> test passed!"
 -- @
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 class (Monoid f) => SegAct f a where
   -- | Lazy segment tree action \(f(x)\).
   --
-  -- @since 1.0.0
+  -- @since 1.0.0.0
   {-# INLINE segAct #-}
   segAct :: f -> a -> a
   segAct = segActWithLength 1
@@ -282,26 +282,26 @@ class (Monoid f) => SegAct f a where
   -- If you implement `SegAct` with this function, you don't have to store the monoid's length,
   -- since it's given externally.
   --
-  -- @since 1.0.0
+  -- @since 1.0.0.0
   {-# INLINE segActWithLength #-}
   segActWithLength :: Int -> f -> a -> a
   segActWithLength _ = segAct
 
 -- | Lazy segment tree defined around `SegAct`.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 data LazySegTree s f a = LazySegTree
   { -- | Valid length.
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     nLst :: {-# UNPACK #-} !Int,
     -- | \(\lceil \log_2 \mathrm{nLst} \rceil\)
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     sizeLst :: {-# UNPACK #-} !Int,
     -- | \(\log_2 \mathrm{sizeLst}\).
     --
-    -- @since 1.0.0
+    -- @since 1.0.0.0
     logLst :: {-# UNPACK #-} !Int,
     -- | Data storage of length @2 * sizeLst@.
     dLst :: !(VUM.MVector s a),
@@ -317,7 +317,7 @@ data LazySegTree s f a = LazySegTree
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Int -> m (LazySegTree (PrimState m) f a)
 new nLst
@@ -332,7 +332,7 @@ new nLst
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE build #-}
 build :: (PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => VU.Vector a -> m (LazySegTree (PrimState m) f a)
 build vs = do
@@ -356,7 +356,7 @@ build vs = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> a -> m ()
 write self@LazySegTree {..} p x = do
@@ -376,7 +376,7 @@ write self@LazySegTree {..} p x = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> (a -> a) -> Int -> m ()
 modify self@LazySegTree {..} f p = do
@@ -396,7 +396,7 @@ modify self@LazySegTree {..} f p = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> (a -> m a) -> Int -> m ()
 modifyM self@LazySegTree {..} f p = do
@@ -416,7 +416,7 @@ modifyM self@LazySegTree {..} f p = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m a
 read self@LazySegTree {..} p = do
@@ -435,7 +435,7 @@ read self@LazySegTree {..} p = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE prod #-}
 prod :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
 prod self@LazySegTree {nLst} l0 r0
@@ -450,7 +450,7 @@ prod self@LazySegTree {nLst} l0 r0
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE prodMaybe #-}
 prodMaybe :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m (Maybe a)
 prodMaybe self@LazySegTree {nLst} l0 r0
@@ -489,7 +489,7 @@ unsafeProd self@LazySegTree {..} l0 r0 = do
 -- ==== Complexity
 -- - \(O(1)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE allProd #-}
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m a
 allProd LazySegTree {..} = VGM.read dLst 1
@@ -502,7 +502,7 @@ allProd LazySegTree {..} = VGM.read dLst 1
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE applyAt #-}
 applyAt :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
 applyAt self@LazySegTree {..} p f = do
@@ -525,7 +525,7 @@ applyAt self@LazySegTree {..} p f = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE applyIn #-}
 applyIn :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
 applyIn self@LazySegTree {..} l0 r0 f
@@ -572,7 +572,7 @@ applyIn self@LazySegTree {..} l0 r0 f
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE minLeft #-}
 minLeft :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 minLeft seg r0 g = minLeftM seg r0 (pure . g)
@@ -588,7 +588,7 @@ minLeft seg r0 g = minLeftM seg r0 (pure . g)
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE minLeftM #-}
 minLeftM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
 minLeftM self@LazySegTree {..} r0 g = do
@@ -647,7 +647,7 @@ minLeftM self@LazySegTree {..} r0 g = do
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE maxRight #-}
 maxRight :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 maxRight seg l0 g = maxRightM seg l0 (pure . g)
@@ -663,7 +663,7 @@ maxRight seg l0 g = maxRightM seg l0 (pure . g)
 -- ==== Complexity
 -- - \(O(\log n)\)
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE maxRightM #-}
 maxRightM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
 maxRightM self@LazySegTree {..} l0 g = do
@@ -708,7 +708,7 @@ maxRightM self@LazySegTree {..} l0 g = do
 
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE freeze #-}
 freeze :: (PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m (VU.Vector a)
 freeze self@LazySegTree {..} = do
@@ -720,7 +720,7 @@ freeze self@LazySegTree {..} = do
 -- | \(O(n)\) Unsafely converts a mutable vector to an immutable one without copying. The mutable
 -- vector may not be used after this operation.
 --
--- @since 1.0.0
+-- @since 1.0.0.0
 {-# INLINE unsafeFreeze #-}
 unsafeFreeze :: (PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m (VU.Vector a)
 unsafeFreeze self@LazySegTree {..} = do
