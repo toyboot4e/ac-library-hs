@@ -15,17 +15,13 @@ module AtCoder.Extra.Monoid
 
     -- * Range add
     RangeAdd (..),
-    RangeAddId (..),
 
     -- * Range set
     RangeSet (..),
-    RangeSetId (..),
   )
 where
 
 import AtCoder.Extra.Monoid.Affine1 (Affine1 (..), Affine1Repr)
 import AtCoder.Extra.Monoid.RangeAdd (RangeAdd (..))
-import AtCoder.Extra.Monoid.RangeAddId (RangeAddId (..))
 import AtCoder.Extra.Monoid.RangeSet (RangeSet (..))
-import AtCoder.Extra.Monoid.RangeSetId (RangeSetId (..))
 import AtCoder.LazySegTree (SegAct (..))

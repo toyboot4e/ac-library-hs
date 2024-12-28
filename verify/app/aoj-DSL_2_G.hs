@@ -17,7 +17,7 @@ main = do
   seg <- LST.build $ VU.replicate n (Sum (0 :: Int))
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !l, !r, !x) -> do
-      LST.applyIn seg (l - 1) r $ RangeAdd x
+      LST.applyIn seg (l - 1) r $ RangeAdd (Sum x)
       pure Nothing
     (1, !l, !r, !_) -> do
       Sum x <- LST.prod seg (l - 1) r

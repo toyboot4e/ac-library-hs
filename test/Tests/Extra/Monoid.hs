@@ -71,23 +71,11 @@ instance (QC.Arbitrary a) => QC.Arbitrary (RangeAdd a) where
   arbitrary = RangeAdd <$> QC.arbitrary
 
 -- orphan instance
-instance (QC.Arbitrary a) => QC.Arbitrary (RangeAddId a) where
-  arbitrary = RangeAddId <$> QC.arbitrary
-
--- orphan instance
 instance (QC.Arbitrary a, Monoid a) => QC.Arbitrary (RangeSet a) where
   arbitrary = do
     b <- (== 1) <$> QC.chooseInt (1, 30)
     if b
       then RangeSet . (Bit True,) <$> QC.arbitrary
-      else pure mempty
-
--- orphan instance
-instance (QC.Arbitrary a, Monoid a) => QC.Arbitrary (RangeSetId a) where
-  arbitrary = do
-    b <- (== 1) <$> QC.chooseInt (1, 30)
-    if b
-      then RangeSetId . (Bit True,) <$> QC.arbitrary
       else pure mempty
 
 -- orphan instance
@@ -113,26 +101,28 @@ tests =
       ],
     testGroup
       "RangeAdd"
-      [ laws @(RangeAdd Int)
+      [ laws @(RangeAdd (Sum Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
-        laws @(RangeAdd Int, Sum Int)
+        laws @(RangeAdd (Sum Int), Sum Int)
           [ segActLaw
-          ]
-      ],
-    testGroup
-      "RangeAddId"
-      [ laws @(RangeAddId Int)
+         ],
+        laws @(RangeAdd (Max Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
-        laws @(RangeAddId Int, Max Int)
+        laws @(RangeAdd (Max Int), Max Int)
           [ segActLaw
           ],
-        laws @(RangeAddId Int, Min Int)
+        laws @(RangeAdd (Min Int))
+          [ QCC.semigroupLaws,
+            QCC.monoidLaws,
+            QCC.semigroupMonoidLaws
+          ],
+        laws @(RangeAdd (Min Int), Min Int)
           [ segActLaw
           ]
       ],
@@ -143,64 +133,31 @@ tests =
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
+        laws @(RangeSet (Sum Int), Sum Int)
+          [ segActLaw
+          ],
         laws @(RangeSet (Product Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
+          ],
+        laws @(RangeSet (Product Int), Product Int)
+          [ segActLaw
           ],
         laws @(RangeSet (Max Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
+        laws @(RangeSet (Max Int), Max Int)
+          [ segActLaw
+          ],
         laws @(RangeSet (Min Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
-        laws @(RangeSet (Sum Int), Sum Int)
-          [ segActLaw
-          ],
-        laws @(RangeSet (Product Int), Product Int)
-          [ segActLaw
-          ],
-        laws @(RangeSet (Max Int), Max Int)
-          [ segActLaw
-          ],
         laws @(RangeSet (Min Int), Min Int)
-          [ segActLaw
-          ]
-      ],
-    testGroup
-      "RangeSetId"
-      [ laws @(RangeSetId (Sum Int))
-          [ QCC.semigroupLaws,
-            QCC.idempotentSemigroupLaws,
-            QCC.monoidLaws,
-            QCC.semigroupMonoidLaws
-          ],
-        laws @(RangeSetId (Product Int))
-          [ QCC.semigroupLaws,
-            QCC.idempotentSemigroupLaws,
-            QCC.monoidLaws,
-            QCC.semigroupMonoidLaws
-          ],
-        laws @(RangeSetId (Max Int))
-          [ QCC.semigroupLaws,
-            QCC.idempotentSemigroupLaws,
-            QCC.monoidLaws,
-            QCC.semigroupMonoidLaws
-          ],
-        laws @(RangeSetId (Min Int))
-          [ QCC.semigroupLaws,
-            QCC.idempotentSemigroupLaws,
-            QCC.monoidLaws,
-            QCC.semigroupMonoidLaws
-          ],
-        laws @(RangeSetId (Max Int), Max Int)
-          [ segActLaw
-          ],
-        laws @(RangeSetId (Min Int), Min Int)
           [ segActLaw
           ]
       ]

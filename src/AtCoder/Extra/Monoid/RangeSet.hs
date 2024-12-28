@@ -74,7 +74,7 @@ act (RangeSet (Bit False, !_)) x = x
 -- @since 1.0.0.0
 {-# INLINE actWithLength #-}
 actWithLength :: (Semigroup a) => Int -> RangeSet a -> a -> a
-actWithLength len (RangeSet (Bit True, !f)) _ = ACEM.power (<>) len f
+actWithLength len (RangeSet (Bit True, !f)) _ = stimes len f
 actWithLength _ (RangeSet (Bit False, !_)) x = x
 
 -- | @since 1.0.0.0

@@ -1,5 +1,9 @@
 # Revision history for acl-hs
 
+## 1.1.0.0 -- Dec 2024
+
+- Remove `RangeSetId` and `RangeAddId` from extra module, making `RangeSet` and `RangeAdd` more generic.
+
 ## 1.0.0.0 -- Dec 2024
 
 * First version.
