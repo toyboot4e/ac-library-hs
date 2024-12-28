@@ -1,7 +1,7 @@
 -- | It contains string algorithms.
 --
--- Let @s@ be a string. We denote the substring of @s@ between \(a\)-th and \(b - 1\)-th character
--- by @s[a..b)@.
+-- Let \(s\) be a string. We denote the substring of \(s\) between \(a\)-th and \(b - 1\)-th
+-- character by @s[a..b)@.
 --
 -- ==== Examples
 --
@@ -65,7 +65,7 @@ import GHC.Stack (HasCallStack)
 -- - \(0 \leq x \leq \mathrm{upper}\) for all elements \(x\) of \(s\).
 --
 -- ==== Complexity
--- - (3) \(O(n + \mathrm{upper})\)-time
+-- - \(O(n + \mathrm{upper})\)-time
 --
 -- @since 1.0.0.0
 {-# INLINE suffixArray #-}
@@ -81,7 +81,7 @@ suffixArray s upper =
 -- - \(0 \leq n\)
 --
 -- ==== Complexity
--- - (1) \(O(n)\)-time
+-- - \(O(n)\)-time
 --
 -- @since 1.0.0.0
 {-# INLINE suffixArrayBS #-}
@@ -97,7 +97,7 @@ suffixArrayBS s = do
 -- - \(0 \leq n\)
 --
 -- ==== Complexity
--- - (2) \(O(n \log n)\)-time, \(O(n)\)-space
+-- - \(O(n \log n)\)-time, \(O(n)\)-space
 --
 -- @since 1.0.0.0
 {-# INLINE suffixArrayOrd #-}

@@ -2,7 +2,7 @@
 
 ## 1.1.0.0 -- Dec 2024
 
-- Remove `RangeSetId` and `RangeAddId` from extra module, making `RangeSet` and `RangeAdd` more generic.
+- Remove `RangeSetId` and `RangeAddId` from the `Extra` module, making `RangeSet` and `RangeAdd` more generic.
 
 ## 1.0.0.0 -- Dec 2024
 
