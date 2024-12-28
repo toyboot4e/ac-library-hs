@@ -70,6 +70,7 @@ library
   exposed-modules:
     AtCoder.Convolution
     AtCoder.Dsu
+    AtCoder.Extra.HashMap
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid
     AtCoder.Extra.Monoid.Affine1
@@ -116,6 +117,7 @@ test-suite ac-library-hs-test
   other-modules:
     Tests.Convolution
     Tests.Dsu
+    Tests.Extra.HashMap
     Tests.Extra.Math
     Tests.Extra.Monoid
     Tests.FenwickTree

@@ -184,6 +184,11 @@ executable typical90_ac
   main-is:       typical90_ac.hs
   build-depends: verify
 
+executable yosupo-associative-array
+  import:        app-local
+  main-is:       yosupo-associative-array.hs
+  build-depends: verify
+
 executable yosupo-point-add-range-sum
   import:        app-local
   main-is:       yosupo-point-add-range-sum.hs

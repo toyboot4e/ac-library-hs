@@ -4,6 +4,7 @@ import Test.Tasty (testGroup)
 import Test.Tasty.Ingredients.Rerun
 import Tests.Convolution qualified
 import Tests.Dsu qualified
+import Tests.Extra.HashMap qualified
 import Tests.Extra.Math qualified
 import Tests.Extra.Monoid qualified
 import Tests.FenwickTree qualified
@@ -31,8 +32,12 @@ main =
     . testGroup "toplevel"
     $ [ testGroup "Convolution" Tests.Convolution.tests,
         testGroup "Dsu" Tests.Dsu.tests,
-        testGroup "Extra.Math" Tests.Extra.Math.tests,
-        testGroup "Extra.Monoid" Tests.Extra.Monoid.tests,
+        testGroup
+          "Extra"
+          [ testGroup "HashMap" Tests.Extra.HashMap.tests,
+            testGroup "Math" Tests.Extra.Math.tests,
+            testGroup "Monoid" Tests.Extra.Monoid.tests
+          ],
         testGroup "FenwickTree" Tests.FenwickTree.tests,
         testGroup
           "Internal"
