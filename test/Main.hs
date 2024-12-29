@@ -4,6 +4,7 @@ import Test.Tasty (testGroup)
 import Test.Tasty.Ingredients.Rerun
 import Tests.Convolution qualified
 import Tests.Dsu qualified
+import Tests.Extra.Bisect qualified
 import Tests.Extra.HashMap qualified
 import Tests.Extra.IntMap qualified
 import Tests.Extra.IntSet qualified
@@ -36,7 +37,8 @@ main =
         testGroup "Dsu" Tests.Dsu.tests,
         testGroup
           "Extra"
-          [ testGroup "HashMap" Tests.Extra.HashMap.tests,
+          [ testGroup "Bisect" Tests.Extra.Bisect.tests,
+            testGroup "HashMap" Tests.Extra.HashMap.tests,
             testGroup "IntMap" Tests.Extra.IntMap.tests,
             testGroup "IntSet" Tests.Extra.IntSet.tests,
             testGroup "Math" Tests.Extra.Math.tests,

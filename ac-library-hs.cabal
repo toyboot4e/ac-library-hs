@@ -70,6 +70,7 @@ library
   exposed-modules:
     AtCoder.Convolution
     AtCoder.Dsu
+    AtCoder.Extra.Bisect
     AtCoder.Extra.HashMap
     AtCoder.Extra.IntMap
     AtCoder.Extra.IntSet
@@ -119,6 +120,7 @@ test-suite ac-library-hs-test
   other-modules:
     Tests.Convolution
     Tests.Dsu
+    Tests.Extra.Bisect
     Tests.Extra.HashMap
     Tests.Extra.IntMap
     Tests.Extra.IntSet
