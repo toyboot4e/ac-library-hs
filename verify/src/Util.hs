@@ -1,6 +1,7 @@
 -- | Minimum parse/print with @bytestring@.
 module Util
   ( intP,
+    intS1P,
     int2P,
     int3P,
     int4P,
@@ -35,6 +36,10 @@ type Parser = StateT BS.ByteString Maybe
 -- | Parses an `Int`.
 intP :: Parser Int
 intP = StateT $ BS.readInt . BS.dropSpace
+
+-- | Parses an `Int` and subtracts @1@.
+intS1P :: Parser Int
+intS1P = StateT $ ((\(!x, !bs) -> (x - 1, bs)) <$>) . BS.readInt . BS.dropSpace
 
 int2P :: (HasCallStack) => Parser (Int, Int)
 int2P = do

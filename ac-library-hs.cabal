@@ -74,6 +74,7 @@ library
     AtCoder.Extra.HashMap
     AtCoder.Extra.IntMap
     AtCoder.Extra.IntSet
+    AtCoder.Extra.IntervalMap
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid
     AtCoder.Extra.Monoid.Affine1
@@ -122,6 +123,7 @@ test-suite ac-library-hs-test
     Tests.Dsu
     Tests.Extra.Bisect
     Tests.Extra.HashMap
+    Tests.Extra.IntervalMap
     Tests.Extra.IntMap
     Tests.Extra.IntSet
     Tests.Extra.Math
