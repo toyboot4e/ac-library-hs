@@ -80,6 +80,7 @@ library
     AtCoder.Extra.Monoid.Affine1
     AtCoder.Extra.Monoid.RangeAdd
     AtCoder.Extra.Monoid.RangeSet
+    AtCoder.Extra.MultiSet
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
     AtCoder.Internal.Barrett
@@ -123,6 +124,7 @@ test-suite ac-library-hs-test
     Tests.Dsu
     Tests.Extra.Bisect
     Tests.Extra.HashMap
+    Tests.Extra.MultiSet
     Tests.Extra.IntervalMap
     Tests.Extra.IntMap
     Tests.Extra.IntSet
