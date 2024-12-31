@@ -21,6 +21,7 @@
 -- Create a `SegTree` of @'Sum' Int@:
 --
 -- >>> import AtCoder.SegTree qualified as ST
+-- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> import Data.Monoid (Sum(..))
 -- >>> seg <- ST.new @_ @(Sum Int) 4
 --
@@ -74,7 +75,7 @@ module AtCoder.SegTree
     new,
     build,
 
-    -- * Accessing individual elements
+    -- * Accessing elements
     write,
     modify,
     modifyM,
@@ -249,7 +250,7 @@ prod self@SegTree {nSt} l0 r0
   | ACIA.testInterval l0 r0 nSt = unsafeProd self l0 r0
   | otherwise = ACIA.errorInterval "AtCoder.SegTree.prod" l0 r0 nSt
 
--- | Total version of `prod`. Returns \(a[l] \cdot ... \cdot a[r - 1]\), assuming the properties of
+-- | Total variant of `prod`. Returns \(a[l] \cdot ... \cdot a[r - 1]\), assuming the properties of
 -- the monoid. It returns `Just` `mempty` if \(l = r\). It return `Nothing` if the interval is
 -- invalid.
 --
@@ -318,7 +319,7 @@ allProd SegTree {..} = VGM.read dSt 1
 minLeft :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
 minLeft seg r0 f = minLeftM seg r0 (pure . f)
 
--- | Monadic version of `minLeft`.
+-- | Monadic variant of `minLeft`.
 --
 -- ==== Constraints
 --
@@ -388,7 +389,7 @@ minLeftM SegTree {..} r0 f = do
 maxRight :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
 maxRight seg l0 f = maxRightM seg l0 (pure . f)
 
--- | Moandic version of `maxRight`.
+-- | Moandic variant of `maxRight`.
 --
 -- ==== Constraints
 -- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.

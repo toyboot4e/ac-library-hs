@@ -73,7 +73,7 @@ runtimeAssert p s
 testIndex :: (HasCallStack) => Int -> Int -> Bool
 testIndex i n = 0 <= i && i < n
 
--- | \(O(1)\) Tests weather \([l, r)\) is a valid interval in \([0, n)\).
+-- | \(O(1)\) Tests whether \([l, r)\) is a valid interval in \([0, n)\).
 --
 -- @since 1.0.0.0
 {-# INLINE testInterval #-}

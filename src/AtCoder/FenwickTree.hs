@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Fenwick tree, also known as binary index tree. Given an array of length \(n\), it processes the
--- following queries in \(O(\log n)\) time.
+-- | A Fenwick tree, also known as binary indexed tree. Given an array of length \(n\), it processes
+-- the following queries in \(O(\log n)\) time.
 --
 -- - Updating an element
 -- - Calculating the sum of the elements of an interval
@@ -40,7 +40,7 @@ module AtCoder.FenwickTree
     new,
     build,
 
-    -- * Modifying the Fenwick tree
+    -- * Adding
     add,
 
     -- * Accessor
@@ -60,7 +60,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (sum)
 
--- | Fenwick tree.
+-- | A Fenwick tree.
 --
 -- @since 1.0.0.0
 data FenwickTree s a = FenwickTree
@@ -122,7 +122,7 @@ add FenwickTree {..} p0 x = do
       VGM.modify dataFt (+ x) (p - 1)
       loop $! p + (p .&. (-p))
 
--- | \(O(\log n)\) Calculates the sum in half-open range @[0, r)@.
+-- | \(O(\log n)\) Calculates the sum in a half-open interval @[0, r)@.
 --
 -- @since 1.0.0.0
 {-# INLINE prefixSum #-}
@@ -135,7 +135,7 @@ prefixSum FenwickTree {..} = inner 0
           dx <- VGM.read dataFt (r - 1)
           inner (acc + dx) (r - r .&. (-r))
 
--- | Calculates the sum in half-open range \([l, r)\).
+-- | Calculates the sum in a half-open interval \([l, r)\).
 --
 -- ==== Constraints
 -- - \(0 \leq l \leq r \leq n\)
@@ -150,8 +150,8 @@ sum ft@FenwickTree {nFt} l r
   | not (ACIA.testInterval l r nFt) = ACIA.errorInterval "AtCoder.FenwickTree.sum" l r nFt
   | otherwise = unsafeSum ft l r
 
--- | Total version of `sum`. Calculates the sum in half-open range \([l, r)\). It returns `Nothing`
--- if the interval is invalid.
+-- | Total variant of `sum`. Calculates the sum in a half-open interval \([l, r)\). It returns
+-- `Nothing` if the interval is invalid.
 --
 -- ==== Complexity
 -- - \(O(\log n)\)

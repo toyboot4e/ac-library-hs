@@ -1,5 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
-
 module Tests.Scc (tests) where
 
 import AtCoder.Scc qualified as Scc

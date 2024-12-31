@@ -17,8 +17,8 @@ where
 import Data.Bits (bit, (!>>.))
 import Data.Word (Word32, Word64)
 
--- | Fast modular multiplication by Montgomery multiplication. The modulus value has to be odd
--- to be fast.
+-- | Fast modular multiplication by Montgomery multiplication. The modulus value must be odd for
+-- the speed.
 data Montgomery = Montgomery
   { mMontgomery :: {-# UNPACK #-} !Word64,
     -- | R2 == (2^64) % MOD;

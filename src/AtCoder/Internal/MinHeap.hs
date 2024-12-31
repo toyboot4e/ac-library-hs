@@ -37,19 +37,19 @@ module AtCoder.Internal.MinHeap
     -- * Constructor
     new,
 
-    -- * Accessors
+    -- * Metadata
     capacity,
     length,
     null,
 
-    -- * Accessors
+    -- * Clearing
     clear,
 
-    -- * Modifying the heap
+    -- * Push/pop/peek
     push,
-    peek,
     pop,
     pop_,
+    peek,
   )
 where
 
@@ -136,17 +136,6 @@ push Heap {..} x = do
           siftUp iParent
   siftUp i0
 
--- | \(O(1)\) Returns the smallest value in the heap, or `Nothing` if it is empty.
---
--- @since 1.0.0.0
-{-# INLINE peek #-}
-peek :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
-peek heap = do
-  isNull <- null heap
-  if isNull
-    then pure Nothing
-    else Just <$> VGM.read (dataBH heap) 0
-
 -- | \(O(\log n)\) Removes the last element from the heap and returns it, or `Nothing` if it is
 -- empty.
 --
@@ -197,3 +186,14 @@ pop_ :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -
 pop_ heap = do
   _ <- pop heap
   pure ()
+
+-- | \(O(1)\) Returns the smallest value in the heap, or `Nothing` if it is empty.
+--
+-- @since 1.0.0.0
+{-# INLINE peek #-}
+peek :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
+peek heap = do
+  isNull <- null heap
+  if isNull
+    then pure Nothing
+    else Just <$> VGM.read (dataBH heap) 0

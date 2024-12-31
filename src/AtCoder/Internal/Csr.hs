@@ -33,9 +33,11 @@
 module AtCoder.Internal.Csr
   ( -- * Compressed sparse row
     Csr,
+
     -- * Constructor
     build,
     build',
+
     -- * Accessors
     adj,
     adjW,

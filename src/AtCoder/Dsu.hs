@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Disjoint set union, also known as Union-Find tree. It processes the following queries in
+-- | A disjoint set union, also known as a Union-Find tree. It processes the following queries in
 -- amortized \(O(\alpha(n))\) time.
 --
 -- - Edge addition
@@ -11,7 +11,7 @@
 -- becomes the representative of the new connected component.
 --
 -- ==== __Example__
--- Create DSU:
+-- Create a `Dsu` with four vertices:
 --
 -- >>> import AtCoder.Dsu qualified as Dsu
 -- >>> dsu <- Dsu.new 4   -- 0 1 2 3
@@ -49,15 +49,15 @@ module AtCoder.Dsu
     -- * Constructor
     new,
 
-    -- * Merge
+    -- * Merging
     merge,
     merge_,
 
     -- * Leader
     leader,
-    same,
 
     -- * Component information
+    same,
     size,
     groups,
   )
@@ -73,13 +73,13 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | Disjoint set union. Akso known as Union-Find tree.
+-- | A disjoint set union. Akso known as Union-Find tree.
 --
 -- @since 1.0.0.0
 data Dsu s = Dsu
-  { -- | 1.0.0 The number of nodes.
+  { -- | The number of nodes.
     --
-    -- @since
+    -- @since 1.0.0.0
     nDsu :: {-# UNPACK #-} !Int,
     -- | For root (leader) nodes it stores their size as a negative number. For child nodes it
     -- stores their parent node index.

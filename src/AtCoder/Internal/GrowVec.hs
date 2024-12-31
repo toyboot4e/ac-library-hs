@@ -39,31 +39,31 @@
 --
 -- @since 1.0.0.0
 module AtCoder.Internal.GrowVec
-  ( -- * Growable vector
+  ( -- * GrowVec
     GrowVec (vecGV),
 
     -- * Constructions
-
-    -- ** Initialization
     new,
     build,
-
-    -- ** Reserving
     reserve,
 
-    -- * Accessing individual elements
-    read,
-    write,
-
-    -- * Modifying the buffer
-    pushBack,
-    popBack,
-    popBack_,
-
-    -- * Accessors
+    -- * Metadata
     length,
     capacity,
     null,
+
+    -- * Readings
+    read,
+
+    -- * Modifications
+
+    -- ** Writing
+    write,
+
+    -- ** Push/pop
+    pushBack,
+    popBack,
+    popBack_,
 
     -- * Conversion
     freeze,
@@ -121,6 +121,30 @@ reserve GrowVec {..} len = do
   when (VUM.length vec < len) $ do
     newVec <- VUM.unsafeGrow vec (len - VUM.length vec)
     writeMutVar vecGV newVec
+
+-- | \(O(1)\) Returns the number of elements in the vector.
+--
+-- @since 1.0.0.0
+{-# INLINE length #-}
+length :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Int
+length GrowVec {posGV} = do
+  VGM.unsafeRead posGV 0
+
+-- | \(O(1)\) Returns the capacity of the internal the vector.
+--
+-- @since 1.0.0.0
+{-# INLINE capacity #-}
+capacity :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Int
+capacity GrowVec {vecGV} = do
+  vec <- readMutVar vecGV
+  pure $ VUM.length vec
+
+-- | \(O(1)\) Returns `True` if the vector is empty.
+--
+-- @since 1.0.0.0
+{-# INLINE null #-}
+null :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Bool
+null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Yields the element at the given position. Will throw an exception if the index is out
 -- of range.
@@ -193,30 +217,6 @@ popBack_ :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m ()
 popBack_ GrowVec {..} = do
   pos <- VGM.unsafeRead posGV 0
   VGM.unsafeWrite posGV 0 $ max 0 $ pos - 1
-
--- | \(O(1)\) Returns the number of elements in the vector.
---
--- @since 1.0.0.0
-{-# INLINE length #-}
-length :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Int
-length GrowVec {posGV} = do
-  VGM.unsafeRead posGV 0
-
--- | \(O(1)\) Returns the capacity of the internal the vector.
---
--- @since 1.0.0.0
-{-# INLINE capacity #-}
-capacity :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Int
-capacity GrowVec {vecGV} = do
-  vec <- readMutVar vecGV
-  pure $ VUM.length vec
-
--- | \(O(1)\) Returns `True` if the vector is empty.
---
--- @since 1.0.0.0
-{-# INLINE null #-}
-null :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m Bool
-null = (<$>) (== 0) . length
 
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Lazily propagted segment tree. It is the data structure for the pair of a [monoid](https://en.wikipedia.org/wiki/Monoid)
+-- | A lazily propagted segment tree. It is the data structure for the pair of a [monoid](https://en.wikipedia.org/wiki/Monoid)
 -- \((S, \cdot: S \times S \to S, e \in S)\) and a set \(F\) of \(S \to S\) mappings that satisfies
 -- the following properties.
 --
@@ -88,7 +88,7 @@ module AtCoder.LazySegTree
     new,
     build,
 
-    -- * Accessing individual elements
+    -- * Accessing elements
     write,
     modify,
     modifyM,
@@ -144,7 +144,9 @@ import Prelude hiding (read)
 --
 -- [Linear left monoid action] @'segActWithLength' len f a = 'Data.Semigroup.stimes' len ('segAct' f a) a@.
 --
--- Note that in `SegAct` instances, new semigroup values are always given from the left: @new '<>' old@.
+-- ==== Invariant
+-- In `SegAct` instances, new semigroup values are always given from the left: @new '<>' old@. The
+-- order is important for non-commutative monoid implementations.
 --
 -- ==== __Example instance__
 -- Take `AtCoder.Extra.Monoid.Affine1` as an example of type \(F\).
@@ -287,7 +289,7 @@ class (Monoid f) => SegAct f a where
   segActWithLength :: Int -> f -> a -> a
   segActWithLength _ = segAct
 
--- | Lazy segment tree defined around `SegAct`.
+-- | A lazily propagated segment tree defined around `SegAct`.
 --
 -- @since 1.0.0.0
 data LazySegTree s f a = LazySegTree
@@ -443,7 +445,7 @@ prod self@LazySegTree {nLst} l0 r0
   | l0 == r0 = pure mempty
   | otherwise = unsafeProd self l0 r0
 
--- | Total version of `prod`. Returns the product of \([a[l], ..., a[r - 1]]\), assuming the
+-- | Total variant of `prod`. Returns the product of \([a[l], ..., a[r - 1]]\), assuming the
 -- properties of the monoid. It returns `Just` `mempty` if \(l = r\). It returns `Nothing` if the
 -- interval is invalid.
 --
@@ -577,7 +579,7 @@ applyIn self@LazySegTree {..} l0 r0 f
 minLeft :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 minLeft seg r0 g = minLeftM seg r0 (pure . g)
 
--- | Monadic version of `minLeft`.
+-- | Monadic variant of `minLeft`.
 --
 -- ==== Constraints
 --
@@ -652,7 +654,7 @@ minLeftM self@LazySegTree {..} r0 g = do
 maxRight :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> Bool) -> m Int
 maxRight seg l0 g = maxRightM seg l0 (pure . g)
 
--- | Monadic version of `maxRight`.
+-- | Monadic variant of `maxRight`.
 --
 -- ==== Constraints
 --

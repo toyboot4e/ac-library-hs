@@ -43,18 +43,20 @@ module AtCoder.Internal.Queue
     -- * Constructor
     new,
 
-    -- * Modifying the queue
+    -- * Metadata
+    capacity,
+    length,
+    null,
+
+    -- * Modifications
+
+    -- ** Push/pop
     pushBack,
     pushFront,
     popFront,
     popFront_,
 
-    -- * Accessors
-    capacity,
-    length,
-    null,
-
-    -- * Clearing
+    -- ** Clearing
     clear,
 
     -- * Conversions
@@ -88,6 +90,30 @@ new n = do
   posQ <- VUM.replicate 2 (0 :: Int)
   vecQ <- VUM.unsafeNew n
   pure Queue {..}
+
+-- | \(O(1)\) Returns the array size.
+--
+-- @since 1.0.0.0
+{-# INLINE capacity #-}
+capacity :: (VU.Unbox a) => Queue s a -> Int
+capacity = VUM.length . vecQ
+
+-- | \(O(1)\) Returns the number of elements in the queue.
+--
+-- @since 1.0.0.0
+{-# INLINE length #-}
+length :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Int
+length Queue {..} = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  pure $ r - l
+
+-- | \(O(1)\) Returns `True` if the buffer is empty.
+--
+-- @since 1.0.0.0
+{-# INLINE null #-}
+null :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Bool
+null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Appends an element to the back. Will throw an exception if the index is out of range.
 --
@@ -144,30 +170,6 @@ popFront_ :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m ()
 popFront_ que = do
   _ <- popFront que
   pure ()
-
--- | \(O(1)\) Returns the array size.
---
--- @since 1.0.0.0
-{-# INLINE capacity #-}
-capacity :: (VU.Unbox a) => Queue s a -> Int
-capacity = VUM.length . vecQ
-
--- | \(O(1)\) Returns the number of elements in the queue.
---
--- @since 1.0.0.0
-{-# INLINE length #-}
-length :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Int
-length Queue {..} = do
-  l <- VGM.unsafeRead posQ 0
-  r <- VGM.unsafeRead posQ 1
-  pure $ r - l
-
--- | \(O(1)\) Returns `True` if the buffer is empty.
---
--- @since 1.0.0.0
-{-# INLINE null #-}
-null :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Bool
-null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Sets the `length` to zero.
 --

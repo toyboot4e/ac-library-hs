@@ -54,25 +54,21 @@ module AtCoder.Internal.Buffer
     new,
     build,
 
-    -- * Push/pop
-    pushBack,
-    popBack,
-
-    -- * Inspection
-    back,
-
-    -- * Accessing individual elements
-    read,
-    write,
-    modify,
-    modifyM,
-
-    -- * Accesssors
+    -- * Metadata
     capacity,
     length,
     null,
 
-    -- * Clearing
+    -- * Reading
+    back,
+    read,
+
+    -- * Modifications
+    pushBack,
+    popBack,
+    write,
+    modify,
+    modifyM,
     clear,
 
     -- * Conversions
@@ -117,29 +113,27 @@ build xs = do
   vecB <- VU.thaw xs
   pure Buffer {..}
 
--- | \(O(1)\) Appends an element to the back.
+-- | \(O(1)\) Returns the array size.
 --
 -- @since 1.0.0.0
-{-# INLINE pushBack #-}
-pushBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> a -> m ()
-pushBack Buffer {..} e = do
-  len <- VGM.read lenB 0
-  VGM.write vecB len e
-  VGM.write lenB 0 (len + 1)
+{-# INLINE capacity #-}
+capacity :: (VU.Unbox a) => Buffer s a -> Int
+capacity = VUM.length . vecB
 
--- | \(O(1)\) Removes the last element from the buffer and returns it, or `Nothing` if it is empty.
+-- | \(O(1)\) Returns the number of elements in the buffer.
 --
 -- @since 1.0.0.0
-{-# INLINE popBack #-}
-popBack :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (Maybe a)
-popBack Buffer {..} = do
-  len <- VGM.read lenB 0
-  if len == 0
-    then pure Nothing
-    else do
-      x <- VGM.read vecB (len - 1)
-      VGM.write lenB 0 (len - 1)
-      pure $ Just x
+{-# INLINE length #-}
+length :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m Int
+length Buffer {..} = do
+  VGM.read lenB 0
+
+-- | \(O(1)\) Returns `True` if the buffer is empty.
+--
+-- @since 1.0.0.0
+{-# INLINE null #-}
+null :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m Bool
+null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Returns the last value in the buffer, or `Nothing` if it is empty.
 --
@@ -164,6 +158,30 @@ read Buffer {..} i = do
   len <- VGM.read lenB 0
   let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.read" i len
   VGM.read vecB i
+
+-- | \(O(1)\) Appends an element to the back.
+--
+-- @since 1.0.0.0
+{-# INLINE pushBack #-}
+pushBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> a -> m ()
+pushBack Buffer {..} e = do
+  len <- VGM.read lenB 0
+  VGM.write vecB len e
+  VGM.write lenB 0 (len + 1)
+
+-- | \(O(1)\) Removes the last element from the buffer and returns it, or `Nothing` if it is empty.
+--
+-- @since 1.0.0.0
+{-# INLINE popBack #-}
+popBack :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (Maybe a)
+popBack Buffer {..} = do
+  len <- VGM.read lenB 0
+  if len == 0
+    then pure Nothing
+    else do
+      x <- VGM.read vecB (len - 1)
+      VGM.write lenB 0 (len - 1)
+      pure $ Just x
 
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
 -- out of range.
@@ -197,28 +215,6 @@ modifyM Buffer {..} f i = do
   len <- VGM.read lenB 0
   let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.modifyM" i len
   VGM.modifyM vecB f i
-
--- | \(O(1)\) Returns the array size.
---
--- @since 1.0.0.0
-{-# INLINE capacity #-}
-capacity :: (VU.Unbox a) => Buffer s a -> Int
-capacity = VUM.length . vecB
-
--- | \(O(1)\) Returns the number of elements in the buffer.
---
--- @since 1.0.0.0
-{-# INLINE length #-}
-length :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m Int
-length Buffer {..} = do
-  VGM.read lenB 0
-
--- | \(O(1)\) Returns `True` if the buffer is empty.
---
--- @since 1.0.0.0
-{-# INLINE null #-}
-null :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m Bool
-null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Sets the `length` to zero.
 --

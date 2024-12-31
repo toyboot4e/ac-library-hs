@@ -39,7 +39,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 -- `Semigroup` for `Affine1` is implemented like function composition, and rightmost affine
 -- transformation is applied first: \((f_1 \circ f_2) v := f_1 (f_2(v))\). If you need 'foldr'
 -- of \([f_l, f_{l+1}, .., f_r)\) on a segment tree, be sure to wrap `Affine1` in
--- `Data.Monoid.Dual`.
+-- @Data.Monoid.Dual@.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..))

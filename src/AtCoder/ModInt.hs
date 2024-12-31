@@ -1,7 +1,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 
--- | It is the struct that treats the modular arithmetic. All the remaining parts of AC Library
+-- | It is the structure that treats the modular arithmetic. All the remaining parts of AC Library
 -- works without modint, so you don't necessarily read this to use the remaining parts.
 --
 -- For most of the problems, it is sufficient to use `ModInt998244353`, `ModInt1000000007`, which

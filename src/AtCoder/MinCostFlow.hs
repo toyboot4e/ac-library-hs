@@ -224,7 +224,7 @@ slope ::
 slope McfGraph {..} s t flowLimit = do
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.slope" "`source` vertex" s "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.slope" "`sink` vertex" t "the number of vertices" nG
-  let !_ = ACIA.runtimeAssert (s /= t) "AtCoder.MinCostFlow.slope: `source` and `sink` vertex have to be distict"
+  let !_ = ACIA.runtimeAssert (s /= t) "AtCoder.MinCostFlow.slope: `source` and `sink` vertex must be distict"
 
   edges_@(VU.V_5 _ _ _ caps _ _) <- ACIGV.unsafeFreeze edgesG
   (!edgeIdx, !g) <- ACIMCSR.build nG edges_

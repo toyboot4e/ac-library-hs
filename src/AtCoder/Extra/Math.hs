@@ -1,6 +1,6 @@
 -- | Extra math module.
 --
--- ==== Examples
+-- ==== __Examples__
 -- >>> import AtCoder.Extra.Math qualified as M
 -- >>> import Data.Semigroup (Product(..), Sum(..))
 -- >>> getProduct $ M.power (<>) 32 (Product 2)
@@ -25,7 +25,7 @@ import Data.Bits ((.>>.))
 
 -- TODO: add `HasCallStack` and provide with `unsafePower`.
 
--- | Calculates \(s^n\) with custom multiplication operator using the binary exponentiation
+-- | Calculates \(x^n\) with custom multiplication operator using the binary exponentiation
 -- technique.
 --
 -- The internal implementation is taken from `Data.Semigroup.stimes`, but `power` uses strict

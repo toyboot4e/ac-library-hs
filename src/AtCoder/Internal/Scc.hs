@@ -11,7 +11,7 @@ module AtCoder.Internal.Scc
     -- * Constructor
     new,
 
-    -- * Modifying the graph
+    -- * Adding edges
     addEdge,
 
     -- * SCC calculation

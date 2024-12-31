@@ -165,7 +165,7 @@ flow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (
 flow MfGraph {..} s t flowLimit = do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`source` vertex" s "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`sink` vertex" t "the number of vertices" nG
-  let !_ = ACIA.runtimeAssert (s /= t) $ "AtCoder.MaxFlow.flow: `source` and `sink` vertex have to be distinct: `" ++ show s ++ "`"
+  let !_ = ACIA.runtimeAssert (s /= t) $ "AtCoder.MaxFlow.flow: `source` and `sink` vertex must be distinct: `" ++ show s ++ "`"
 
   level <- VUM.unsafeNew nG
   que <- ACIQ.new nG
@@ -319,7 +319,7 @@ edges g@MfGraph {posG} = do
   VU.generateM len (getEdge g)
 
 -- | \(O(1)\) Changes the capacity and the flow amount of the $i$-th edge to @newCap@ and
--- @newFlow@, respectively. It doesn't change the capacity or the flow amount of other edges.
+-- @newFlow@, respectively. It oes not change the capacity or the flow amount of other edges.
 --
 -- ==== Constraints
 -- - \(0 \leq \mathrm{newflow} \leq \mathrm{newcap}\)
