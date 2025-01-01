@@ -81,6 +81,7 @@ library
     AtCoder.Extra.Monoid.RangeAdd
     AtCoder.Extra.Monoid.RangeSet
     AtCoder.Extra.MultiSet
+    AtCoder.Extra.Wdsu
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
     AtCoder.Internal.Barrett
