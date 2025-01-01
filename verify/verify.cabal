@@ -214,6 +214,11 @@ executable yosupo-range-affine-range-sum
   main-is:       yosupo-range-affine-range-sum.hs
   build-depends: verify
 
+executable yosupo-range-affine-range-sum-Mat2x2
+  import:        app-local
+  main-is:       yosupo-range-affine-range-sum-Mat2x2.hs
+  build-depends: verify
+
 executable yosupo-range-affine-point-get
   import:        app-local
   main-is:       yosupo-range-affine-point-get.hs
@@ -237,6 +242,16 @@ executable yosupo-suffixarray
 executable yosupo-two-sat
   import:        app-local
   main-is:       yosupo-two-sat.hs
+  build-depends: verify
+
+executable yosupo-union-find-with-potencial
+  import:        app-local
+  main-is:       yosupo-union-find-with-potencial.hs
+  build-depends: verify
+
+executable unionfind-with-potential-non-commutative_group
+  import:        app-local
+  main-is:       unionfind-with-potential-non-commutative_group.hs
   build-depends: verify
 
 executable yosupo-zalgorithm

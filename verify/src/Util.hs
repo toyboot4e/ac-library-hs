@@ -105,11 +105,11 @@ intersperseWithBSB showF del vec
   | otherwise = showF (VG.head vec) <> VG.foldMap ((del <>) . showF) (VG.tail vec)
 
 {-# INLINE unwordsBSB #-}
-unwordsBSB :: VU.Vector Int -> BSB.Builder
+unwordsBSB :: (VG.Vector v Int) => v Int -> BSB.Builder
 unwordsBSB = intersperseWithBSB BSB.intDec wsBSB
 
 {-# INLINE unlinesBSB #-}
-unlinesBSB :: VU.Vector Int -> BSB.Builder
+unlinesBSB :: (VG.Vector v Int) => v Int -> BSB.Builder
 unlinesBSB = intersperseWithBSB BSB.intDec endlBSB
 
 {-# INLINE unlinesWithBSB #-}

@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | Range add monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\).
+-- | Range transformation monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\).
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Monoid.Affine1
@@ -13,6 +13,10 @@ module AtCoder.Extra.Monoid.Affine1
 
     -- * Action
     act,
+
+    -- * Operators
+    zero,
+    ident,
   )
 where
 
@@ -29,7 +33,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 
 -- Tuple is not the fastest representation, but it's easier to implement `Unbox`.
 
--- | Range add monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\).
+-- | Range transformation monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\).
 --
 -- ==== Composition and dual
 -- `Semigroup` for `Affine1` is implemented like function composition, and rightmost affine
@@ -82,6 +86,20 @@ act (Affine1 (!a, !b)) x = a * x + b
 {-# INLINE actWithLength #-}
 actWithLength :: (Num a) => Int -> Affine1 a -> a -> a
 actWithLength len (Affine1 (!a, !b)) !x = a * x + b * fromIntegral len
+
+-- | Transformation to zero.
+--
+-- @since 1.1.0.0
+{-# INLINE zero #-}
+zero :: (Num a) => Affine1 a
+zero = Affine1 (0, 0)
+
+-- | Identity transformation.
+--
+-- @since 1.1.0.0
+{-# INLINE ident #-}
+ident :: (Num a) => Affine1 a
+ident = Affine1 (1, 0)
 
 -- | @since 1.0.0.0
 instance (Num a) => Semigroup (Affine1 a) where

@@ -1,7 +1,8 @@
 module Tests.Extra.Monoid (tests) where
 
 import AtCoder.Extra.Monoid
-import Data.Bit (Bit(..))
+import AtCoder.Extra.Monoid.Affine1 qualified as A
+import Data.Bit (Bit (..))
 import Data.Proxy (Proxy (..))
 import Data.Semigroup (Max (..), Min (..), Product (..), Sum (..), stimes)
 import Test.QuickCheck.Classes qualified as QCC
@@ -79,6 +80,14 @@ instance (QC.Arbitrary a, Monoid a) => QC.Arbitrary (RangeSet a) where
       else pure mempty
 
 -- orphan instance
+instance (QC.Arbitrary a) => QC.Arbitrary (Mat2x2 a) where
+  arbitrary = Mat2x2 <$> QC.arbitrary
+
+-- orphan instance
+instance (QC.Arbitrary a) => QC.Arbitrary (V2 a) where
+  arbitrary = V2 <$> QC.arbitrary
+
+-- orphan instance
 instance QC.Arbitrary (Max Int) where
   arbitrary = Max <$> QC.arbitrary
 
@@ -86,11 +95,19 @@ instance QC.Arbitrary (Max Int) where
 instance QC.Arbitrary (Min Int) where
   arbitrary = Min <$> QC.arbitrary
 
+prop_affineZero :: Affine1 (Sum Int) -> QC.Property
+prop_affineZero a =
+  QC.conjoin
+    [ A.zero <> a QC.=== A.zero,
+      a <> A.zero QC.=== (\(A.Affine1 (!_, !b)) -> A.Affine1 (0, b)) a
+    ]
+
 tests :: [TestTree]
 tests =
   [ testGroup
       "Affine1"
-      [ laws @(Affine1 (Sum Int))
+      [ QC.testProperty "zero" prop_affineZero,
+        laws @(Affine1 (Sum Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
@@ -108,7 +125,7 @@ tests =
           ],
         laws @(RangeAdd (Sum Int), Sum Int)
           [ segActLaw
-         ],
+          ],
         laws @(RangeAdd (Max Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
@@ -159,6 +176,25 @@ tests =
           ],
         laws @(RangeSet (Min Int), Min Int)
           [ segActLaw
+          ]
+      ],
+    testGroup
+      "Mat2x2"
+      [ laws @(Mat2x2 Int)
+          [ QCC.semigroupLaws,
+            QCC.monoidLaws,
+            QCC.semigroupMonoidLaws
+          ],
+        laws @(Mat2x2 Int, V2 Int)
+          [ segActLaw
+          ]
+      ],
+    testGroup
+      "V2"
+      [ laws @(V2 Int)
+          [ QCC.semigroupLaws,
+            QCC.monoidLaws,
+            QCC.semigroupMonoidLaws
           ]
       ]
   ]
