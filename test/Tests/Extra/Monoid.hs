@@ -1,6 +1,7 @@
 module Tests.Extra.Monoid (tests) where
 
 import AtCoder.Extra.Monoid
+import AtCoder.Extra.Monoid.RollingHash (RollingHash (..))
 import AtCoder.Extra.Monoid.Affine1 qualified as A
 import Data.Bit (Bit (..))
 import Data.Proxy (Proxy (..))
@@ -88,13 +89,20 @@ instance (QC.Arbitrary a) => QC.Arbitrary (V2 a) where
   arbitrary = V2 <$> QC.arbitrary
 
 -- orphan instance
+instance QC.Arbitrary (RollingHash b 998244353) where
+  arbitrary = do
+    hash <- QC.chooseInt (0, 998244353 - 1)
+    next <- QC.chooseInt (0, 998244353 - 1)
+    pure $ RollingHash hash next
+
+-- orphan instance
 instance QC.Arbitrary (Max Int) where
   arbitrary = Max <$> QC.arbitrary
 
 -- orphan instance
 instance QC.Arbitrary (Min Int) where
   arbitrary = Min <$> QC.arbitrary
-
+  
 prop_affineZero :: Affine1 (Sum Int) -> QC.Property
 prop_affineZero a =
   QC.conjoin
@@ -192,6 +200,14 @@ tests =
     testGroup
       "V2"
       [ laws @(V2 Int)
+          [ QCC.semigroupLaws,
+            QCC.monoidLaws,
+            QCC.semigroupMonoidLaws
+          ]
+      ],
+    testGroup
+      "RollingHash"
+      [ laws @(RollingHash 100 998244353)
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws

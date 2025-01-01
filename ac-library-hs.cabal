@@ -81,6 +81,7 @@ library
     AtCoder.Extra.Monoid.Mat2x2
     AtCoder.Extra.Monoid.RangeAdd
     AtCoder.Extra.Monoid.RangeSet
+    AtCoder.Extra.Monoid.RollingHash
     AtCoder.Extra.Monoid.V2
     AtCoder.Extra.MultiSet
     AtCoder.Extra.Wdsu

@@ -194,6 +194,11 @@ executable yosupo-associative-array
   main-is:       yosupo-associative-array.hs
   build-depends: verify
 
+executable yosupo-enumerate-palindromes
+  import:        app-local
+  main-is:       yosupo-enumerate-palindromes.hs
+  build-depends: verify
+
 executable yosupo-point-add-range-sum
   import:        app-local
   main-is:       yosupo-point-add-range-sum.hs
