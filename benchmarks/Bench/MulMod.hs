@@ -1,4 +1,4 @@
-module Bench.MulMod (benches32, benches64) where
+module Bench.MulMod (benches) where
 
 import BenchLib.MulMod.Barrett64 qualified as Barrett64
 import BenchLib.MulMod.BarrettWideWord qualified as BarrettWideWord
@@ -45,8 +45,8 @@ benches32 =
 
 -- | This benchmark is almost nonsense, as the pre calculation' overhead is not considered while the
 -- real use case is @powMod@. However, it's useful when optimizing the successive calculation.
-benches64 :: Benchmark
-benches64 =
+benches :: Benchmark
+benches =
   bgroup
     "mulMod Word64 vector"
     [ bench "barrettWideWord" $ whnf (VU.foldl' (BarrettWideWord.mulMod btWW) w64) nonZeroRandomVec64,

@@ -6,12 +6,13 @@ import Tests.Convolution qualified
 import Tests.Dsu qualified
 import Tests.Extra.Bisect qualified
 import Tests.Extra.HashMap qualified
-import Tests.Extra.IntervalMap qualified
 import Tests.Extra.IntMap qualified
 import Tests.Extra.IntSet qualified
+import Tests.Extra.IntervalMap qualified
 import Tests.Extra.Math qualified
 import Tests.Extra.Monoid qualified
 import Tests.Extra.MultiSet qualified
+import Tests.Extra.Semigroup.Matrix qualified
 import Tests.FenwickTree qualified
 import Tests.Internal.Bit qualified
 import Tests.Internal.Buffer qualified
@@ -46,7 +47,8 @@ main =
             testGroup "IntSet" Tests.Extra.IntSet.tests,
             testGroup "Math" Tests.Extra.Math.tests,
             testGroup "Monoid" Tests.Extra.Monoid.tests,
-            testGroup "MultiSet" Tests.Extra.MultiSet.tests
+            testGroup "MultiSet" Tests.Extra.MultiSet.tests,
+            testGroup "Semigroup.Matrix" Tests.Extra.Semigroup.Matrix.tests
           ],
         testGroup "FenwickTree" Tests.FenwickTree.tests,
         testGroup

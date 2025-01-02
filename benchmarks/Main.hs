@@ -3,7 +3,9 @@
 module Main where
 
 import Bench.AddMod qualified
+import Bench.Matrix qualified
 import Bench.MulMod qualified
+import Bench.ModInt qualified
 import Bench.PowMod qualified
 import Criterion.Main
 
@@ -13,9 +15,10 @@ import Criterion.Main
 main :: IO ()
 main =
   defaultMain
-  -- TODO: generate graph by benchmark group?
-    [ -- Bench.MulMod.benches32,
-      -- Bench.MulMod.benches64,
-      -- Bench.AddMod.benches
-      Bench.PowMod.benches
+    -- TODO: generate criterion graph by benchmark group?
+    [ Bench.MulMod.benches,
+      Bench.ModInt.benches,
+      Bench.AddMod.benches,
+      Bench.PowMod.benches,
+      Bench.Matrix.benches
     ]

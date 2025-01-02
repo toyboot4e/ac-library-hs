@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 -- | Minimum parse/print with @bytestring@.
 module Util
   ( intP,
@@ -14,15 +16,19 @@ module Util
     unlinesBSB,
     unlinesWithBSB,
     unwordsBSB,
+    unwordsWithBSB,
     putBSB,
     printBSB,
+    showMat,
   )
 where
 
+import AtCoder.Extra.Semigroup.Matrix qualified as Mat
 import Control.Monad.Trans.State.Strict (StateT (..), evalStateT)
 import Data.ByteString.Builder qualified as BSB
 import Data.ByteString.Char8 qualified as BS
 import Data.Maybe (fromJust, fromMaybe)
+import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
@@ -106,7 +112,11 @@ intersperseWithBSB showF del vec
 
 {-# INLINE unwordsBSB #-}
 unwordsBSB :: (VG.Vector v Int) => v Int -> BSB.Builder
-unwordsBSB = intersperseWithBSB BSB.intDec wsBSB
+unwordsBSB = unwordsWithBSB BSB.intDec
+
+{-# INLINE unwordsWithBSB #-}
+unwordsWithBSB :: (VG.Vector v a) => (a -> BSB.Builder) -> v a -> BSB.Builder
+unwordsWithBSB f = intersperseWithBSB f wsBSB
 
 {-# INLINE unlinesBSB #-}
 unlinesBSB :: (VG.Vector v Int) => v Int -> BSB.Builder
@@ -123,3 +133,9 @@ putBSB = BSB.hPutBuilder stdout
 {-# INLINE printBSB #-}
 printBSB :: BSB.Builder -> IO ()
 printBSB = putBSB . (<> endlBSB)
+
+showMat :: (Show a, VU.Unbox a) => Mat.Matrix a -> BSB.Builder
+showMat Mat.Matrix {..} = unlinesWithBSB id $ V.map showF rows
+  where
+    rows = V.unfoldrExactN hM (VU.splitAt wM) vecM
+    showF = unwordsWithBSB (BSB.string8 . show)

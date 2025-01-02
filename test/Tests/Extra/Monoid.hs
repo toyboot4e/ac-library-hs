@@ -1,8 +1,8 @@
 module Tests.Extra.Monoid (tests) where
 
 import AtCoder.Extra.Monoid
-import AtCoder.Extra.Monoid.RollingHash (RollingHash (..))
 import AtCoder.Extra.Monoid.Affine1 qualified as A
+import AtCoder.Extra.Monoid.RollingHash (RollingHash (..))
 import Data.Bit (Bit (..))
 import Data.Proxy (Proxy (..))
 import Data.Semigroup (Max (..), Min (..), Product (..), Sum (..), stimes)
@@ -102,7 +102,7 @@ instance QC.Arbitrary (Max Int) where
 -- orphan instance
 instance QC.Arbitrary (Min Int) where
   arbitrary = Min <$> QC.arbitrary
-  
+
 prop_affineZero :: Affine1 (Sum Int) -> QC.Property
 prop_affineZero a =
   QC.conjoin

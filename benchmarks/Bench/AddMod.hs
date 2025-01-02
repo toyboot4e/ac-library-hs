@@ -6,7 +6,7 @@ module Bench.AddMod (benches) where
 import BenchLib.AddMod
 import Criterion
 import Data.Vector.Unboxed qualified as VU
-import Data.Word (Word32, Word64)
+import Data.Word (Word32)
 import System.Random
 
 n :: Int

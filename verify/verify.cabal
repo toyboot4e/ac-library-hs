@@ -199,6 +199,16 @@ executable yosupo-enumerate-palindromes
   main-is:       yosupo-enumerate-palindromes.hs
   build-depends: verify
 
+executable yosupo-matrix-product
+  import:        app-local
+  main-is:       yosupo-matrix-product.hs
+  build-depends: verify
+
+executable yosupo-matrix-product-mint
+  import:        app-local
+  main-is:       yosupo-matrix-product-mint.hs
+  build-depends: verify
+
 executable yosupo-point-add-range-sum
   import:        app-local
   main-is:       yosupo-point-add-range-sum.hs
@@ -207,6 +217,16 @@ executable yosupo-point-add-range-sum
 executable yosupo-point-set-range-composite
   import:        app-local
   main-is:       yosupo-point-set-range-composite.hs
+  build-depends: verify
+
+executable yosupo-pow-of-matrix
+  import:        app-local
+  main-is:       yosupo-pow-of-matrix.hs
+  build-depends: verify
+
+executable yosupo-pow-of-matrix-mint
+  import:        app-local
+  main-is:       yosupo-pow-of-matrix-mint.hs
   build-depends: verify
 
 executable yosupo-predecessor-problem

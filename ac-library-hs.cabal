@@ -72,9 +72,9 @@ library
     AtCoder.Dsu
     AtCoder.Extra.Bisect
     AtCoder.Extra.HashMap
+    AtCoder.Extra.IntervalMap
     AtCoder.Extra.IntMap
     AtCoder.Extra.IntSet
-    AtCoder.Extra.IntervalMap
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid
     AtCoder.Extra.Monoid.Affine1
@@ -84,6 +84,7 @@ library
     AtCoder.Extra.Monoid.RollingHash
     AtCoder.Extra.Monoid.V2
     AtCoder.Extra.MultiSet
+    AtCoder.Extra.Semigroup.Matrix
     AtCoder.Extra.Wdsu
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
@@ -128,12 +129,13 @@ test-suite ac-library-hs-test
     Tests.Dsu
     Tests.Extra.Bisect
     Tests.Extra.HashMap
-    Tests.Extra.MultiSet
     Tests.Extra.IntervalMap
     Tests.Extra.IntMap
     Tests.Extra.IntSet
     Tests.Extra.Math
     Tests.Extra.Monoid
+    Tests.Extra.MultiSet
+    Tests.Extra.Semigroup.Matrix
     Tests.FenwickTree
     Tests.Internal.Bit
     Tests.Internal.Buffer
@@ -163,15 +165,15 @@ test-suite ac-library-hs-test
     , containers
     , hspec
     , mtl
+    , QuickCheck
+    , quickcheck-classes
+    , random
     , tasty
     , tasty-hspec
     , tasty-hunit
     , tasty-quickcheck
     , tasty-rerun
     , transformers
-    , QuickCheck
-    , quickcheck-classes
-    , random
     , unordered-containers
 
 benchmark ac-library-hs-benchmark
@@ -183,8 +185,11 @@ benchmark ac-library-hs-benchmark
   hs-source-dirs: benchmarks
   other-modules:
     Bench.AddMod
+    Bench.Matrix
+    Bench.ModInt
     Bench.PowMod
     BenchLib.AddMod
+    BenchLib.Matrix
     BenchLib.ModInt.ModIntNats
     BenchLib.ModInt.Modulus
     BenchLib.MulMod.Barrett64
@@ -196,8 +201,10 @@ benchmark ac-library-hs-benchmark
     , ac-library-hs
     , base
     , criterion
+    , mtl
     , random
     , tagged
+    , transformers
 
 test-suite benchlib-test
   import:         warnings
