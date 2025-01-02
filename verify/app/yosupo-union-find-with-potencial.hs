@@ -1,6 +1,6 @@
 {-# LANGUAGE ViewPatterns #-}
 
-import AtCoder.Extra.Wdsu qualified as Wdsu
+import AtCoder.Extra.Pdsu qualified as Pdsu
 import AtCoder.ModInt qualified as M
 import Data.Bool (bool)
 import Data.Semigroup (Sum (..))
@@ -23,13 +23,13 @@ main = do
           0 -> (0 :: Int,,,) <$> intP <*> intP <*> intP
           1 -> (1 :: Int,,,-1 :: Int) <$> intP <*> intP
           _ -> error "unreachable"
-  dsu <- Wdsu.new @_ @(Sum Mint) n negate
+  dsu <- Pdsu.new @_ @(Sum Mint) n negate
   res <- (`VU.mapM` qs) $ \case
     (0, !u, !v, Sum . modInt -> !dx) -> do
-      b <- Wdsu.canMerge dsu u v dx
-      Wdsu.merge_ dsu u v dx
+      b <- Pdsu.canMerge dsu u v dx
+      Pdsu.merge_ dsu u v dx
       pure $ bool 0 1 b
     (1, !u, !v, !_) -> do
-      maybe (-1 :: Int) (M.val . getSum) <$> Wdsu.diff dsu u v
+      maybe (-1 :: Int) (M.val . getSum) <$> Pdsu.diff dsu u v
     _ -> error "unreachable"
   printBSB $ unlinesBSB res

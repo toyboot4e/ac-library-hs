@@ -87,7 +87,7 @@ library
     AtCoder.Extra.MultiSet
     AtCoder.Extra.Semigroup.Matrix
     AtCoder.Extra.Semigroup.Permutation
-    AtCoder.Extra.Wdsu
+    AtCoder.Extra.Pdsu
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
     AtCoder.Internal.Barrett
