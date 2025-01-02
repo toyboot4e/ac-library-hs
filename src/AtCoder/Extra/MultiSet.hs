@@ -249,14 +249,14 @@ keys ms = VU.force <$> unsafeKeys ms
 -- @since 1.1.0.0
 {-# INLINE elems #-}
 elems :: (PrimMonad m) => MultiSet (PrimState m) -> m (VU.Vector Int)
-elems ms = VU.force <$> unsafeKeys ms
+elems ms = VU.force <$> unsafeElems ms
 
 -- | \(O(n)\) Enumerates the key-count pairs in the set.
 --
 -- @since 1.1.0.0
 {-# INLINE assocs #-}
-assocs :: (PrimMonad m) => MultiSet (PrimState m) -> m (VU.Vector Int)
-assocs ms = VU.force <$> unsafeKeys ms
+assocs :: (PrimMonad m) => MultiSet (PrimState m) -> m (VU.Vector (Int, Int))
+assocs ms = VU.force <$> unsafeAssocs ms
 
 -- | \(O(n)\) Enumerates the keys in the set.
 --
