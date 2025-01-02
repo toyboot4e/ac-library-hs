@@ -164,6 +164,11 @@ executable aoj-DSL_2_L
   main-is:       aoj-DSL_2_L.hs
   build-depends: verify
 
+executable aoj-GRL_4_B
+  import:        app-online
+  main-is:       aoj-GRL_4_B.hs
+  build-depends: verify
+
 executable aoj-GRL_6_A
   import:        app-local
   main-is:       aoj-GRL_6_A.hs
