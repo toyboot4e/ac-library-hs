@@ -13,6 +13,7 @@ import Tests.Extra.Math qualified
 import Tests.Extra.Monoid qualified
 import Tests.Extra.MultiSet qualified
 import Tests.Extra.Semigroup.Matrix qualified
+import Tests.Extra.Semigroup.Permutation qualified
 import Tests.FenwickTree qualified
 import Tests.Internal.Bit qualified
 import Tests.Internal.Buffer qualified
@@ -48,7 +49,8 @@ main =
             testGroup "Math" Tests.Extra.Math.tests,
             testGroup "Monoid" Tests.Extra.Monoid.tests,
             testGroup "MultiSet" Tests.Extra.MultiSet.tests,
-            testGroup "Semigroup.Matrix" Tests.Extra.Semigroup.Matrix.tests
+            testGroup "Semigroup.Matrix" Tests.Extra.Semigroup.Matrix.tests,
+            testGroup "Semigroup.Permutation" Tests.Extra.Semigroup.Permutation.tests
           ],
         testGroup "FenwickTree" Tests.FenwickTree.tests,
         testGroup

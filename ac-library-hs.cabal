@@ -85,6 +85,7 @@ library
     AtCoder.Extra.Monoid.V2
     AtCoder.Extra.MultiSet
     AtCoder.Extra.Semigroup.Matrix
+    AtCoder.Extra.Semigroup.Permutation
     AtCoder.Extra.Wdsu
     AtCoder.FenwickTree
     AtCoder.Internal.Assert
@@ -136,6 +137,7 @@ test-suite ac-library-hs-test
     Tests.Extra.Monoid
     Tests.Extra.MultiSet
     Tests.Extra.Semigroup.Matrix
+    Tests.Extra.Semigroup.Permutation
     Tests.FenwickTree
     Tests.Internal.Bit
     Tests.Internal.Buffer
@@ -227,6 +229,7 @@ test-suite benchlib-test
     , hspec
     , mtl
     , QuickCheck
+    -- , quickcheck-instances
     , random
     , tagged
     , tasty

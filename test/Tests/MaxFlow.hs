@@ -2,7 +2,7 @@
 module Tests.MaxFlow (tests) where
 
 import AtCoder.MaxFlow qualified as MF
-import Data.Bit (Bit(..))
+import Data.Bit (Bit (..))
 import Data.Vector.Unboxed qualified as VU
 import System.IO.Unsafe (unsafePerformIO)
 import Test.Hspec
