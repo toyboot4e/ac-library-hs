@@ -10,6 +10,7 @@ module AtCoder.Extra.Graph
 
     -- * CSR helpers
     swapDupe,
+    swapDupe',
 
     -- * Graph search
     topSort,
@@ -44,9 +45,33 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 -- >>> gr `Gr.adj` 2
 -- [1]
 --
+-- @since 1.1.0.0
 {-# INLINE swapDupe #-}
 swapDupe :: (VU.Unbox (Int, Int, w)) => VU.Vector (Int, Int, w) -> VU.Vector (Int, Int, w)
 swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
+
+-- | \(O(n)\) Converts non-directed edges into directional edges. This is a convenient function for
+-- making an input of `build'`.
+--
+-- ==== __Example__
+-- Create a non-directed graph:
+--
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let gr = Gr.build' 3 . Gr.swapDupe' $ VU.fromList [(0, 1), (1, 2)]
+-- >>> gr `Gr.adj` 0
+-- [1]
+--
+-- >>> gr `Gr.adj` 1
+-- [0,2]
+--
+-- >>> gr `Gr.adj` 2
+-- [1]
+--
+-- @since 1.1.0.0
+{-# INLINE swapDupe' #-}
+swapDupe' :: (VU.Unbox (Int, Int)) => VU.Vector (Int, Int) -> VU.Vector (Int, Int)
+swapDupe' = VU.concatMap (\(!u, !v) -> VU.fromListN 2 [(u, v), (v, u)])
 
 -- | \(O(n \log n + m)\) Returns the lexicographically smallest topological ordering of given graph.
 --
