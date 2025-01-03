@@ -204,6 +204,16 @@ executable yosupo-enumerate-palindromes
   main-is:       yosupo-enumerate-palindromes.hs
   build-depends: verify
 
+executable yosupo-jump-on-tree
+  import:        app-local
+  main-is:       yosupo-jump-on-tree.hs
+  build-depends: verify
+
+executable yosupo-lca
+  import:        app-local
+  main-is:       yosupo-lca.hs
+  build-depends: verify
+
 executable yosupo-matrix-product
   import:        app-local
   main-is:       yosupo-matrix-product.hs
@@ -288,6 +298,20 @@ executable yosupo-unionfind-with-potential-non-commutative-group
   import:        app-local
   main-is:       yosupo-unionfind-with-potential-non-commutative-group.hs
   build-depends: verify
+
+executable yosupo-vertex-add-path-sum
+  import:        app-local
+  main-is:       yosupo-vertex-add-path-sum.hs
+  build-depends: verify
+
+executable yosupo-vertex-add-subtree-sum
+  import:        app-local
+  main-is:       yosupo-vertex-add-subtree-sum.hs
+  build-depends: verify
+
+executable yosupo-vertex-set-path-composite
+  import:        app-local
+  main-is:       yosupo-vertex-set-path-composite.hs
   build-depends: verify
 
 executable yosupo-zalgorithm

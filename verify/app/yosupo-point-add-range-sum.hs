@@ -14,10 +14,10 @@ main = do
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !p, !x) -> do
       ST.modify seg (+ Sum x) p
-      return Nothing
+      pure Nothing
     (1, !l, !r) -> do
       Sum x <- ST.prod seg l r
-      return $ Just x
+      pure $ Just x
     _ -> error "unreachable"
 
   printBSB $ unlinesBSB res
