@@ -38,6 +38,18 @@ prop_zero p =
   where
     zero = P.zero (P.length p)
 
+prop_identAct :: QC.Positive Int -> QC.Gen QC.Property
+prop_identAct (QC.Positive len) = do
+  let p = P.ident len
+  i <- QC.chooseInt (0, len - 1)
+  pure $ P.act p i QC.=== i
+
+prop_zeroAct :: QC.Positive Int -> QC.Gen QC.Property
+prop_zeroAct (QC.Positive len) = do
+  let p = P.zero len
+  i <- QC.chooseInt (0, len - 1)
+  pure $ P.act p i QC.=== i
+
 -- orphan instance
 instance QC.Arbitrary P.Permutation where
   arbitrary = do
@@ -50,6 +62,8 @@ tests =
   [ unsafePerformIO spec_invalid,
     QC.testProperty "ident" prop_ident,
     QC.testProperty "zero" prop_zero,
+    QC.testProperty "identAct" prop_identAct,
+    QC.testProperty "zeroAct" prop_zeroAct,
     laws
       @P.Permutation
       [ QCC.semigroupLaws

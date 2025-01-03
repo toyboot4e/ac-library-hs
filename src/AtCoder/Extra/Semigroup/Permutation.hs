@@ -2,6 +2,20 @@
 --
 -- The permutation is considered to be a left semigroup action: \(p_2 (p_1 x) = (p_2 \circ p_1) x\).
 --
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Semigroup.Permutation qualified as Permutation
+-- >>> import Data.Semigroup (Semigroup (stimes))
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let perm = Permutation.new $ VU.fromList [1, 2, 3, 0]
+-- >>> Permutation.act perm 1
+-- 2
+--
+-- >>> Permutation.act (perm <> perm) 1
+-- 3
+--
+-- >>> Permutation.act (stimes 3 perm) 1
+-- 0
+--
 -- @since 1.1.0.0
 module AtCoder.Extra.Semigroup.Permutation
   ( -- * Permutation
@@ -12,6 +26,9 @@ module AtCoder.Extra.Semigroup.Permutation
     unsafeNew,
     ident,
     zero,
+
+    -- * Act
+    act,
 
     -- * Metadata
     length,
@@ -70,6 +87,15 @@ ident = Permutation . (`VU.generate` id)
 {-# INLINE zero #-}
 zero :: Int -> Permutation
 zero n = Permutation $ VU.replicate n (-1)
+
+-- | \(O(1)\) Maps an index.
+--
+-- @since 1.1.0.0
+{-# INLINE act #-}
+act :: (HasCallStack) => Permutation -> Int -> Int
+act (Permutation vec) i = case vec VG.! i of
+  (-1) -> i
+  i' -> i'
 
 -- | \(O(1)\) Returns the length of the internal vector.
 --
