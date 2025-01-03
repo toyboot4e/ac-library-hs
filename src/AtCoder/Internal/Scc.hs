@@ -17,6 +17,10 @@ module AtCoder.Internal.Scc
     -- * SCC calculation
     sccIds,
     scc,
+
+    -- ** (Extra API) CSR API
+    sccIdsCsr,
+    sccCsr
   )
 where
 
@@ -25,6 +29,7 @@ import AtCoder.Internal.GrowVec qualified as ACIGV
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.ST (runST)
 import Data.Foldable (for_)
 import Data.Maybe (fromJust)
 import Data.Vector qualified as V
@@ -67,19 +72,47 @@ addEdge SccGraph {edgesScc} from to = do
 {-# INLINE sccIds #-}
 sccIds :: (PrimMonad m) => SccGraph (PrimState m) -> m (Int, VU.Vector Int)
 sccIds SccGraph {..} = do
+  csr <- ACICSR.build' nScc <$> ACIGV.unsafeFreeze edgesScc
+  pure $ sccIdsCsr csr
+
+-- | \(O(n + m)\) Returns the strongly connected components.
+--
+-- @since 1.0.0.0
+{-# INLINE scc #-}
+scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
+scc g = do
+  (!groupNum, !ids) <- sccIds g
+  let counts = VU.create $ do
+        vec <- VUM.replicate groupNum (0 :: Int)
+        VU.forM_ ids $ \x -> do
+          VGM.modify vec (+ 1) x
+        pure vec
+  groups <- V.mapM VUM.unsafeNew $ VU.convert counts
+  is <- VUM.replicate groupNum (0 :: Int)
+  VU.iforM_ ids $ \v sccId -> do
+    i <- VGM.read is sccId
+    VGM.write is sccId $ i + 1
+    VGM.write (groups VG.! sccId) i v
+  V.mapM VU.unsafeFreeze groups
+
+-- | \(O(n + m)\) API) Returns a pair of @(# of scc, scc id)@.
+--
+-- @since 1.1.0.0
+{-# INLINE sccIdsCsr #-}
+sccIdsCsr :: ACICSR.Csr w -> (Int, VU.Vector Int)
+sccIdsCsr g@ACICSR.Csr {..} = runST $ do
   -- see also the Wikipedia: https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm#The_algorithm_in_pseudocode
-  g <- ACICSR.build' nScc <$> ACIGV.unsafeFreeze edgesScc
   -- next SCC ID
   groupNum <- VUM.replicate 1 (0 :: Int)
   -- stack of vertices
-  visited <- ACIGV.new nScc
+  visited <- ACIGV.new nCsr
   -- vertex -> low-link: the smallest index of any node on the stack known to be reachable from
   -- v through v's DFS subtree, including v itself.
-  low <- VUM.replicate nScc (0 :: Int)
+  low <- VUM.replicate nCsr (0 :: Int)
   -- vertex -> order of the visit (0, 1, ..)
-  ord <- VUM.replicate nScc (-1 :: Int)
+  ord <- VUM.replicate nCsr (-1 :: Int)
   -- vertex -> scc id
-  ids <- VUM.replicate nScc (0 :: Int)
+  ids <- VUM.replicate nCsr (0 :: Int)
 
   let dfs v ord0 = do
         VGM.write low v ord0
@@ -112,7 +145,7 @@ sccIds SccGraph {..} = do
           sccId <- VGM.unsafeRead groupNum 0
           fix $ \loop -> do
             u <- fromJust <$> ACIGV.popBack visited
-            VGM.write ord u nScc
+            VGM.write ord u nCsr
             VGM.write ids u sccId
             unless (u == v) loop
           VGM.unsafeWrite groupNum 0 $ sccId + 1
@@ -126,12 +159,12 @@ sccIds SccGraph {..} = do
           else pure curOrd
     )
     (0 :: Int)
-    (VU.generate nScc id)
+    (VU.generate nCsr id)
 
   num <- VGM.unsafeRead groupNum 0
   -- The SCCs are reverse topologically sorted, e.g., [0, 1] <- [2] <- [3]
   -- Now reverse the SCC IDs so that they will be topologically sorted: [3] -> [2] -> [0, 1]
-  for_ [0 .. nScc - 1] $ \i -> do
+  for_ [0 .. nCsr - 1] $ \i -> do
     VGM.modify ids ((num - 1) -) i
 
   ids' <- VU.unsafeFreeze ids
@@ -139,16 +172,10 @@ sccIds SccGraph {..} = do
 
 -- | \(O(n + m)\) Returns the strongly connected components.
 --
--- @since 1.0.0.0
-{-# INLINE scc #-}
-scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
-scc g = do
-  (!groupNum, !ids) <- sccIds g
-  let counts = VU.create $ do
-        vec <- VUM.replicate groupNum (0 :: Int)
-        VU.forM_ ids $ \x -> do
-          VGM.modify vec (+ 1) x
-        pure vec
+-- @since 1.1.0.0
+{-# INLINE sccCsr #-}
+sccCsr :: ACICSR.Csr w -> V.Vector (VU.Vector Int)
+sccCsr g = runST $ do
   groups <- V.mapM VUM.unsafeNew $ VU.convert counts
   is <- VUM.replicate groupNum (0 :: Int)
   VU.iforM_ ids $ \v sccId -> do
@@ -156,3 +183,10 @@ scc g = do
     VGM.write is sccId $ i + 1
     VGM.write (groups VG.! sccId) i v
   V.mapM VU.unsafeFreeze groups
+  where
+    (!groupNum, !ids) = sccIdsCsr g
+    counts = VU.create $ do
+      vec <- VUM.replicate groupNum (0 :: Int)
+      VU.forM_ ids $ \x -> do
+        VGM.modify vec (+ 1) x
+      pure vec

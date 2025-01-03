@@ -6,11 +6,15 @@
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Graph
-  ( module Csr,
+  ( -- * Re-export of CSR
+
+    -- | The `Csr.Csr` data type and all the functions are re-exported.
+    module Csr,
 
     -- * CSR helpers
     swapDupe,
     swapDupe',
+    scc,
 
     -- * Graph search
     topSort,
@@ -20,9 +24,11 @@ where
 import AtCoder.Extra.IntSet qualified as IS
 import AtCoder.Internal.Buffer qualified as B
 import AtCoder.Internal.Csr as Csr
+import AtCoder.Internal.Scc qualified as ACISCC
 import Control.Monad (when)
 import Control.Monad.ST (runST)
 import Data.Foldable (for_)
+import Data.Vector qualified as V
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -72,6 +78,21 @@ swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 {-# INLINE swapDupe' #-}
 swapDupe' :: (VU.Unbox (Int, Int)) => VU.Vector (Int, Int) -> VU.Vector (Int, Int)
 swapDupe' = VU.concatMap (\(!u, !v) -> VU.fromListN 2 [(u, v), (v, u)])
+
+-- | \(O(n + m)\) (Extra API) Returns the strongly connected components.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> -- 0 == 1 -> 2    3
+-- >>> let gr = Gr.build' 4 $ VU.fromList [(0, 1), (1, 0), (1, 2)]
+-- >>> Gr.scc gr
+-- [[3],[0,1],[2]]
+--
+-- @since 1.1.0.0
+{-# INLINE scc #-}
+scc :: Csr w -> V.Vector (VU.Vector Int)
+scc = ACISCC.sccCsr
 
 -- | \(O(n \log n + m)\) Returns the lexicographically smallest topological ordering of given graph.
 --
