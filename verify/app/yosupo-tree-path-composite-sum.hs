@@ -1,5 +1,5 @@
 import AtCoder.Extra.Graph qualified as Gr
-import AtCoder.Extra.Graph.Tree qualified as Tree
+import AtCoder.Extra.Tree qualified as Tree
 import AtCoder.Extra.Monoid.Mat2x2 qualified as Mat2x2
 import AtCoder.Extra.Monoid.V2 qualified as V2
 import AtCoder.ModInt qualified as M

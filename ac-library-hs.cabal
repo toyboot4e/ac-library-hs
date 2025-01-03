@@ -76,7 +76,7 @@ library
     AtCoder.Extra.IntMap
     AtCoder.Extra.IntSet
     AtCoder.Extra.Graph
-    AtCoder.Extra.Graph.Tree
+    AtCoder.Extra.Tree
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid
     AtCoder.Extra.Monoid.Affine1

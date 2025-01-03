@@ -1,7 +1,7 @@
 -- | Generic tree functions.
 --
 -- @since 1.1.0.0
-module AtCoder.Extra.Graph.Tree
+module AtCoder.Extra.Tree
   ( fold,
     scan,
     foldReroot,
