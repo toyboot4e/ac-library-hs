@@ -1,6 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | Range transformation monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\).
+-- | Range transformation monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\). Use
+-- @Mat2x2@ if inverse operation is needed or monoid length needs to be stored (in @V2@).
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Monoid.Affine1
