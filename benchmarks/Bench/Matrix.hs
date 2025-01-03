@@ -48,33 +48,40 @@ benches =
       bench "mulMod3" $ whnf (V.foldl1' (Mat.mulMod3 m)) randomMatrixInput,
       bench "mulMod4" $ whnf (V.foldl1' (Mat.mulMod4 m)) randomMatrixInput,
       bench "mulMod5" $ whnf (V.foldl1' (Mat.mulMod5 m)) randomMatrixInput,
-      bench "mulModMint" $ whnf (V.foldl1' Mat.mulModMint1) randomMintMatrixInput,
-      bench "mulModMint" $ whnf (V.foldl1' Mat.mulModMint2) randomMintMatrixInput,
-      bench "mulModMint" $ whnf (V.foldl1' Mat.mulModMint3) randomMintMatrixInput,
-      bench "powMod_ACL" $ whnf (VU.foldl' (flip (ACMAT.powMod 998244353)) squareMat) randomVec,
-      bench "powModMintACL_stimes" $ whnf (VU.foldl' (flip stimes) squareMatMint) randomVec,
-      bench "powModMintACL_stimes'" $ whnf (VU.foldl' (flip ACEM.stimes') squareMatMint) randomVec,
-      bench "powModMintACL_powModMint" $ whnf (VU.foldl' (flip ACMAT.powModMint) squareMatMint) randomVec
+      bench "mulMint1" $ whnf (V.foldl1' Mat.mulMint1) randomMintMatrixInput,
+      bench "mulMint2" $ whnf (V.foldl1' Mat.mulMint2) randomMintMatrixInput,
+      bench "mulMint3" $ whnf (V.foldl1' Mat.mulMint3) randomMintMatrixInput,
+      -- mul (ACL)
+      bench "mul_ACL" $ whnf (V.foldl1' ACMAT.mul) randomMatrixInputACL,
+      bench "mulMod_ACL" $ whnf (V.foldl1' (ACMAT.mulMod m)) randomMatrixInputACL,
+      -- pow mod (ACL only)
+      bench "powMod_ACL" $ whnf (VU.foldl' (flip (ACMAT.powMod m)) squareMat) randomVec,
+      bench "powMintACL_stimes" $ whnf (VU.foldl' (flip stimes) squareMatMint) randomVec,
+      bench "powMintACL_stimes'" $ whnf (VU.foldl' (flip ACEM.stimes') squareMatMint) randomVec,
+      bench "powMintACL_powMint" $ whnf (VU.foldl' (flip ACMAT.powMint) squareMatMint) randomVec
     ]
   where
     -- Bench matrix
     randomMatrixInput :: V.Vector (Mat.Matrix Int)
-    randomMatrixInput = evalState (V.unfoldrExactNM testSize nextMatrix (Mat.wM mat0)) gen0
+    !randomMatrixInput = evalState (V.unfoldrExactNM testSize nextMatrix (Mat.wM mat0)) gen0
       where
         ((!mat0, !_), !gen0) = runState randomMatrix $ mkStdGen 123456789
 
     randomMintMatrixInput :: V.Vector (Mat.Matrix (M.ModInt 998244353))
-    randomMintMatrixInput = V.map (Mat.map M.new) randomMatrixInput
+    !randomMintMatrixInput = V.map (Mat.map M.new) randomMatrixInput
 
     -- ACL matrix
+    randomMatrixInputACL :: V.Vector (ACMAT.Matrix Int)
+    !randomMatrixInputACL = V.map (\mat -> ACMAT.new (Mat.hM mat) (Mat.wM mat) (Mat.vecM mat)) randomMatrixInput
+
     squareMat :: ACMAT.Matrix Int
-    squareMat = evalState (randomSquareACLMatrix 17) $ mkStdGen 123456789
+    !squareMat = evalState (randomSquareACLMatrix 17) $ mkStdGen 123456789
 
     squareMatMint ::ACMAT.Matrix (M.ModInt 998244353)
-    squareMatMint = ACMAT.map M.new squareMat
+    !squareMatMint = ACMAT.map M.new squareMat
 
     -- non-zero random vector
     randomVec :: VU.Vector Int
-    randomVec =
+    !randomVec =
       VU.map ((+ 1) . fromIntegral) $
-        VU.unfoldrExactN 100 (genWord64R (998244383 - 2)) (mkStdGen 123456789)
+        VU.unfoldrExactN 100 (genWord64R (m - 2)) (mkStdGen 123456789)

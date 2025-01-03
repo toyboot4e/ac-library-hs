@@ -17,9 +17,9 @@ module BenchLib.Matrix
     mulMod3,
     mulMod4,
     mulMod5,
-    mulModMint1,
-    mulModMint2,
-    mulModMint3,
+    mulMint1,
+    mulMint2,
+    mulMint3,
   )
 where
 
@@ -312,9 +312,9 @@ mulMod5 !m !a !b =
     vecB = vecM b
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
 
-{-# INLINE mulModMint1 #-}
-mulModMint1 :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> Matrix (M.ModInt a) -> Matrix (M.ModInt a)
-mulModMint1 !a !b =
+{-# INLINE mulMint1 #-}
+mulMint1 :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> Matrix (M.ModInt a) -> Matrix (M.ModInt a)
+mulMint1 !a !b =
   Matrix h w' $
     VU.unfoldrExactN
       (h * w')
@@ -338,9 +338,9 @@ mulModMint1 !a !b =
     vecB = vecM b
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
 
-{-# INLINE mulModMint2 #-}
-mulModMint2 :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> Matrix (M.ModInt a) -> Matrix (M.ModInt a)
-mulModMint2 !a !b =
+{-# INLINE mulMint2 #-}
+mulMint2 :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> Matrix (M.ModInt a) -> Matrix (M.ModInt a)
+mulMint2 !a !b =
   Matrix h w' $
     VU.unfoldrExactN
       (h * w')
@@ -366,9 +366,9 @@ mulModMint2 !a !b =
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
 
 -- REMARK: This is very unsafe in that it can overflow (mod^2 * n)
-{-# INLINE mulModMint3 #-}
-mulModMint3 :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> Matrix (M.ModInt a) -> Matrix (M.ModInt a)
-mulModMint3 !a !b =
+{-# INLINE mulMint3 #-}
+mulMint3 :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> Matrix (M.ModInt a) -> Matrix (M.ModInt a)
+mulMint3 !a !b =
   Matrix h w' $
     VU.unfoldrExactN
       (h * w')

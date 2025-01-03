@@ -29,7 +29,7 @@ module AtCoder.Extra.Semigroup.Matrix
     mulMint,
     mulMod,
     powMod,
-    powModMint,
+    powMint,
   )
 where
 
@@ -145,17 +145,14 @@ mul !a !b =
       )
       (0, 0)
   where
-    f row col = VU.sum $ VU.zipWith (*) (rows1 VG.! row) (cols2 VG.! col)
+    f row col = VU.sum $ VU.imap (\iRow x -> x * VG.unsafeIndex vecB (col + iRow * w')) (VU.unsafeSlice (w * row) w vecA)
     h = hM a
     w = wM a
-    vecA = vecM a
     h' = hM b
+    vecA = vecM a
     w' = wM b
     vecB = vecM b
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
-    rows1 = V.unfoldrExactN h (VU.splitAt w) vecA
-    -- cols2 = V.generate w' $ \col -> VU.generate h' $ \row -> vecB VG.! (w' * row + col)
-    cols2 = V.generate w' $ \col -> VU.unfoldrExactN h' (\i -> (VG.unsafeIndex vecB i, i + w')) col
 
 -- | \(O(h_1 w_2 K)\) `mul` specialized to `M.ModInt`.
 --
@@ -230,13 +227,13 @@ powMod m n mat
   where
     !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.powMod: matrix size mismatch"
 
--- | \(O(nhw)\) Calculates \(M^n\) taking the mod.
-powModMint :: forall m. (KnownNat m) => Int -> Matrix (M.ModInt m) -> Matrix (M.ModInt m)
-powModMint n mat
+-- | \(O(nhw)\) Calculates \(M^n\), specialized to `M.ModInt`.
+powMint :: forall m. (KnownNat m) => Int -> Matrix (M.ModInt m) -> Matrix (M.ModInt m)
+powMint n mat
   | n == 0 = ident $ hM mat
   | otherwise = ACEM.power (mulMintImpl bt) n mat
   where
-    !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.powModMint: matrix size mismatch"
+    !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.powMint: matrix size mismatch"
     !bt = BT.new32 $ fromIntegral (natVal' (proxy# @m))
 
 -- | @since 1.1.0.0
