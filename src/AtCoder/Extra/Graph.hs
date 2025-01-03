@@ -26,7 +26,8 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- | \(O(n)\) Converts non-directed edges into directional edges.
+-- | \(O(n)\) Converts non-directed edges into directional edges. This is a convenient function for
+-- making an input of `build`.
 --
 -- ==== __Example__
 -- Create a non-directed graph:
@@ -56,7 +57,7 @@ swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let n = 5
--- >>> let gr = Gr.build n $ VU.fromList [(1, 2, ()), (4, 0, ()), (0, 3, ())]
+-- >>> let gr = Gr.build' n $ VU.fromList [(1, 2), (4, 0), (0, 3)]
 -- >>> Gr.topSort n (gr `Gr.adj`)
 -- [1,2,4,0,3]
 --

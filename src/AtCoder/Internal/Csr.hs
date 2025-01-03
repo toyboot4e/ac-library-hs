@@ -130,7 +130,7 @@ build' n edges = build n $ VU.zip3 us vs (VU.replicate (VU.length us) ())
 --
 -- @since 1.0.0.0
 {-# INLINE adj #-}
-adj :: (HasCallStack, VU.Unbox w) => Csr w -> Int -> VU.Vector Int
+adj :: (HasCallStack) => Csr w -> Int -> VU.Vector Int
 adj Csr {..} i =
   let il = startCsr VG.! i
       ir = startCsr VG.! (i + 1)
@@ -150,7 +150,7 @@ adjW Csr {..} i =
 --
 -- @since 1.0.0.0
 {-# INLINE eAdj #-}
-eAdj :: (HasCallStack, VU.Unbox w) => Csr w -> Int -> VU.Vector (Int, Int)
+eAdj :: (HasCallStack) => Csr w -> Int -> VU.Vector (Int, Int)
 eAdj Csr {..} i =
   let il = startCsr VG.! i
       ir = startCsr VG.! (i + 1)

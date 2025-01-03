@@ -39,7 +39,7 @@ foldImpl tree valAt toF act root memo = inner (-1) root
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
--- >>> import AtCoder.Extra.Graph.Tree qualified as Tree
+-- >>> import AtCoder.Extra.Tree qualified as Tree
 -- >>> import Data.Semigroup (Sum (..))
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let gr = Gr.build @(Sum Int) 5 . Gr.swapDupe $ VU.fromList [(2, 1, Sum 1), (1, 0, Sum 1), (2, 3, Sum 1), (3, 4, Sum 1)]
@@ -81,7 +81,7 @@ fold tree valAt toF act root = runIdentity $ do
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
--- >>> import AtCoder.Extra.Graph.Tree qualified as Tree
+-- >>> import AtCoder.Extra.Tree qualified as Tree
 -- >>> import Data.Semigroup (Sum (..))
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let n = 5
@@ -128,7 +128,7 @@ scan n tree acc0At toF act root = VG.create $ do
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
--- >>> import AtCoder.Extra.Graph.Tree qualified as Tree
+-- >>> import AtCoder.Extra.Tree qualified as Tree
 -- >>> import Data.Semigroup (Sum (..))
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let n = 5
