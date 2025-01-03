@@ -13,11 +13,12 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import GHC.Stack (HasCallStack)
 
 {-# INLINE foldImpl #-}
 foldImpl ::
   forall m w f a.
-  (Monad m, VU.Unbox w) =>
+  (HasCallStack, Monad m, VU.Unbox w) =>
   (Int -> VU.Vector (Int, w)) ->
   (Int -> a) ->
   (a -> (Int, w) -> f) ->
@@ -60,7 +61,7 @@ foldImpl tree valAt toF act root memo = inner (-1) root
 -- 4
 {-# INLINE fold #-}
 fold ::
-  (VU.Unbox w) =>
+  (HasCallStack, VU.Unbox w) =>
   -- | A graph as a function.
   (Int -> VU.Vector (Int, w)) ->
   -- | Assignment of initial vertex values.
@@ -151,7 +152,7 @@ scan n tree acc0At toF act root = VG.create $ do
 {-# INLINE foldReroot #-}
 foldReroot ::
   forall w f a.
-  (VU.Unbox a, VU.Unbox f, Monoid f, VU.Unbox w) =>
+  (HasCallStack, VU.Unbox a, VU.Unbox f, Monoid f, VU.Unbox w) =>
   -- | The number of vertices.
   Int ->
   -- | A graph as a function.
