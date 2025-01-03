@@ -90,6 +90,13 @@ powMod x n0 m0
 
 -- | M. Forisek and J. Jancina, Fast Primality Testing for Integers That Fit into a Machine Word
 --
+-- ==== Constraints
+-- - \(n < 4759123141 (2^{32} < 4759123141)\), otherwise the return value can lie
+--   ([Wikipedia](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test#Testing_against_small_sets_of_bases)).
+--
+-- ==== Complexity
+-- - \(O(k \log^3 n)\), \(k = 3\)
+--
 -- @since 1.0.0.0
 {-# INLINE isPrime #-}
 isPrime :: Int -> Bool

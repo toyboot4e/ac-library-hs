@@ -14,13 +14,19 @@
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Math
-  ( -- * Binary exponential
+  ( -- * Re-exports from the internal math module
+    ACIM.isPrime,
+    ACIM.invGcd,
+    ACIM.primitiveRoot,
+
+    -- * Binary exponential
     power,
     stimes',
     mtimes',
   )
 where
 
+import AtCoder.Internal.Math qualified as ACIM
 import Data.Bits ((.>>.))
 
 -- TODO: add `HasCallStack` and provide with `unsafePower`.
