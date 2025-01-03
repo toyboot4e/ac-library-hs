@@ -76,7 +76,7 @@
 -- - The API is based on `Monoid` and `SegAct`, not the functions @op@, @e@, @mapping@,
 -- @composition@ and @id@.
 -- - @get@ and @set@ are renamed to `read` and `write`.
--- - `modify`, `modifyM`, `freeze` and `unsafeFreeze` are added.
+-- - `modify`, `modifyM`, `exchange`, `freeze` and `unsafeFreeze` are added.
 --
 -- @since 1.0.0.0
 module AtCoder.LazySegTree
@@ -92,6 +92,7 @@ module AtCoder.LazySegTree
     write,
     modify,
     modifyM,
+    exchange,
     read,
 
     -- * Products
@@ -409,6 +410,27 @@ modifyM self@LazySegTree {..} f p = do
   VGM.modifyM dLst f p'
   for_ [1 .. logLst] $ \i -> do
     update self $ p' .>>. i
+
+-- | (Extra API) Sets \(p\)-th value of the array to \(x\) and returns the old value.
+--
+-- ==== Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.1.0.0
+{-# INLINE exchange #-}
+exchange :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> a -> m a
+exchange self@LazySegTree {..} p x = do
+  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.exchange" p nLst
+  let p' = p + sizeLst
+  for_ [logLst, logLst - 1 .. 1] $ \i -> do
+    push self $ p' .>>. i
+  res <- VGM.exchange dLst p' x
+  for_ [1 .. logLst] $ \i -> do
+    update self $ p' .>>. i
+  pure res
 
 -- | Returns \(p\)-th value of the array.
 --

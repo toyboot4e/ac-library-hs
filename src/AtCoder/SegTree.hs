@@ -64,7 +64,7 @@
 -- ==== Major changes from the original @ac-library@
 -- - The implementation is `Monoid` based.
 -- - @get@ and @set@ are renamed to `read` and `write`.
--- - `modify`, `modifyM`, `freeze` and `unsafeFreeze` are added.
+-- - `modify`, `modifyM`, `exchange`, `freeze` and `unsafeFreeze` are added.
 --
 -- @since 1.0.0.0
 module AtCoder.SegTree
@@ -79,6 +79,7 @@ module AtCoder.SegTree
     write,
     modify,
     modifyM,
+    exchange,
     read,
 
     -- * Products
@@ -218,6 +219,23 @@ modifyM self@SegTree {..} f p = do
   VGM.modifyM dSt f (p + sizeSt)
   for_ [1 .. logSt] $ \i -> do
     update self ((p + sizeSt) .>>. i)
+
+-- | (Extra API) Writes \(p\)-th value of the array to \(x\) and returns the old value.
+--
+-- ==== Constraints
+-- - \(0 \leq p \lt n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.1.0.0
+{-# INLINE exchange #-}
+exchange :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m a
+exchange self@SegTree {..} p x = do
+  let !_ = ACIA.checkIndex "AtCoder.SegTree.exchange" p nSt
+  ret <- VGM.read dSt (p + sizeSt)
+  write self p x
+  pure ret
 
 -- | Returns \(p\)-th value of the array.
 --
