@@ -32,7 +32,7 @@
 -- @since 1.0.0.0
 module AtCoder.Internal.Csr
   ( -- * Compressed sparse row
-    Csr,
+    Csr (..),
 
     -- * Constructor
     build,
@@ -57,8 +57,25 @@ import GHC.Stack (HasCallStack)
 --
 -- @since 1.0.0.0
 data Csr w = Csr
-  { startCsr :: !(VU.Vector Int),
+  { -- | The number of vertices.
+    --
+    -- @since 1.1.0.0
+    nCsr :: {-# UNPACK #-} !Int,
+    -- | The number of edges.
+    --
+    -- @since 1.1.0.0
+    nEdgesCsr :: {-# UNPACK #-} !Int,
+    -- | Starting indices.
+    --
+    -- @since 1.1.0.0
+    startCsr :: !(VU.Vector Int),
+    -- | Adjacent vertices.
+    --
+    -- @since 1.1.0.0
     adjCsr :: !(VU.Vector Int),
+    -- | Edge weights.
+    --
+    -- @since 1.1.0.0
     wCsr :: !(VU.Vector w)
   }
   deriving
@@ -73,20 +90,21 @@ data Csr w = Csr
 -- @since 1.0.0.0
 {-# INLINE build #-}
 build :: (HasCallStack, VU.Unbox w) => Int -> VU.Vector (Int, Int, w) -> Csr w
-build n edges = runST $ do
-  start <- VUM.replicate (n + 1) (0 :: Int)
+build nCsr edges = runST $ do
+  let nEdgesCsr = VU.length edges
+  start <- VUM.replicate (nCsr + 1) (0 :: Int)
 
   let (!froms, !_, !_) = VU.unzip3 edges
   VU.forM_ froms $ \from -> do
     VGM.modify start (+ 1) (from + 1)
 
-  for_ [1 .. n] $ \i -> do
+  for_ [1 .. nCsr] $ \i -> do
     prev <- VGM.read start (i - 1)
     VGM.modify start (+ prev) i
 
   edgeAdj <- VUM.unsafeNew (VU.length edges)
   edgeW <- VUM.unsafeNew (VU.length edges)
-  counter <- VUM.unsafeNew n
+  counter <- VUM.unsafeNew nCsr
   VUM.unsafeCopy counter $ VUM.init start
   VU.forM_ edges $ \(!from, !to, !w) -> do
     c <- VGM.read counter from
