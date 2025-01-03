@@ -284,9 +284,10 @@ executable yosupo-union-find-with-potencial
   main-is:       yosupo-union-find-with-potencial.hs
   build-depends: verify
 
-executable unionfind-with-potential-non-commutative_group
+executable yosupo-unionfind-with-potential-non-commutative-group
   import:        app-local
-  main-is:       unionfind-with-potential-non-commutative_group.hs
+  main-is:       yosupo-unionfind-with-potential-non-commutative-group.hs
+  build-depends: verify
   build-depends: verify
 
 executable yosupo-zalgorithm
