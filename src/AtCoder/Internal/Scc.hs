@@ -44,7 +44,7 @@ data SccGraph s = SccGraph
     edgesScc :: !(ACIGV.GrowVec s (Int, Int))
   }
 
--- | \(O(n)\) Creates `SccGraph` of \(n\) vertices.
+-- | \(O(n)\) Creates a `SccGraph` of \(n\) vertices.
 --
 -- @since 1.0.0.0
 {-# INLINE new #-}

@@ -64,7 +64,16 @@ import GHC.Stack (HasCallStack)
 --
 -- @since 1.0.0.0
 {-# INLINE powMod #-}
-powMod :: (HasCallStack) => Int -> Int -> Int -> Int
+powMod ::
+  (HasCallStack) =>
+  -- | \(x\)
+  Int ->
+  -- | \(n\)
+  Int ->
+  -- | \(m\)
+  Int ->
+  -- | \(x^n \bmod m\)
+  Int
 powMod x n0 m0
   | m0 == 1 = 0
   | otherwise = fromIntegral $ inner n0 1 $ fromIntegral (x `mod` m0)
@@ -100,7 +109,7 @@ isPrime n
       | t == n - 1 || y == 1 || y == n - 1 = not $ y /= n - 1 && even t
       | otherwise = inner (t .<<. 1) (y * y `mod` n)
 
--- | Returns \((g, x)\) such that \(g = \gcd(a, b), \mathrm{xa} = g(\bmod b), 0 \le x \le b/g\).
+-- | Returns \((g, x)\) such that \(g = \gcd(a, b), \mathrm{xa} \equiv g \pmod b, 0 \le x \le b/g\).
 --
 -- ==== Constraints
 -- - \(1 \le b\) (not asserted)

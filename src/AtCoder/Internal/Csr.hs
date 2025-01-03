@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Immutable Compresed Sparse Row.
+-- | Immutable Compresed Sparse Row. It is re-exported from @AtCoder.Extra.Graph@ with additional
+-- functionalities.
 --
 -- ==== __Example__
 -- Create a `Csr` without edge weights using `build`:
@@ -85,7 +86,7 @@ data Csr w = Csr
       Show
     )
 
--- | \(O(n + m)\) Creates `Csr`.
+-- | \(O(n + m)\) Creates a `Csr`.
 --
 -- @since 1.0.0.0
 {-# INLINE build #-}
@@ -117,7 +118,7 @@ build nCsr edges = runST $ do
   wCsr <- VU.unsafeFreeze edgeW
   pure Csr {..}
 
--- | \(O(n + m)\) Creates `Csr` with no weight.
+-- | \(O(n + m)\) Creates a `Csr` with no weight.
 --
 -- @since 1.0.0.0
 {-# INLINE build' #-}
@@ -126,7 +127,7 @@ build' n edges = build n $ VU.zip3 us vs (VU.replicate (VU.length us) ())
   where
     (!us, !vs) = VU.unzip edges
 
--- | \(O(1)\) Returns adjacent vertices.
+-- | \(O(1)\) Returns the adjacent vertices.
 --
 -- @since 1.0.0.0
 {-# INLINE adj #-}
@@ -136,7 +137,7 @@ adj Csr {..} i =
       ir = startCsr VG.! (i + 1)
    in VU.slice il (ir - il) adjCsr
 
--- | \(O(1)\) Returns adjacent vertices with weights.
+-- | \(O(1)\) Returns the adjacent vertices with weights.
 --
 -- @since 1.0.0.0
 {-# INLINE adjW #-}
@@ -146,7 +147,7 @@ adjW Csr {..} i =
       ir = startCsr VG.! (i + 1)
    in VU.zip (VU.slice il (ir - il) adjCsr) (VU.slice il (ir - il) wCsr)
 
--- | \(O(1)\) Returns a vector of @(edgeId, adjacentVertex)@.
+-- | \(O(n)\) Returns a vector of @(edgeId, adjacentVertex)@.
 --
 -- @since 1.0.0.0
 {-# INLINE eAdj #-}

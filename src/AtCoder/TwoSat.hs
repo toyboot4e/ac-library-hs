@@ -8,7 +8,7 @@
 --
 -- it decides whether there is a truth assignment that satisfies all clauses.
 --
--- ==== Example
+-- ==== __Example__
 -- >>> import AtCoder.TwoSat qualified as TS
 -- >>> import Data.Bit (Bit(..))
 -- >>> ts <- TS.new 1

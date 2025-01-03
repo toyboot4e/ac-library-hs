@@ -44,14 +44,14 @@ data Barrett = Barrett
       Show
     )
 
--- | Creates barret reduction for modulus \(m\) from a `Word32` value.
+-- | Creates a `Barrett` for a modulus value \(m\) of type `Word32` value.
 --
 -- @since 1.0.0.0
 {-# INLINE new32 #-}
 new32 :: Word32 -> Barrett
 new32 m = Barrett m $ maxBound @Word64 `div` (fromIntegral m :: Word64) + 1
 
--- | Creates barret reduction for modulus \(m\) from a `Word64` value.
+-- | Creates a `Barrett` for a modulus value \(m\) of type `Word64` value.
 --
 -- @since 1.0.0.0
 {-# INLINE new64 #-}

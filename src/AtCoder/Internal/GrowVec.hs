@@ -91,7 +91,7 @@ data GrowVec s a = GrowVec
     vecGV :: !(MutVar s (VUM.MVector s a))
   }
 
--- | \(O(n)\) Creates `GrowVec` with initial capacity \(n\).
+-- | \(O(n)\) Creates a `GrowVec` with initial capacity \(n\).
 --
 -- @since 1.0.0.0
 {-# INLINE new #-}
@@ -101,7 +101,7 @@ new n = do
   vecGV <- newMutVar =<< VUM.unsafeNew n
   pure GrowVec {..}
 
--- | \(O(n)\) Creates `GrowVec` with initial values.
+-- | \(O(n)\) Creates a `GrowVec` with initial values.
 --
 -- @since 1.0.0.0
 {-# INLINE build #-}

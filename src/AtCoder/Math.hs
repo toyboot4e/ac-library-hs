@@ -5,6 +5,7 @@
 -- @since 1.0.0.0
 module AtCoder.Math
   ( -- * Modulus operations
+
     -- These functions are internally used for `AtCoder.ModInt`.
     powMod,
     invMod,
@@ -42,7 +43,14 @@ import GHC.Stack (HasCallStack)
 --
 -- @since 1.0.0.0
 {-# INLINE invMod #-}
-invMod :: (HasCallStack) => Int -> Int -> Int
+invMod ::
+  (HasCallStack) =>
+  -- | \(x\)
+  Int ->
+  -- | \(m\)
+  Int ->
+  -- | \(x^{-1} \bmod m\)
+  Int
 invMod x m =
   let !_ = ACIA.runtimeAssert (1 <= m) $ "AtCoder.Math.invMod: given invalid `m` less than 1: " ++ show m
       (!z1, !z2) = ACIM.invGcd (fromIntegral x) (fromIntegral m)
@@ -66,7 +74,7 @@ invMod x m =
 -- ==== Complexity
 -- - \(O(n \log{\mathrm{lcm}(m[i])})\)
 --
--- ==== Example
+-- ==== __Example__
 -- `crt` calculates \(y\) such that \(y \equiv r_i \pmod m_i, \forall i \in \lbrace 0,1,\cdots, n - 1 \rbrace\):
 --
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -127,7 +135,7 @@ crt r m = loop 0 1 [0 .. VU.length r - 1]
 -- ==== Complexity
 -- - \(O(\log m)\)
 --
--- ==== Example
+-- ==== __Example__
 -- `floorSum` calculates the number of points surrounded by a line
 -- \(y = \frac {a \times x + b} {m} \) and \(x, y\) axes in \(O(\log m)\) time:
 --
@@ -150,7 +158,18 @@ crt r m = loop 0 1 [0 .. VU.length r - 1]
 --
 -- @since 1.0.0.0
 {-# INLINE floorSum #-}
-floorSum :: (HasCallStack) => Int -> Int -> Int -> Int -> Int
+floorSum ::
+  (HasCallStack) =>
+  -- | \(n\)
+  Int ->
+  -- | \(m\)
+  Int ->
+  -- | \(a\)
+  Int ->
+  -- | \(b\)
+  Int ->
+  -- | \(\sum\limits_{i = 0}^{n - 1} \left\lfloor \frac{a \times i + b}{m} \right\rfloor\)
+  Int
 floorSum n m a b = ACIM.floorSumUnsigned n m a' b' - da - db
   where
     !_ = ACIA.runtimeAssert (0 <= n && n < bit 32) $ "AtCoder.Math.floorSum: given invalid `n` (`" ++ show n ++ "`)"

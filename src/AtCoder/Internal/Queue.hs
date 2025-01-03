@@ -81,7 +81,7 @@ data Queue s a = Queue
     vecQ :: !(VUM.MVector s a)
   }
 
--- | \(O(n)\) Creates `Queue` with capacity \(n\).
+-- | \(O(n)\) Creates a `Queue` with capacity \(n\).
 --
 -- @since 1.0.0.0
 {-# INLINE new #-}

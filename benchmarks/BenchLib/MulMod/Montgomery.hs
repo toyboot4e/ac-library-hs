@@ -27,7 +27,7 @@ data Montgomery = Montgomery
     negInvMontgomery :: {-# UNPACK #-} !Word32
   }
 
--- | Creates `Montgomery` for modulus @m@.
+-- | Creates a `Montgomery` for modulus @m@.
 new :: Word64 -> Montgomery
 new m =
   let !negInv = inner 0 0 1 0

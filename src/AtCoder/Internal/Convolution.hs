@@ -55,7 +55,7 @@ data FftInfo p = FftInfo
       Show
     )
 
--- | \(O(\log m)\) Creates `FftInfo`.
+-- | \(O(\log m)\) Creates an `FftInfo`.
 --
 -- @since 1.0.0.0
 {-# INLINE newInfo #-}

@@ -4,8 +4,8 @@
 -- | It is the structure that treats the modular arithmetic. All the remaining parts of AC Library
 -- works without modint, so you don't necessarily read this to use the remaining parts.
 --
--- For most of the problems, it is sufficient to use `ModInt998244353`, `ModInt1000000007`, which
--- can be used as follows.
+-- ==== __Example__
+-- It is often convenient to define a type alias of `ModInt` for a specific modulus value:
 --
 -- >>> import AtCoder.ModInt qualified as M
 -- >>> type Mint = M.ModInt998244353
@@ -13,7 +13,11 @@
 -- >>> modInt 1000000000
 -- 1755647
 --
+-- >>> modInt 1000000000 / modInt 3
+-- 666081451
+--
 -- ==== Major changes from the original @ac-library@
+-- - @StaticModInt@ is renamed to `ModInt`.
 -- - @DynamicModInt@ is removed.
 --
 -- @since 1.0.0.0
@@ -82,14 +86,14 @@ class (KnownNat a) => Modulus a where
   -- @since 1.0.0.0
   isPrimeModulus :: Proxy# a -> Bool
 
-  -- | Returns the primitive root of the modulus value. Note that the default implementation is
-  -- slow.
+  -- | Returns the primitive root of the modulus value. Note that the default implementation is slow
+  -- and the value should be hard-coded.
   --
   -- @since 1.0.0.0
   {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus :: Proxy# a -> Int
   -- we could use `AllowAmbigousTypes` or `Tagged` newtype, but `Proxy#` wasn't so slow.
-  -- not sure about `x^n` case though..
+  -- not sure about the case of `x^n` though..
   primitiveRootModulus _ = ACIM.primitiveRoot $ fromIntegral (natVal' (proxy# @a))
 
 -- | \(2^{24} - 1\).
@@ -146,17 +150,17 @@ instance Modulus 2147483647 where
   {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 7
 
--- | `ModInt` with modulus value @998244353@.
+-- | Type alias of `ModInt` with modulus value \(998244353\).
 --
 -- @since 1.0.0.0
 type ModInt998244353 = ModInt 998244353
 
--- | `ModInt` with modulus value @1000000007@.
+-- | Type alias of `ModInt` with modulus value \(1000000007\).
 --
 -- @since 1.0.0.0
 type ModInt1000000007 = ModInt 1000000007
 
--- | Retrieves `Int` from `KnownNat`.
+-- | Retrieves the `Int` value from a `KnownNat`.
 --
 -- >>> import Data.Proxy (Proxy(..))
 -- >>> modVal (Proxy @42)
@@ -167,7 +171,7 @@ type ModInt1000000007 = ModInt 1000000007
 modVal :: forall a. (KnownNat a) => Proxy a -> Int
 modVal p = fromIntegral $ natVal p
 
--- | Retrieves `Int` from `KnownNat`.
+-- | Retrieves the `Int` value from a `KnownNat`.
 --
 -- >>> :set -XMagicHash
 -- >>> import GHC.Exts (proxy#)
@@ -179,28 +183,28 @@ modVal p = fromIntegral $ natVal p
 modVal# :: forall a. (KnownNat a) => Proxy# a -> Int
 modVal# p = fromIntegral $ natVal' p
 
--- | Creates `ModInt` from an `Int` value taking mod.
+-- | Creates a `ModInt` from an `Int` value taking the mod.
 --
 -- @since 1.0.0.0
 {-# INLINE new #-}
 new :: forall a. (KnownNat a) => Int -> ModInt a
 new v = ModInt . fromIntegral $ v `mod` fromIntegral (natVal' (proxy# @a))
 
--- | Creates `ModInt` from a `Word32` value taking mod.
+-- | Creates a `ModInt` from a `Word32` value taking the mod.
 --
 -- @since 1.0.0.0
 {-# INLINE new32 #-}
 new32 :: forall a. (KnownNat a) => Word32 -> ModInt a
 new32 v = ModInt $ v `mod` fromIntegral (natVal' (proxy# @a))
 
--- | Creates `ModInt` from a `Word64` value taking mod.
+-- | Creates a `ModInt` from a `Word64` value taking the mod.
 --
 -- @since 1.0.0.0
 {-# INLINE new64 #-}
 new64 :: forall a. (KnownNat a) => Word64 -> ModInt a
 new64 v = ModInt . fromIntegral $ v `mod` fromIntegral (natVal' (proxy# @a))
 
--- | Creates `ModInt` without taking mod. It is the function for constant-factor speedup.
+-- | Creates `ModInt` without taking the mod. It is the function for constant-factor speedup.
 --
 -- ==== Constraints
 -- - \(0 \leq x \lt \mathrm{mod}\) (not asserted at runtime)
@@ -210,7 +214,7 @@ new64 v = ModInt . fromIntegral $ v `mod` fromIntegral (natVal' (proxy# @a))
 unsafeNew :: (KnownNat a) => Word32 -> ModInt a
 unsafeNew = ModInt
 
--- | `Word32` value that treats the modula arithmetic.
+-- | `Word32` value that treats the modular arithmetic.
 newtype ModInt a = ModInt {unModInt :: Word32}
   deriving
     ( -- @since 1.0.0.0

@@ -81,7 +81,7 @@ data Heap s a = Heap
     dataBH :: !(VUM.MVector s a)
   }
 
--- | \(O(n)\) Creates `Heap` with capacity \(n\).
+-- | \(O(n)\) Creates a `Heap` with capacity \(n\).
 --
 -- @since 1.0.0.0
 {-# INLINE new #-}

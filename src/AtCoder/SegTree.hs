@@ -233,8 +233,10 @@ modifyM self@SegTree {..} f p = do
 exchange :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m a
 exchange self@SegTree {..} p x = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.exchange" p nSt
-  ret <- VGM.read dSt (p + sizeSt)
-  write self p x
+  ret <- VGM.exchange dSt (p + sizeSt) x
+  VGM.write dSt (p + sizeSt) x
+  for_ [1 .. logSt] $ \i -> do
+    update self ((p + sizeSt) .>>. i)
   pure ret
 
 -- | Returns \(p\)-th value of the array.
@@ -334,7 +336,16 @@ allProd SegTree {..} = VGM.read dSt 1
 --
 -- @since 1.0.0.0
 {-# INLINE minLeft #-}
-minLeft :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
+minLeft ::
+  (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
+  -- | The segment tree
+  SegTree (PrimState m) a ->
+  -- | \(r\)
+  Int ->
+  -- | \(p\): user prediate
+  (a -> Bool) ->
+  -- | \(l\): \(p\) holds for \([l, r)\)
+  m Int
 minLeft seg r0 f = minLeftM seg r0 (pure . f)
 
 -- | Monadic variant of `minLeft`.
@@ -351,7 +362,16 @@ minLeft seg r0 f = minLeftM seg r0 (pure . f)
 --
 -- @since 1.0.0.0
 {-# INLINE minLeftM #-}
-minLeftM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
+minLeftM ::
+  (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
+  -- | The segment tree
+  SegTree (PrimState m) a ->
+  -- | \(r\)
+  Int ->
+  -- | \(p\): user prediate
+  (a -> m Bool) ->
+  -- | \(l\): \(p\) holds for \([l, r)\)
+  m Int
 minLeftM SegTree {..} r0 f = do
   b <- f mempty
   let !_ = ACIA.runtimeAssert b "AtCoder.SegTree.minLeftM: `f empty` returned `False`"
@@ -404,7 +424,16 @@ minLeftM SegTree {..} r0 f = do
 --
 -- @since 1.0.0.0
 {-# INLINE maxRight #-}
-maxRight :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> Bool) -> m Int
+maxRight ::
+  (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
+  -- | The segment tree
+  SegTree (PrimState m) a ->
+  -- | \(l\)
+  Int ->
+  -- | \(p\): user prediate
+  (a -> Bool) ->
+  -- | \(r\): \(p\) holds for \([l, r)\)
+  m Int
 maxRight seg l0 f = maxRightM seg l0 (pure . f)
 
 -- | Moandic variant of `maxRight`.
@@ -419,7 +448,16 @@ maxRight seg l0 f = maxRightM seg l0 (pure . f)
 --
 -- @since 1.0.0.0
 {-# INLINE maxRightM #-}
-maxRightM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> (a -> m Bool) -> m Int
+maxRightM ::
+  (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
+  -- | The segment tree
+  SegTree (PrimState m) a ->
+  -- | \(l\)
+  Int ->
+  -- | \(p\): user prediate
+  (a -> m Bool) ->
+  -- | \(r\): \(p\) holds for \([l, r)\)
+  m Int
 maxRightM SegTree {..} l0 f = do
   b <- f mempty
   let !_ = ACIA.runtimeAssert b "AtCoder.SegTree.maxRightM: `f mempty` returned `False`"

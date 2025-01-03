@@ -1,9 +1,9 @@
 -- | It contains string algorithms.
 --
 -- Let \(s\) be a string. We denote the substring of \(s\) between \(a\)-th and \(b - 1\)-th
--- character by @s[a..b)@.
+-- character by \(s[a..b)\).
 --
--- ==== Examples
+-- ==== __Examples__
 --
 -- ===== Suffix Array and LCP Array
 --
@@ -32,9 +32,9 @@ module AtCoder.String
     -- * LCP array
     lcpArray,
     lcpArrayBS,
-    zAlgorithm,
 
     -- * Z algorithm
+    zAlgorithm,
     zAlgorithmBS,
   )
 where
@@ -55,9 +55,9 @@ import GHC.Stack (HasCallStack)
 
 -- | Calculates suffix array for a `Int` vector.
 --
--- Given a string @s@ of length \(n\), it returns the suffix array of @s@. Here, the suffix array
--- @sa@ of @s@ is a permutation of \(0, \cdots, n-1\) such that @s[sa[i]..n) < s[sa[i+1]..n)@ holds
--- for all \(i = 0,1, \cdots ,n-2\).
+-- Given a string \(s\) of length \(n\), it returns the suffix array of \(s\). Here, the suffix array
+-- \(\mathrm{sa}\) of \(s\) is a permutation of \(0, \cdots, n-1\) such that \(s[\mathrm{sa}[i]..n) < s[\mathrm{sa}[i+1]..n)\)
+-- holds for all \(i = 0,1, \cdots ,n-2\).
 --
 -- ==== Constraints
 -- - \(0 \leq n\)
@@ -97,7 +97,8 @@ suffixArrayBS s = do
 -- - \(0 \leq n\)
 --
 -- ==== Complexity
--- - \(O(n \log n)\)-time, \(O(n)\)-space
+-- - \(O(n \log n)\)-time
+-- - \(O(n)\)-space
 --
 -- @since 1.0.0.0
 {-# INLINE suffixArrayOrd #-}
@@ -124,12 +125,12 @@ suffixArrayOrd s =
         (upper_,) <$> VU.unsafeFreeze vec
    in ACIS.saIs s2 upper
 
--- | Given a string @s@ of length \(n\), it returns the LCP array of @s@. Here, the LCP array of
--- @s@ is the array of length \(n-1\), such that the \(i\)-th element is the length of the LCP
--- (Longest Common Prefix) of @s[sa[i]..n)@ and @s[sa[i+1]..n)@
+-- | Given a string \(s\) of length \(n\), it returns the LCP array of \(s\). Here, the LCP array of
+-- \(s\) is the array of length \(n-1\), such that the \(i\)-th element is the length of the LCP
+-- (Longest Common Prefix) of \(s[\mathrm{sa}[i]..n)\) and \(s[\mathrm{sa}[i+1]..n)\).
 --
 -- ==== Constraints
--- - The second argument is the suffix array of @s@.
+-- - The second argument is the suffix array of \(s\).
 -- - \(1 \leq n\)
 --
 -- ==== Complexity
@@ -137,7 +138,14 @@ suffixArrayOrd s =
 --
 -- @since 1.0.0.0
 {-# INLINE lcpArray #-}
-lcpArray :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int -> VU.Vector Int
+lcpArray ::
+  (HasCallStack, Ord a, VU.Unbox a) =>
+  -- | A vector representing a string
+  VU.Vector a ->
+  -- | Suffix array
+  VU.Vector Int ->
+  -- | LCP array
+  VU.Vector Int
 lcpArray s sa =
   let n = VU.length s
       !_ = ACIA.runtimeAssert (n >= 1) "AtCoder.String.lcpArray: given empty input"
@@ -167,10 +175,10 @@ lcpArray s sa =
           rnk
         pure lcp
 
--- | @ByteString@ verison of `lcpArray`.
+-- | @ByteString@ variant of `lcpArray`.
 --
 -- ==== Constraints
--- - The second argument is the suffix array of @s@.
+-- - The second argument is the suffix array of \(s\).
 -- - \(1 \leq n\)
 --
 -- ==== Complexity
@@ -178,17 +186,25 @@ lcpArray s sa =
 --
 -- @since 1.0.0.0
 {-# INLINE lcpArrayBS #-}
-lcpArrayBS :: (HasCallStack) => BS.ByteString -> VU.Vector Int -> VU.Vector Int
+lcpArrayBS ::
+  (HasCallStack) =>
+  -- | String
+  BS.ByteString ->
+  -- | Suffix array
+  VU.Vector Int ->
+  -- | LCP array
+  VU.Vector Int
 lcpArrayBS s sa =
   let n = BS.length s
       s2 = VU.map ord . VU.fromListN n $ BS.unpack s
    in lcpArray s2 sa
 
 -- | Given a `Ord` vector of length \(n\), it returns the array of length \(n\), such that the
--- \(i\)-th element is the length of the LCP (Longest Common Prefix) of @s[0..n)@ and @s[i..n)@.
+-- \(i\)-th element is the length of the LCP (Longest Common Prefix) of \(s[0..n)\) and \(s[i..n)\).
 --
 -- ==== Constraints
 -- - \(n \leq n\)
+--
 -- ==== Complexity
 -- - \(O(n)\)
 --
@@ -227,10 +243,11 @@ zAlgorithm s
     n = VU.length s
 
 -- | Given a string of length \(n\), it returns the array of length \(n\), such that the \(i\)-th
--- element is the length of the LCP (Longest Common Prefix) of @s[0..n)@ and @s[i..n)@.
+-- element is the length of the LCP (Longest Common Prefix) of \(s[0..n)\) and \(s[i..n)\).
 --
 -- ==== Constraints
 -- - \(n \leq n\)
+--
 -- ==== Complexity
 -- - \(O(n)\)
 --

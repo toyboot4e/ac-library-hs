@@ -28,7 +28,7 @@ import Data.Bits ((.>>.))
 -- | Calculates \(x^n\) with custom multiplication operator using the binary exponentiation
 -- technique.
 --
--- The internal implementation is taken from `Data.Semigroup.stimes`, but `power` uses strict
+-- The internal implementation is taken from @Data.Semigroup.stimes@, but `power` uses strict
 -- evaluation and is often much faster.
 --
 -- ==== Complexity
@@ -53,7 +53,7 @@ power op n0 x1
       | n == 1 = x `op` z
       | otherwise = g (x `op` x) (n .>>. 1) (x `op` z)
 
--- | Strict `Data.Semigroup.stimes`.
+-- | Strict variant of @Data.Semigroup.stimes@.
 --
 -- ==== Complexity
 -- - \(O(\log n)\)
@@ -66,7 +66,7 @@ power op n0 x1
 stimes' :: (Semigroup a) => Int -> a -> a
 stimes' = power (<>)
 
--- | Strict `Data.Monoid.mtimes`.
+-- | Strict variant of @Data.Monoid.mtimes@.
 --
 -- ==== Complexity
 -- - \(O(\log n)\)

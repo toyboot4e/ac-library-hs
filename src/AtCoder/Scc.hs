@@ -1,6 +1,6 @@
 -- | It calculates the strongly connected components of directed graphs.
 --
--- ==== Example
+-- ==== __Example__
 -- >>> import AtCoder.Scc qualified as Scc
 -- >>> gr <- Scc.new 4     -- 0    1    2    3
 -- >>> Scc.nScc gr
