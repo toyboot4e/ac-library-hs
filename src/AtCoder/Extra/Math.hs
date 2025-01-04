@@ -1,17 +1,5 @@
 -- | Extra math module.
 --
--- ==== __Examples__
--- >>> import AtCoder.Extra.Math qualified as M
--- >>> import Data.Semigroup (Product(..), Sum(..))
--- >>> getProduct $ M.power (<>) 32 (Product 2)
--- 4294967296
---
--- >>> getProduct $ M.stimes' 32 (Product 2)
--- 4294967296
---
--- >>> getProduct $ M.mtimes' 32 (Product 2)
--- 4294967296
---
 -- @since 1.0.0.0
 module AtCoder.Extra.Math
   ( -- * Re-exports from the internal math module
@@ -19,7 +7,19 @@ module AtCoder.Extra.Math
     ACIM.invGcd,
     ACIM.primitiveRoot,
 
-    -- * Binary exponential
+    -- * Binary exponentiation
+
+    -- | ==== __Examples__
+    -- >>> import AtCoder.Extra.Math qualified as M
+    -- >>> import Data.Semigroup (Product(..), Sum(..))
+    -- >>> getProduct $ M.power (<>) 32 (Product 2)
+    -- 4294967296
+    --
+    -- >>> getProduct $ M.stimes' 32 (Product 2)
+    -- 4294967296
+    --
+    -- >>> getProduct $ M.mtimes' 32 (Product 2)
+    -- 4294967296
     power,
     stimes',
     mtimes',
