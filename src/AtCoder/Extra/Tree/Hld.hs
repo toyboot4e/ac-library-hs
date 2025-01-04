@@ -175,6 +175,8 @@ type Vertex = Int
 type VertexHld = Vertex
 
 -- | Hld splits a tree into segments and assignes contiguous `VertexHLD` for each segment.
+--
+-- @since 1.1.0.0
 data Hld = Hld
   { -- | The root vertex.
     --

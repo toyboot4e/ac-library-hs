@@ -34,13 +34,16 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
 -- | \(O(n)\) Converts non-directed edges into directional edges. This is a convenient function for
--- making an input of `build`.
+-- making an input to `build`.
 --
 -- ==== __Example__
 -- Create a non-directed graph:
 --
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> Gr.swapDupe $ VU.fromList [(0, 1, ()), (1, 2, ())]
+-- [(0,1,()),(1,0,()),(1,2,()),(2,1,())]
+--
 -- >>> let gr = Gr.build 3 . Gr.swapDupe $ VU.fromList [(0, 1, ()), (1, 2, ())]
 -- >>> gr `Gr.adj` 0
 -- [1]
@@ -57,13 +60,16 @@ swapDupe :: (VU.Unbox (Int, Int, w)) => VU.Vector (Int, Int, w) -> VU.Vector (In
 swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 
 -- | \(O(n)\) Converts non-directed edges into directional edges. This is a convenient function for
--- making an input of `build'`.
+-- making an input to `build'`.
 --
 -- ==== __Example__
 -- Create a non-directed graph:
 --
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> Gr.swapDupe' $ VU.fromList [(0, 1), (1, 2)]
+-- [(0,1),(1,0),(1,2),(2,1)]
+--
 -- >>> let gr = Gr.build' 3 . Gr.swapDupe' $ VU.fromList [(0, 1), (1, 2)]
 -- >>> gr `Gr.adj` 0
 -- [1]
@@ -79,7 +85,7 @@ swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 swapDupe' :: (VU.Unbox (Int, Int)) => VU.Vector (Int, Int) -> VU.Vector (Int, Int)
 swapDupe' = VU.concatMap (\(!u, !v) -> VU.fromListN 2 [(u, v), (v, u)])
 
--- | \(O(n + m)\) (Extra API) Returns the strongly connected components.
+-- | \(O(n + m)\) Returns the strongly connected components.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -94,7 +100,8 @@ swapDupe' = VU.concatMap (\(!u, !v) -> VU.fromListN 2 [(u, v), (v, u)])
 scc :: Csr w -> V.Vector (VU.Vector Int)
 scc = ACISCC.sccCsr
 
--- | \(O(n \log n + m)\) Returns the lexicographically smallest topological ordering of given graph.
+-- | \(O(n \log n + m)\) Returns the lexicographically smallest topological ordering of the given
+-- graph.
 --
 -- ==== Constraints
 -- - The graph must be a DAG.

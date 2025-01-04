@@ -2,7 +2,15 @@
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Tree
-  ( fold,
+  ( -- * Tree folding
+
+    -- | These function are built around the three type parameters: \(w\), \(f\) and \(a\).
+    --
+    -- - \(w\): Edge weight.
+    -- - \(f\): Monoid action to vertex values. These actions are created from vertex value \(a\) and
+    -- edge information @(Int, w)@.
+    -- - \(a\): Monoid values stored at vertices.
+    fold,
     scan,
     foldReroot,
   )
@@ -59,6 +67,8 @@ foldImpl tree valAt toF act root memo = inner (-1) root
 --   in getSum res
 -- :}
 -- 4
+--
+-- @since 1.1.0.0
 {-# INLINE fold #-}
 fold ::
   (HasCallStack, VU.Unbox w) =>
@@ -78,7 +88,7 @@ fold tree valAt toF act root = runIdentity $ do
   foldImpl tree valAt toF act root (\_ _ -> pure ())
 
 -- | \(O(n)\) Folds a tree from a root vertex, also known as tree DP. The calculation process on
--- every vertex is recoreded.
+-- every vertex is recoreded and returned as a vector.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -102,9 +112,11 @@ fold tree valAt toF act root = runIdentity $ do
 --   in VU.map getSum res
 -- :}
 -- [0,1,4,1,0]
+--
+-- @since 1.1.0.0
 {-# INLINE scan #-}
 scan ::
-  (VG.Vector v a, VU.Unbox w) =>
+  (VU.Unbox w, VG.Vector v a) =>
   -- | The number of vertices.
   Int ->
   -- | A graph as a function.
@@ -149,10 +161,12 @@ scan n tree acc0At toF act root = VG.create $ do
 --   in VU.map getSum res
 -- :}
 -- [4,4,4,4,4]
+--
+-- @since 1.1.0.0
 {-# INLINE foldReroot #-}
 foldReroot ::
   forall w f a.
-  (HasCallStack, VU.Unbox a, VU.Unbox f, Monoid f, VU.Unbox w) =>
+  (HasCallStack, VU.Unbox w, VU.Unbox a, VU.Unbox f, Monoid f) =>
   -- | The number of vertices.
   Int ->
   -- | A graph as a function.
