@@ -65,7 +65,7 @@ data Csr w = Csr
     -- | The number of edges.
     --
     -- @since 1.1.0.0
-    nEdgesCsr :: {-# UNPACK #-} !Int,
+    mCsr :: {-# UNPACK #-} !Int,
     -- | Starting indices.
     --
     -- @since 1.1.0.0
@@ -92,7 +92,7 @@ data Csr w = Csr
 {-# INLINE build #-}
 build :: (HasCallStack, VU.Unbox w) => Int -> VU.Vector (Int, Int, w) -> Csr w
 build nCsr edges = runST $ do
-  let nEdgesCsr = VU.length edges
+  let mCsr = VU.length edges
   start <- VUM.replicate (nCsr + 1) (0 :: Int)
 
   let (!froms, !_, !_) = VU.unzip3 edges

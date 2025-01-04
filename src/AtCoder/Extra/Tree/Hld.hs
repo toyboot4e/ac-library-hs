@@ -311,7 +311,7 @@ newAt tree root = runST $ do
     <*> pure subtreeSize
   where
     !n = Gr.nCsr tree
-    !_ = ACIA.runtimeAssert (2 * (Gr.nCsr tree - 1) == Gr.nEdgesCsr tree) "AtCoder.Extra.Hld.newAt: not a non-directed tree"
+    !_ = ACIA.runtimeAssert (2 * (Gr.nCsr tree - 1) == Gr.mCsr tree) "AtCoder.Extra.Hld.newAt: not a non-directed tree"
 
 -- | \(O(\log n)\) Calculates the lowest common ancestor of \(u\) and \(v\).
 --
