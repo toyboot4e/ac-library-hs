@@ -144,7 +144,7 @@ invGcd a0 b
               !m0' = m0 - m1 * u
            in inner t s' m1 m0'
 
--- | Returns primitive root.
+-- | Returns the primitive root of the given `Int`.
 --
 -- @since 1.0.0.0
 {-# INLINE primitiveRoot #-}

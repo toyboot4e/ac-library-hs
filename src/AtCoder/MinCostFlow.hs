@@ -292,8 +292,8 @@ internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
                   cap <- VGM.read capCsr $ start + di
 
                   unless (cap == 0) $ do
-                    -- \|-dual[e.to] + dual[v]| <= (n-1)C
-                    -- cost <= C - -(n-1)C + 0 = nC
+                    -- - |-dual[e.to] + dual[v]| <= (n-1)C
+                    -- - cost <= C - -(n-1)C + 0 = nC
                     cost' <- do
                       dualTo <- VGM.read duals to
                       pure $! cost - dualTo + dualV

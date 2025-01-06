@@ -147,7 +147,7 @@ data SegTree s a = SegTree
 new :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (SegTree (PrimState m) a)
 new nSt
   | nSt >= 0 = build $ VU.replicate nSt mempty
-  | otherwise = error $ "new: given negative size (`" ++ show nSt ++ "`)"
+  | otherwise = error $ "AtCoder.SegTree.new: given negative size (`" ++ show nSt ++ "`)"
 
 -- | Creates an array with initial values.
 --
