@@ -23,6 +23,7 @@ module AtCoder.Extra.Bisect
   )
 where
 
+import AtCoder.Internal.Assert qualified as ACIA
 import Data.Functor ((<&>))
 import Data.Functor.Identity
 import Data.Vector.Generic qualified as VG
@@ -90,6 +91,9 @@ lowerBound vec = lowerBoundIn 0 (VG.length vec) vec
 
 -- | \(O(\log n)\) `lowerBound` for a vector of slice \([l, r)\).
 --
+-- ==== Constraints
+-- - \(0 \leq l \leq r \leq n\)
+--
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let xs = VU.fromList [1, 1, 2, 2, 4, 4]
@@ -112,7 +116,9 @@ lowerBound vec = lowerBoundIn 0 (VG.length vec) vec
 -- @since 1.1.0.0
 {-# INLINE lowerBoundIn #-}
 lowerBoundIn :: (HasCallStack, VG.Vector v a, Ord a) => Int -> Int -> v a -> a -> Maybe Int
-lowerBoundIn l r vec target = bisectR l r $ \i -> vec VG.! i < target
+lowerBoundIn l r vec target = bisectR l r $ \i -> VG.unsafeIndex vec i < target
+  where
+    !_ = ACIA.checkInterval "AtCoder.Extra.Bisect.lowerBoundIn" l r (VG.length vec)
 
 -- | \(O(\log n)\) Binary search on a vector. It returns the index of first element \(x\) s.t.
 -- \(x \gt x_0\), or `Nothing` when no such point exists.
@@ -153,6 +159,9 @@ upperBound vec = upperBoundIn 0 (VG.length vec) vec
 
 -- | \(O(\log n)\) `upperBound` for a vector of slice \([l, r)\).
 --
+-- ==== Constraints
+-- - \(0 \leq l \leq r \leq n\)
+--
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let xs = VU.fromList [1, 1, 2, 2, 4, 4]
@@ -178,7 +187,9 @@ upperBound vec = upperBoundIn 0 (VG.length vec) vec
 -- @since 1.1.0.0
 {-# INLINE upperBoundIn #-}
 upperBoundIn :: (HasCallStack, VG.Vector v a, Ord a) => Int -> Int -> v a -> a -> Maybe Int
-upperBoundIn l r vec target = bisectR l r $ \i -> vec VG.! i <= target
+upperBoundIn l r vec target = bisectR l r $ \i -> VG.unsafeIndex vec i <= target
+  where
+    !_ = ACIA.checkInterval "AtCoder.Extra.Bisect.upperBoundIn" l r (VG.length vec)
 
 -- | \(O(\log n)\) Bisection method on a half-open interval \([l, r)\). It returns the left boundary
 -- point, or `Nothing` if the point does not lie within the given interval.
