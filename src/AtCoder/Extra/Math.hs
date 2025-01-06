@@ -3,7 +3,7 @@
 -- @since 1.0.0.0
 module AtCoder.Extra.Math
   ( -- * Re-exports from the internal math module
-    ACIM.isPrime,
+    isPrime32,
     ACIM.invGcd,
     ACIM.primitiveRoot,
 
@@ -29,7 +29,17 @@ where
 import AtCoder.Internal.Math qualified as ACIM
 import Data.Bits ((.>>.))
 
--- TODO: add `HasCallStack` and provide with `unsafePower`.
+-- | \(O(k \log^3 n) (k = 3)\). Returns whether the given `Int` value is a prime number.
+--
+-- ==== Constraints
+-- - \(n < 4759123141 (2^{32} < 4759123141)\), otherwise the return value can lie
+--   (see [Wikipedia](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test#Testing_against_small_sets_of_bases)).
+--
+--
+-- @since 1.1.0.0
+{-# INLINE isPrime32 #-}
+isPrime32 :: Int -> Bool
+isPrime32 = ACIM.isPrime
 
 -- | Calculates \(x^n\) with custom multiplication operator using the binary exponentiation
 -- technique.
