@@ -195,6 +195,11 @@ executable yosupo-jump-on-tree
   main-is:       yosupo-jump-on-tree.hs
   build-depends: verify
 
+executable yosupo-range-kth-smallest
+  import:        app-local
+  main-is:       yosupo-range-kth-smallest.hs
+  build-depends: verify
+
 executable yosupo-lca
   import:        app-local
   main-is:       yosupo-lca.hs
@@ -260,9 +265,29 @@ executable yosupo-range-set-range-composite
   main-is:       yosupo-range-set-range-composite.hs
   build-depends: verify
 
+executable yosupo-rectangle-sum
+  import:        app-local
+  main-is:       yosupo-rectangle-sum.hs
+  build-depends: verify
+
+executable yosupo-point-add-rectangle-sum
+  import:        app-local
+  main-is:       yosupo-point-add-rectangle-sum.hs
+  build-depends: verify
+
 executable yosupo-scc
   import:        app-local
   main-is:       yosupo-scc.hs
+  build-depends: verify
+
+executable yosupo-static-range-count-distinct
+  import:        app-local
+  main-is:       yosupo-static-range-count-distinct.hs
+  build-depends: verify
+
+executable yosupo-static-range-frequency
+  import:        app-local
+  main-is:       yosupo-static-range-frequency.hs
   build-depends: verify
 
 executable yosupo-suffixarray
@@ -331,4 +356,3 @@ executable alpc-h
   import:        app-online
   main-is:       alpc-h.hs
   build-depends: verify
-
