@@ -40,19 +40,23 @@ import System.IO (stdout)
 type Parser = StateT BS.ByteString Maybe
 
 -- | Parses an `Int`.
+{-# INLINE intP #-}
 intP :: Parser Int
 intP = StateT $ BS.readInt . BS.dropSpace
 
 -- | Parses an `Int` and subtracts @1@.
+{-# INLINE intS1P #-}
 intS1P :: Parser Int
 intS1P = StateT $ ((\(!x, !bs) -> (x - 1, bs)) <$>) . BS.readInt . BS.dropSpace
 
+{-# INLINE int2P #-}
 int2P :: (HasCallStack) => Parser (Int, Int)
 int2P = do
   x1 <- intP
   x2 <- intP
   pure (x1, x2)
 
+{-# INLINE int3P #-}
 int3P :: (HasCallStack) => Parser (Int, Int, Int)
 int3P = do
   x1 <- intP
@@ -60,6 +64,7 @@ int3P = do
   x3 <- intP
   pure (x1, x2, x3)
 
+{-# INLINE int4P #-}
 int4P :: (HasCallStack) => Parser (Int, Int, Int, Int)
 int4P = do
   x1 <- intP
@@ -71,26 +76,32 @@ int4P = do
 -- * Line getter
 
 -- | Gets @a@.
+{-# INLINE int #-}
 int :: (HasCallStack) => IO Int
 int = fromMaybe (error "int") . evalStateT intP <$> BS.getLine
 
 -- | Gets @a b@.
+{-# INLINE ints2 #-}
 ints2 :: (HasCallStack) => IO (Int, Int)
 ints2 = fromMaybe (error "ints2") . evalStateT int2P <$> BS.getLine
 
 -- | Gets @a b c@.
+{-# INLINE ints3 #-}
 ints3 :: (HasCallStack) => IO (Int, Int, Int)
 ints3 = fromMaybe (error "ints3") . evalStateT int3P <$> BS.getLine
 
 -- | Gets @a b c d@.
+{-# INLINE ints4 #-}
 ints4 :: (HasCallStack) => IO (Int, Int, Int, Int)
 ints4 = fromMaybe (error "ints4") . evalStateT int4P <$> BS.getLine
 
 -- | Gets @a b c ..@.
+{-# INLINE ints #-}
 ints :: IO (VU.Vector Int)
 ints = VU.unfoldr (BS.readInt . BS.dropSpace) <$> BS.getLine
 
 -- | Reads one line from the state and runs a pure parser for it.
+{-# INLINE withLine #-}
 withLine :: (HasCallStack) => Parser a -> IO a
 withLine f = fromJust . evalStateT f <$> BS.getLine
 
@@ -134,6 +145,7 @@ putBSB = BSB.hPutBuilder stdout
 printBSB :: BSB.Builder -> IO ()
 printBSB = putBSB . (<> endlBSB)
 
+{-# INLINE showMat #-}
 showMat :: (Show a, VU.Unbox a) => Mat.Matrix a -> BSB.Builder
 showMat Mat.Matrix {..} = unlinesWithBSB id $ V.map showF rows
   where
