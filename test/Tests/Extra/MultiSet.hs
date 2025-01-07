@@ -186,16 +186,16 @@ prop_randomTest Init {..} = QCM.monadicIO $ do
             QCM.assertWith (expected == res) $ show (query, expected, res)
 
             -- check the map contents:
-            let assocsE = VU.modify VAI.sort (VU.fromList (IM.assocs ref'))
-            assocs <- QCM.run $ VU.modify VAI.sort <$> MS.unsafeAssocs ms
+            let assocsE = VU.modify (VAI.sortBy compare) (VU.fromList (IM.assocs ref'))
+            assocs <- QCM.run $ VU.modify (VAI.sortBy compare) <$> MS.unsafeAssocs ms
             QCM.assertWith (assocsE == assocs) $ show ("- assocs", assocsE, assocs)
 
-            let keysE = VU.modify VAI.sort (VU.fromList (IM.keys ref'))
-            keys_ <- QCM.run $ VU.modify VAI.sort <$> MS.unsafeKeys ms
+            let keysE = VU.modify (VAI.sortBy compare) (VU.fromList (IM.keys ref'))
+            keys_ <- QCM.run $ VU.modify (VAI.sortBy compare) <$> MS.unsafeKeys ms
             QCM.assertWith (keysE == keys_) $ show ("- keys", keysE, keys_)
 
-            let elemsE = VU.modify VAI.sort (VU.fromList (IM.elems ref'))
-            elems <- QCM.run $ VU.modify VAI.sort <$> MS.unsafeElems ms
+            let elemsE = VU.modify (VAI.sortBy compare) (VU.fromList (IM.elems ref'))
+            elems <- QCM.run $ VU.modify (VAI.sortBy compare) <$> MS.unsafeElems ms
             QCM.assertWith (elemsE == elems) $ show ("- elems", elemsE, elems)
 
             let sizeE = IM.size ref'
