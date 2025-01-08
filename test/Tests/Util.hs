@@ -1,4 +1,4 @@
-module Tests.Util (myForAllShrink, laws) where
+module Tests.Util (myForAllShrink, laws, intervalGen) where
 
 import Data.Proxy (Proxy (..))
 import Data.Typeable (Typeable, typeRep)
@@ -40,3 +40,10 @@ laws =
           let QCC.Laws name pairs = f (Proxy @a)
            in testGroup name (map (uncurry QC.testProperty) pairs)
       )
+
+-- | Returns an interval [l, r) in [0, n)
+intervalGen :: Int -> QC.Gen (Int, Int)
+intervalGen n = do
+  l <- QC.chooseInt (0, n)
+  r <- QC.chooseInt (l, n)
+  pure (l, r)

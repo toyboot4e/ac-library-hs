@@ -17,6 +17,7 @@ import Test.QuickCheck.Monadic as QCM
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
+import Tests.Util (intervalGen)
 
 -- | buildM should call onAdd and onDel correctly
 prop_buildM :: QC.Gen QC.Property
@@ -79,12 +80,12 @@ queryGen :: Int -> QC.Gen Query
 queryGen n = do
   QC.oneof
     [ Contains <$> keyGen,
-      Intersects <$> intervalGen,
-      Lookup <$> intervalGen,
-      ReadMaybe <$> intervalGen,
-      Insert <$> intervalGen <*> valGen,
-      Delete <$> intervalGen,
-      Overwrite <$> intervalGen <*> valGen,
+      Intersects <$> intervalGen n,
+      Lookup <$> intervalGen n,
+      ReadMaybe <$> intervalGen n,
+      Insert <$> intervalGen n <*> valGen,
+      Delete <$> intervalGen n,
+      Overwrite <$> intervalGen n <*> valGen,
       pure Freeze
       -- TestFreq is manually given
       -- pure TestFreq
@@ -92,11 +93,6 @@ queryGen n = do
   where
     keyGen = QC.chooseInt (0, n - 1)
     valGen = QC.chooseInt (-20, 20)
-    -- half-open interval
-    intervalGen = do
-      l <- QC.chooseInt (0, n)
-      r <- QC.chooseInt (l, n)
-      pure (l, r)
 
 undef :: Int
 undef = minBound `div` 2
