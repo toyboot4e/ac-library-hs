@@ -7,8 +7,6 @@ import Data.Maybe (fromMaybe)
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- TODO: compare speed with `containers`.
-
 -- verification-helper: PROBLEM https://judge.yosupo.jp/problem/predecessor_problem
 main :: IO ()
 main = do
@@ -17,7 +15,7 @@ main = do
   qs <- VU.replicateM q ints2
 
   set <- IS.new n
-  for_ (zip [0 :: Int .. ] (BS.unpack t)) $ \(!i, !c) -> do
+  for_ (zip [0 :: Int ..] (BS.unpack t)) $ \(!i, !c) -> do
     when (c == '1') $ do
       IS.insert set i
 

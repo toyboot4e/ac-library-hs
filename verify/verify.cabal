@@ -54,32 +54,18 @@ extra-doc-files: CHANGELOG.md
 common dependencies
   -- optimized
   ghc-options:        -Wall -fllvm -O2
-
-  if impl(ghc ==9.4.5)
-    build-depends:
-      , ac-library-hs
-      , base               ==4.17.1.0
-      , bitvec             ^>=1.1.4.0
-      , bytestring         ^>=0.11.4.0
-      , mtl                ^>=2.3.1
-      , primitive          ^>=0.8.0.0
-      , transformers       ^>=0.6.1.0
-      , vector             ^>=0.13.0.0
-      , vector-algorithms  ^>=0.9.0.1
-      , wide-word
-
-  if (impl(ghc >9.4.5) || impl(ghc <9.4.5))
-    build-depends:
-      , ac-library-hs
-      , base               >=4.9     && <4.22
-      , bitvec             <1.2
-      , bytestring         <0.14
-      , mtl
-      , primitive          >=0.6.4.0 && <0.10
-      , transformers
-      , vector             >=0.13.0  && <0.14
-      , vector-algorithms  <0.10
-      , wide-word          <0.2
+  build-depends:
+    , ac-library-hs
+    , base               >=4.9     && <4.22
+    , bitvec             <1.2
+    , bytestring         <0.14
+    , containers
+    , mtl
+    , primitive          >=0.6.4.0 && <0.10
+    , transformers
+    , vector             >=0.13.0  && <0.14
+    , vector-algorithms  <0.10
+    , wide-word          <0.2
 
   default-language:   GHC2021
 
@@ -247,6 +233,11 @@ executable yosupo-pow-of-matrix-mint
 executable yosupo-predecessor-problem
   import:        app-local
   main-is:       yosupo-predecessor-problem.hs
+  build-depends: verify
+
+executable yosupo-predecessor-problem-containers
+  import:        app-local
+  main-is:       yosupo-predecessor-problem-containers.hs
   build-depends: verify
 
 executable yosupo-range-affine-range-sum
