@@ -10,6 +10,9 @@ description:
   Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive
   programming on [AtCoder](https://atcoder.jp/).
 
+  - Functions primarily use half-open interval \([l, r)\).
+  - The extra module contains additional utilities beyond the original C++ library.
+
 category:        Algorithms, Data Structures
 license:         CC0-1.0
 license-file:    LICENSE
