@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- | Fast modular multiplication for `Word32` by barrett reduction.
+-- | Fast modular multiplication for `Word32` using barrett reduction.
 -- Reference: https://en.wikipedia.org/wiki/Barrett_reduction
 --
 -- ==== __Example__
@@ -16,10 +16,10 @@
 module AtCoder.Internal.Barrett
   ( -- * Barrett
     Barrett,
-    -- * Constructors
+    -- * Constructor
     new32,
     new64,
-    -- * Accessors
+    -- * Accessor
     umod,
     -- * Barrett reduction
     mulMod,
@@ -29,7 +29,7 @@ where
 import Data.WideWord.Word128 (Word128 (..))
 import Data.Word (Word32, Word64)
 
--- | Fast modular multiplication by barrett reduction.
+-- | Fast modular multiplication using barrett reduction.
 -- Reference: https://en.wikipedia.org/wiki/Barrett_reduction
 --
 -- @since 1.0.0.0

@@ -58,11 +58,11 @@
 --
 -- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\). If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\),
 -- wrap your monoid in `Data.Monoid.Dual`.
--- - If you ever need to store boxed types to `LazySegTree`, wrap it in 'vector:Data.Vector.Unboxed.DoNotUnboxStrict'
+-- - If you ever need to store boxed types to `LazySegTree`, wrap it in @Data.Vector.Unboxed.DoNotUnboxStrict@
 -- or the like.
 --
 -- ==== Major changes from the original @ac-library@
--- - The implementation is `Monoid` based.
+-- - The implementation is `Monoid` based, not function objects.
 -- - @get@ and @set@ are renamed to `read` and `write`.
 -- - `modify`, `modifyM`, `exchange`, `freeze` and `unsafeFreeze` are added.
 --
@@ -271,7 +271,7 @@ prod self@SegTree {nSt} l0 r0
   | otherwise = ACIA.errorInterval "AtCoder.SegTree.prod" l0 r0 nSt
 
 -- | Total variant of `prod`. Returns \(a[l] \cdot ... \cdot a[r - 1]\), assuming the properties of
--- the monoid. It returns `Just` `mempty` if \(l = r\). It return `Nothing` if the interval is
+-- the monoid. It returns `Just` `mempty` if \(l = r\). Returns `Nothing` if the interval is
 -- invalid.
 --
 -- ==== Complexity

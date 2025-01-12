@@ -123,7 +123,7 @@ instance Modulus 754974721 where
   {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 11
 
--- | \(119 \times 2^{23} + 1\). It is often used in contest problems
+-- | \(119 \times 2^{23} + 1\). It is often used in contest problems.
 --
 -- @since 1.0.0.0
 instance Modulus 998244353 where
@@ -150,14 +150,10 @@ instance Modulus 2147483647 where
   {-# INLINE primitiveRootModulus #-}
   primitiveRootModulus _ = 7
 
--- | Type alias of `ModInt` with modulus value \(998244353\).
---
--- @since 1.0.0.0
+-- | @since 1.0.0.0
 type ModInt998244353 = ModInt 998244353
 
--- | Type alias of `ModInt` with modulus value \(1000000007\).
---
--- @since 1.0.0.0
+-- | @since 1.0.0.0
 type ModInt1000000007 = ModInt 1000000007
 
 -- | Retrieves the `Int` value from a `KnownNat`.
@@ -215,19 +211,22 @@ unsafeNew :: (KnownNat a) => Word32 -> ModInt a
 unsafeNew = ModInt
 
 -- | `Word32` value that treats the modular arithmetic.
-newtype ModInt a = ModInt {unModInt :: Word32}
+newtype ModInt a = ModInt
+  { -- | @since 1.0.0.0
+    unModInt :: Word32
+  }
   deriving
-    ( -- @since 1.0.0.0
+    ( -- | @since 1.0.0.0
       P.Prim
     )
   deriving newtype
-    ( -- @since 1.0.0.0
+    ( -- | @since 1.0.0.0
       Eq,
-      -- @since 1.0.0.0
+      -- | @since 1.0.0.0
       Ord,
-      -- @since 1.0.0.0
+      -- | @since 1.0.0.0
       Read,
-      -- @since 1.0.0.0
+      -- | @since 1.0.0.0
       Show
     )
 
@@ -326,10 +325,10 @@ inv self@(ModInt x)
           !_ = ACIA.runtimeAssert (eg1 == 1) "AtCoder.ModInt.inv: `x^(-1) mod m` cannot be calculated when `gcd x modulus /= 1`"
        in fromIntegral eg2
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 deriving newtype instance (KnownNat p) => Real (ModInt p)
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 instance (KnownNat p) => Num (ModInt p) where
   {-# INLINE (+) #-}
   (ModInt !x1) + (ModInt !x2)
@@ -359,45 +358,45 @@ instance (KnownNat p) => Num (ModInt p) where
   {-# INLINE fromInteger #-}
   fromInteger = ModInt . fromInteger . (`mod` fromIntegral (natVal' (proxy# @p)))
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 instance (KnownNat p) => Bounded (ModInt p) where
   {-# INLINE minBound #-}
   minBound = ModInt 0
   {-# INLINE maxBound #-}
   maxBound = ModInt $! fromIntegral (natVal' (proxy# @p)) - 1
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 instance (KnownNat p) => Enum (ModInt p) where
   {-# INLINE toEnum #-}
   toEnum = new
   {-# INLINE fromEnum #-}
   fromEnum = fromIntegral . unModInt
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 instance (Modulus p) => Integral (ModInt p) where
   {-# INLINE quotRem #-}
   quotRem x y = (x / y, x - x / y * y)
   {-# INLINE toInteger #-}
   toInteger = coerce (toInteger @Word32)
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 instance (Modulus p) => Fractional (ModInt p) where
   {-# INLINE recip #-}
   recip = inv
   {-# INLINE fromRational #-}
   fromRational q = fromInteger (numerator q) / fromInteger (denominator q)
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 newtype instance VU.MVector s (ModInt a) = MV_ModInt (VU.MVector s Word32)
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 newtype instance VU.Vector (ModInt a) = V_ModInt (VU.Vector Word32)
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 deriving newtype instance VGM.MVector VU.MVector (ModInt a)
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 deriving newtype instance VG.Vector VU.Vector (ModInt a)
 
--- | -- @since 1.0.0.0
+-- | @since 1.0.0.0
 instance VU.Unbox (ModInt a)

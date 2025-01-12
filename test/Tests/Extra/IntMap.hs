@@ -31,6 +31,7 @@ data Query
   = Size
   | Member Int
   | NotMember Int
+  | Null
   | Lookup Int
   | Insert Int Int
   | InsertWithAdd Int Int
@@ -63,6 +64,7 @@ queryGen n = do
     [ pure Size,
       Member <$> lookupKeyGen,
       NotMember <$> lookupKeyGen,
+      pure Null,
       Lookup <$> lookupKeyGen,
       -- insert is partial function
       Insert <$> insertKeyGen <*> valGen,
@@ -89,6 +91,7 @@ handleRef im q = case q of
   Size -> (im, I $ IMR.size im)
   Member k -> (im, B $ IMR.member k im)
   NotMember k -> (im, B . not $ IMR.member k im)
+  Null -> (im, B $ IMR.null im)
   Lookup k -> (im, M $ IMR.lookup k im)
   Insert k v -> (IMR.insert k v im, None)
   InsertWithAdd k v -> (IMR.insertWith (+) k v im, None)
@@ -113,6 +116,7 @@ handleAcl im q = case q of
   Size -> I <$> IM.size im
   Member k -> B <$> IM.member im k
   NotMember k -> B <$> IM.notMember im k
+  Null -> B <$> IM.null im
   Lookup k -> M <$> IM.lookup im k
   Insert k v -> do
     IM.insert im k v

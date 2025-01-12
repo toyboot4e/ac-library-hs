@@ -3,7 +3,7 @@
 
 -- | A simple HxW matrix backed by a vector, mainly for binary exponention.
 --
--- The matrix is considered to be left semigroup action: \(m_2 (m_1 v) = (m_2 \circ m_1) v\).
+-- The matrix is a left semigroup action: \(m_2 (m_1 v) = (m_2 \circ m_1) v\).
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Semigroup.Matrix
@@ -20,14 +20,13 @@ module AtCoder.Extra.Semigroup.Matrix
     map,
 
     -- * Multiplications
-
-    -- ** To a column vector
     mulToCol,
-
-    -- ** To another matrix
     mul,
-    mulMint,
     mulMod,
+    mulMint,
+
+    -- * Powers
+    pow,
     powMod,
     powMint,
   )
@@ -51,13 +50,16 @@ import Prelude hiding (map)
 
 -- | A simple HxW matrix backed by a vector, mainly for binary exponention.
 --
--- The matrix is considered to be left semigroup action: \(m_2 (m_1 v) = (m_2 \circ m_1) v\).
+-- The matrix is a left semigroup action: \(m_2 (m_1 v) = (m_2 \circ m_1) v\).
 --
 --
 -- @since 1.1.0.0
 data Matrix a = Matrix
-  { hM :: {-# UNPACK #-} !Int,
+  { -- | @since 1.1.0.0
+    hM :: {-# UNPACK #-} !Int,
+    -- | @since 1.1.0.0
     wM :: {-# UNPACK #-} !Int,
+    -- | @since 1.1.0.0
     vecM :: !(VU.Vector a)
   }
   deriving
@@ -72,7 +74,7 @@ data Matrix a = Matrix
 -- @since 1.1.0.0
 type Col a = VU.Vector a
 
--- | \(O(hw)\) Creates a HxW matrix.
+-- | \(O(hw)\) Creates an HxW matrix.
 --
 -- @since 1.1.0.0
 {-# INLINE new #-}
@@ -81,14 +83,14 @@ new h w vec
   | VU.length vec /= h * w = error "AtCoder.Extra.Matrix: size mismatch"
   | otherwise = Matrix h w vec
 
--- | \(O(n^2)\) Creates a NxN zero matrix.
+-- | \(O(n^2)\) Creates an NxN zero matrix.
 --
 -- @since 1.1.0.0
 {-# INLINE zero #-}
 zero :: (VU.Unbox a, Num a) => Int -> Matrix a
 zero n = Matrix n n $ VU.replicate (n * n) 0
 
--- | \(O(n^2)\) Creates a NxN identity matrix.
+-- | \(O(n^2)\) Creates an NxN identity matrix.
 --
 -- @since 1.1.0.0
 {-# INLINE ident #-}
@@ -99,7 +101,7 @@ ident n = Matrix n n $ VU.create $ do
     VGM.write vec (i + n * i) 1
   pure vec
 
--- | \(O(n^2)\) Creates a NxN diagonal matrix.
+-- | \(O(n^2)\) Creates an NxN diagonal matrix.
 --
 -- @since 1.1.0.0
 {-# INLINE diag #-}
@@ -128,7 +130,7 @@ mulToCol Matrix {..} !col = VU.convert $ V.map (VU.sum . VU.zipWith (*) col) row
     !_ = ACIA.runtimeAssert (n == wM) "AtCoder.Extra.Matrix.mulToCol: size mismatch"
     rows = V.unfoldrExactN hM (VU.splitAt wM) vecM
 
--- | \(O(h_1 w_2 K)\) Multiplies H1xK matrix to a KxW2 matrix.
+-- | \(O(h_1 K w_2)\) Multiplies H1xK matrix to a KxW2 matrix.
 --
 -- @since 1.1.0.0
 {-# INLINE mul #-}
@@ -153,6 +155,35 @@ mul !a !b =
     w' = wM b
     vecB = vecM b
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
+
+-- | \(O(h_1 w_2 K)\) Multiplies H1xK matrix to a KxW2 matrix, taking the mod.
+--
+-- @since 1.1.0.0
+{-# INLINE mulMod #-}
+mulMod :: Int -> Matrix Int -> Matrix Int -> Matrix Int
+mulMod !m !a !b =
+  Matrix h w' $
+    VU.unfoldrExactN
+      (h * w')
+      ( \(!row, !col) ->
+          let !x = f row col
+           in if col + 1 >= w'
+                then (x, (row + 1, 0))
+                else (x, (row, col + 1))
+      )
+      (0, 0)
+  where
+    !bt = BT.new32 $ fromIntegral m
+    f row col = VU.foldl1' addMod $ VU.imap (\iRow x -> mulMod_ x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
+    addMod x y = (x + y) `rem` m
+    mulMod_ x y = fromIntegral $ BT.mulMod bt (fromIntegral x) (fromIntegral y)
+    h = hM a
+    w = wM a
+    h' = hM b
+    vecA = vecM a
+    w' = wM b
+    vecB = vecM b
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMod: matrix size mismatch"
 
 -- | \(O(h_1 w_2 K)\) `mul` specialized to `M.ModInt`.
 --
@@ -189,49 +220,38 @@ mulMintImpl !bt !a !b =
     vecB = vecM b
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMint: matrix size mismatch"
 
--- | \(O(h_1 w_2 K)\) Multiplies H1xK matrix to a KxW2 matrix, taking the modulus value.
+-- | \(O(w n^3)\) Calculates \(M^k\).
 --
 -- @since 1.1.0.0
-{-# INLINE mulMod #-}
-mulMod :: Int -> Matrix Int -> Matrix Int -> Matrix Int
-mulMod !m !a !b =
-  Matrix h w' $
-    VU.unfoldrExactN
-      (h * w')
-      ( \(!row, !col) ->
-          let !x = f row col
-           in if col + 1 >= w'
-                then (x, (row + 1, 0))
-                else (x, (row, col + 1))
-      )
-      (0, 0)
-  where
-    !bt = BT.new32 $ fromIntegral m
-    f row col = VU.foldl1' addMod $ VU.imap (\iRow x -> mulMod_ x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
-    addMod x y = (x + y) `rem` m
-    mulMod_ x y = fromIntegral $ BT.mulMod bt (fromIntegral x) (fromIntegral y)
-    h = hM a
-    w = wM a
-    h' = hM b
-    vecA = vecM a
-    w' = wM b
-    vecB = vecM b
-    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMod: matrix size mismatch"
-
--- | \(O(nhw)\) Calculates \(M^n\).
-{-# INLINE powMod #-}
-powMod :: Int -> Int -> Matrix Int -> Matrix Int
-powMod m n mat
-  | n == 0 = ident $ hM mat
-  | otherwise = ACEM.power (mulMod m) n mat
+{-# INLINE pow #-}
+pow :: Int -> Matrix Int -> Matrix Int
+pow k mat
+  | k < 0 = error "AtCoder.Extra.Matrix.powMod: the exponential must be non-negative"
+  | k == 0 = ident $ hM mat
+  | otherwise = ACEM.power mul k mat
   where
     !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.powMod: matrix size mismatch"
 
--- | \(O(nhw)\) Calculates \(M^n\), specialized to `M.ModInt`.
+-- | \(O(w n^3)\) Calculates \(M^k\), taking the mod.
+--
+-- @since 1.1.0.0
+{-# INLINE powMod #-}
+powMod :: Int -> Int -> Matrix Int -> Matrix Int
+powMod m k mat
+  | k < 0 = error "AtCoder.Extra.Matrix.powMod: the exponential must be non-negative"
+  | k == 0 = ident $ hM mat
+  | otherwise = ACEM.power (mulMod m) k mat
+  where
+    !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.powMod: matrix size mismatch"
+
+-- | \(O(w n^3)\) Calculates \(M^k\), specialized to `M.ModInt`.
+--
+-- @since 1.1.0.0
 powMint :: forall m. (KnownNat m) => Int -> Matrix (M.ModInt m) -> Matrix (M.ModInt m)
-powMint n mat
-  | n == 0 = ident $ hM mat
-  | otherwise = ACEM.power (mulMintImpl bt) n mat
+powMint k mat
+  | k < 0 = error "AtCoder.Extra.Matrix.powMint: the exponential must be non-negative"
+  | k == 0 = ident $ hM mat
+  | otherwise = ACEM.power (mulMintImpl bt) k mat
   where
     !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.powMint: matrix size mismatch"
     !bt = BT.new32 $ fromIntegral (natVal' (proxy# @m))

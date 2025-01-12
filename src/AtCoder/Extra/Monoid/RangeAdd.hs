@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | Range add monoid action for \([l, r)\) intervals.
+-- | Monoid action \(f: x \rightarrow x + d\).
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Monoid.RangeAdd
@@ -9,8 +9,9 @@ module AtCoder.Extra.Monoid.RangeAdd
 
     -- * Constructor
     new,
+    unRangeAdd,
 
-    -- * Action
+    -- * Actions
     act,
   )
 where
@@ -22,9 +23,9 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- | Range add monoid action.
+-- | Monoid action \(f: x \rightarrow x + d\).
 --
--- ==== Example
+-- ==== __Example__
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeAdd(..))
 -- >>> import AtCoder.LazySegTree qualified as LST
 -- >>> import Data.Semigroup (Max(..))
@@ -51,14 +52,21 @@ newtype RangeAdd a = RangeAdd a
 new :: a -> RangeAdd a
 new = RangeAdd
 
--- | Applies one-length range add: \(f: x \rightarrow d + x\).
+-- | \(O(1)\) Retrieves the internal value of `RangeAdd`.
+--
+-- @since 1.1.0.0
+{-# INLINE unRangeAdd #-}
+unRangeAdd :: RangeAdd a -> a
+unRangeAdd (RangeAdd a) = a
+
+-- | \(O(1)\) Applies one-length range add: \(f: x \rightarrow d + x\).
 --
 -- @since 1.0.0.0
 {-# INLINE act #-}
 act :: (Semigroup a) => RangeAdd a -> a -> a
 act (RangeAdd dx) x = dx <> x
 
--- | Acts on @a@ with length in terms of `SegAct`.
+-- | \(O(1)\) Acts on @a@ with length in terms of `SegAct`.
 --
 -- @since 1.0.0.0
 {-# INLINE actWithLength #-}

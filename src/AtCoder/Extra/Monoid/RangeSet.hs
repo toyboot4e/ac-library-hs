@@ -1,21 +1,22 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | Range set monoid action for \([l, r)\) intervals.
+-- | Monoid action \(f: x \rightarrow a\).
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Monoid.RangeSet
   ( -- * RangeSet
     RangeSet (..),
+    RangeSetRepr,
 
-    -- * Constructor
+    -- * Constructors
     new,
+    unRangeSet,
 
-    -- * Action
+    -- * Actions
     act,
   )
 where
 
-import AtCoder.Extra.Math qualified as ACEM
 import AtCoder.LazySegTree (SegAct (..))
 import Data.Bit (Bit (..))
 import Data.Semigroup (stimes)
@@ -24,9 +25,9 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- | Range set monoid action.
+-- | Monoid action \(f: x \rightarrow a\).
 --
--- ==== Example
+-- ==== __Example__
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeSet(..))
 -- >>> import AtCoder.LazySegTree qualified as LST
 -- >>> import Data.Bit (Bit (..))
@@ -51,17 +52,24 @@ newtype RangeSet a = RangeSet (RangeSetRepr a)
 -- Tuples are not the fastest representation, but it's easier to implement
 -- `Data.Vector.Unboxed.Unbox`.
 --
--- @since 1.0.0.0
+-- @since 1.1.0.0
 type RangeSetRepr a = (Bit, a)
 
--- | Creates a new `RangeSet` action.
+-- | \(O(1)\) Creates a new `RangeSet` action.
 --
 -- @since 1.0.0.0
 {-# INLINE new #-}
 new :: a -> RangeSet a
 new = RangeSet . (Bit True,)
 
--- | Applies one-length range set: \(f: x \rightarrow y\).
+-- | \(O(1)\) Retrieves the internal representation of `RangeSet`.
+--
+-- @since 1.1.0.0
+{-# INLINE unRangeSet #-}
+unRangeSet :: RangeSet a -> RangeSetRepr a
+unRangeSet (RangeSet a) = a
+
+-- | \(O(1)\) Applies one-length range set: \(f: x \rightarrow y\).
 --
 -- @since 1.0.0.0
 {-# INLINE act #-}

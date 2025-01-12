@@ -1,5 +1,3 @@
-{-# LANGUAGE ViewPatterns #-}
-
 import AtCoder.Extra.Monoid.Mat2x2 (Mat2x2 (..), unMat2x2)
 import AtCoder.Extra.Monoid.Mat2x2 qualified as Mat2x2
 import AtCoder.Extra.Pdsu qualified as Pdsu

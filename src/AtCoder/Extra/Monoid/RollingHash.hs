@@ -4,8 +4,11 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 
--- | The rolling hash algorithm implemented as a monoid, typically stored in a segment tree. The
--- type parameter @b@ represents the B-adic number and @p@ represents the modulus value.
+-- | Rolling hash algorithm implemented as a monoid, typically stored in a segment tree. The type
+-- parameters \(b\) and \(p\) represent the B-adic base and the modulus, respectively.
+--
+-- Combining `RollingHash` with `SegTree` enables \(O(\log |s|)\) string slice creation and
+-- \(O(1)\) slice comparison.
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Monoid.RollingHash
@@ -25,8 +28,12 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Exts (proxy#)
 import GHC.TypeNats (KnownNat, natVal')
 
--- | The rolling hash algorithm implemented as a monoid, typically stored in a segment tree. The
--- type parameter @b@ represents the B-adic number and @p@ represents the modulus value.
+-- | Rolling hash algorithm implemented as a monoid, typically stored in a segment tree. The type
+-- parameters \(b\) and \(p\) represent the B-adic base and the modulus, respectively.
+--
+-- Combining `RollingHash` with `SegTree` enables \(O(\log |s|)\) string slice creation and
+-- \(O(1)\) slice comparison.
+--
 --
 -- ==== __Example__
 -- It's convenient to define a type alias of `RollingHash`:
@@ -91,18 +98,24 @@ instance (KnownNat b, KnownNat p) => Monoid (RollingHash b p) where
 
 type RHRepr = (Int, Int)
 
+-- | @since 1.1.0.0
 instance VU.IsoUnbox (RollingHash b p) RHRepr where
   {-# INLINE toURepr #-}
   toURepr (RollingHash a b) = (a, b)
   {-# INLINE fromURepr #-}
   fromURepr (!a, !b) = RollingHash a b
 
+-- | @since 1.1.0.0
 newtype instance VU.MVector s (RollingHash b p) = MV_RH (VUM.MVector s RHRepr)
 
+-- | @since 1.1.0.0
 newtype instance VU.Vector (RollingHash b p) = V_RH (VU.Vector RHRepr)
 
+-- | @since 1.1.0.0
 deriving via (RollingHash b p `VU.As` RHRepr) instance VGM.MVector VUM.MVector (RollingHash b p)
 
+-- | @since 1.1.0.0
 deriving via (RollingHash b p `VU.As` RHRepr) instance VG.Vector VU.Vector (RollingHash b p)
 
+-- | @since 1.1.0.0
 instance VU.Unbox (RollingHash b p)

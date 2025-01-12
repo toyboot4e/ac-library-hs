@@ -3,8 +3,9 @@
 -- original implementation:
 -- <https://noimi.hatenablog.com/entry/2021/05/02/195143>
 
--- | A dense map that manages non-overlapping intervals \((l, r, x)\) with the range \([0, n)\).
--- Interval state changes can be tracked using the @onAdd@ and @onDel@ hooks.
+-- | Dense map covering \([0, n)\) that manages non-overlapping intervals \([l, r)\) within it. Each
+-- interval has an associated value \(v\). Use @onAdd@ and @onDel@ hooks to track interval state
+-- changes during `buildM`, `insertM` and `deleteM` operations.
 --
 -- ==== Invariant
 -- Each interval is operated as a whole, similar to a persistant data structure. When part of an
@@ -70,15 +71,15 @@ module AtCoder.Extra.IntervalMap
 
     -- * Modifications
 
-    -- ** Inserting
+    -- ** Insertions
     insert,
     insertM,
 
-    -- ** Deleting
+    -- ** Deletions
     delete,
     deleteM,
 
-    -- ** Overwriting
+    -- ** Overwrites
     overwrite,
     overwriteM,
 
@@ -95,12 +96,13 @@ import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
 import Prelude hiding (lookup, read)
 
--- | A dense map that manages non-overlapping intervals \((l, r, x)\) with the range \([0, n)\).
--- Interval state changes can be tracked using the @onAdd@ and @onDel@ hooks.
+-- | Dense map covering \([0, n)\) that manages non-overlapping intervals \((l, r)\) within it. Each
+-- interval has an associated value \(x\). Use @onAdd@ and @onDel@ hooks to track interval state
+-- changes during `buildM`, `insertM` and `deleteM` operations.
 --
 -- @since 1.1.0.0
 newtype IntervalMap s a = IntervalMap
-  { -- | @l@ -> @(r, a)@
+  { -- | Maps \(l\) to \((r, a)\).
     unITM :: IM.IntMap s (Int, a)
   }
 
@@ -130,8 +132,11 @@ build xs = buildM xs onAdd
 -- @since 1.1.0.0
 buildM ::
   (PrimMonad m, Eq a, VU.Unbox a) =>
+  -- | Input values
   VU.Vector a ->
+  -- | @onAdd@ hook that take an interval \([l, r)\) with associated value \(v\)
   (Int -> Int -> a -> m ()) ->
+  -- | The map
   m (IntervalMap (PrimState m) a)
 buildM xs onAdd = do
   dim <- IM.new (G.length xs)
@@ -151,13 +156,14 @@ buildM xs onAdd = do
 capacity :: IntervalMap s a -> Int
 capacity = IM.capacity . unITM
 
--- | \(O(\log n)\) Point variant of `intersects`.
+-- | \(O(\log n)\) Returns whether a point \(x\) is contained within any of the intervals.
 --
 -- @since 1.1.0.0
 contains :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> m Bool
 contains itm i = intersects itm i (i + 1)
 
--- | \(O(\log n)\) Boolean variant of `lookup`.
+-- | \(O(\log n)\) Returns whether an interval \([l, r)\) is fully contained within any of the
+-- intervals.
 --
 -- @since 1.1.0.0
 intersects :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m Bool
@@ -169,7 +175,7 @@ intersects (IntervalMap dim) l r
         Just (!_, (!r', !_)) -> r <= r'
         _ -> False
 
--- | \(O(\log n)\) Looks up an interval that contains \([l, r)\).
+-- | \(O(\log n)\) Looks up an interval that fully contains \([l, r)\).
 --
 -- @since 1.1.0.0
 lookup :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m (Maybe (Int, Int, a))
@@ -182,7 +188,8 @@ lookup (IntervalMap im) l r
           | r <= r' -> Just (l', r', a)
         _ -> Nothing
 
--- | \(O(\log n)\) Looks up an interval that contains \([l, r)\) and reads out the value.
+-- | \(O(\log n)\) Looks up an interval that fully contains \([l, r)\) and reads out the value.
+-- Throws an error if no such interval exists.
 --
 -- @since 1.1.0.0
 read :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m a
@@ -192,7 +199,8 @@ read itm l r = do
     Just !a -> a
     Nothing -> error $ "[read] not a member: " ++ show (l, r)
 
--- | \(O(\log n)\) Looks up an interval that contains \([l, r)\) and reads out the value.
+-- | \(O(\log n)\) Looks up an interval that fully contains \([l, r)\) and reads out the value.
+-- Returns `Nothing` if no such interval exists.
 --
 -- @since 1.1.0.0
 readMaybe :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m (Maybe a)
@@ -205,7 +213,8 @@ readMaybe (IntervalMap dim) l r
           | r <= r' -> Just a
         _ -> Nothing
 
--- | Amortized \(O(\log n)\) interval insertion. Overlapping intervals are overwritten.
+-- | Amortized \(O(\log n)\) Inserts an interval \([l, r)\) with associated value \(v\) into the
+-- map. Overwrites any overlapping intervals.
 --
 -- @since 1.1.0.0
 insert :: (PrimMonad m, Eq a, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> a -> m ()
@@ -214,17 +223,24 @@ insert itm l r x = insertM itm l r x onAdd onDel
     onAdd _ _ _ = pure ()
     onDel _ _ _ = pure ()
 
--- | Amortized \(O(\log n)\) interval insertion with side effects via @onAdd@ and @onDel@ hooks.
--- Overlapping intervals are overwritten.
+-- | Amortized \(O(\log n)\) Inserts an interval \([l, r)\) with associated value \(v\) into the
+-- map. Overwrites any overlapping intervals. Tracks interval state changes via @onAdd@ and @onDel@
+-- hooks.
 --
 -- @since 1.1.0.0
 insertM ::
   (PrimMonad m, Eq a, VU.Unbox a) =>
+  -- | The map
   IntervalMap (PrimState m) a ->
+  -- | \(l\)
   Int ->
+  -- | \(r\)
   Int ->
+  -- | \(v\)
   a ->
+  -- | @onAdd@ hook that take an interval \([l, r)\) with associated value \(v\)
   (Int -> Int -> a -> m ()) ->
+  -- | @onDel@ hook that take an interval \([l, r)\) with associated value \(v\)
   (Int -> Int -> a -> m ()) ->
   m ()
 insertM (IntervalMap dim) l0 r0 x onAdd onDel
@@ -322,7 +338,7 @@ insertM (IntervalMap dim) l0 r0 x onAdd onDel
               IM.insert dim l' (l, x')
               pure (l, r)
 
--- | Amortized \(O(\log n)\) interval deletion.
+-- | Amortized \(O(\log n)\) Deletes an interval \([l, r)\) from the map.
 --
 -- @since 1.1.0.0
 delete :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m ()
@@ -331,15 +347,21 @@ delete itm l r = deleteM itm l r onAdd onDel
     onAdd _ _ _ = pure ()
     onDel _ _ _ = pure ()
 
--- | Amortized \(O(\log n)\) interval deletion with side effects via @onAdd@ and @onDel@ hooks.
+-- | Amortized \(O(\log n)\) Deletes an interval \([l, r)\) from the map. Tracks interval state
+-- changes via @onAdd@ and @onDel@ hooks.
 --
 -- @since 1.1.0.0
 deleteM ::
   (PrimMonad m, VU.Unbox a) =>
+  -- | The map
   IntervalMap (PrimState m) a ->
+  -- | \(l\)
   Int ->
+  -- | \(r\)
   Int ->
+  -- | @onAdd@ hook that take an interval \([l, r)\) with associated value \(v\)
   (Int -> Int -> a -> m ()) ->
+  -- | @onDel@ hook that take an interval \([l, r)\) with associated value \(v\)
   (Int -> Int -> a -> m ()) ->
   m ()
 deleteM (IntervalMap dim) l0 r0 onAdd onDel
@@ -408,15 +430,22 @@ overwrite itm l r x = do
     Nothing -> pure ()
 
 -- | \(O(\log n)\). Shorthand for overwriting the value of an interval that contains \([l, r)\).
+-- Tracks interval state changes via @onAdd@ and @onDel@ hooks.
 --
 -- @since 1.1.0.0
 overwriteM ::
   (PrimMonad m, Eq a, VU.Unbox a) =>
+  -- | The map
   IntervalMap (PrimState m) a ->
+  -- | \(l\)
   Int ->
+  -- | \(r\)
   Int ->
+  -- | \(v\)
   a ->
+  -- | @onAdd@ hook that take an interval \([l, r)\) with associated value \(v\)
   (Int -> Int -> a -> m ()) ->
+  -- | @onDel@ hook that take an interval \([l, r)\) with associated value \(v\)
   (Int -> Int -> a -> m ()) ->
   m ()
 overwriteM itm l r x onAdd onDel = do
@@ -425,8 +454,8 @@ overwriteM itm l r x onAdd onDel = do
     Just (!l', !r', !_) -> insertM itm l' r' x onAdd onDel
     Nothing -> pure ()
 
--- | \(O(n \log n)\) Enumerates the intervals as \((l, (r, x))\) tuples, where \([l, r)\) is the
--- interval and \(x\) is the associated value.
+-- | \(O(n \log n)\) Enumerates the intervals and the associated values as \((l, (r, x))\) tuples,
+-- where \([l, r)\) is the interval and \(x\) is the associated value.
 --
 -- @since 1.1.0.0
 freeze :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> m (VU.Vector (Int, (Int, a)))

@@ -42,7 +42,7 @@ module AtCoder.Internal.GrowVec
   ( -- * GrowVec
     GrowVec (vecGV),
 
-    -- * Constructions
+    -- * Constructors
     new,
     build,
     reserve,
@@ -209,7 +209,7 @@ popBack GrowVec {..} = do
       vec <- readMutVar vecGV
       Just <$> VGM.read vec (pos - 1)
 
--- | \(O(1)\) `popBack` with return value discarded.
+-- | \(O(1)\) `popBack` with the return value discarded.
 --
 -- @since 1.0.0.0
 {-# INLINE popBack_ #-}

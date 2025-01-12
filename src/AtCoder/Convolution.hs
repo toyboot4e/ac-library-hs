@@ -14,7 +14,7 @@
 -- >>> import Data.Proxy (Proxy)
 -- >>> import Data.Vector.Unboxed qualified as VU
 --
--- It's handy to define specific items for interested modulus values:
+-- Define specific modulus items:
 --
 -- >>> type Mint = M.ModInt998244353
 -- >>> let modInt :: Int -> Mint; modInt = M.new
@@ -26,7 +26,7 @@
 -- >>> C.convolution a b
 -- [5,16,34,60,61,52,32]
 --
--- You can also target any @'Integral' a@ (with some runtime overhead for conversion to modint):
+-- You can also target any @'Integral' a@ with `convolutionRaw`:
 --
 -- >>> let a = VU.fromList @Int [1, 2, 3, 4]
 -- >>> let b = VU.fromList @Int [5, 6, 7, 8]

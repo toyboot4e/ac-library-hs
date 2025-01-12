@@ -1,16 +1,22 @@
 -- | It calculates the strongly connected components of directed graphs.
 --
 -- ==== __Example__
+-- Create a `SccGraph`:
+--
 -- >>> import AtCoder.Scc qualified as Scc
 -- >>> gr <- Scc.new 4     -- 0    1    2    3
 -- >>> Scc.nScc gr
 -- 4
+--
+-- Add edges and get SCC of the graph:
 --
 -- >>> Scc.addEdge gr 0 1  -- 0 -> 1    2    3
 -- >>> Scc.addEdge gr 1 0  -- 0 == 1    2    3
 -- >>> Scc.addEdge gr 1 2  -- 0 == 1 -> 2    3
 -- >>> Scc.scc gr
 -- [[3],[0,1],[2]]
+--
+-- See also the @scc@ function in @AtCoder.Extra.Graph@ module that computes SCC for a CSR.
 --
 -- @since 1.0.0.0
 module AtCoder.Scc (SccGraph, nScc, new, addEdge, scc) where

@@ -7,7 +7,7 @@
 -- - Calculating the sum of the elements of an interval
 --
 -- ==== __Example__
--- You can create a `FenwickTree` with `new`:
+-- Create a `FenwickTree` with `new`:
 --
 -- >>> import AtCoder.FenwickTree qualified as FT
 -- >>> ft <- FT.new @_ @Int 4 -- [0, 0, 0, 0]
@@ -24,7 +24,7 @@
 -- >>> FT.sum ft 0 3
 -- 6
 --
--- You can create a `FenwickTree` with initial values using `build`:
+-- Create a `FenwickTree` with initial values using `build`:
 --
 -- >>> ft <- FT.build @_ @Int $ VU.fromList [3, 0, 3, 0]
 -- >>> FT.add ft 1 2          -- [3, 2, 3, 0]

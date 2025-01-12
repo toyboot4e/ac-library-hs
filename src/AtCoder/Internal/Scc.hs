@@ -8,7 +8,7 @@ module AtCoder.Internal.Scc
   ( -- * Internal SCC
     SccGraph (nScc),
 
-    -- * Constructor
+    -- * Constructors
     new,
 
     -- * Adding edges

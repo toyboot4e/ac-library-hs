@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Fixed-sized queue. Internally it has \(l, r\) pair of valid element bounds.
+-- | Fixed-sized queue. Internally it has an \([l, r)\) pair of valid element bounds.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Internal.Queue qualified as Q
@@ -56,7 +56,7 @@ module AtCoder.Internal.Queue
     popFront,
     popFront_,
 
-    -- ** Clearing
+    -- ** Reset
     clear,
 
     -- * Conversions
@@ -72,7 +72,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (length, null)
 
--- | Fixed-sized queue. Internally it has \([l, r)\) pair of valid element bounds.
+-- | Fixed-sized queue. Internally it has an \([l, r)\) pair of valid element bounds.
 --
 -- @since 1.0.0.0
 data Queue s a = Queue
@@ -162,7 +162,7 @@ popFront Queue {..} = do
       VGM.unsafeWrite posQ 0 (l + 1)
       pure $ Just x
 
--- | \(O(1)\) `popFront` with return value discarded.
+-- | \(O(1)\) `popFront` with the return value discarded.
 --
 -- @since 1.0.0.0
 {-# INLINE popFront_ #-}

@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | A monoid acted by @Mat2x2@.
+-- | A monoid acted on by `Mat2x2`, an affine transformation target.
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Monoid.V2
@@ -19,7 +19,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- | A monoid acted by @Mat2x2@.
+-- | A monoid acted on by `Mat2x2`, an affine transformation target.
 --
 -- @since 1.1.0.0
 newtype V2 a = V2 (V2Repr a)

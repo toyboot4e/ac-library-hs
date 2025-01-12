@@ -17,6 +17,7 @@ import Tests.Extra.Semigroup.Permutation qualified
 import Tests.Extra.WaveletMatrix qualified
 import Tests.Extra.WaveletMatrix.BitVector qualified
 import Tests.Extra.WaveletMatrix.Raw qualified
+import Tests.Extra.WaveletMatrix2d qualified
 import Tests.FenwickTree qualified
 import Tests.Internal.Bit qualified
 import Tests.Internal.Buffer qualified
@@ -56,7 +57,8 @@ main =
             testGroup "Semigroup.Permutation" Tests.Extra.Semigroup.Permutation.tests,
             testGroup "WaveletMatrix" Tests.Extra.WaveletMatrix.tests,
             testGroup "WaveletMatrix.BitVector" Tests.Extra.WaveletMatrix.BitVector.tests,
-            testGroup "WaveletMatrix.Raw" Tests.Extra.WaveletMatrix.Raw.tests
+            testGroup "WaveletMatrix.Raw" Tests.Extra.WaveletMatrix.Raw.tests,
+            testGroup "WaveletMatrix2d" Tests.Extra.WaveletMatrix2d.tests
           ],
         testGroup "FenwickTree" Tests.FenwickTree.tests,
         testGroup

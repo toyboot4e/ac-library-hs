@@ -3,12 +3,12 @@
 -- | A disjoint set union, also known as a Union-Find tree. It processes the following queries in
 -- amortized \(O(\alpha(n))\) time.
 --
--- - Edge addition
--- - Deciding whether given two vertices are in the same connected component
+-- - Edge addition (`merge`)
+-- - Deciding whether given two vertices are in the same connected component (`same`)
 --
--- Each connected component internally has a representative vertex. When two connected components
--- are merged by edge addition, one of the two representatives of these connected components
--- becomes the representative of the new connected component.
+-- Each connected component internally has a representative vertex (`leader`). When two connected
+-- components are merged by edge addition (`merge`), one of the two representatives of these
+-- connected components becomes the representative (`leader`) of the new connected component.
 --
 -- ==== __Example__
 -- Create a `Dsu` with four vertices:
@@ -103,8 +103,8 @@ new nDsu
       pure Dsu {..}
   | otherwise = error $ "new: given negative size (`" ++ show nDsu ++ "`)"
 
--- | Adds an edge @(a, b)@. the vertices @a@ and @b@ were in the same connected component, it
--- returns the representative of this connected component. Otherwise, it returns the
+-- | Adds an edge \((a, b)\). If the vertices \(a\) and \(b\) are in the same connected component, it
+-- returns the representative (`leader`) of this connected component. Otherwise, it returns the
 -- representative of the new connected component.
 --
 -- ==== Constraints
@@ -134,7 +134,7 @@ merge dsu@Dsu {..} a b = do
       VGM.modify parentOrSizeDsu (+ sizeY) x
       pure x
 
--- | `merge` with return value discarded.
+-- | `merge` with the return value discarded.
 --
 -- ==== Constraints
 -- - \(0 \leq a < n\)
@@ -207,7 +207,7 @@ size dsu@Dsu {..} a = do
   sizeLa <- VGM.read parentOrSizeDsu la
   pure (-sizeLa)
 
--- | Divides the graph into connected components and returns the list of them.
+-- | Divides the graph into connected components and returns the vector of them.
 --
 -- More precisely, it returns a vector of the "vector of the vertices in a connected component".
 -- Both of the orders of the connected components and the vertices are undefined.

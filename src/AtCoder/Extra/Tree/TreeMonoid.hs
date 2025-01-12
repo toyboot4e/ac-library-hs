@@ -1,16 +1,17 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Segment tree integration to the heavy-light decomposition technique.
+-- | Integration of segment trees with the heavy-light decomposition technique. Computes monoid
+-- products on a path in \(O(\log^2 n)\) time or on a subtree in \(O(\log n)\) time.
 --
 -- - If vertices have weights, create a `TreeMonoid` with `fromVerts`.
 -- - If edges have weights, create a tree monoid with `fromEdges`.
 --
--- ==== __Weights on edges__
+-- ==== __(Internals) Weights on edges__
 --
--- If edges have weights, you can either treat the edges as new vertices or assign edge weights to
--- the deeper index.
+-- When vertices are unweighted and only edges have weights, treat edges as new vertices or assign
+-- edge weights to the deeper vertex.
 --
--- Idea 1. Convert edges as new vertices and `fromVerts`.
+-- Idea 1. Convert edges into new vertices. This is inefficient.
 --
 -- @
 -- o--o--o  --> o-x-o-x-o

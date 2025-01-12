@@ -5,6 +5,8 @@
 -- modified later.
 --
 -- ==== __Example__
+-- Create a `WaveletMatrix2d` with initial vertex values:
+--
 -- >>> import AtCoder.Extra.WaveletMatrix2d qualified as WM
 -- >>> import Data.Semigroup (Sum (..))
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -12,8 +14,13 @@
 -- >>> -- 4  5  6  7
 -- >>> -- 0  1  2  3
 -- >>> wm <- WM.build negate $ VU.generate 12 $ \i -> let (!y, !x) = i `divMod` 4 in (x, y, Sum i)
--- >>> WM.read wm 2 1
+--
+-- Read the value at \(x = 2, y = 1\):
+--
+-- >>> WM.read wm (2, 1)
 -- Sum {getSum = 6}
+--
+-- Other segment tree methods are also available, but in 2D:
 --
 -- >>> WM.allProd wm -- (0 + 11) * 12 / 2 = 66
 -- Sum {getSum = 66}
@@ -43,7 +50,6 @@ module AtCoder.Extra.WaveletMatrix2d
     prod,
     prodMaybe,
     allProd,
-
     -- wavelet matrix methods could be implemented, too
   )
 where
@@ -64,9 +70,11 @@ import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
--- TODO: do not require the inverse operator?
--- TODO: maxRight?
--- TODO: add rank etc.
+-- NOTE: There are many possible improvements.
+-- - Use cumulative sum or fenwick tree instead for the speed.
+-- - The inverse operator is not actually required.
+-- - Wavelet matrix methods such as `rank` can be implemented
+-- - `maxRight` can be implemented.
 
 -- | Segment Tree on Wavelet Matrix: points on a 2D plane and rectangle products.
 data WaveletMatrix2d s a = WaveletMatrix2d
@@ -76,16 +84,23 @@ data WaveletMatrix2d s a = WaveletMatrix2d
     xyDictWm2d :: !(VU.Vector (Int, Int)),
     -- | y index compression dictionary.
     yDictWm2d :: !(VU.Vector Int),
-    -- | The segment tree of the weights of the points in order of `xyDictWm2d`.
+    -- | The segment tree of the weights of the points in the order of `xyDictWm2d`.
     segTreesWm2d :: !(V.Vector (ST.SegTree s a)),
     -- | The inverse operator of the interested monoid.
     invWm2d :: !(a -> a)
   }
 
--- | \(O(n \log n\) Creates a `WaveletMatrixWithSegmentTree` with `mempty` as the initial monoid
+-- | \(O(n \log n)\) Creates a `WaveletMatrix2d` with `mempty` as the initial monoid
 -- values for each point.
 {-# INLINE new #-}
-new :: (PrimMonad m, Monoid a, VU.Unbox a) => (a -> a) -> VU.Vector (Int, Int) -> m (WaveletMatrix2d (PrimState m) a)
+new ::
+  (PrimMonad m, Monoid a, VU.Unbox a) =>
+  -- | Inverse operator of the monoid
+  (a -> a) ->
+  -- | Input points
+  VU.Vector (Int, Int) ->
+  -- | A 2D wavelet matrix
+  m (WaveletMatrix2d (PrimState m) a)
 new invWm2d xys = do
   let n = VG.length xys
   let xyDictWm2d = VU.uniq . VU.modify (VAI.sortBy compare) $ xys
@@ -98,10 +113,17 @@ new invWm2d xys = do
   segTreesWm2d <- V.replicateM (Rwm.heightRwm rawWmWm2d) (ST.new n)
   pure WaveletMatrix2d {..}
 
--- | \(O(n \log n\) Creates a `WaveletMatrixWithSegmentTree` with wavelet matrix with segment tree
+-- | \(O(n \log n)\) Creates a `WaveletMatrix2d` with wavelet matrix with segment tree
 -- with initial monoid values. Monoids on a duplicate point are accumulated with `(<>)`.
 {-# INLINE build #-}
-build :: (PrimMonad m, Monoid a, VU.Unbox a) => (a -> a) -> VU.Vector (Int, Int, a) -> m (WaveletMatrix2d (PrimState m) a)
+build ::
+  (PrimMonad m, Monoid a, VU.Unbox a) =>
+  -- | Inverse operator of the monoid
+  (a -> a) ->
+  -- | Input points with initial values
+  VU.Vector (Int, Int, a) ->
+  -- | A 2D wavelet matrix
+  m (WaveletMatrix2d (PrimState m) a)
 build invWm2d xysw = do
   let (!xs, !ys, !_) = VU.unzip3 xysw
   wm <- new invWm2d $ VU.zip xs ys
@@ -110,15 +132,15 @@ build invWm2d xysw = do
     modify wm (<> w) (x, y)
   pure wm
 
--- | \(O(1)\) Returns the monoid value at \(x, y\).
+-- | \(O(1)\) Returns the monoid value at \((x, y)\).
 {-# INLINE read #-}
 read :: (HasCallStack, VU.Unbox a, Monoid a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> (Int, Int) -> m a
 read WaveletMatrix2d {..} (!x, !y) = do
   ST.read (V.head segTreesWm2d) . fromJust $ lowerBound xyDictWm2d (x, y)
 
--- | \(O(\log^2 n\) Writes the monoid value of a point. Access to unknown points are undefined.
+-- | \(O(\log^2 n)\) Writes the monoid value at \((x, y)\). Access to unknown points are undefined.
 {-# INLINE write #-}
-write :: (HasCallStack, Monoid a, VU.Unbox a, PrimMonad m) => WaveletMatrix2d (PrimState m) a ->  (Int, Int) -> a -> m ()
+write :: (HasCallStack, Monoid a, VU.Unbox a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> (Int, Int) -> a -> m ()
 write WaveletMatrix2d {..} (!x, !y) v = do
   let !i_ = fromJust $ lowerBound xyDictWm2d (x, y)
   V.ifoldM'_
@@ -134,7 +156,8 @@ write WaveletMatrix2d {..} (!x, !y) v = do
     i_
     $ V.zip (Rwm.bitsRwm rawWmWm2d) segTreesWm2d
 
--- | \(O(\log^2 n\) Modifies the monoid value of a point. Access to unknown points are undefined.
+-- | \(O(\log^2 n)\) Modifies the monoid value at \((x, y)\). Access to unknown points are
+-- undefined.
 {-# INLINE modify #-}
 modify :: (HasCallStack, Monoid a, VU.Unbox a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> (a -> a) -> (Int, Int) -> m ()
 modify WaveletMatrix2d {..} f (!x, !y) = do
@@ -185,7 +208,7 @@ prodMaybe wm@WaveletMatrix2d {..} !xl !xr !yl !yr
     yl' = fromMaybe 0 $ bisectR 0 (VG.length yDictWm2d) $ (< yl) . VG.unsafeIndex yDictWm2d
     yr' = fromMaybe (VG.length yDictWm2d) $ bisectR 0 (VG.length yDictWm2d) $ (< yr) . VG.unsafeIndex yDictWm2d
 
--- | \(O(\log^2 n)\) Return the monoid product of all of the points i the wavelet matrix.
+-- | \(O(\log^2 n)\) Return the monoid product of all of the points in the wavelet matrix.
 {-# INLINE allProd #-}
 allProd :: (HasCallStack, VU.Unbox a, Monoid a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> m a
 allProd WaveletMatrix2d {..} = do

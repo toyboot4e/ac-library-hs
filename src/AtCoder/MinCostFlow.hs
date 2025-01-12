@@ -110,11 +110,17 @@ new nG = do
 {-# INLINE addEdge #-}
 addEdge ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
+  -- | Graph
   McfGraph (PrimState m) cap cost ->
+  -- | from
   Int ->
+  -- | to
   Int ->
+  -- | capacity
   cap ->
+  -- | cost
   cost ->
+  -- | Edge index
   m Int
 addEdge McfGraph {..} from to cap cost = do
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.addEdge" "`from` vertex" from "the number of vertices" nG
@@ -125,7 +131,7 @@ addEdge McfGraph {..} from to cap cost = do
   ACIGV.pushBack edgesG (from, to, cap, 0, cost)
   pure m
 
--- | `addEdge` with return value discarded.
+-- | `addEdge` with th return value discarded.
 --
 -- ==== Constraints
 -- - \(0 \leq \mathrm{from}, \mathrm{to} \lt n\)
@@ -138,10 +144,15 @@ addEdge McfGraph {..} from to cap cost = do
 {-# INLINE addEdge_ #-}
 addEdge_ ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
+  -- | Graph
   McfGraph (PrimState m) cap cost ->
+  -- | from
   Int ->
+  -- | to
   Int ->
+  -- | capacity
   cap ->
+  -- | cost
   cost ->
   m ()
 addEdge_ graph from to cap cost = do
@@ -161,10 +172,15 @@ addEdge_ graph from to cap cost = do
 {-# INLINE flow #-}
 flow ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
+  -- | Graph
   McfGraph (PrimState m) cap cost ->
+  -- | Fource @s@
   Int ->
+  -- | Sink @t@
   Int ->
+  -- | Flow limit
   cap ->
+  -- | Tuple of @(cap, cost@)
   m (cap, cost)
 flow graph s t flowLimit = do
   res <- slope graph s t flowLimit
@@ -182,9 +198,13 @@ flow graph s t flowLimit = do
 {-# INLINE maxFlow #-}
 maxFlow ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, Bounded cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
+  -- | Graph
   McfGraph (PrimState m) cap cost ->
+  -- | Source @s@
   Int ->
+  -- | Sink @t@
   Int ->
+  -- | Tuple of @(cap, cost@)
   m (cap, cost)
 maxFlow graph s t = do
   res <- slope graph s t maxBound
@@ -216,10 +236,15 @@ maxFlow graph s t = do
 {-# INLINE slope #-}
 slope ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
+  -- | Graph
   McfGraph (PrimState m) cap cost ->
+  -- | Source @s@
   Int ->
+  -- | Sink @t@
   Int ->
+  -- | Flow limit
   cap ->
+  -- | Vector of @(cap, cost)@
   m (VU.Vector (cap, cost))
 slope McfGraph {..} s t flowLimit = do
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.slope" "`source` vertex" s "the number of vertices" nG
@@ -368,8 +393,11 @@ internalSlopeMCF csr@ACIMCSR.Csr {..} n s t flowLimit = do
 {-# INLINE getEdge #-}
 getEdge ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
+  -- | Graph
   McfGraph (PrimState m) cap cost ->
+  -- | Edge index
   Int ->
+  -- | Tuple of @(from, to, cap, flow, cost)@
   m (Int, Int, cap, cap, cost)
 getEdge McfGraph {..} i = do
   m <- ACIGV.length edgesG
@@ -386,7 +414,9 @@ getEdge McfGraph {..} i = do
 {-# INLINE edges #-}
 edges ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
+  -- | Graph
   McfGraph (PrimState m) cap cost ->
+  -- | Vector of @(from, to, cap, flow, cost)@
   m (VU.Vector (Int, Int, cap, cap, cost))
 edges McfGraph {..} = do
   ACIGV.freeze edgesG
@@ -401,7 +431,9 @@ edges McfGraph {..} = do
 {-# INLINE unsafeEdges #-}
 unsafeEdges ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, VU.Unbox cost) =>
+  -- | Graph
   McfGraph (PrimState m) cap cost ->
+  -- | Vector of @(from, to, cap, flow, cost)@
   m (VU.Vector (Int, Int, cap, cap, cost))
 unsafeEdges McfGraph {..} = do
   ACIGV.unsafeFreeze edgesG

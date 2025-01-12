@@ -1,6 +1,6 @@
 -- | A permutation represented by a vector, mainly for binary exponentiation.
 --
--- The permutation is considered to be a left semigroup action: \(p_2 (p_1 x) = (p_2 \circ p_1) x\).
+-- The permutation is a left semigroup action: \(p_2 (p_1 x) = (p_2 \circ p_1) x\).
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Semigroup.Permutation qualified as Permutation
@@ -27,7 +27,7 @@ module AtCoder.Extra.Semigroup.Permutation
     ident,
     zero,
 
-    -- * Act
+    -- * Actions
     act,
 
     -- * Metadata
@@ -43,7 +43,7 @@ import Prelude hiding (length)
 
 -- | A permutation represented by a vector, mainly for binary exponentiation.
 --
--- The permutation is considered to be a left semigroup action: \(p_2 (p_1 x) = (p_2 \circ p_1) x\).
+-- The permutation is a left semigroup action: \(p_2 (p_1 x) = (p_2 \circ p_1) x\).
 --
 -- @since 1.1.0.0
 newtype Permutation = Permutation
@@ -56,7 +56,7 @@ newtype Permutation = Permutation
       Show
     )
 
--- | \(O(1)\) Creates a `Permutation` with boundary check.
+-- | \(O(1)\) Creates a `Permutation`, performing boundary check on input vector.
 --
 -- @since 1.1.0.0
 {-# INLINE new #-}
@@ -66,7 +66,7 @@ new xs = Permutation xs
     n = VU.length xs
     !_ = VU.foldl' (\() i -> let !_ = ACIA.runtimeAssert (-1 <= i && i < n) "AtCoder.Extra.Semigroup.Permutation.new: index boundary error" in ()) () xs
 
--- | \(O(1)\) Creates a `Permutation` without boundary check.
+-- | \(O(1)\) Creates a `Permutation`, without performing boundary check on input vector.
 --
 -- @since 1.1.0.0
 {-# INLINE unsafeNew #-}

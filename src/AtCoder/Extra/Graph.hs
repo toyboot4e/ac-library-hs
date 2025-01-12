@@ -1,14 +1,10 @@
--- | Generic graph serach functions. Graphs are abstracted as the number of vertices and a function
--- that returns the neighbors of a vertex.
---
--- Also the `Csr` module is re-exported and it's considered as the primary concrete graph
--- implementation.
+-- | Re-export of the @Csr@ module and generic graph search functions.
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Graph
   ( -- * Re-export of CSR
 
-    -- | The `Csr.Csr` data type and all the functions are re-exported.
+    -- | The `Csr.Csr` data type and all the functions such as `build` or `adj` are re-exported.
     module Csr,
 
     -- * CSR helpers
@@ -37,12 +33,14 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 -- making an input to `build`.
 --
 -- ==== __Example__
--- Create a non-directed graph:
+-- `swapDupe` duplicates each edge reversing the direction:
 --
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> Gr.swapDupe $ VU.fromList [(0, 1, ()), (1, 2, ())]
 -- [(0,1,()),(1,0,()),(1,2,()),(2,1,())]
+--
+-- Create a non-directed graph:
 --
 -- >>> let gr = Gr.build 3 . Gr.swapDupe $ VU.fromList [(0, 1, ()), (1, 2, ())]
 -- >>> gr `Gr.adj` 0
@@ -63,12 +61,14 @@ swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 -- making an input to `build'`.
 --
 -- ==== __Example__
--- Create a non-directed graph:
+-- `swapDupe'` duplicates each edge reversing the direction:
 --
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> Gr.swapDupe' $ VU.fromList [(0, 1), (1, 2)]
 -- [(0,1),(1,0),(1,2),(2,1)]
+--
+-- Create a non-directed graph:
 --
 -- >>> let gr = Gr.build' 3 . Gr.swapDupe' $ VU.fromList [(0, 1), (1, 2)]
 -- >>> gr `Gr.adj` 0

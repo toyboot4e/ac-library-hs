@@ -5,7 +5,7 @@
 
 -- | A potentialized disjoint set union on a [group](https://en.wikipedia.org/wiki/Group_(mathematics\))
 -- under a differential constraint system. Each vertex \(v\) is assigned a potential value \(p(v)\),
--- where representatives of each group have a potential of `mempty`, and other vertices have
+-- where representatives (`leader`) of each group have a potential of `mempty`, and other vertices have
 -- potentials relative to their representative.
 --
 -- The group type is represented as a `Monoid` with a inverse operator, passed on `new`. This
@@ -20,28 +20,26 @@ module AtCoder.Extra.Pdsu
   ( -- * Pdsu
     Pdsu (nPdsu),
 
-    -- * Constructor
+    -- * Constructors
     new,
 
-    -- * Vertex information
+    -- * Inspection
     leader,
     pot,
-
-    -- * Merging
-    merge,
-    merge_,
-
-    -- * Two vertex information
     diff,
     unsafeDiff,
     same,
     canMerge,
 
+    -- * Merging
+    merge,
+    merge_,
+
     -- * Group information
     size,
     groups,
 
-    -- * Clearing
+    -- * Reset
     clear,
   )
 where
@@ -111,12 +109,19 @@ data Pdsu s a = Pdsu
     invertPdsu :: !(a -> a)
   }
 
--- | \(O(n)\) Creates a new DSU under a differential constraint system. The second argument is the
--- inverse operator of potential values.
+-- | \(O(n)\) Creates a new DSU under a differential constraint system.
 --
 -- @since 1.1.0.0
 {-# INLINE new #-}
-new :: forall m a. (PrimMonad m, Monoid a, VU.Unbox a) => Int -> (a -> a) -> m (Pdsu (PrimState m) a)
+new ::
+  forall m a.
+  (PrimMonad m, Monoid a, VU.Unbox a) =>
+  -- | The number of vertices
+  Int ->
+  -- | The inverse operator of the monoid
+  (a -> a) ->
+  -- | A DSU
+  m (Pdsu (PrimState m) a)
 new n f = Pdsu n <$> VUM.replicate n (-1 {- size 1 -}) <*> VUM.replicate n (mempty :: a) <*> pure f
 
 -- | \(O(\alpha(n))\) Returns the representative of the connected component that contains the
@@ -145,7 +150,8 @@ leader Pdsu {..} v0 = inner v0
             VGM.modify potentialPdsu (<> pp) v
           pure r
 
--- | \(O(\alpha(n))\) Returns \(p(v)\), the potential of \(v\) in their group.
+-- | \(O(\alpha(n))\) Returns \(p(v)\), the potential value of vertex \(v\) relative to the
+-- reprensetative of its group.
 --
 -- @since 1.1.0.0
 {-# INLINE pot #-}
@@ -157,8 +163,43 @@ pot dsu@Pdsu {..} v1 = do
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.pot" v1 nPdsu
 
--- | \(O(\alpha(n))\) Merges \(v_1\) to \(v_2\) with differential (relative) potential \(dp\):
--- \(p(v1) := dp \cdot p(v2)\). Returns `True` if they're newly merged.
+-- | \(O(\alpha(n))\) Returns whether the vertices \(a\) and \(b\) are in the same connected
+-- component.
+--
+-- @since 1.1.0.0
+{-# INLINE same #-}
+same :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m Bool
+same !dsu !v1 !v2 = (==) <$> leader dsu v1 <*> leader dsu v2
+
+-- TODO: call it unsafeDiff
+
+-- | \(O(\alpha(n))\) Returns the potential of \(v_1\) relative to \(v_2\): \(p(v_1) \cdot p^{-1}(v_2)\)
+-- if the two vertices belong to the same group. Returns `Nothing` when the two vertices are not
+-- connected.
+--
+-- @since 1.1.0.0
+{-# INLINE diff #-}
+diff :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m (Maybe a)
+diff !dsu !v1 !v2 = do
+  b <- same dsu v1 v2
+  if b
+    then Just <$> unsafeDiff dsu v1 v2
+    else pure Nothing
+
+-- | \(O(\alpha(n))\) Returns the potential of \(v_1\) relative to \(v_2\): \(p(v_1) \cdot p^{-1}(v_2)\)
+-- if the two vertices belong to the same group. Returns meaningless value if the two vertices are
+-- not connected.
+--
+-- @since 1.1.0.0
+{-# INLINE unsafeDiff #-}
+unsafeDiff :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m a
+unsafeDiff !dsu !v1 !v2 = do
+  p1 <- pot dsu v1
+  p2 <- pot dsu v2
+  pure $ p1 <> invertPdsu dsu p2
+
+-- | \(O(\alpha(n))\) Merges \(v_1\) to \(v_2\) with differential (relative) potential
+-- \(\mathrm{dp}\): \(p(v1) := \mathrm{dp} \cdot p(v2)\). Returns `True` if they're newly merged.
 --
 -- @since 1.1.0.0
 {-# INLINE merge #-}
@@ -211,41 +252,6 @@ merge_ :: (HasCallStack, PrimMonad m, Monoid a, Ord a, VU.Unbox a) => Pdsu (Prim
 merge_ !dsu !v1 !v2 !dp = do
   _ <- merge dsu v1 v2 dp
   pure ()
-
--- | \(O(\alpha(n))\) Returns whether the vertices \(a\) and \(b\) are in the same connected
--- component.
---
--- @since 1.1.0.0
-{-# INLINE same #-}
-same :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m Bool
-same !dsu !v1 !v2 = (==) <$> leader dsu v1 <*> leader dsu v2
-
--- TODO: call it unsafeDiff
-
--- | \(O(\alpha(n))\) Returns the potential of \(v_1\) relative to \(v_2\): \(p(v_1) \cdot p^{-1}(v_2)\)
--- if the two vertices belong to the same group. Returns `Nothing` when the two vertices are not
--- connected.
---
--- @since 1.1.0.0
-{-# INLINE diff #-}
-diff :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m (Maybe a)
-diff !dsu !v1 !v2 = do
-  b <- same dsu v1 v2
-  if b
-    then Just <$> unsafeDiff dsu v1 v2
-    else pure Nothing
-
--- | \(O(\alpha(n))\) Returns the potential of \(v_1\) relative to \(v_2\): \(p(v_1) \cdot p^{-1}(v_2)\)
--- if the two vertices belong to the same group. Returns meaningless value if the two vertices are
--- not connected.
---
--- @since 1.1.0.0
-{-# INLINE unsafeDiff #-}
-unsafeDiff :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m a
-unsafeDiff !dsu !v1 !v2 = do
-  p1 <- pot dsu v1
-  p2 <- pot dsu v2
-  pure $ p1 <> invertPdsu dsu p2
 
 -- | \(O(\alpha(n))\) Returns `True` if the two vertices belong to different groups or they belong
 -- to the same group under the condition \(p(v_1) = dp \cdot p(v_2)\). It's just a convenient

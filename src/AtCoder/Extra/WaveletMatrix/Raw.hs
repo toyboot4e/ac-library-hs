@@ -7,14 +7,14 @@
 -- NOTE: `topK` and `intersects` are not implemented as they are slow.
 
 -- | A static Wavelet Matrix without automatic index comperssion. Consider using
--- @AtCoder.Extra.WaveletMatrix@.
+-- @AtCoder.Extra.WaveletMatrix@ instead.
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.WaveletMatrix.Raw
   ( -- * RawWaveletMatrix
     RawWaveletMatrix (..),
 
-    -- * Construction
+    -- * Constructors
     build,
 
     -- * Access (indexing)
@@ -97,13 +97,13 @@ data RawWaveletMatrix = RawWaveletMatrix
   }
   deriving (Eq, Show)
 
--- | \(O(N \log N)\) Creates a `RawWaveletMatrix` from an array \(a\).
+-- | \(O(n \log n)\) Creates a `RawWaveletMatrix` from a vector \(a\).
 --
 -- @since 1.1.0.0
 {-# INLINE build #-}
 build ::
   (HasCallStack) =>
-  -- | The number of different \(x\), starting from zero.
+  -- | The number of different values in the compressed vector.
   Int ->
   -- | A compressed vector
   VU.Vector Int ->
@@ -365,8 +365,8 @@ selectKthIn wm@RawWaveletMatrix {..} l_ r_ k x
             (l'_, r'_)
             bitsRwm
 
--- | \(O(\log |S|)\) Given the interval \([l, r)\), returns the index of the \(k\)-th (0-based)
--- largest value. Note that duplicated values are treated as distinct occurrences.
+-- | \(O(\log |S|)\) Given an interval \([l, r)\), it returns the index of the \(k\)-th (0-based)
+-- largest value. Note that duplicated values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
 {-# INLINE kthLargestIn #-}
@@ -386,8 +386,8 @@ kthLargestIn wm l r k
   | 0 <= l && l < r && r <= lengthRwm wm = Just $ unsafeKthLargestIn wm l r k
   | otherwise = Nothing
 
--- | \(O(\log |S|)\) Given the interval \([l, r)\), returns both the index and the value of the
--- \(k\)-th (0-based) largest value. Note that duplicated values are treated as distinct occurrences.
+-- | \(O(\log |S|)\) Given an interval \([l, r)\), it returns both the index and the value of the
+-- \(k\)-th (0-based) largest value. Note that duplicated values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
 {-# INLINE ikthLargestIn #-}
@@ -407,8 +407,8 @@ ikthLargestIn wm l r k
   | 0 <= l && l < r && r <= lengthRwm wm = Just $ unsafeIKthLargestIn wm l r k
   | otherwise = Nothing
 
--- | \(O(\log |S|)\) Given the interval \([l, r)\), returns the index of the \(k\)-th (0-based)
--- smallest value. Note that duplicated values are treated as distinct occurrences.
+-- | \(O(\log |S|)\) Given an interval \([l, r)\), it returns the index of the \(k\)-th (0-based)
+-- smallest value. Note that duplicated values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
 {-# INLINE kthSmallestIn #-}
@@ -428,8 +428,8 @@ kthSmallestIn wm l r k
   | 0 <= l && l < r && r <= lengthRwm wm = Just $ unsafeKthSmallestIn wm l r k
   | otherwise = Nothing
 
--- | \(O(\log |S|)\) Given the interval \([l, r)\), returns both the index and the value of the
--- \(k\)-th (0-based) smallest value. Note that duplicated values are treated as distinct occurrences.
+-- | \(O(\log |S|)\) Given an interval \([l, r)\), it returns both the index and the value of the
+-- \(k\)-th (0-based) smallest value. Note that duplicated values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
 {-# INLINE ikthSmallestIn #-}
@@ -448,8 +448,8 @@ ikthSmallestIn wm l r k
   | 0 <= l && l < r && r <= lengthRwm wm = Just $ unsafeIKthSmallestIn wm l r k
   | otherwise = Nothing
 
--- | \(O(\log a)\) Returns \(k\)-th (0-based) biggest number in \([l, r)\). Two different values are
--- treated as separate values.
+-- | \(O(\log a)\) Returns \(k\)-th (0-based) biggest number in \([l, r)\). Note that duplicated
+-- values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
 {-# INLINE unsafeKthLargestIn #-}

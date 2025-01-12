@@ -3,18 +3,19 @@
 -- original implementaion:
 -- <https://github.com/maspypy/library/blob/main/ds/hashmap.hpp>
 
--- | A dense, fast `Int` hash map with the fixed-sized capacity of \(n\). Most operations are
+-- | A dense, fast `Int` hash map with a fixed-sized `capacity` of \(n\). Most operations are
 -- performed in \(O(1)\) time, but in average.
 --
--- NOTE: The entries cannot be invalidated due to the internal implementation (/open addressing/).
+-- NOTE: The entries (key - value pairs) cannot be invalidated due to the internal implementation
+-- (called /open addressing/).
 --
 -- ==== __Example__
--- Create a `HashMap` with capacity \(10\):
+-- Create a `HashMap` with `capacity` \(10\):
 --
 -- >>> import AtCoder.Extra.HashMap qualified as HM
 -- >>> hm <- HM.new @_ @Int 10
 --
--- `insert`, `lookup` and other functions are available:
+-- `insert`, `lookup` and other functions are available in \(O(1)\) averaged time:
 --
 -- >>> HM.insert hm 0 100
 -- >>> HM.insert hm 10 101
@@ -47,16 +48,16 @@ module AtCoder.Extra.HashMap
 
     -- * Modifications
 
-    -- ** Inserting
+    -- ** Insertions
     insert,
     insertWith,
     exchange,
 
-    -- ** Modifying
+    -- ** Updates
     modify,
     modifyM,
 
-    -- ** Clearing
+    -- ** Reset
     clear,
 
     -- * Conversions
@@ -86,7 +87,7 @@ import Data.Word (Word64)
 import GHC.Stack (HasCallStack)
 import Prelude hiding (lookup)
 
--- | A dense, fast `Int` hash map with the fixed-sized capacity of \(n\).
+-- | A dense, fast `Int` hash map with a fixed-sized capacity of \(n\).
 --
 -- @since 1.1.0.0
 data HashMap s a = HashMap
@@ -215,15 +216,15 @@ member hm@HashMap {..} k = do
 notMember :: (HasCallStack, PrimMonad m) => HashMap (PrimState m) a -> Int -> m Bool
 notMember hm k = not <$> member hm k
 
--- | \(O(1)\) Inserts a (key, value) pair.
+-- | \(O(1)\) Inserts a \((k, v)\) pair.
 --
 -- @since 1.1.0.0
 {-# INLINE insert #-}
 insert :: (HasCallStack, PrimMonad m, VU.Unbox a) => HashMap (PrimState m) a -> Int -> a -> m ()
 insert hm k v = void $ exchange hm k v
 
--- | \(O(1)\) Inserts a (key, value) pair. If the key exists, the function will insert the pair
--- @(key, f new old)@.
+-- | \(O(1)\) Inserts a \((k, v)\) pair. If the key exists, the function will insert the pair
+-- \((k, f(v_{\mathrm{new}}, v_{\mathrm{old}}))\).
 --
 -- @since 1.1.0.0
 {-# INLINE insertWith #-}
@@ -236,12 +237,12 @@ insertWith hm@HashMap {..} f k v = do
       -- modify the existing entry
       VGM.modify valHM (f v) i
     else do
-      -- insert the new (key, value) pair
+      -- insert the new \((k, v)\) pair
       decrementRestCapacity restCapHM "insertWith"
       VGM.write keyHM i k
       VGM.write valHM i v
 
--- | \(O(1)\) Inserts a (key, value) pair and returns the old value, or `Nothing` if no such entry
+-- | \(O(1)\) Inserts a \((k, v)\) pair and returns the old value, or `Nothing` if no such entry
 -- exists.
 --
 -- @since 1.1.0.0
@@ -299,14 +300,14 @@ clear HashMap {..} = do
 keys :: (PrimMonad m, VU.Unbox a) => HashMap (PrimState m) a -> m (VU.Vector Int)
 keys hm = VU.force <$> unsafeKeys hm
 
--- | \(O(n)\) Enumerates the keys in the hash map.
+-- | \(O(n)\) Enumerates the elements (values) in the hash map.
 --
 -- @since 1.1.0.0
 {-# INLINE elems #-}
 elems :: (PrimMonad m, VU.Unbox a) => HashMap (PrimState m) a -> m (VU.Vector a)
 elems hm = VU.force <$> unsafeElems hm
 
--- | \(O(n)\) Enumerates the keys in the hash map.
+-- | \(O(n)\) Enumerates the key-value pairs in the hash map.
 --
 -- @since 1.1.0.0
 {-# INLINE assocs #-}
@@ -323,7 +324,7 @@ unsafeKeys HashMap {..} = do
   keys_ <- VU.unsafeFreeze keyHM
   pure $ VU.ifilter (const . unBit . (used VG.!)) keys_
 
--- | \(O(n)\) Enumerates the elements in the hash map.
+-- | \(O(n)\) Enumerates the elements (values) in the hash map.
 --
 -- @since 1.1.0.0
 {-# INLINE unsafeElems #-}

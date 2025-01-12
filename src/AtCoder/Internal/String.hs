@@ -20,7 +20,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- TODO: remove `HasCallStack` when we're 100% sure the input is guarded
+-- TODO: remove `HasCallStack`?
 
 -- | \(O(n^2)\) Internal implementation of suffix array creation (naive).
 --
@@ -88,7 +88,18 @@ saDoubling s = VU.create $ do
 --
 -- @since 1.0.0.0
 {-# INLINE saIsImpl #-}
-saIsImpl :: (HasCallStack) => Int -> Int -> VU.Vector Int -> Int -> VU.Vector Int
+saIsImpl ::
+  (HasCallStack) =>
+  -- | naive threshould
+  Int ->
+  -- | doubling threshould
+  Int ->
+  -- | string
+  VU.Vector Int ->
+  -- | upper bounds
+  Int ->
+  -- | suffix array
+  VU.Vector Int
 saIsImpl naiveThreshold doublingThreshold s upper = VU.create $ do
   let n = VU.length s
   let !ls = VU.create $ do
@@ -247,7 +258,14 @@ saIsImpl naiveThreshold doublingThreshold s upper = VU.create $ do
 --
 -- @since 1.0.0.0
 {-# INLINE saIs #-}
-saIs :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
+saIs ::
+  (HasCallStack) =>
+  -- | string
+  VU.Vector Int ->
+  -- | upper bounds
+  Int ->
+  -- | suffix array
+  VU.Vector Int
 saIs = saIsManual 10 40
 
 -- | \(O(n)\) Internal implementation of suffix array creation (suffix array induced sorting).
@@ -259,7 +277,18 @@ saIs = saIsManual 10 40
 --
 -- @since 1.0.0.0
 {-# INLINE saIsManual #-}
-saIsManual :: (HasCallStack) => Int -> Int -> VU.Vector Int -> Int -> VU.Vector Int
+saIsManual ::
+  (HasCallStack) =>
+  -- | naive threshold
+  Int ->
+  -- | doubling threshold
+  Int ->
+  -- | string
+  VU.Vector Int ->
+  -- | upper bounds
+  Int ->
+  -- | suffix array
+  VU.Vector Int
 saIsManual naiveThreshold doublingThreshold s upper
   | n == 0 = VU.empty
   | n == 1 = VU.singleton 0

@@ -34,7 +34,7 @@ module AtCoder.Internal.MinHeap
   ( -- * Heap
     Heap,
 
-    -- * Constructor
+    -- * Constructors
     new,
 
     -- * Metadata
@@ -42,7 +42,7 @@ module AtCoder.Internal.MinHeap
     length,
     null,
 
-    -- * Clearing
+    -- * Reset
     clear,
 
     -- * Push/pop/peek
@@ -178,7 +178,7 @@ pop heap@Heap {..} = do
       siftDown 0
       pure $ Just root
 
--- | \(O(\log n)\) `pop` with return value discarded.
+-- | \(O(\log n)\) `pop` with the return value discarded.
 --
 -- @since 1.0.0.0
 {-# INLINE pop_ #-}

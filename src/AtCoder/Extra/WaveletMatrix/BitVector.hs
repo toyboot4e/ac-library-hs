@@ -44,11 +44,11 @@ data BitVector = BitVector
     --
     -- @since 1.1.0.0
     bitsBv :: !(VU.Vector Bit),
-    -- | Cumulative sum of bits by words.
+    -- | Cumulative sum of bits by 64 words.
     --
     -- @since 1.1.0.0
     csumBv :: !(VU.Vector Int)
-    -- we could use Word32
+    -- we could use Word32 for csumBv, as 2^32 is large enough
   }
   deriving (Eq, Show)
 
@@ -71,14 +71,13 @@ build bitsBv =
 wordSize :: Int
 wordSize = 64
 
--- | \(O(n)\) Calculates the cumulative sum by word for the bit vector in-place and returns the
--- sum.
+-- | \(O(n)\) Calculates the cumulative sum in-place for the bit vector and returns the sum.
 --
 -- @since 1.1.0.0
 {-# INLINE csumInPlace #-}
 csumInPlace ::
   (PrimMonad m) =>
-  -- | Cumulative sum of length \(\lceil (|\mathrm{bs}| + 63) / 64 \rceil\).
+  -- | Cumulative sum of length \(\lceil |\mathrm{bits}| / 64 \rceil\).
   VUM.MVector (PrimState m) Int ->
   -- | Bits
   VU.Vector Bit ->
@@ -119,21 +118,22 @@ rank1 BitVector {..} i = fromCSum + fromRest
     fromCSum = VG.unsafeIndex csumBv nWords
     fromRest = popCount . VU.take nRest . VU.drop (nWords * wordSize) $ bitsBv
 
--- | \(O(\log n)\) Returns the index of \(k\)-th \(0\), or `Nothing` if no such bit exists.
+-- | \(O(\log n)\) Returns the index of \(k\)-th \(0\) (0-based), or `Nothing` if no such bit exists.
 --
 -- @since 1.1.0.0
 {-# INLINE select0 #-}
 select0 :: BitVector -> Int -> Maybe Int
 select0 bv = selectKthIn0 bv 0 (VG.length (bitsBv bv))
 
--- | \(O(\log n)\) Returns the index of \(k\)-th \(1\), or `Nothing` if no such bit exists.
+-- | \(O(\log n)\) Returns the index of \(k\)-th \(1\) (0-based), or `Nothing` if no such bit exists.
 --
 -- @since 1.1.0.0
 {-# INLINE select1 #-}
 select1 :: BitVector -> Int -> Maybe Int
 select1 bv = selectKthIn1 bv 0 (VG.length (bitsBv bv))
 
--- | \(O(\log n)\) Returns the index of \(k\)-th \(0\) in \([l, r)\), or `Nothing` if no such bit exists.
+-- | \(O(\log n)\) Returns the index of \(k\)-th \(0\) (0-based) in \([l, r)\), or `Nothing` if no
+-- such bit exists.
 --
 -- @since 1.1.0.0
 {-# INLINE selectKthIn0 #-}
@@ -155,7 +155,8 @@ selectKthIn0 bv l r k
     nZeros = rank0 bv r - rankL0
     rankL0 = rank0 bv l
 
--- | \(O(\log n)\) Returns the index of \(k\)-th \(1\) in \([l, r)\), or `Nothing` if no such bit exists.
+-- | \(O(\log n)\) Returns the index of \(k\)-th \(1\) (0-based) in \([l, r)\), or `Nothing` if no
+-- such bit exists.
 --
 -- @since 1.1.0.0
 {-# INLINE selectKthIn1 #-}

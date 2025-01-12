@@ -11,7 +11,7 @@ module AtCoder.Extra.WaveletMatrix
   ( -- * Wavelet Matrix
     WaveletMatrix (..),
 
-    -- * Construction
+    -- * Constructors
     build,
 
     -- * Access (indexing)
@@ -74,7 +74,7 @@ import Data.Vector.Unboxed qualified as VU
 --
 -- @since 1.1.0.0
 data WaveletMatrix = WaveletMatrix
-  { -- | The raw wavelet matrix.
+  { -- | The internal wavelet matrix, where index compression is not automatically performed.
     --
     -- @since 1.1.0.0
     rawWM :: !Rwm.RawWaveletMatrix,

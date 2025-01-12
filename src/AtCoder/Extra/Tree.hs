@@ -7,8 +7,8 @@ module AtCoder.Extra.Tree
     -- | These function are built around the three type parameters: \(w\), \(f\) and \(a\).
     --
     -- - \(w\): Edge weight.
-    -- - \(f\): Monoid action to vertex values. These actions are created from vertex value \(a\) and
-    -- edge information @(Int, w)@.
+    -- - \(f\): Monoid action to a vertex value. These actions are created from vertex value \(a\)
+    -- and edge information @(Int, w)@.
     -- - \(a\): Monoid values stored at vertices.
     fold,
     scan,
@@ -59,7 +59,7 @@ foldImpl tree valAt toF act root memo = inner (-1) root
 --  let res = Tree.fold (gr `Gr.adjW`) valAt toF act 2
 --        where
 --          valAt :: Int -> X
---          valAt _i = mempty @(Sum Int)
+--          valAt = const $ mempty @(Sum Int)
 --          toF :: X -> (Int, W) -> F
 --          toF x (!_i, !dx) = x + dx
 --          act :: F -> X -> X
@@ -72,13 +72,13 @@ foldImpl tree valAt toF act root memo = inner (-1) root
 {-# INLINE fold #-}
 fold ::
   (HasCallStack, VU.Unbox w) =>
-  -- | A graph as a function.
+  -- | Graph as a function.
   (Int -> VU.Vector (Int, w)) ->
-  -- | Assignment of initial vertex values.
+  -- | @valAt@: Assignment of initial vertex values.
   (Int -> a) ->
-  -- | Converts a vertex value into an action onto a neighbor vertex.
+  -- | @toF@: Converts a vertex value into an action onto a neighbor vertex.
   (a -> (Int, w) -> f) ->
-  -- | Performs an action onto a vertex value.
+  -- | @act@: Performs an action onto a vertex value.
   (f -> a -> a) ->
   -- | Root vertex.
   Int ->
@@ -104,7 +104,7 @@ fold tree valAt toF act root = runIdentity $ do
 --  let res = Tree.scan n (gr `Gr.adjW`) valAt toF act 2
 --        where
 --          valAt :: Int -> X
---          valAt _i = mempty @(Sum Int)
+--          valAt = const $ mempty @(Sum Int)
 --          toF :: X -> (Int, W) -> F
 --          toF x (!_i, !dx) = x + dx
 --          act :: F -> X -> X
@@ -119,13 +119,13 @@ scan ::
   (VU.Unbox w, VG.Vector v a) =>
   -- | The number of vertices.
   Int ->
-  -- | A graph as a function.
+  -- | Graph as a function.
   (Int -> VU.Vector (Int, w)) ->
-  -- | Assignment of initial vertex values.
+  -- | @valAt@: Assignment of initial vertex values.
   (Int -> a) ->
-  -- | Converts a vertex value into an action onto a neighbor vertex.
+  -- | @toF@: Converts a vertex value into an action onto a neighbor vertex.
   (a -> (Int, w) -> f) ->
-  -- | Performs an action onto a vertex value.
+  -- | @act@: Performs an action onto a vertex value.
   (f -> a -> a) ->
   -- | Root vertex.
   Int ->
@@ -153,7 +153,7 @@ scan n tree acc0At toF act root = VG.create $ do
 --  let res = Tree.foldReroot n (gr `Gr.adjW`) valAt toF act
 --        where
 --          valAt :: Int -> X
---          valAt _i = mempty @(Sum Int)
+--          valAt = const $ mempty @(Sum Int)
 --          toF :: X -> (Int, W) -> F
 --          toF x (!_i, !dx) = x + dx
 --          act :: F -> X -> X
@@ -169,13 +169,13 @@ foldReroot ::
   (HasCallStack, VU.Unbox w, VU.Unbox a, VU.Unbox f, Monoid f) =>
   -- | The number of vertices.
   Int ->
-  -- | A graph as a function.
+  -- | Graph as a function.
   (Int -> VU.Vector (Int, w)) ->
-  -- | Assignment of initial vertex values.
+  -- | @valAt@:Assignment of initial vertex values.
   (Int -> a) ->
-  -- | Converts a vertex value into an action onto a neighbor vertex.
+  -- | @toF@: Converts a vertex value into an action onto a neighbor vertex.
   (a -> (Int, w) -> f) ->
-  -- | Performs an action onto a vertex value.
+  -- | @act@: Performs an action onto a vertex value.
   (f -> a -> a) ->
   -- | Tree folding result from every vertex as a root.
   VU.Vector a

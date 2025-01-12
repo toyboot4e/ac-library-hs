@@ -1,11 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Heavy-light decomposition is a technique that breaks down a tree into segments, where each
--- segment is assigned consecutive indices. It allows various path/subtree queries to be processed
--- in \(O(\log n)\) time. See also the @TreeMonoid@ module for integrating segment trees and
--- getting products on paths in \(O(\log^2 n)\) time or subtrees in \(O(\log n)\) time.
+-- | Heavy-light decomposition is a method for partitioning a tree into segments with consecutive
+-- indices. It processes various path queries in \(O(\log n)\) time. For segment tree integration
+-- and monoid products, refer to the @TreeMonoid@ module.
 --
 -- ==== __Overview of the internals__
+-- The following is for understanding the internals, not for using the API. Skip to the examples if
+-- you want.
 --
 -- ===== Original tree
 --
@@ -32,8 +33,8 @@
 --     15
 -- @
 --
--- Note that vertices on higher (shallower) segments are assigned smaller indices. This is very
--- internally very important when calculating `lca`.
+-- Note that vertices on higher (closer to the root) segments are assigned smaller indices. This is
+-- very internally very important when calculating `lca`.
 --
 -- ===== `headHld`: Vertex -> Vertex
 --
@@ -44,7 +45,7 @@
 -- @
 --  0==0==0==0==0==0==0==0==0==0     XX: original Vertex
 --     |     |
---  5==5      11==11==11
+--  5==5     11==11==11
 --     |
 --     4
 -- @
@@ -99,8 +100,9 @@
 -- >>> Hld.isInSubtree hld 2 4 -- `4` is not in the subtree of `2`
 -- False
 --
--- Segment queries are used by the @TreeMonoid@ module and s not intended for manual use, here's
--- some examples. This time, the reindex by the HLD is super simple:
+-- ===== Segment queries
+-- Products and segment queries are primarily used by the @TreeMonoid@ module and is not intended
+-- for diretct use, but here's some examples. This time the reindex by the HLD is identity:
 --
 -- >>> Hld.indexHld hld
 -- [0,1,2,3,4,5]
@@ -144,9 +146,6 @@ module AtCoder.Extra.Tree.Hld
     isInSubtree,
 
     -- * Products
-
-    -- | These functions are rather for internal use, so see the @TreeMonoid@ module as the primary
-    -- API.
     WeightPolicy (..),
     prod,
   )
@@ -174,7 +173,7 @@ type Vertex = Int
 -- @since 1.1.0.0
 type VertexHld = Vertex
 
--- | Hld splits a tree into segments and assignes contiguous `VertexHLD` for each segment.
+-- | `Hld` partitions a tree into segments and assignes contiguous `VertexHld` for each segment.
 --
 -- @since 1.1.0.0
 data Hld = Hld
@@ -395,7 +394,7 @@ path hld@Hld {..} u v = concatMap expand $ pathSegmentsInclusive WeightsAreOnVer
       | otherwise = map (revIndexHld VG.!) [l, l - 1 .. r]
 
 -- | \(O(\log n)\) Decomposes a path between two vertices \(u\) and \(v\) into segments. Each
--- segment is represented as an inclusive range \([u_i, v_i]\) of `VertexHLD`.
+-- segment is represented as an __inclusive__ range \([u_i, v_i]\) of `VertexHLD`.
 --
 -- The LCA is omitted from the returning vertices when the weight policy is set to
 -- `WeightsAreOnEdges`. This is the trick to put edge weights to on vertices.

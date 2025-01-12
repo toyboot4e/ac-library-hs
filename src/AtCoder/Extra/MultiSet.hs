@@ -62,7 +62,7 @@ module AtCoder.Extra.MultiSet
   ( -- * MultiSet
     MultiSet,
 
-    -- * Construtor
+    -- * Construtors
     new,
 
     -- * Metadata
@@ -155,7 +155,7 @@ member MultiSet {..} k = do
     Just i -> i > 0
     _ -> False
 
--- | \(O(1)\) Tests whether \(k\) is not in the map.
+-- | \(O(1)\) Tests whether \(k\) is not in the set.
 --
 -- @since 1.1.0.0
 notMember :: (PrimMonad m) => MultiSet (PrimState m) -> Int -> m Bool
@@ -173,8 +173,8 @@ inc ms k = add ms k 1
 dec :: (HasCallStack, PrimMonad m) => MultiSet (PrimState m) -> Int -> m ()
 dec ms k = sub ms k 1
 
--- | \(O(1)\) Increments the count of a key \(k\) by \(v\). If the key does not exist in the map,
--- the \(k, v\) pair is inserted. If \(v\) is negative, it falls back to `sub`.
+-- | \(O(1)\) Increments the count of a key \(k\) by \(c\). If the key does not exist in the set,
+-- the \((k, c)\) pair is inserted. If \(v\) is negative, it falls back to `sub`.
 --
 -- @since 1.1.0.0
 add :: (HasCallStack, PrimMonad m) => MultiSet (PrimState m) -> Int -> Int -> m ()
@@ -191,7 +191,7 @@ add ms@MultiSet {..} k v = case compare v 0 of
         HM.insert mapMS k v
         VGM.unsafeModify cntMS (+ 1) 0
 
--- | \(O(1)\) Decrements the count of a key \(k\) by \(v\). If \(v\) is negative, it falls back to
+-- | \(O(1)\) Decrements the count of a key \(k\) by \(c\). If \(c\) is negative, it falls back to
 -- `add`.
 --
 -- @since 1.1.0.0
@@ -211,7 +211,7 @@ sub ms@MultiSet {..} k v = case compare v 0 of
         LT -> error $ "AtCoder.Extra.Multiset.sub: the count of `" ++ show k ++ "` is becoming a negative value: `" ++ show (n - v) ++ "`"
       _ -> pure ()
 
--- | \(O(1)\) Inserts a \(k, v\) pair.
+-- | \(O(1)\) Inserts a key-count pair into the set. `MultiSet` is actually a count map.
 --
 -- @since 1.1.0.0
 insert :: (HasCallStack, PrimMonad m) => MultiSet (PrimState m) -> Int -> Int -> m ()

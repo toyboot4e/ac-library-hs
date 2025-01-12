@@ -3,7 +3,7 @@
 -- original implementation:
 -- <https://github.com/maspypy/library/blob/main/ds/fastset.hpp>
 
--- | A dense, fast `Int` set implemented as a 64-ary tree that covers the interval \([0, n)\).
+-- | A dense, fast `Int` set implemented as a 64-ary tree that covers an interval \([0, n)\).
 --
 -- ==== __Example__
 -- Create an `IntSet` with capacity \(10\):
@@ -42,33 +42,34 @@ module AtCoder.Extra.IntSet
     -- * Metadata
     capacity,
     size,
+    null,
 
     -- * Lookups
     member,
     notMember,
 
-    -- ** Compartive
+    -- ** Compartive lookups
     lookupGE,
     lookupGT,
     lookupLE,
     lookupLT,
 
-    -- ** Max/Min
+    -- ** Max/Min lookups
     lookupMin,
     lookupMax,
 
     -- * Modifications
 
-    -- ** Inserting
+    -- ** Insertions
     insert,
 
-    -- ** Deleting
+    -- ** Deletions
     delete,
     delete_,
     deleteMin,
     deleteMax,
 
-    -- * Conversion
+    -- * Conversions
     keys,
   )
 where
@@ -90,6 +91,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
+import Prelude hiding (null)
 
 -- | \(O(1)\) Retrieves the most significant bit.
 --
@@ -124,7 +126,7 @@ lsbOf x = countTrailingZeros x
 wordSize :: Int
 wordSize = 64
 
--- | A dense, fast `Int` set implemented as a 64-ary tree that covers the interval \([0, n)\).
+-- | A dense, fast `Int` set implemented as a 64-ary tree that covers an interval \([0, n)\).
 --
 -- @since 1.1.0.0
 data IntSet s = IntSet
@@ -159,7 +161,7 @@ new capacityIS = do
         (bimap ((`div` wordSize) . (+ (wordSize - 1))) (+ 1))
         (capacityIS, 0)
 
--- | \(O(n \log n)\) Creates an `IntSet` for the interval \([0, n)\) with initial values.
+-- | \(O(n + m \log n)\) Creates an `IntSet` for the interval \([0, n)\) with initial values.
 --
 -- @since 1.1.0.0
 {-# INLINE build #-}
@@ -183,7 +185,14 @@ capacity = capacityIS
 size :: (PrimMonad m) => IntSet (PrimState m) -> m Int
 size = (`VUM.unsafeRead` 0) . sizeIS
 
--- | \(O(\log n)\) Tests whether \(k\) is in the map.
+-- | \(O(1)\) Returns whether the set is empty.
+--
+-- @since 1.1.0.0
+{-# INLINE null #-}
+null :: (PrimMonad m) => IntSet (PrimState m) -> m Bool
+null = ((== 0) <$>) . size
+
+-- | \(O(\log n)\) Tests whether \(k\) is in the set.
 --
 -- @since 1.1.0.0
 {-# INLINE member #-}
@@ -201,14 +210,7 @@ member IntSet {..} k
 notMember :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m Bool
 notMember dis k = not <$> member dis k
 
--- | \(O(\log n)\) Deletes \(k\) from the set. Does nothing if no such key exists.
---
--- @since 1.1.0.0
-{-# INLINE delete_ #-}
-delete_ :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m ()
-delete_ is k = void $ delete is k
-
--- | \(O(\log n)\) Looks up the smallest \(k\) such that \(k \ge k_0\) in the set.
+-- | \(O(\log n)\) Looks up the smallest key \(k\) such that \(k \ge k_0\).
 --
 -- @since 1.1.0.0
 {-# INLINE lookupGE #-}
@@ -237,14 +239,14 @@ lookupGE IntSet {..} i0
       where
         (!q, !r) = i `divMod` wordSize
 
--- | \(O(\log n)\) Looks up the smallest \(k\) such that \(k \gt k_0\) in the set.
+-- | \(O(\log n)\) Looks up the smallest key \(k\) such that \(k \gt k_0\).
 --
 -- @since 1.1.0.0
 {-# INLINE lookupGT #-}
 lookupGT :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m (Maybe Int)
 lookupGT is k = lookupGE is (k + 1)
 
--- | \(O(\log n)\) Looks up the largest \(k\) such that \(k \le k_0\) in the set.
+-- | \(O(\log n)\) Looks up the largest key \(k\) such that \(k \le k_0\).
 --
 -- @since 1.1.0.0
 {-# INLINE lookupLE #-}
@@ -272,29 +274,29 @@ lookupLE IntSet {..} i0
       where
         (!q, !r) = i `divMod` wordSize
 
--- | \(O(\log n)\) Looks up the largest \(k\) such that \(k \lt k_0\) in the set.
+-- | \(O(\log n)\) Looks up the largest key \(k\) such that \(k \lt k_0\).
 --
 -- @since 1.1.0.0
 {-# INLINE lookupLT #-}
 lookupLT :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m (Maybe Int)
 lookupLT is k = lookupLE is (k - 1)
 
--- | \(O(\log n)\) Looks up minimum value in the set.
+-- | \(O(\log n)\) Looks up the minimum key.
 --
 -- @since 1.1.0.0
 {-# INLINE lookupMin #-}
 lookupMin :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
 lookupMin is = lookupGE is 0
 
--- | \(O(\log n)\) Looks up maximum value in the set.
+-- | \(O(\log n)\) Looks up the maximum key.
 --
 -- @since 1.1.0.0
 {-# INLINE lookupMax #-}
 lookupMax :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
 lookupMax is = lookupLE is (capacityIS is - 1)
 
--- | \(O(\log n)\) Inserts \(k\) into the set. If an entry with the same key already exists, it is
--- overwritten.
+-- | \(O(\log n)\) Inserts a key \(k\) into the set. If an entry with the same key already exists,
+-- it is overwritten.
 --
 -- @since 1.1.0.0
 {-# INLINE insert #-}
@@ -314,8 +316,8 @@ insert is@IntSet {..} k = do
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.IntSet.insert" k capacityIS
 
--- | \(O(\log n)\) Deletes @k@ from the set. Does nothing if no such key exists. Returns whether the
--- key existed.
+-- | \(O(\log n)\) Deletes a key \(k\) from the set. Does nothing if no such key exists. Returns
+-- whether the key existed.
 --
 -- @since 1.1.0.0
 {-# INLINE delete #-}
@@ -340,7 +342,14 @@ delete is@IntSet {..} k = do
       pure True
     else pure False
 
--- | \(O(\log n)\) Deletes the minimum value in the set.
+-- | \(O(\log n)\) Deletes a key \(k\) from the set. Does nothing if no such key exists.
+--
+-- @since 1.1.0.0
+{-# INLINE delete_ #-}
+delete_ :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m ()
+delete_ is k = void $ delete is k
+
+-- | \(O(\log n)\) Deletes the minimum key from the set. Returns `Nothing` if the set is empty.
 --
 -- @since 1.1.0.0
 {-# INLINE deleteMin #-}
@@ -353,7 +362,7 @@ deleteMin is = do
           pure key
       )
 
--- | \(O(\log n)\) Deletes the maximum value in the set.
+-- | \(O(\log n)\) Deletes the maximum key from the set. Returns `Nothing` if the set is empty.
 --
 -- @since 1.1.0.0
 {-# INLINE deleteMax #-}

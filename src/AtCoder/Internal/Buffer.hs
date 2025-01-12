@@ -1,7 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Pushable vector with fixed size capacity. Stack. Internally it tracks the number of elements
--- in the vector.
+-- | A pushable vector with fixed capacity \(n\). Internally, it tracks the number of elements.
 --
 -- ==== __Example__
 -- Create a buffer with capacity @4@:
@@ -85,7 +84,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (length, null, read)
 
--- | Pushable vector with fixed size capacity. Stack.
+-- | A pushable vector with fixed capacity \(n\). Internally, it tracks the number of elements.
 --
 -- @since 1.0.0.0
 data Buffer s a = Buffer
@@ -184,7 +183,7 @@ popBack Buffer {..} = do
       pure $ Just x
 
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
--- out of range.
+-- out of bounds.
 --
 -- @since 1.0.0.0
 {-# INLINE write #-}
@@ -195,7 +194,7 @@ write Buffer {..} i e = do
   VGM.write vecB i e
 
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
--- out of range.
+-- out of bounds.
 --
 -- @since 1.0.0.0
 {-# INLINE modify #-}
@@ -206,7 +205,7 @@ modify Buffer {..} f i = do
   VGM.modify vecB f i
 
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
--- out of range.
+-- out of bounds.
 --
 -- @since 1.0.0.0
 {-# INLINE modifyM #-}

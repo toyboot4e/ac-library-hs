@@ -1,10 +1,10 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Immutable Compresed Sparse Row. It is re-exported from @AtCoder.Extra.Graph@ with additional
--- functionalities.
+-- | Immutable Compresed Sparse Row. It is re-exported from the @AtCoder.Extra.Graph@ module with
+-- additional functionalities.
 --
 -- ==== __Example__
--- Create a `Csr` without edge weights using `build`:
+-- Create a `Csr` without edge weights using `build'` and retrieve the edges with `adj`:
 --
 -- >>> import AtCoder.Internal.Csr qualified as C
 -- >>> let csr = build' 3 $ VU.fromList @(Int, Int) [(0, 1), (0, 2), (0, 3), (1, 2), (2, 3)]
@@ -17,7 +17,7 @@
 -- >>> csr `C.adj` 2
 -- [3]
 --
--- Create a `Csr` with edge weights with `build` and retrieve edge with `edgeW`:
+-- Create a `Csr` with edge weights using `build` and retrieve the edges with `adjW`:
 --
 -- >>> import AtCoder.Internal.Csr qualified as C
 -- >>> let csr = build 3 $ VU.fromList @(Int, Int, Int) [(0, 1, 101), (0, 2, 102), (0, 3, 103), (1, 2, 112), (2, 3, 123)]
@@ -38,6 +38,7 @@ module AtCoder.Internal.Csr
     -- * Constructor
     build,
     build',
+    build1,
 
     -- * Accessors
     adj,
@@ -118,13 +119,22 @@ build nCsr edges = runST $ do
   wCsr <- VU.unsafeFreeze edgeW
   pure Csr {..}
 
--- | \(O(n + m)\) Creates a `Csr` with no weight.
+-- | \(O(n + m)\) Creates a `Csr` with no edge weight.
 --
 -- @since 1.0.0.0
 {-# INLINE build' #-}
 build' :: (HasCallStack) => Int -> VU.Vector (Int, Int) -> Csr ()
 build' n edges = build n $ VU.zip3 us vs (VU.replicate (VU.length us) ())
   where
+    (!us, !vs) = VU.unzip edges
+
+-- | \(O(n + m)\) Creates a `Csr` with @1@ as edge weights.
+--
+-- @since 1.1.0.0
+{-# INLINE build1 #-}
+build1 :: (HasCallStack) => Int -> VU.Vector (Int, Int) -> Csr Int
+build1 n edges = build n $ VU.zip3 us vs (VU.replicate (VU.length us) (1 :: Int))
+ where
     (!us, !vs) = VU.unzip edges
 
 -- | \(O(1)\) Returns the adjacent vertices.

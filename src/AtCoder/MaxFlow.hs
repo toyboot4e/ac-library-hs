@@ -21,7 +21,7 @@
 -- 1
 --
 -- Get the minimum cut with `minCut`. In this case, removing the second edge makes the minimum cut
--- (note that the edge capacity (\(1\)) = max flow):
+-- (note that the edge capacity \(1\) = max flow):
 --
 -- >>> MF.minCut g 0 -- returns a Bit vector. `1` (`Bit True`) is on the `s` side.
 -- [1,1,0]
@@ -116,7 +116,18 @@ new nG = do
 --
 -- @since 1.0.0.0
 {-# INLINE addEdge #-}
-addEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m Int
+addEdge ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | from
+  Int ->
+  -- | to
+  Int ->
+  -- | cap
+  cap ->
+  -- | Edge index
+  m Int
 addEdge MfGraph {..} from to cap = do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdge" "`from` vertex" from "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdge" "`to` vertex" to "the number of vertices" nG
@@ -131,7 +142,7 @@ addEdge MfGraph {..} from to cap = do
   ACIGV.pushBack (gG VG.! to) (from, iEdge, 0)
   pure m
 
--- | `addEdge` with return value discarded.
+-- | `addEdge` with the return value discarded.
 --
 -- ==== Constraints
 -- - \(0 \leq \mathrm{from}, \mathrm{to} \lt n\)
@@ -142,7 +153,17 @@ addEdge MfGraph {..} from to cap = do
 --
 -- @since 1.0.0.0
 {-# INLINE addEdge_ #-}
-addEdge_ :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m ()
+addEdge_ ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | from
+  Int ->
+  -- | to
+  Int ->
+  -- | cap
+  cap ->
+  m ()
 addEdge_ graph from to cap = do
   _ <- addEdge graph from to cap
   pure ()
@@ -161,7 +182,18 @@ addEdge_ graph from to cap = do
 --
 -- @since 1.0.0.0
 {-# INLINE flow #-}
-flow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> cap -> m cap
+flow ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Source @s@
+  Int ->
+  -- | Sink @t@
+  Int ->
+  -- | Flow limit
+  cap ->
+  -- | Max flow
+  m cap
 flow MfGraph {..} s t flowLimit = do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`source` vertex" s "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`sink` vertex" t "the number of vertices" nG
@@ -253,7 +285,16 @@ flow MfGraph {..} s t flowLimit = do
 --
 -- @since 1.0.0.0
 {-# INLINE maxFlow #-}
-maxFlow :: (HasCallStack, PrimMonad m, Num cap, Ord cap, Bounded cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> Int -> m cap
+maxFlow ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, Bounded cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Source @s@
+  Int ->
+  -- | Sink @t@
+  Int ->
+  -- | Max flow
+  m cap
 maxFlow graph s t = flow graph s t maxBound
 
 -- | Returns a vector of length \(n\), such that the \(i\)-th element is `True` if and only if there
@@ -265,7 +306,14 @@ maxFlow graph s t = flow graph s t maxBound
 --
 -- @since 1.0.0.0
 {-# INLINE minCut #-}
-minCut :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (VU.Vector Bit)
+minCut ::
+  (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Source @s@
+  Int ->
+  -- | Minimum cut
+  m (VU.Vector Bit)
 minCut MfGraph {..} s = do
   visited <- VUM.replicate nG $ Bit False
   que <- ACIQ.new nG -- we could use a growable queue here
@@ -296,7 +344,14 @@ minCut MfGraph {..} s = do
 --
 -- @since 1.0.0.0
 {-# INLINE getEdge #-}
-getEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> m (Int, Int, cap, cap)
+getEdge ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Vertex
+  Int ->
+  -- | Tuple of @(from, to, cap, flow)@
+  m (Int, Int, cap, cap)
 getEdge MfGraph {..} i = do
   m <- ACIGV.length posG
   let !_ = ACIA.checkEdge "AtCoder.MaxFlow.getEdge" i m
@@ -313,7 +368,12 @@ getEdge MfGraph {..} i = do
 --
 -- @since 1.0.0.0
 {-# INLINE edges #-}
-edges :: (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> m (VU.Vector (Int, Int, cap, cap))
+edges ::
+  (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Vector of @(from, to, cap, flow)@
+  m (VU.Vector (Int, Int, cap, cap))
 edges g@MfGraph {posG} = do
   len <- ACIGV.length posG
   VU.generateM len (getEdge g)
@@ -329,7 +389,17 @@ edges g@MfGraph {posG} = do
 --
 -- @since 1.0.0.0
 {-# INLINE changeEdge #-}
-changeEdge :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => MfGraph (PrimState m) cap -> Int -> cap -> cap -> m ()
+changeEdge ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Edge index
+  Int ->
+  -- | New capacity
+  cap ->
+  -- | New flow
+  cap ->
+  m ()
 changeEdge MfGraph {..} i newCap newFlow = do
   m <- ACIGV.length posG
   let !_ = ACIA.checkEdge "AtCoder.MaxFlow.changeEdge" i m

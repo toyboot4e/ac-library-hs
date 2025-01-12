@@ -51,7 +51,7 @@
 -- >>> LST.allProd seg
 -- Sum {getSum = 24}
 --
--- Run binary search in \(O(\log n\) time complexity:
+-- Run binary search:
 --
 -- >>> LST.maxRight seg 0 (<= (Sum 10)) -- sum [0, 2) = 7 <= 10
 -- 2
@@ -59,8 +59,7 @@
 -- >>> LST.minLeft seg 4 (<= (Sum 10)) -- sum [3, 4) = 10 <= 10
 -- 3
 --
--- Inspect all the values in \(O(n \log n)\) with `freeze` or `unsafeFreeze`. Note that they
--- propagete all the applied actions:
+-- Inspect all the values in \(O(n \log n)\) with `freeze` or `unsafeFreeze`:
 --
 -- >>> VU.map getSum <$> LST.freeze seg
 -- [2,5,7,10]
@@ -69,7 +68,7 @@
 --
 -- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\). If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\),
 -- wrap your monoid in `Data.Monoid.Dual`.
--- - If you ever need to store boxed types to `LazySegTree`, wrap it in 'vector:Data.Vector.Unboxed.DoNotUnboxStrict'
+-- - If you ever need to store boxed types to `LazySegTree`, wrap it in @Data.Vector.Unboxed.DoNotUnboxStrict@
 -- or the like.
 --
 -- ==== Major changes from the original @ac-library@
@@ -135,13 +134,13 @@ import Prelude hiding (read)
 -- | Typeclass reprentation of the `LazySegTree` properties. User can implement either `segAct` or
 -- `segActWithLength`.
 --
--- Instances should satisfy the follwing:
+-- Instances should satisfy the follwing properties:
 --
 -- [Left monoid action] @'segAct' (f2 '<>' f1) x = 'segAct' f2 ('segAct' f1 x)@
 -- [Identity map] @`segAct` `mempty` x = x@
 -- [Endomorphism] @'segAct' f (x1 '<>' x2) = ('segAct' f x1) '<>' ('segAct' f x2)@
 --
--- If you implement `segActWithLength`, satisfy one more propety:
+-- If you implement `SegAct` via `segActWithLength`, satisfy one more propety:
 --
 -- [Linear left monoid action] @'segActWithLength' len f a = 'Data.Semigroup.stimes' len ('segAct' f a) a@.
 --
@@ -468,7 +467,7 @@ prod self@LazySegTree {nLst} l0 r0
   | otherwise = unsafeProd self l0 r0
 
 -- | Total variant of `prod`. Returns the product of \([a[l], ..., a[r - 1]]\), assuming the
--- properties of the monoid. It returns `Just` `mempty` if \(l = r\). It returns `Nothing` if the
+-- properties of the monoid. Returns `Just` `mempty` if \(l = r\). It returns `Nothing` if the
 -- interval is invalid.
 --
 -- ==== Complexity
@@ -518,7 +517,7 @@ unsafeProd self@LazySegTree {..} l0 r0 = do
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m a
 allProd LazySegTree {..} = VGM.read dLst 1
 
--- | Applies @segAct f@ to an index @p@.
+-- | Applies @segAct f@ to an index \(p\).
 --
 -- ==== Constraints
 -- - \(0 \leq p \lt n\)
@@ -541,7 +540,7 @@ applyAt self@LazySegTree {..} p f = do
   for_ [1 .. logLst] $ \i -> do
     update self $ p' .>>. i
 
--- | Applies @segAct f@ to an interval @[l, r)@.
+-- | Applies @segAct f@ to an interval \([l, r)\).
 --
 -- ==== Constraints
 -- - \(0 \leq l \leq r \leq n\)

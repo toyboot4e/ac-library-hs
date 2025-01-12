@@ -30,6 +30,7 @@ instance QC.Arbitrary Init where
 data Query
   = Member Int
   | NotMember Int
+  | Null
   | Insert Int
   | Delete Int
   | Delete_ Int
@@ -56,6 +57,7 @@ queryGen n = do
   QC.oneof
     [ Member <$> lookupKeyGen,
       NotMember <$> lookupKeyGen,
+      pure Null,
       -- insert is partial function
       Insert <$> insertKeyGen,
       Delete <$> lookupKeyGen,
@@ -78,6 +80,7 @@ handleRef :: ISR.Set Int -> Query -> (ISR.Set Int, Result)
 handleRef is q = case q of
   Member k -> (is, B $ ISR.member k is)
   NotMember k -> (is, B . not $ ISR.member k is)
+  Null -> (is, B $ ISR.null is)
   Insert k -> (ISR.insert k is, None)
   Delete k -> (ISR.delete k is, B $ ISR.member k is)
   Delete_ k -> (ISR.delete k is, None)
@@ -99,6 +102,7 @@ handleAcl :: (HasCallStack, PrimMonad m) => IS.IntSet (PrimState m) -> Query -> 
 handleAcl is q = case q of
   Member k -> B <$> IS.member is k
   NotMember k -> B <$> IS.notMember is k
+  Null -> B <$> IS.null is
   Insert k -> do
     IS.insert is k
     pure None

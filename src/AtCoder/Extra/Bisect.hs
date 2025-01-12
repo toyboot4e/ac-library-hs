@@ -1,15 +1,27 @@
 -- | Bisection methods and binary search functions. They partition a half-open interval \([l, r)\)
--- into two and return either left or right boundary point.
+-- into two and return either the left or the right point of the boundary.
 --
 -- @
 -- Y Y Y Y Y N N N N N      Y: user predicate holds
 -- --------* *---------> X  N: user predicate does not hold
---         L R              L, R: left, right point of the partition
+--         L R              L, R: left, right point of the boundary
 -- @
+--
+-- ==== __Example__
+-- Perform index compression:
+--
+-- >>> import AtCoder.Extra.Bisect
+-- >>> import Data.Maybe (fromJust)
+-- >>> import Data.Vector.Algorithms.Intro qualified as VAI
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let xs = VU.fromList ([0, 20, 10, 40, 30] :: [Int])
+-- >>> let dict = VU.uniq $ VU.modify VAI.sort xs
+-- >>> VU.map (fromJust . lowerBound dict) xs
+-- [0,2,1,4,3]
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Bisect
-  ( -- * C++ like binary search
+  ( -- * C++-like binary search
     lowerBound,
     lowerBoundIn,
     upperBound,
@@ -52,8 +64,8 @@ bisectLImpl p l0 = inner (l0 - 1)
 bisectRImpl :: (HasCallStack, Monad m) => (Int -> m Bool) -> Int -> Int -> m Int
 bisectRImpl p l = ((+ 1) <$>) . bisectLImpl p l
 
--- | \(O(\log n)\) Binary search on a vector. It returns the index of first element \(x\) s.t.
--- \(x \ge x_0\), or `Nothing` when no such point exists.
+-- | \(O(\log n)\) Returns the index of the first element \(x\) in the vector such that
+-- \(x \ge x_0\), or `Nothing` if no such element exists.
 --
 -- @
 -- Y Y Y Y Y N N N N N      Y: (< x0)
@@ -89,39 +101,43 @@ bisectRImpl p l = ((+ 1) <$>) . bisectLImpl p l
 lowerBound :: (HasCallStack, VG.Vector v a, Ord a) => v a -> a -> Maybe Int
 lowerBound vec = lowerBoundIn 0 (VG.length vec) vec
 
--- | \(O(\log n)\) `lowerBound` for a vector of slice \([l, r)\).
+-- | \(O(\log n)\) Computes the `lowerBound` for a slice of a vector within the interval \([l, r)\).
 --
--- ==== Constraints
--- - \(0 \leq l \leq r \leq n\)
+-- - The user predicate evaluates indices in \([l, r)\).
+-- - The interval \([l, r)\) is silently clamped to ensure it remains within the bounds \([0, n)\).
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
--- >>> let xs = VU.fromList [1, 1, 2, 2, 4, 4]
--- >>> --                          *--*--*
--- >>> lowerBoundIn 2 5 xs 1
+-- >>> let xs = VU.fromList [10, 10, 20, 20, 40, 40]
+-- >>> --                            *---*---*
+-- >>> lowerBoundIn 2 5 xs 10
 -- Just 2
 --
--- >>> lowerBoundIn 2 5 xs 2
+-- >>> lowerBoundIn 2 5 xs 20
 -- Just 2
 --
--- >>> lowerBoundIn 2 5 xs 3
+-- >>> lowerBoundIn 2 5 xs 30
 -- Just 4
 --
--- >>> lowerBoundIn 2 5 xs 4
+-- >>> lowerBoundIn 2 5 xs 40
 -- Just 4
 --
--- >>> lowerBoundIn 2 5 xs 5
+-- >>> lowerBoundIn 2 5 xs 50
 -- Nothing
 --
 -- @since 1.1.0.0
 {-# INLINE lowerBoundIn #-}
-lowerBoundIn :: (HasCallStack, VG.Vector v a, Ord a) => Int -> Int -> v a -> a -> Maybe Int
-lowerBoundIn l r vec target = bisectR l r $ \i -> VG.unsafeIndex vec i < target
+lowerBoundIn :: (VG.Vector v a, Ord a) => Int -> Int -> v a -> a -> Maybe Int
+lowerBoundIn l_ r_ vec target
+  | ACIA.testInterval l r (VG.length vec) = bisectR l r $ \i -> VG.unsafeIndex vec i < target
+  | otherwise = Nothing
   where
-    !_ = ACIA.checkInterval "AtCoder.Extra.Bisect.lowerBoundIn" l r (VG.length vec)
+    -- clamp
+    l = max 0 l_
+    r = min (VG.length vec) r_
 
--- | \(O(\log n)\) Binary search on a vector. It returns the index of first element \(x\) s.t.
--- \(x \gt x_0\), or `Nothing` when no such point exists.
+-- | \(O(\log n)\) Returns the index of the first element \(x\) in the vector such that
+-- \(x \gt x_0\), or `Nothing` if no such element exists.
 --
 -- @
 -- Y Y Y Y Y N N N N N      Y: (<= x0)
@@ -131,17 +147,17 @@ lowerBoundIn l r vec target = bisectR l r $ \i -> VG.unsafeIndex vec i < target
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
--- >>> let xs = VU.fromList [1, 1, 2, 2, 4, 4]
--- >>> upperBound xs 1
+-- >>> let xs = VU.fromList [10, 10, 20, 20, 40, 40]
+-- >>> upperBound xs 10
 -- Just 2
 --
--- >>> upperBound xs 2
+-- >>> upperBound xs 20
 -- Just 4
 --
--- >>> upperBound xs 3
+-- >>> upperBound xs 30
 -- Just 4
 --
--- >>> upperBound xs 4
+-- >>> upperBound xs 40
 -- Nothing
 --
 -- Out of range values:
@@ -149,7 +165,7 @@ lowerBoundIn l r vec target = bisectR l r $ \i -> VG.unsafeIndex vec i < target
 -- >>> upperBound xs 0
 -- Just 0
 --
--- >>> upperBound xs 5
+-- >>> upperBound xs 50
 -- Nothing
 --
 -- @since 1.1.0.0
@@ -157,54 +173,58 @@ lowerBoundIn l r vec target = bisectR l r $ \i -> VG.unsafeIndex vec i < target
 upperBound :: (HasCallStack, VG.Vector v a, Ord a) => v a -> a -> Maybe Int
 upperBound vec = upperBoundIn 0 (VG.length vec) vec
 
--- | \(O(\log n)\) `upperBound` for a vector of slice \([l, r)\).
+-- | \(O(\log n)\) Computes the `upperBound` for a slice of a vector within the interval \([l, r)\).
 --
--- ==== Constraints
--- - \(0 \leq l \leq r \leq n\)
+-- - The user predicate evaluates indices in \([l, r)\).
+-- - The interval \([l, r)\) is silently clamped to ensure it remains within the bounds \([0, n)\).
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
--- >>> let xs = VU.fromList [1, 1, 2, 2, 4, 4]
--- >>> --                          *--*--*
+-- >>> let xs = VU.fromList [10, 10, 20, 20, 40, 40]
+-- >>> --                            *---*---*
 -- >>> upperBoundIn 2 5 xs 0
 -- Just 2
 --
--- >>> upperBoundIn 2 5 xs 1
+-- >>> upperBoundIn 2 5 xs 10
 -- Just 2
 --
--- >>> upperBoundIn 2 5 xs 2
+-- >>> upperBoundIn 2 5 xs 20
 -- Just 4
 --
--- >>> upperBoundIn 2 5 xs 3
+-- >>> upperBoundIn 2 5 xs 30
 -- Just 4
 --
--- >>> upperBoundIn 2 5 xs 4
+-- >>> upperBoundIn 2 5 xs 40
 -- Nothing
 --
--- >>> upperBoundIn 2 5 xs 5
+-- >>> upperBoundIn 2 5 xs 50
 -- Nothing
 --
 -- @since 1.1.0.0
 {-# INLINE upperBoundIn #-}
-upperBoundIn :: (HasCallStack, VG.Vector v a, Ord a) => Int -> Int -> v a -> a -> Maybe Int
-upperBoundIn l r vec target = bisectR l r $ \i -> VG.unsafeIndex vec i <= target
+upperBoundIn :: (VG.Vector v a, Ord a) => Int -> Int -> v a -> a -> Maybe Int
+upperBoundIn l_ r_ vec target
+  | ACIA.testInterval l r (VG.length vec) = bisectR l r $ \i -> VG.unsafeIndex vec i <= target
+  | otherwise = Nothing
   where
-    !_ = ACIA.checkInterval "AtCoder.Extra.Bisect.upperBoundIn" l r (VG.length vec)
+    -- clamp
+    l = max 0 l_
+    r = min (VG.length vec) r_
 
--- | \(O(\log n)\) Bisection method on a half-open interval \([l, r)\). It returns the left boundary
--- point, or `Nothing` if the point does not lie within the given interval.
+-- | \(O(\log n)\) Applies the bisection method on a half-open interval \([l, r)\) and returns the
+-- left boundary point, or `Nothing` if no such point exists.
 --
 -- @
 -- Y Y Y Y Y N N N N N      Y: user predicate holds
 -- --------* ----------> X  N: user predicate does not hold
---         L                L: returning point
+--         L                L: the left boundary point returned
 -- @
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
--- >>> let xs = VU.fromList [1, 1, 2, 2, 3, 3]
+-- >>> let xs = VU.fromList [10, 10, 20, 20, 30, 30]
 -- >>> let n = VU.length xs
--- >>> bisectL 0 n ((<= 2) . (xs VU.!))
+-- >>> bisectL 0 n ((<= 20) . (xs VU.!))
 -- Just 3
 --
 -- >>> bisectL 0 n ((<= 0) . (xs VU.!))
@@ -213,7 +233,7 @@ upperBoundIn l r vec target = bisectR l r $ \i -> VG.unsafeIndex vec i <= target
 -- >>> bisectL 0 n ((<= 100) . (xs VU.!))
 -- Just 5
 --
--- >>> bisectL 0 3 ((<= 2) . (xs VU.!))
+-- >>> bisectL 0 3 ((<= 20) . (xs VU.!))
 -- Just 2
 --
 -- @since 1.1.0.0
@@ -222,8 +242,6 @@ bisectL :: (HasCallStack) => Int -> Int -> (Int -> Bool) -> Maybe Int
 bisectL l r p = runIdentity $ bisectLM l r (pure . p)
 
 -- | \(O(\log n)\) Monadic variant of `bisectL`.
---
--- @since 1.1.0.0
 --
 -- @since 1.1.0.0
 {-# INLINE bisectLM #-}
@@ -235,21 +253,21 @@ bisectLM l r p
         i | i == (l - 1) -> Nothing
         i -> Just i
 
--- | \(O(\log n)\) Bisection method on a half-open interval \([l, r)\). It returns the right
--- boundary point, or `Nothing` if the point does not lie within the given interval.
+-- | \(O(\log n)\) Applies the bisection method on a half-open interval \([l, r)\) and returns the
+-- right boundary point, or `Nothing` if no such point exists.
 --
 --
 -- @
 -- Y Y Y Y Y N N N N N      Y: user predicate holds
 -- --------- *---------> X  N: user predicate does not hold
---           R              R: returning point
+--           R              R: the right boundary point returned
 -- @
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
--- >>> let xs = VU.fromList [1, 1, 2, 2, 3, 3]
+-- >>> let xs = VU.fromList [10, 10, 20, 20, 30, 30]
 -- >>> let n = VU.length xs
--- >>> bisectR 0 n ((<= 2) . (xs VU.!))
+-- >>> bisectR 0 n ((<= 20) . (xs VU.!))
 -- Just 4
 --
 -- >>> bisectR 0 n ((<= 0) . (xs VU.!))
@@ -258,7 +276,7 @@ bisectLM l r p
 -- >>> bisectR 0 n ((<= 100) . (xs VU.!))
 -- Nothing
 --
--- >>> bisectR 0 4 ((<= 2) . (xs VU.!))
+-- >>> bisectR 0 4 ((<= 20) . (xs VU.!))
 -- Nothing
 --
 -- @since 1.1.0.0
