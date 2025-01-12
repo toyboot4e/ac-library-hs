@@ -2,7 +2,9 @@ module Tests.Extra.Monoid (tests) where
 
 import AtCoder.Extra.Monoid
 import AtCoder.Extra.Monoid.Affine1 qualified as A
+import AtCoder.Extra.Monoid.Mat2x2 qualified as M
 import AtCoder.Extra.Monoid.RollingHash (RollingHash (..))
+import AtCoder.ModInt qualified as ModInt
 import Data.Bit (Bit (..))
 import Data.Proxy (Proxy (..))
 import Data.Semigroup (Max (..), Min (..), Product (..), Sum (..), stimes)
@@ -103,6 +105,10 @@ instance QC.Arbitrary (Max Int) where
 instance QC.Arbitrary (Min Int) where
   arbitrary = Min <$> QC.arbitrary
 
+-- orphan instance (TODO: move to common implementation)
+instance QC.Arbitrary ModInt.ModInt998244353 where
+  arbitrary = ModInt.new <$> QC.arbitrary
+
 prop_affineZero :: Affine1 (Sum Int) -> QC.Property
 prop_affineZero a =
   QC.conjoin
@@ -110,11 +116,41 @@ prop_affineZero a =
       a <> A.zero QC.=== (\(A.Affine1 (!_, !b)) -> A.Affine1 (0, b)) a
     ]
 
+prop_affineIdent :: Affine1 (Sum Int) -> QC.Property
+prop_affineIdent a =
+  QC.conjoin
+    [ A.ident <> a QC.=== a,
+      a <> A.ident QC.=== a
+    ]
+
+prop_mat2x2Zero :: Mat2x2 Int -> QC.Property
+prop_mat2x2Zero a =
+  QC.conjoin
+    [ M.zero <> a QC.=== M.zero,
+      a <> M.zero QC.=== M.zero
+    ]
+
+prop_mat2x2Ident :: Mat2x2 Int -> QC.Property
+prop_mat2x2Ident a =
+  QC.conjoin
+    [ M.ident <> a QC.=== a,
+      a <> M.ident QC.=== a
+    ]
+
+prop_mat2x2Inv :: Mat2x2 ModInt.ModInt998244353 -> QC.Property
+prop_mat2x2Inv a =
+  (M.det a /= 0 QC.==>) $
+    QC.conjoin
+      [ M.inv a <> a QC.=== M.ident,
+        a <> M.inv a QC.=== M.ident
+      ]
+
 tests :: [TestTree]
 tests =
   [ testGroup
       "Affine1"
       [ QC.testProperty "zero" prop_affineZero,
+        QC.testProperty "ident" prop_affineIdent,
         laws @(Affine1 (Sum Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
@@ -188,7 +224,10 @@ tests =
       ],
     testGroup
       "Mat2x2"
-      [ laws @(Mat2x2 Int)
+      [ QC.testProperty "zero" prop_mat2x2Zero,
+        QC.testProperty "ident" prop_mat2x2Ident,
+        QC.testProperty "inv" prop_mat2x2Inv,
+        laws @(Mat2x2 Int)
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws

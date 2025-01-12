@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | Range transformation monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\). It is
--- less efficient to @Affine1@ but works with inverse opereations.
+-- | Monoid action \(f: x \rightarrow ax + b\). Less efficient than @Affine1@, but compatible with
+-- inverse opereations.
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Monoid.Mat2x2
@@ -9,39 +9,39 @@ module AtCoder.Extra.Monoid.Mat2x2
     Mat2x2 (..),
     Mat2x2Repr,
 
-    -- * Constructor
+    -- * Constructors
     new,
     unMat2x2,
+    ident,
+    zero,
 
-    -- * Action
+    -- * Actions
     act,
 
     -- * Operators
-    -- zero,
-    ident,
+    map,
+    det,
     inv,
   )
 where
 
 import AtCoder.Extra.Math qualified as ACEM
-import AtCoder.Extra.Monoid.V2 (V2(..))
+import AtCoder.Extra.Monoid.V2 (V2 (..))
 import AtCoder.LazySegTree (SegAct (..))
 import Data.Semigroup (Dual (..), Semigroup (..))
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import GHC.Stack (HasCallStack)
+import Prelude hiding (map)
 
--- | Range transformation monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\). It is
--- less efficient to @Affine1@ but works with inverse opereations.
---
--- The matrix is considered to be left semigroup action: \(m_2 (m_1 v) = (m_2 \circ m_1) v\).
+-- | Monoid action \(f: x \rightarrow ax + b\). Less efficient than @Affine1@, but compatible with
+-- inverse opereations.
 --
 -- ==== Composition and dual
--- `Semigroup` for `Mat2x2` is implemented like function composition, and rightmost affine
--- transformation is applied first: \((f_1 \circ f_2) v := f_1 (f_2(v))\). If you need 'foldr'
--- of \([f_l, f_{l+1}, .., f_r)\) on a segment tree, be sure to wrap `Mat2x2` in
--- @Data.Monoid.Dual@.
+-- The affine transformation acts as a left monoid action: \(f_2 (f_1 v) = (f_2 \circ f_1) v\). To
+-- apply the leftmost transformation first in a segment tree, wrap `Mat2x2` in @Data.Monoid.Dual@.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Monoid.Mat2x2 qualified as Mat2x2
@@ -70,7 +70,7 @@ newtype Mat2x2 a = Mat2x2 (Mat2x2Repr a)
 -- @since 1.1.0.0
 type Mat2x2Repr a = (a, a, a, a)
 
--- | \(O(1)\) Creates an affine transformation: \(f: x \rightarrow a \times x + b\).
+-- | \(O(1)\) Creates a one-dimensional affine transformation: \(f: x \rightarrow a \times x + b\).
 --
 -- @since 1.1.0.0
 {-# INLINE new #-}
@@ -83,6 +83,20 @@ new !a !b = Mat2x2 (a, b, 0, 1)
 {-# INLINE unMat2x2 #-}
 unMat2x2 :: Mat2x2 a -> Mat2x2Repr a
 unMat2x2 (Mat2x2 a) = a
+
+-- | \(O(1)\) Transformation to zero.
+--
+-- @since 1.1.0.0
+{-# INLINE zero #-}
+zero :: (Num a) => Mat2x2 a
+zero = Mat2x2 (0, 0, 0, 0)
+
+-- | \(O(1)\) Identity transformation.
+--
+-- @since 1.1.0.0
+{-# INLINE ident #-}
+ident :: (Num a) => Mat2x2 a
+ident = Mat2x2 (1, 0, 0, 1)
 
 -- | \(O(1)\) Multiplies `Mat2x2` to `V2`.
 {-# INLINE mulMV #-}
@@ -109,19 +123,42 @@ mulMM (Mat2x2 (!a11, !a12, !a21, !a22)) (Mat2x2 (!b11, !b12, !b21, !b22)) = Mat2
 act :: (Num a) => Mat2x2 a -> V2 a -> V2 a
 act = mulMV
 
--- | \(O(1)\) Identity transformation.
+-- | \(O(1)\) Maps the every component of `Mat2x2`.
 --
 -- @since 1.1.0.0
-{-# INLINE ident #-}
-ident :: (Num a) => Mat2x2 a
-ident = Mat2x2 (1, 0, 0, 1)
+{-# INLINE map #-}
+map :: (a -> b) -> Mat2x2 a -> Mat2x2 b
+map f (Mat2x2 (!a11, !a12, !a21, !a22)) = Mat2x2 (a11', a12', a21', a22')
+  where
+    !a11' = f a11
+    !a12' = f a12
+    !a21' = f a21
+    !a22' = f a22
 
--- | \(O(1)\) Returns 2x2 unit matrix, based on `Fractional` instance.
+-- | \(O(1)\) Returns the determinan of the matrix.
+--
+-- @since 1.1.0.0
+{-# INLINE det #-}
+det :: (Fractional e) => Mat2x2 e -> e
+det (Mat2x2 (!a, !b, !c, !d)) = a * d - b * c
+
+-- | \(O(1)\) Returns the inverse matrix, based on `Fractional` instance (mainly for @ModInt@).
+--
+-- ==== Constraints
+-- - The determinant (`det`) of the matrix must be non-zero, otherwise an error is thrown.
+--
+-- @since 1.1.0.0
 {-# INLINE inv #-}
-inv :: (Fractional e) => Mat2x2 e -> Mat2x2 e
+inv :: (HasCallStack, Fractional e, Eq e) => Mat2x2 e -> Mat2x2 e
 inv (Mat2x2 (!a, !b, !c, !d)) = Mat2x2 (a', b', c', d')
   where
-    !r = recip $ a * d - b * c
+    -- NOTE: zero division
+    -- !r = recip $ a * d - b * c
+    !r
+      | det_ == 0 = error "AtCoder.Extra.Mat2x2.inv: the determinant of the matrix must be non zero"
+      | otherwise = recip det_
+      where
+        !det_ = a * d - b * c
     !a' = r * d
     !b' = r * (-b)
     !c' = r * (-c)

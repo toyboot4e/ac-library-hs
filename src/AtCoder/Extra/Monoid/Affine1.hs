@@ -1,7 +1,9 @@
 {-# LANGUAGE TypeFamilies #-}
 
--- | Range transformation monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\). Use
--- @Mat2x2@ if inverse operation is needed or monoid length needs to be stored (in @V2@).
+-- | Monoid action \(f: x \rightarrow ax + b\).
+--
+-- - Use @Mat2x2@ if inverse operations are required, or if it's necessary to store the monoid
+-- length in the acted monoid (@V2@).
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Monoid.Affine1
@@ -9,15 +11,14 @@ module AtCoder.Extra.Monoid.Affine1
     Affine1 (..),
     Affine1Repr,
 
-    -- * Constructor
+    -- * Constructors
     new,
-
-    -- * Action
-    act,
-
-    -- * Operators
-    zero,
+    unAffine1,
     ident,
+    zero,
+
+    -- * Actions
+    act,
   )
 where
 
@@ -32,17 +33,16 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
--- Tuple is not the fastest representation, but it's easier to implement `Unbox`.
-
--- | Range transformation monoid action for \([l, r)\) intervals: \(f: x \rightarrow ax + b\).
+-- | Monoid action \(f: x \rightarrow ax + b\).
+--
+-- - Use @Mat2x2@ if inverse operations are required, or if it's necessary to store the monoid
+-- length in the acted monoid (@V2@).
 --
 -- ==== Composition and dual
--- `Semigroup` for `Affine1` is implemented like function composition, and rightmost affine
--- transformation is applied first: \((f_1 \circ f_2) v := f_1 (f_2(v))\). If you need 'foldr'
--- of \([f_l, f_{l+1}, .., f_r)\) on a segment tree, be sure to wrap `Affine1` in
--- @Data.Monoid.Dual@.
+-- The affine transformation acts as a left monoid action: \(f_2 (f_1 v) = (f_2 \circ f_1) v\). To
+-- apply the leftmost transformation first in a segment tree, wrap `Affine1` in @Data.Monoid.Dual@.
 --
--- ==== Example
+-- ==== __Example__
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..))
 -- >>> import AtCoder.LazySegTree qualified as LST
 -- >>> seg <- LST.build @_ @(Affine1 Int) @(Sum Int) $ VU.generate 3 Sum -- [0, 1, 2]
@@ -67,40 +67,47 @@ newtype Affine1 a = Affine1 (Affine1Repr a)
 -- @since 1.0.0.0
 type Affine1Repr a = (a, a)
 
--- | Creates `Affine1`.
+-- | \(O(1)\) Creates a one-dimensional affine transformation: \(f: x \rightarrow a \times x + b\).
 --
 -- @since 1.0.0.0
 {-# INLINE new #-}
 new :: a -> a -> Affine1 a
 new !a !b = Affine1 (a, b)
 
--- | Applies \(f: x \rightarrow a \times x + b\).
+-- | \(O(1)\) Retrieves the two components of `Affine1`.
 --
--- @since 1.0.0.0
-{-# INLINE act #-}
-act :: (Num a) => Affine1 a -> a -> a
-act (Affine1 (!a, !b)) x = a * x + b
+-- @since 1.1.0.0
+{-# INLINE unAffine1 #-}
+unAffine1 :: Affine1 a -> Affine1Repr a
+unAffine1 (Affine1 a) = a
 
--- | Acts on @a@ with length in terms of `SegAct`. Works for `Sum a` only.
+-- | \(O(1)\) Identity transformation.
 --
--- @since 1.0.0.0
-{-# INLINE actWithLength #-}
-actWithLength :: (Num a) => Int -> Affine1 a -> a -> a
-actWithLength len (Affine1 (!a, !b)) !x = a * x + b * fromIntegral len
+-- @since 1.1.0.0
+{-# INLINE ident #-}
+ident :: (Num a) => Affine1 a
+ident = Affine1 (1, 0)
 
--- | Transformation to zero.
+-- | \(O(1)\) Transformation to zero.
 --
 -- @since 1.1.0.0
 {-# INLINE zero #-}
 zero :: (Num a) => Affine1 a
 zero = Affine1 (0, 0)
 
--- | Identity transformation.
+-- | \(O(1)\) Applies the one-dimensional affine transformation \(f: x \rightarrow a \times x + b\).
 --
--- @since 1.1.0.0
-{-# INLINE ident #-}
-ident :: (Num a) => Affine1 a
-ident = Affine1 (1, 0)
+-- @since 1.0.0.0
+{-# INLINE act #-}
+act :: (Num a) => Affine1 a -> a -> a
+act (Affine1 (!a, !b)) x = a * x + b
+
+-- | \(O(1)\) Acts on @a@ with length in terms of `SegAct`. Works for `Sum a` only.
+--
+-- @since 1.0.0.0
+{-# INLINE actWithLength #-}
+actWithLength :: (Num a) => Int -> Affine1 a -> a -> a
+actWithLength len (Affine1 (!a, !b)) !x = a * x + b * fromIntegral len
 
 -- | @since 1.0.0.0
 instance (Num a) => Semigroup (Affine1 a) where
