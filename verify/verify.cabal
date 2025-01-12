@@ -165,6 +165,11 @@ executable aoj-GRL_6_B
   main-is:       aoj-GRL_6_B.hs
   build-depends: verify
 
+executable past202109-k
+  import:        app-local
+  main-is:       past202109-k.hs
+  build-depends: verify
+
 executable past202104-open-m
   import:        app-local
   main-is:       past202104-open-m.hs

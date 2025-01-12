@@ -131,7 +131,7 @@ addEdge McfGraph {..} from to cap cost = do
   ACIGV.pushBack edgesG (from, to, cap, 0, cost)
   pure m
 
--- | `addEdge` with th return value discarded.
+-- | `addEdge` with the return value discarded.
 --
 -- ==== Constraints
 -- - \(0 \leq \mathrm{from}, \mathrm{to} \lt n\)

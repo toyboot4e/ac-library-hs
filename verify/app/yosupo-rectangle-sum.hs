@@ -1,4 +1,4 @@
-import AtCoder.Extra.WaveletMatrix.SegTree qualified as WM
+import AtCoder.Extra.WaveletMatrix2d qualified as WM
 import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
 import Util

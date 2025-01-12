@@ -18,7 +18,7 @@ main = do
   q <- int
   lrxs <- VU.replicateM q $ withLine ((,,) <$> intS1P <*> intP <*> intP)
 
-  let !dict = VU.modify (VAI.sortBy comparing) $ xs VU.++ VU.map (\(!_, !_, !x) -> x) lrxs
+  let !dict = VU.modify (VAI.sortBy compare) $ xs VU.++ VU.map (\(!_, !_, !x) -> x) lrxs
   intervals <- ITM.new @_ @Int n
   res <- VUM.replicate 1 (0 :: Int)
   cnt <- VUM.replicate (VG.length dict) (0 :: Int)
