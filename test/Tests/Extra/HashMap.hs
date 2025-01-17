@@ -59,23 +59,22 @@ data Query
 
 instance QC.Arbitrary Query where
   arbitrary = do
-    a <- QC.chooseInt (1, 100)
-    if a == 1
-      then pure Clear
-      else
-        QC.oneof
-          [ pure Size,
-            Member <$> keyGen,
-            NotMember <$> keyGen,
-            Lookup <$> keyGen,
-            Insert <$> keyGen <*> valGen,
-            InsertWithAdd <$> keyGen <*> valGen,
-            Exchange <$> keyGen <*> valGen,
-            ModifyAdd <$> keyGen <*> valGen
-          ]
+    QC.frequency
+      [ (rare, pure Clear),
+        (often, pure Size),
+        (often, Member <$> keyGen),
+        (often, NotMember <$> keyGen),
+        (often, Lookup <$> keyGen),
+        (often, Insert <$> keyGen <*> valGen),
+        (often, InsertWithAdd <$> keyGen <*> valGen),
+        (often, Exchange <$> keyGen <*> valGen),
+        (often, ModifyAdd <$> keyGen <*> valGen)
+      ]
     where
+      rare = 1
+      often = 10
       keyGen = QC.chooseInt (-5, 5)
-      valGen = QC.chooseInt (-10, 10)
+      valGen = QC.arbitrary @Int
 
 -- | Arbitrary return type for the `Query` result.
 data Result
