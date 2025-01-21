@@ -101,6 +101,8 @@ ident n = Matrix n n $ VU.create $ do
     VGM.write vec (i + n * i) 1
   pure vec
 
+-- FIXME: diag should not take `n`
+
 -- | \(O(n^2)\) Creates an NxN diagonal matrix.
 --
 -- @since 1.1.0.0
@@ -183,7 +185,7 @@ mulMod !m !a !b =
     vecA = vecM a
     w' = wM b
     vecB = vecM b
-    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMod: matrix size mismatch"
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
 
 -- | \(O(h_1 w_2 K)\) `mul` specialized to `M.ModInt`.
 --
@@ -218,7 +220,7 @@ mulMintImpl !bt !a !b =
     vecA = vecM a
     w' = wM b
     vecB = vecM b
-    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMint: matrix size mismatch"
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
 
 -- | \(O(w n^3)\) Calculates \(M^k\).
 --
@@ -226,11 +228,11 @@ mulMintImpl !bt !a !b =
 {-# INLINE pow #-}
 pow :: Int -> Matrix Int -> Matrix Int
 pow k mat
-  | k < 0 = error "AtCoder.Extra.Matrix.powMod: the exponential must be non-negative"
+  | k < 0 = error "AtCoder.Extra.Matrix.pow: the exponential must be non-negative"
   | k == 0 = ident $ hM mat
   | otherwise = ACEM.power mul k mat
   where
-    !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.powMod: matrix size mismatch"
+    !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.pow: matrix size mismatch"
 
 -- | \(O(w n^3)\) Calculates \(M^k\), taking the mod.
 --
@@ -260,5 +262,7 @@ powMint k mat
 instance (Num a, VU.Unbox a) => Semigroup (Matrix a) where
   {-# INLINE (<>) #-}
   (<>) = mul
+
+  -- Prefer `powMod` or `powMint` as specialized, much efficient variant.
   {-# INLINE stimes #-}
   stimes = ACEM.power (<>) . fromIntegral
