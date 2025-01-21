@@ -4,8 +4,8 @@ module Main where
 
 import Bench.AddMod qualified
 import Bench.Matrix qualified
-import Bench.MulMod qualified
 import Bench.ModInt qualified
+import Bench.MulMod qualified
 import Bench.PowMod qualified
 import Criterion.Main
 

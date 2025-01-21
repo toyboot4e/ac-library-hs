@@ -12,23 +12,32 @@ module BenchLib.Matrix
     mul3_1,
     mul3_2,
     mul3_3,
+    mul4_1,
+    mul4_2,
+    mul4_3,
     mulMod1,
     mulMod2,
     mulMod3,
     mulMod4,
     mulMod5,
+    mulMod6,
+    mulMod7,
     mulMint1,
     mulMint2,
     mulMint3,
+    mulMint4,
   )
 where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Barrett qualified as BT
 import AtCoder.ModInt qualified as M
+import Data.Foldable (for_)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
+import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
+import Data.Vector.Unboxed.Mutable qualified as VUM
 import Data.Word (Word64)
 import GHC.Exts (Proxy#, proxy#)
 import GHC.Stack (HasCallStack)
@@ -179,6 +188,69 @@ mul3_3 !a !b = Matrix h w' $ VU.generate (h * w') $ \i ->
     vecB = vecM b
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
 
+-- | Fastest: efficient iteration
+{-# INLINE mul4_1 #-}
+mul4_1 :: forall e. (Num e, VU.Unbox e) => Matrix e -> Matrix e -> Matrix e
+mul4_1 !a !b = Matrix h w' $ VU.create $ do
+  c <- VUM.replicate (h * w') (0 :: e)
+  for_ [0 .. h - 1] $ \i -> do
+    for_ [0 .. w - 1] $ \k -> do
+      for_ [0 .. w' - 1] $ \j -> do
+        let !aik = VG.unsafeIndex vecA (i * w + k)
+        let !bkj = VG.unsafeIndex vecB (k * w' + j)
+        VGM.unsafeModify c (+ (aik * bkj)) (i * w' + j)
+  pure c
+  where
+    h = hM a
+    w = wM a
+    h' = hM b
+    vecA = vecM a
+    w' = wM b
+    vecB = vecM b
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
+
+{-# INLINE mul4_2 #-}
+mul4_2 :: forall e. (Num e, VU.Unbox e) => Matrix e -> Matrix e -> Matrix e
+mul4_2 !a !b = Matrix h w' $ VU.create $ do
+  c <- VUM.replicate (h * w') (0 :: e)
+  for_ [0 .. h - 1] $ \i -> do
+    let !iw = i * w
+    let !iw' = i * w'
+    for_ [0 .. w - 1] $ \k -> do
+      let !kw' = k * w'
+      for_ [0 .. w' - 1] $ \j -> do
+        let !aik = VG.unsafeIndex vecA (iw + k)
+        let !bkj = VG.unsafeIndex vecB (kw' + j)
+        VGM.unsafeModify c (+ (aik * bkj)) (iw' + j)
+  pure c
+  where
+    h = hM a
+    w = wM a
+    h' = hM b
+    vecA = vecM a
+    w' = wM b
+    vecB = vecM b
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
+
+{-# INLINE mul4_3 #-}
+mul4_3 :: forall e. (Num e, VU.Unbox e) => Matrix e -> Matrix e -> Matrix e
+mul4_3 !a !b = Matrix h w' $ VU.create $ do
+  c <- VUM.replicate (h * w') (0 :: e)
+  for_ [0 .. h - 1] $ \i -> do
+    for_ [0 .. w - 1] $ \k -> do
+      VU.iforM_ (VU.unsafeSlice (k * w') w' vecB) $ \j bkj -> do
+        let !aik = VG.unsafeIndex vecA (i * w + k)
+        VGM.unsafeModify c (+ (aik * bkj)) (i * w' + j)
+  pure c
+  where
+    h = hM a
+    w = wM a
+    h' = hM b
+    vecA = vecM a
+    w' = wM b
+    vecB = vecM b
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
+
 {-# INLINE mulMod1 #-}
 mulMod1 :: Int -> Matrix Int -> Matrix Int -> Matrix Int
 mulMod1 !m !a !b =
@@ -299,6 +371,37 @@ mulMod5 !m !a !b =
       (0, 0)
   where
     !bt = BT.new32 $ fromIntegral m
+    -- NOTE: this is unsafe if the matrix is too large
+    f row col =
+      fromIntegral
+        . (`rem` fromIntegral m)
+        . VU.sum
+        $ VU.imap
+          (\iRow x -> BT.mulMod bt (fromIntegral x) (fromIntegral (VG.unsafeIndex vecB (col + (iRow * w')))))
+          (VU.unsafeSlice (w * row) w vecA)
+    h = hM a
+    w = wM a
+    h' = hM b
+    vecA = vecM a
+    w' = wM b
+    vecB = vecM b
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
+
+{-# INLINE mulMod6 #-}
+mulMod6 :: Int -> Matrix Int -> Matrix Int -> Matrix Int
+mulMod6 !m !a !b =
+  Matrix h w' $
+    VU.unfoldrExactN
+      (h * w')
+      ( \(!row, !col) ->
+          let !x = f row col
+           in if col + 1 >= w'
+                then (x, (row + 1, 0))
+                else (x, (row, col + 1))
+      )
+      (0, 0)
+  where
+    !bt = BT.new32 $ fromIntegral m
     f row col = VU.foldl1' addMod $ VU.imap (\iRow x -> mulMod x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
     addMod x y
       | x + y >= m = x + y - m
@@ -311,6 +414,29 @@ mulMod5 !m !a !b =
     w' = wM b
     vecB = vecM b
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
+
+{-# INLINE mulMod7 #-}
+mulMod7 :: Int -> Matrix Int -> Matrix Int -> Matrix Int
+mulMod7 !m !a !b = Matrix h w' $ VU.create $ do
+  c <- VUM.replicate (h * w') (0 :: Int)
+  for_ [0 .. h - 1] $ \i -> do
+    for_ [0 .. w - 1] $ \k -> do
+      for_ [0 .. w' - 1] $ \j -> do
+        let !aik = VG.unsafeIndex vecA (i * w + k)
+        let !bkj = VG.unsafeIndex vecB (k * w' + j)
+        VGM.unsafeModify c (addMod (mulMod_ aik bkj)) (i * w' + j)
+  pure c
+  where
+    !bt = BT.new32 $ fromIntegral m
+    addMod x y = (x + y) `rem` m
+    mulMod_ x y = fromIntegral $ BT.mulMod bt (fromIntegral x) (fromIntegral y)
+    h = hM a
+    w = wM a
+    h' = hM b
+    vecA = vecM a
+    w' = wM b
+    vecB = vecM b
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMod: matrix size mismatch"
 
 {-# INLINE mulMint1 #-}
 mulMint1 :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> Matrix (M.ModInt a) -> Matrix (M.ModInt a)
@@ -365,7 +491,6 @@ mulMint2 !a !b =
     vecB = vecM b
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
 
--- REMARK: This is very unsafe in that it can overflow (mod^2 * n)
 {-# INLINE mulMint3 #-}
 mulMint3 :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> Matrix (M.ModInt a) -> Matrix (M.ModInt a)
 mulMint3 !a !b =
@@ -381,8 +506,12 @@ mulMint3 !a !b =
       (0, 0)
   where
     !bt = BT.new32 $ fromIntegral (natVal' (proxy# @a))
+    -- NOTE: this is unsafe if the matrix is too large
     f :: Int -> Int -> M.ModInt a
-    f row col = M.new64 . VU.sum $ VU.imap (\iRow x -> mulMod x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
+    f row col =
+      M.new64
+        . VU.sum
+        $ VU.imap (\iRow x -> mulMod x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
     mulMod :: M.ModInt a -> M.ModInt a -> Word64
     mulMod (M.ModInt x) (M.ModInt y) = BT.mulMod bt (fromIntegral x) (fromIntegral y)
     h = hM a
@@ -392,3 +521,27 @@ mulMint3 !a !b =
     w' = wM b
     vecB = vecM b
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
+
+-- performs memory efficient iteration, but requires more type conversions and slow
+{-# INLINE mulMint4 #-}
+mulMint4 :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> Matrix (M.ModInt a) -> Matrix (M.ModInt a)
+mulMint4 !a !b = Matrix h w' $ VU.create $ do
+  c <- VUM.replicate (h * w') (M.unsafeNew 0)
+  for_ [0 .. h - 1] $ \i -> do
+    for_ [0 .. w - 1] $ \k -> do
+      for_ [0 .. w' - 1] $ \j -> do
+        let !aik = VG.unsafeIndex vecA (i * w + k)
+        let !bkj = VG.unsafeIndex vecB (k * w' + j)
+        VGM.unsafeModify c (+ (mulMod_ aik bkj)) (i * w' + j)
+  pure c
+  where
+    !bt = BT.new32 $ fromIntegral (natVal' (proxy# @a))
+    mulMod_ :: M.ModInt a -> M.ModInt a -> M.ModInt a
+    mulMod_ (M.ModInt x) (M.ModInt y) = M.unsafeNew . fromIntegral $ BT.mulMod bt (fromIntegral x) (fromIntegral y)
+    h = hM a
+    w = wM a
+    h' = hM b
+    vecA = vecM a
+    w' = wM b
+    vecB = vecM b
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMint: matrix size mismatch"

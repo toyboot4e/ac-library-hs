@@ -136,20 +136,17 @@ mulToCol Matrix {..} !col = VU.convert $ V.map (VU.sum . VU.zipWith (*) col) row
 --
 -- @since 1.1.0.0
 {-# INLINE mul #-}
-mul :: (Num e, VU.Unbox e) => Matrix e -> Matrix e -> Matrix e
-mul !a !b =
-  Matrix h w' $
-    VU.unfoldrExactN
-      (h * w')
-      ( \(!row, !col) ->
-          let !x = f row col
-           in if col + 1 >= w'
-                then (x, (row + 1, 0))
-                else (x, (row, col + 1))
-      )
-      (0, 0)
+mul :: forall e. (Num e, VU.Unbox e) => Matrix e -> Matrix e -> Matrix e
+mul !a !b = Matrix h w' $ VU.create $ do
+  c <- VUM.replicate (h * w') (0 :: e)
+  for_ [0 .. h - 1] $ \i -> do
+    for_ [0 .. w - 1] $ \k -> do
+      for_ [0 .. w' - 1] $ \j -> do
+        let !aik = VG.unsafeIndex vecA (i * w + k)
+        let !bkj = VG.unsafeIndex vecB (k * w' + j)
+        VGM.unsafeModify c (+ (aik * bkj)) (i * w' + j)
+  pure c
   where
-    f row col = VU.sum $ VU.imap (\iRow x -> x * VG.unsafeIndex vecB (col + iRow * w')) (VU.unsafeSlice (w * row) w vecA)
     h = hM a
     w = wM a
     h' = hM b
@@ -176,9 +173,14 @@ mulMod !m !a !b =
       (0, 0)
   where
     !bt = BT.new32 $ fromIntegral m
-    f row col = VU.foldl1' addMod $ VU.imap (\iRow x -> mulMod_ x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
-    addMod x y = (x + y) `rem` m
-    mulMod_ x y = fromIntegral $ BT.mulMod bt (fromIntegral x) (fromIntegral y)
+    -- NOTE: this is unsafe if the matrix is too large
+    f row col =
+      fromIntegral
+        . (`rem` fromIntegral m)
+        . VU.sum
+        $ VU.imap
+          (\iRow x -> BT.mulMod bt (fromIntegral x) (fromIntegral (VG.unsafeIndex vecB (col + (iRow * w')))))
+          (VU.unsafeSlice (w * row) w vecA)
     h = hM a
     w = wM a
     h' = hM b
@@ -210,10 +212,14 @@ mulMintImpl !bt !a !b =
       )
       (0, 0)
   where
+    -- NOTE: this is unsafe if the matrix is too large
     f :: Int -> Int -> M.ModInt a
-    f row col = VU.sum $ VU.imap (\iRow x -> mulMod_ x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
-    mulMod_ :: M.ModInt a -> M.ModInt a -> M.ModInt a
-    mulMod_ (M.ModInt x) (M.ModInt y) = M.unsafeNew . fromIntegral $ BT.mulMod bt (fromIntegral x) (fromIntegral y)
+    f row col =
+      M.new64
+        . VU.sum
+        $ VU.imap (\iRow x -> mulMod x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
+    -- mulMod :: M.ModInt a -> M.ModInt a -> Word64
+    mulMod (M.ModInt x) (M.ModInt y) = BT.mulMod bt (fromIntegral x) (fromIntegral y)
     h = hM a
     w = wM a
     h' = hM b
@@ -249,6 +255,7 @@ powMod m k mat
 -- | \(O(w n^3)\) Calculates \(M^k\), specialized to `M.ModInt`.
 --
 -- @since 1.1.0.0
+{-# INLINE powMint #-}
 powMint :: forall m. (KnownNat m) => Int -> Matrix (M.ModInt m) -> Matrix (M.ModInt m)
 powMint k mat
   | k < 0 = error "AtCoder.Extra.Matrix.powMint: the exponential must be non-negative"
