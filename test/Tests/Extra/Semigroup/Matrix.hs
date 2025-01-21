@@ -2,6 +2,7 @@ module Tests.Extra.Semigroup.Matrix (tests) where
 
 import AtCoder.Extra.Semigroup.Matrix qualified as Mat
 import AtCoder.ModInt qualified as M
+import Data.Semigroup (stimes)
 import Data.Vector.Unboxed qualified as VU
 import GHC.TypeNats (KnownNat)
 import Test.QuickCheck.Classes qualified as QCC
@@ -34,10 +35,22 @@ prop_mulToCol = do
   let rhs = Mat.vecM $ Mat.mul mat (Mat.new w 1 col)
   pure  $ lhs QC.=== rhs
 
+m :: Int
+m = 998244353
+
+prop_pow :: QC.Small Int -> QC.NonNegative Int -> QC.Gen QC.Property
+prop_pow (QC.Small n) (QC.NonNegative k) = do
+  vec <- VU.fromList <$> QC.vectorOf (n * n) (QC.chooseInt (0, m - 1))
+  let mat = Mat.new n n vec
+  if k == 0
+    then pure $ Mat.pow k mat QC.=== Mat.ident n
+    else pure $ Mat.pow k mat QC.=== stimes k mat
+
 tests :: [TestTree]
 tests =
   [ QC.testProperty "mulToCol" prop_mulToCol,
     laws @(Mat.Matrix (M.ModInt 998244353))
       [ QCC.semigroupLaws
-      ]
+      ],
+    QC.testProperty "pow" prop_pow
   ]

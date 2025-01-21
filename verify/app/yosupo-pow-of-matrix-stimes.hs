@@ -15,5 +15,5 @@ main = do
   let !mat = fromJust . (`evalStateT` rest) $ do
         vecA <- VU.replicateM (n * n) (M.unsafeNew @998244353 . fromIntegral <$> intP)
         pure $ Mat.new n n vecA
-  let !matK = Mat.powMint k mat
+  let !matK = Mat.mul matA matB -- NOTE: very slow (use mulMod or mulMint for real projects)
   printBSB $ showMat matK
