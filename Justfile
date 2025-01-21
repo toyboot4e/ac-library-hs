@@ -7,10 +7,17 @@ help:
 
 # runs the benchmark
 bench:
-    cabal bench --benchmark-options='--output a.html'
+    cabal bench --enable-tests --benchmark-options='--output a.html'
 
 [private]
-alias b := bench
+alias be := bench
+
+# builds the library
+build:
+    cabal build
+
+[private]
+alias b := build
 
 # shows all warnings and errors
 check:
@@ -21,7 +28,7 @@ alias c := check
 
 # generates Haddock document
 doc:
-    cabal haddock "$@"
+    cabal haddock
 
 [private]
 alias d := doc
@@ -46,10 +53,13 @@ alias m := measure
 
 # runs local test (parameter example: '-p /SegTree/')
 test opts='':
-    cabal test --enable-tests --test-options opts
+    cabal test --enable-tests --test-options '{{opts}}'
 
 [private]
 alias t := test
+
+touch:
+    touch verify/app/*
 
 # runs local test for a online judge problem
 verify:
