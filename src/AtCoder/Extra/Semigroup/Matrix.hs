@@ -137,7 +137,7 @@ mulToCol Matrix {..} !col = VU.convert $ V.map (VU.sum . VU.zipWith (*) col) row
 -- @since 1.1.0.0
 {-# INLINE mul #-}
 mul :: forall e. (Num e, VU.Unbox e) => Matrix e -> Matrix e -> Matrix e
-mul !a !b = Matrix h w' $ VU.create $ do
+mul (Matrix h w vecA) (Matrix h' w' vecB)= Matrix h w' $ VU.create $ do
   c <- VUM.replicate (h * w') (0 :: e)
   for_ [0 .. h - 1] $ \i -> do
     for_ [0 .. w - 1] $ \k -> do
@@ -147,12 +147,6 @@ mul !a !b = Matrix h w' $ VU.create $ do
         VGM.unsafeModify c (+ (aik * bkj)) (i * w' + j)
   pure c
   where
-    h = hM a
-    w = wM a
-    h' = hM b
-    vecA = vecM a
-    w' = wM b
-    vecB = vecM b
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
 
 -- | \(O(h_1 w_2 K)\) Multiplies H1xK matrix to a KxW2 matrix, taking the mod.
@@ -160,7 +154,7 @@ mul !a !b = Matrix h w' $ VU.create $ do
 -- @since 1.1.0.0
 {-# INLINE mulMod #-}
 mulMod :: Int -> Matrix Int -> Matrix Int -> Matrix Int
-mulMod !m !a !b =
+mulMod !m (Matrix h w vecA) (Matrix h' w' vecB) =
   Matrix h w' $
     VU.unfoldrExactN
       (h * w')
@@ -181,13 +175,7 @@ mulMod !m !a !b =
         $ VU.imap
           (\iRow x -> BT.mulMod bt (fromIntegral x) (fromIntegral (VG.unsafeIndex vecB (col + (iRow * w')))))
           (VU.unsafeSlice (w * row) w vecA)
-    h = hM a
-    w = wM a
-    h' = hM b
-    vecA = vecM a
-    w' = wM b
-    vecB = vecM b
-    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMod: matrix size mismatch"
 
 -- | \(O(h_1 w_2 K)\) `mul` specialized to `M.ModInt`.
 --
@@ -200,7 +188,7 @@ mulMint = mulMintImpl bt
 
 {-# INLINE mulMintImpl #-}
 mulMintImpl :: forall a. (KnownNat a) => BT.Barrett -> Matrix (M.ModInt a) -> Matrix (M.ModInt a) -> Matrix (M.ModInt a)
-mulMintImpl !bt !a !b =
+mulMintImpl !bt (Matrix h w vecA) (Matrix h' w' vecB) =
   Matrix h w' $
     VU.unfoldrExactN
       (h * w')
@@ -220,13 +208,7 @@ mulMintImpl !bt !a !b =
         $ VU.imap (\iRow x -> mulMod x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
     -- mulMod :: M.ModInt a -> M.ModInt a -> Word64
     mulMod (M.ModInt x) (M.ModInt y) = BT.mulMod bt (fromIntegral x) (fromIntegral y)
-    h = hM a
-    w = wM a
-    h' = hM b
-    vecA = vecM a
-    w' = wM b
-    vecB = vecM b
-    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"
+    !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMintImpl: matrix size mismatch"
 
 -- | \(O(w n^3)\) Calculates \(M^k\).
 --

@@ -90,4 +90,4 @@ benches =
     randomVec :: VU.Vector Int
     !randomVec =
       VU.map ((+ 1) . fromIntegral) $
-        VU.unfoldrExactN 100 (genWord64R (m - 2)) (mkStdGen 123456789)
+        VU.unfoldrExactN 100 (genWord64R (998244353 - 2)) (mkStdGen 123456789)
