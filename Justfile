@@ -61,6 +61,9 @@ alias t := test
 touch:
     touch verify/app/*
 
+[private]
+alias to := touch
+
 # runs local test for a online judge problem
 verify:
     cd verify && ./script/verify
