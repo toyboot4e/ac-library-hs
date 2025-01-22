@@ -1,8 +1,8 @@
 module Bench.Matrix (benches) where
 
-import AtCoder.ModInt qualified as M
-import AtCoder.Extra.Semigroup.Matrix qualified as ACMAT
 import AtCoder.Extra.Math qualified as ACEM
+import AtCoder.Extra.Semigroup.Matrix qualified as ACMAT
+import AtCoder.ModInt qualified as M
 import BenchLib.Matrix qualified as Mat
 import Control.Monad.State.Class (MonadState, state)
 import Control.Monad.Trans.State.Strict (evalState, runState)
@@ -60,6 +60,7 @@ benches =
       -- mul (ACL)
       bench "mul_ACL" $ whnf (V.foldl1' ACMAT.mul) randomMatrixInputACL,
       bench "mulMod_ACL" $ whnf (V.foldl1' (ACMAT.mulMod m)) randomMatrixInputACL,
+      bench "mulMint_ACL" $ whnf (V.foldl1' ACMAT.mulMint) randomMintMatrixInputACL,
       -- pow mod (ACL only)
       bench "powMod_ACL" $ whnf (VU.foldl' (flip (ACMAT.powMod m)) squareMat) randomVec,
       bench "powMintACL_stimes" $ whnf (VU.foldl' (flip stimes) squareMatMint) randomVec,
@@ -78,12 +79,15 @@ benches =
 
     -- ACL matrix
     randomMatrixInputACL :: V.Vector (ACMAT.Matrix Int)
-    !randomMatrixInputACL = V.map (\mat -> ACMAT.new (Mat.hM mat) (Mat.wM mat) (Mat.vecM mat)) randomMatrixInput
+    !randomMatrixInputACL = V.map (\(Mat.Matrix h w vec) -> ACMAT.new h w vec) randomMatrixInput
+
+    randomMintMatrixInputACL :: V.Vector (ACMAT.Matrix (M.ModInt 998244353))
+    !randomMintMatrixInputACL = V.map (\(Mat.Matrix h w vec) -> ACMAT.new h w vec) randomMintMatrixInput
 
     squareMat :: ACMAT.Matrix Int
     !squareMat = evalState (randomSquareACLMatrix 17) $ mkStdGen 123456789
 
-    squareMatMint ::ACMAT.Matrix (M.ModInt 998244353)
+    squareMatMint :: ACMAT.Matrix (M.ModInt 998244353)
     !squareMatMint = ACMAT.map M.new squareMat
 
     -- non-zero random vector

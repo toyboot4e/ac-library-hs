@@ -409,7 +409,9 @@ mulMint3 (Matrix h w vecA) (Matrix h' w' vecB) =
     f row col =
       M.new64
         . VU.sum
-        $ VU.imap (\iRow x -> mulMod x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
+        $ VU.imap
+          (\iRow x -> mulMod x (VG.unsafeIndex vecB (col + (iRow * w'))))
+          (VU.unsafeSlice (w * row) w vecA)
     mulMod :: M.ModInt a -> M.ModInt a -> Word64
     mulMod (M.ModInt x) (M.ModInt y) = BT.mulMod bt (fromIntegral x) (fromIntegral y)
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mul: matrix size mismatch"

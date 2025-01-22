@@ -137,7 +137,7 @@ mulToCol Matrix {..} !col = VU.convert $ V.map (VU.sum . VU.zipWith (*) col) row
 -- @since 1.1.0.0
 {-# INLINE mul #-}
 mul :: forall e. (Num e, VU.Unbox e) => Matrix e -> Matrix e -> Matrix e
-mul (Matrix h w vecA) (Matrix h' w' vecB)= Matrix h w' $ VU.create $ do
+mul (Matrix h w vecA) (Matrix h' w' vecB) = Matrix h w' $ VU.create $ do
   c <- VUM.replicate (h * w') (0 :: e)
   for_ [0 .. h - 1] $ \i -> do
     for_ [0 .. w - 1] $ \k -> do
@@ -205,9 +205,14 @@ mulMintImpl !bt (Matrix h w vecA) (Matrix h' w' vecB) =
     f row col =
       M.new64
         . VU.sum
-        $ VU.imap (\iRow x -> mulMod x (VG.unsafeIndex vecB (col + (iRow * w')))) (VU.unsafeSlice (w * row) w vecA)
-    -- mulMod :: M.ModInt a -> M.ModInt a -> Word64
-    mulMod (M.ModInt x) (M.ModInt y) = BT.mulMod bt (fromIntegral x) (fromIntegral y)
+        $ VU.imap
+          ( \iRow x ->
+              BT.mulMod
+                bt
+                (fromIntegral (M.unModInt x))
+                (fromIntegral (M.unModInt (VG.unsafeIndex vecB (col + (iRow * w')))))
+          )
+          (VU.unsafeSlice (w * row) w vecA)
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMintImpl: matrix size mismatch"
 
 -- | \(O(w n^3)\) Calculates \(M^k\).
