@@ -225,6 +225,11 @@ executable yosupo-matrix-product-mint-stimes
   main-is:       yosupo-matrix-product-mint-stimes.hs
   build-depends: verify
 
+executable yosupo-matrix-rank
+  import:        app-local
+  main-is:       yosupo-matrix-rank.hs
+  build-depends: verify
+
 executable yosupo-point-add-range-sum
   import:        app-local
   main-is:       yosupo-point-add-range-sum.hs

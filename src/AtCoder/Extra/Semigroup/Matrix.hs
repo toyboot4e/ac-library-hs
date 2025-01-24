@@ -29,6 +29,9 @@ module AtCoder.Extra.Semigroup.Matrix
     pow,
     powMod,
     powMint,
+
+    -- * Rank
+    rank,
   )
 where
 
@@ -36,6 +39,8 @@ import AtCoder.Extra.Math qualified as ACEM
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Barrett qualified as BT
 import AtCoder.ModInt qualified as M
+import Control.Monad (when)
+import Control.Monad.ST (runST)
 import Data.Foldable (for_)
 import Data.Semigroup (Semigroup (..))
 import Data.Vector qualified as V
@@ -251,6 +256,57 @@ powMint k mat
   where
     !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.powMint: matrix size mismatch"
     !bt = BT.new32 $ fromIntegral (natVal' (proxy# @m))
+
+-- | (Internal)
+{-# INLINE read2d #-}
+read2d ::
+  (PrimMonad m, VU.Unbox a) =>
+  VM.MVector (PrimState m) (VUM.MVector (PrimState m) a) ->
+  Int ->
+  Int ->
+  m a
+read2d view i j = do
+  row <- VGM.unsafeRead view i
+  VGM.unsafeRead row j
+
+-- | \(O(hw \min(h, w))\) Returns the rank of the matrix.
+--
+-- @since 1.2.0.0
+{-# INLINE rank #-}
+rank :: (Fractional a, Eq a, VU.Unbox a) => Matrix a -> Int
+rank (Matrix h w vec) = runST $ do
+  vm <- VU.thaw vec
+  view <- V.thaw $ V.unfoldrExactN h (VUM.splitAt w) vm
+  let inner rk j
+        | rk == h || j == w = pure rk
+        | otherwise = do
+            xrj <- read2d view rk j
+            when (xrj == 0) $ do
+              let runSwap i
+                    | i == h = pure ()
+                    | otherwise = do
+                        xij <- read2d view i j
+                        if xij /= 0
+                          then VGM.unsafeSwap view rk i
+                          else runSwap (i + 1)
+              runSwap (rk + 1)
+            xrj' <- read2d view rk j
+            if xrj' == 0
+              then inner rk (j + 1)
+              else do
+                let c = 1 / xrj'
+                rowRk <- VGM.read view rk
+                -- for_ [j .. w - 1] $ \k -> do
+                VGM.iforM_ (VGM.unsafeDrop j rowRk) $ \k_ x -> do
+                  VGM.unsafeWrite rowRk (k_ + j) $! c * x
+                for_ [rk + 1 .. h - 1] $ \i -> do
+                  c <- read2d view i j
+                  rowI <- VGM.read view i
+                  -- for_ [j .. w - 1] $ \k -> do
+                  VGM.iforM_ (VGM.unsafeDrop j rowRk) $ \k_ ark -> do
+                    VGM.unsafeModify rowI (subtract (ark * c)) (k_ + j)
+                inner (rk + 1) (j + 1)
+  inner 0 0
 
 -- | @since 1.1.0.0
 instance (Num a, VU.Unbox a) => Semigroup (Matrix a) where
