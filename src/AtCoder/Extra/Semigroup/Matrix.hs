@@ -12,6 +12,7 @@ module AtCoder.Extra.Semigroup.Matrix
 
     -- * Constructors
     new,
+    square,
     zero,
     ident,
     diag,
@@ -91,6 +92,13 @@ new :: (HasCallStack, VU.Unbox a) => Int -> Int -> VU.Vector a -> Matrix a
 new h w vec
   | VU.length vec /= h * w = error "AtCoder.Extra.Matrix: size mismatch"
   | otherwise = Matrix h w vec
+
+-- | \(O(n^2)\) Creates an NxN square matrix.
+--
+-- @since 1.2.0.0
+{-# INLINE square #-}
+square :: (HasCallStack, VU.Unbox a) => Int -> VU.Vector a -> Matrix a
+square n = new n n
 
 -- | \(O(n^2)\) Creates an NxN zero matrix.
 --
