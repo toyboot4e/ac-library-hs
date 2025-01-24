@@ -1,3 +1,5 @@
 .venv
 .verify-helper
 .fzf-history
+.fzf-history-online
+main
