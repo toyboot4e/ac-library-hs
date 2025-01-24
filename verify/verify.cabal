@@ -210,6 +210,11 @@ executable yosupo-lca
   main-is:       yosupo-lca.hs
   build-depends: verify
 
+executable yosupo-inverse-matrix
+  import:        app-local
+  main-is:       yosupo-inverse-matrix.hs
+  build-depends: verify
+
 executable yosupo-matrix-product
   import:        app-local
   main-is:       yosupo-matrix-product.hs

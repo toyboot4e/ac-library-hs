@@ -32,6 +32,10 @@ module AtCoder.Extra.Semigroup.Matrix
 
     -- * Rank
     rank,
+
+    -- * Inverse
+    inv,
+    invRaw,
   )
 where
 
@@ -307,6 +311,88 @@ rank (Matrix h w vec) = runST $ do
                     VGM.unsafeModify rowI (subtract (ark * c)) (k_ + j)
                 inner (rk + 1) (j + 1)
   inner 0 0
+
+-- TODO: add HasCallStack and compare their speeds
+
+-- | \(O(n^3)\) Returns @(det, invMatrix)@ or `Nothing` if the matrix does not have inverse (the
+-- determinant is zero).
+--
+-- ==== Constraints
+-- - The input must be a square matrix.
+--
+-- @since 1.2.0.0
+{-# INLINE inv #-}
+inv :: forall a. (Fractional a, Eq a, VU.Unbox a) => Matrix a -> Maybe (a, Matrix a)
+inv mat@(Matrix n _ _) = do
+  (!det, !invMat) <- invRaw mat
+  let !invMat' = VU.concat $ V.toList invMat
+  pure (det, Matrix n n invMat')
+
+-- | \(O(n^3)\) Returns @(det, invMatrix)@ or `Nothing` if the matrix does not have inverse (the
+-- determinant is zero).
+--
+-- ==== Constraints
+-- - The input must be a square matrix.
+--
+-- @since 1.2.0.0
+{-# INLINE invRaw #-}
+invRaw :: forall a. (Fractional a, Eq a, VU.Unbox a) => Matrix a -> Maybe (a, V.Vector (VU.Vector a))
+invRaw (Matrix h w vec) = runST $ do
+  vecA <- VU.thaw vec
+  viewA <- V.thaw $ V.unfoldrExactN n (VUM.splitAt n) vecA
+
+  vecB <- VUM.replicate (n * n) (0 :: a)
+  for_ [0 .. n - 1] $ \i -> do
+    VGM.unsafeWrite vecB (n * i + i) (1 :: a)
+  viewB <- V.thaw $ V.unfoldrExactN n (VUM.splitAt n) vecB
+
+  let inner i !det
+        | i >= n = do
+            viewB' <- V.mapM VU.unsafeFreeze =<< V.unsafeFreeze viewB
+            pure $ Just (det, viewB')
+        | otherwise = do
+            let swapLoop k !det
+                  | k >= n = pure det
+                  | otherwise = do
+                      aki <- read2d viewA k i
+                      if aki /= 0
+                        then do
+                          if k /= i
+                            then do
+                              VGM.unsafeSwap viewA i k
+                              VGM.unsafeSwap viewB i k
+                              pure (-det)
+                            else pure det
+                        else do
+                          swapLoop (k + 1) det
+            det' <- swapLoop i det
+            aii <- read2d viewA i i
+            if aii == 0
+              then pure Nothing
+              else do
+                let !c = (1 :: a) / aii
+                let !det'' = det' * aii
+                rowAI <- VGM.unsafeRead viewA i
+                rowBI <- VGM.unsafeRead viewB i
+                VUM.iforM_ (VUM.unsafeDrop i rowAI) $ \j_ x -> do
+                  VGM.unsafeWrite rowAI (j_ + i) $! x * c
+                VUM.iforM_ rowBI $ \j x -> do
+                  VGM.unsafeWrite rowBI j $! x * c
+                for_ [0 .. n - 1] $ \k -> do
+                  when (i /= k) $ do
+                    c <- read2d viewA k i
+                    rowAK <- VGM.unsafeRead viewA k
+                    rowBK <- VGM.unsafeRead viewB k
+                    VGM.iforM_ (VGM.unsafeDrop i rowAI) $ \j_ aij -> do
+                      VGM.unsafeModify rowAK (subtract (aij * c)) (j_ + i)
+                    VGM.iforM_ rowBI $ \j bij -> do
+                      VGM.unsafeModify rowBK (subtract (bij * c)) j
+                inner (i + 1) det''
+
+  inner 0 (1 :: a)
+  where
+    !_ = ACIA.runtimeAssert (h == w) $ "AtCoder.Extra.Semigroup.Matrix.inv: given non-square matrix of size " ++ show (h, w)
+    n = h
 
 -- | @since 1.1.0.0
 instance (Num a, VU.Unbox a) => Semigroup (Matrix a) where
