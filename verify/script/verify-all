@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Be sure to set `DROPBOX_TOKEN` before run.
+# touch app/*.hs
+./.venv/bin/oj-verify run app/*.hs
