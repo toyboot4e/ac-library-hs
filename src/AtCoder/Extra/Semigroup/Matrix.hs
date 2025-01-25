@@ -37,6 +37,10 @@ module AtCoder.Extra.Semigroup.Matrix
     -- * Inverse
     inv,
     invRaw,
+
+    -- * Determinant
+    detMod,
+    detMint,
   )
 where
 
@@ -45,14 +49,17 @@ import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Barrett qualified as BT
 import AtCoder.ModInt qualified as M
 import Control.Monad (when)
+import Control.Monad.Primitive (PrimMonad, PrimState)
 import Control.Monad.ST (runST)
 import Data.Foldable (for_)
 import Data.Semigroup (Semigroup (..))
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
+import Data.Vector.Mutable qualified as VM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import Data.Word (Word64)
 import GHC.Exts (proxy#)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, natVal')
@@ -401,6 +408,83 @@ invRaw (Matrix h w vec) = runST $ do
   where
     !_ = ACIA.runtimeAssert (h == w) $ "AtCoder.Extra.Semigroup.Matrix.inv: given non-square matrix of size " ++ show (h, w)
     n = h
+
+-- | \(O(hw \min(h, w))\) Returns the rank of the matrix.
+--
+-- @since 1.2.0.0
+{-# INLINE detMod #-}
+detMod :: Int -> Matrix Int -> Int
+detMod m (Matrix h w vecA) = runST $ do
+  vm <- VU.thaw vecA
+  view <- V.thaw $ V.unfoldrExactN n (VUM.splitAt n) vm
+
+  let inner i (!det :: Int)
+        | i >= n = pure det
+        | otherwise = do
+            let swapLoop j !det
+                  | j >= n = pure det
+                  | otherwise = do
+                      aji <- read2d view j i
+                      if aji == 0
+                        then swapLoop (j + 1) det
+                        else do
+                          if i /= j
+                            then do
+                              VGM.unsafeSwap view i j
+                              pure $! m - det
+                            else pure det
+            det' <- swapLoop i det
+            det'' <- VU.foldM'
+              ( \ !acc j -> do
+                  let visitDiag !det = do
+                        aii <- read2d view i i
+                        if aii == 0
+                          then pure det
+                          else do
+                            aji <- read2d view j i
+                            let !c = m - aji `div` aii
+                            rowI <- VGM.unsafeRead view i
+                            rowJ <- VGM.unsafeRead view j
+                            -- NOTE: it's a reverse loop!
+                            VGM.ifoldrM'
+                              ( \k_ aik () -> do
+                                  VGM.unsafeModify rowJ ((`mod` m) . (+ aik * c)) (k_ + i)
+                              )
+                              ()
+                              (VGM.unsafeDrop i rowI)
+                            VGM.unsafeSwap view i j
+                            visitDiag (m - det)
+                  acc' <- visitDiag acc
+                  VGM.unsafeSwap view i j
+                  pure $! m - acc'
+              )
+              det'
+              (VU.generate (n - (i + 1)) (+ (i + 1)))
+
+            inner (i + 1) det''
+
+  det <- inner 0 (1 :: Int)
+  fromIntegral
+    <$> VU.foldM'
+      ( \(!acc :: Word64) i -> do
+          aii <- read2d view i i
+          pure $! BT.mulMod bt acc $! fromIntegral aii
+      )
+      (fromIntegral det)
+      (VU.generate n id)
+  where
+    !_ = ACIA.runtimeAssert (h == w) $ "AtCoder.Extra.Semigroup.Matrix.detMod: given non-square matrix of size " ++ show (h, w)
+    !n = h
+    !bt = BT.new32 $ fromIntegral m
+
+-- | \(O(hw \min(h, w))\) Returns the rank of the matrix.
+--
+-- @since 1.2.0.0
+{-# INLINE detMint #-}
+detMint :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> M.ModInt a
+detMint matA = M.new . detMod m $ map M.val matA
+  where
+    !m = fromIntegral (natVal' (proxy# @a))
 
 -- | @since 1.1.0.0
 instance (Num a, VU.Unbox a) => Semigroup (Matrix a) where

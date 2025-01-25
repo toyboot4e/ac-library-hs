@@ -215,6 +215,21 @@ executable yosupo-inverse-matrix
   main-is:       yosupo-inverse-matrix.hs
   build-depends: verify
 
+executable yosupo-matrix-det
+  import:        app-local
+  main-is:       yosupo-matrix-det.hs
+  build-depends: verify
+
+executable yosupo-matrix-det-mint
+  import:        app-local
+  main-is:       yosupo-matrix-det-mint.hs
+  build-depends: verify
+
+executable yosupo-matrix-det-arbitrary-mod
+  import:        app-local
+  main-is:       yosupo-matrix-det-arbitrary-mod.hs
+  build-depends: verify
+
 executable yosupo-matrix-product
   import:        app-local
   main-is:       yosupo-matrix-product.hs
