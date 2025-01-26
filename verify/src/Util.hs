@@ -13,6 +13,8 @@ module Util
     ints4,
     ints,
     withLine,
+    wsBSB,
+    endlBSB,
     unlinesBSB,
     unlinesWithBSB,
     unwordsBSB,
@@ -34,7 +36,7 @@ import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
 import System.IO (stdout)
 
--- TODO: use MonadState, add INLINE
+-- TODO: use MonadState
 
 -- | Failable parser.
 type Parser = StateT BS.ByteString Maybe
