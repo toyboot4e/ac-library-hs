@@ -190,6 +190,16 @@ executable yosupo-associative-array
   main-is:       yosupo-associative-array.hs
   build-depends: verify
 
+executable yosupo-biconnected-components
+  import:        app-local
+  main-is:       yosupo-biconnected-components.hs
+  build-depends: verify
+
+executable yosupo-biconnected-components-util
+  import:        app-local
+  main-is:       yosupo-biconnected-components-util.hs
+  build-depends: verify
+
 executable yosupo-enumerate-palindromes
   import:        app-local
   main-is:       yosupo-enumerate-palindromes.hs
