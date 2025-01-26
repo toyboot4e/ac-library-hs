@@ -65,6 +65,7 @@ module AtCoder.Internal.Buffer
     -- * Modifications
     pushBack,
     popBack,
+    popBack_,
     write,
     modify,
     modifyM,
@@ -181,6 +182,15 @@ popBack Buffer {..} = do
       x <- VGM.read vecB (len - 1)
       VGM.write lenB 0 (len - 1)
       pure $ Just x
+
+-- | \(O(1)\) Removes the last element from the buffer and discards it.
+--
+-- @since 1.2.0.0
+{-# INLINE popBack_ #-}
+popBack_ :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m ()
+popBack_ buf = do
+  _ <- popBack buf
+  pure ()
 
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
 -- out of bounds.
