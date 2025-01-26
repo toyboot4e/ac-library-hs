@@ -253,13 +253,13 @@ convolutionNaive a b = VU.create $ do
   ans <- VGM.replicate (n + m - 1) 0
   if n < m
     then do
-      for_ [0 .. m - 1] $ \j -> do
-        for_ [0 .. n - 1] $ \i -> do
-          VGM.modify ans (+ a VG.! i * b VG.! j) (i + j)
+      VU.iforM_ b $ \j bj -> do
+        VU.iforM_ a $ \i ai -> do
+          VGM.modify ans (+ ai * bj) (i + j)
     else do
-      for_ [0 .. n - 1] $ \i -> do
-        for_ [0 .. m - 1] $ \j -> do
-          VGM.modify ans (+ a VG.! i * b VG.! j) (i + j)
+      VU.iforM_ a $ \i ai -> do
+        VU.iforM_ b $ \j bj -> do
+          VGM.modify ans (+ ai * bj) (i + j)
   pure ans
 
 -- | @since 1.0.0.0
