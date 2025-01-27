@@ -200,6 +200,21 @@ executable yosupo-biconnected-components-util
   main-is:       yosupo-biconnected-components-util.hs
   build-depends: verify
 
+executable yosupo-dynamic-tree-vertex-add-path-sum
+  import:        app-local
+  main-is:       yosupo-dynamic-tree-vertex-add-path-sum.hs
+  build-depends: verify
+
+executable yosupo-dynamic-tree-vertex-set-path-composite
+  import:        app-local
+  main-is:       yosupo-dynamic-tree-vertex-set-path-composite.hs
+  build-depends: verify
+
+executable yosupo-dynamic-tree-vertex-add-subtree-sum
+  import:        app-local
+  main-is:       yosupo-dynamic-tree-vertex-add-subtree-sum.hs
+  build-depends: verify
+
 executable yosupo-enumerate-palindromes
   import:        app-local
   main-is:       yosupo-enumerate-palindromes.hs
@@ -215,9 +230,14 @@ executable yosupo-range-kth-smallest
   main-is:       yosupo-range-kth-smallest.hs
   build-depends: verify
 
-executable yosupo-lca
+executable yosupo-lca-hld
   import:        app-local
-  main-is:       yosupo-lca.hs
+  main-is:       yosupo-lca-hld.hs
+  build-depends: verify
+
+executable yosupo-lca-lct
+  import:        app-local
+  main-is:       yosupo-lca-lct.hs
   build-depends: verify
 
 executable yosupo-inverse-matrix

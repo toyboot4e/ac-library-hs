@@ -81,6 +81,7 @@ library
     AtCoder.Extra.Graph
     AtCoder.Extra.Tree
     AtCoder.Extra.Tree.Hld
+    AtCoder.Extra.Tree.Lct
     AtCoder.Extra.Tree.TreeMonoid
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid

@@ -2,7 +2,8 @@
 
 -- | Minimum parse/print with @bytestring@.
 module Util
-  ( intP,
+  ( Parser,
+    intP,
     intS1P,
     int2P,
     int3P,
