@@ -90,7 +90,7 @@ where
 
 import AtCoder.Extra.IntMap qualified as IM
 import Control.Monad (foldM_)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Data.Vector.Generic qualified as G
 import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
@@ -237,7 +237,7 @@ insert itm l r x = insertM itm l r x onAdd onDel
 -- hooks.
 --
 -- @since 1.1.0.0
-{-# INLINE insertM #-}
+{-# INLINABLE insertM #-}
 insertM ::
   (PrimMonad m, Eq a, VU.Unbox a) =>
   -- | The map
@@ -259,10 +259,10 @@ insertM (IntervalMap dim) l0 r0 x onAdd onDel
       !r <- handleRight l0 r0
       (!l', !r') <- handleLeft l0 r
       onAdd l' r' x
-      IM.insert dim l' (r', x)
+      stToPrim $ IM.insert dim l' (r', x)
   where
     handleRight l r = do
-      res <- IM.lookupGE dim l
+      res <- stToPrim $ IM.lookupGE dim l
       case res of
         Just interval0@(!_, (!_, !_)) -> run interval0 l r
         Nothing -> pure r
@@ -280,7 +280,7 @@ insertM (IntervalMap dim) l0 r0 x onAdd onDel
       | l' == r && x' == x = do
           -- adjacent interval with the same value: merge into one.
           onDel l' r' x'
-          IM.delete_ dim l'
+          stToPrim $ IM.delete_ dim l'
           pure r'
       | l' == r = do
           -- adjacent interval with different values: nothing to do.
@@ -289,8 +289,9 @@ insertM (IntervalMap dim) l0 r0 x onAdd onDel
       | r' <= r = do
           -- inside the interval: delete and continue
           onDel l' r' x'
-          IM.delete_ dim l'
-          res <- IM.lookupGT dim l'
+          res <- stToPrim $ do
+            IM.delete_ dim l'
+            IM.lookupGT dim l'
           case res of
             Just rng -> run rng l r
             Nothing -> pure r
@@ -298,18 +299,20 @@ insertM (IntervalMap dim) l0 r0 x onAdd onDel
       | x' == x = do
           -- intersecting interval with the same value: merge into one.
           onDel l' r' x'
-          IM.delete_ dim l'
-          pure r'
+          stToPrim $ do
+            IM.delete_ dim l'
+            pure r'
       | otherwise = do
           -- intersecting interval with a different value: delete the intersection.
           onDel l' r' x'
           onAdd r r' x'
-          IM.delete_ dim l'
-          IM.insert dim r (r', x')
-          pure r
+          stToPrim $ do
+            IM.delete_ dim l'
+            IM.insert dim r (r', x')
+            pure r
 
     handleLeft l r = do
-      res <- IM.lookupLT dim l
+      res <- stToPrim $ IM.lookupLT dim l
       case res of
         Nothing -> pure (l, r)
         Just (!l', (!r', !x'))
@@ -317,8 +320,9 @@ insertM (IntervalMap dim) l0 r0 x onAdd onDel
           | r' == l && x' == x -> do
               -- adjacent interval with the same value: merge into one.
               onDel l' r' x'
-              IM.delete_ dim l'
-              pure (l', r)
+              stToPrim $ do
+                IM.delete_ dim l'
+                pure (l', r)
           | r' == l -> do
               -- adjacent interval with different values: nothing to do.
               pure (l, r)
@@ -329,24 +333,27 @@ insertM (IntervalMap dim) l0 r0 x onAdd onDel
           | x' == x -> do
               -- insersecting interval with the same value: merge into one.
               onDel l' r' x'
-              IM.delete_ dim l'
-              pure (min l l', max r r')
+              stToPrim $ do
+                IM.delete_ dim l'
+                pure (min l l', max r r')
           | r' > r -> do
               -- [l', r') contains [l, r) with a different value: split into three.
               onDel l' r' x'
               onAdd l' l x'
               onAdd r r' x'
-              -- IM.delete_ dim l'
-              IM.insert dim l' (l, x')
-              IM.insert dim r (r', x')
-              pure (l, r)
+              stToPrim $ do
+                -- IM.delete_ dim l'
+                IM.insert dim l' (l, x')
+                IM.insert dim r (r', x')
+                pure (l, r)
           | otherwise -> do
               -- insersecting interval with a different value: delete.
               onDel l' r' x'
               onAdd l' l x'
-              -- IM.delete_ dim l'
-              IM.insert dim l' (l, x')
-              pure (l, r)
+              stToPrim $ do
+                -- IM.delete_ dim l'
+                IM.insert dim l' (l, x')
+                pure (l, r)
 
 -- | Amortized \(O(\log n)\) Deletes an interval \([l, r)\) from the map.
 --
@@ -362,7 +369,7 @@ delete itm l r = deleteM itm l r onAdd onDel
 -- changes via @onAdd@ and @onDel@ hooks.
 --
 -- @since 1.1.0.0
-{-# INLINE deleteM #-}
+{-# INLINABLE deleteM #-}
 deleteM ::
   (PrimMonad m, VU.Unbox a) =>
   -- | The map
@@ -383,7 +390,7 @@ deleteM (IntervalMap dim) l0 r0 onAdd onDel
       handleLeft l0 r0
   where
     handleRight l r = do
-      res <- IM.lookupGE dim l
+      res <- stToPrim $ IM.lookupGE dim l
       case res of
         Just interval0@(!_, (!_, !_)) -> run interval0 l r
         Nothing -> pure ()
@@ -395,8 +402,9 @@ deleteM (IntervalMap dim) l0 r0 onAdd onDel
       | r' <= r = do
           -- contained
           onDel l' r' x'
-          IM.delete_ dim l'
-          res <- IM.lookupGT dim l'
+          res <- stToPrim $ do
+            IM.delete_ dim l'
+            IM.lookupGT dim l'
           case res of
             Just rng -> run rng l r
             Nothing -> pure ()
@@ -404,12 +412,13 @@ deleteM (IntervalMap dim) l0 r0 onAdd onDel
           -- intersecting
           onDel l' r' x'
           onAdd r r' x'
-          IM.delete_ dim l'
-          IM.insert dim r (r', x')
-          pure ()
+          stToPrim $ do
+            IM.delete_ dim l'
+            IM.insert dim r (r', x')
+            pure ()
 
     handleLeft l r = do
-      res <- IM.lookupLT dim l
+      res <- stToPrim $ IM.lookupLT dim l
       case res of
         Nothing -> pure ()
         Just (!l', (!r', !x'))
@@ -421,15 +430,16 @@ deleteM (IntervalMap dim) l0 r0 onAdd onDel
               onDel l' r' x'
               onAdd l' l x'
               onAdd r r' x'
-              -- IM.delete dim l'
-              IM.insert dim l' (l, x')
-              IM.insert dim r (r', x')
+              stToPrim $ do
+                -- IM.delete dim l'
+                IM.insert dim l' (l, x')
+                IM.insert dim r (r', x')
           | otherwise -> do
               -- intersecting
               onDel l' r' x'
               onAdd l' l x'
               -- IM.delete_ dim l'
-              IM.insert dim l' (l, x')
+              stToPrim $ IM.insert dim l' (l, x')
 
 -- | \(O(\log n)\) Shorthand for overwriting the value of an interval that contains \([l, r)\).
 --
