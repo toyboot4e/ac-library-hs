@@ -76,6 +76,7 @@ import GHC.TypeNats (natVal')
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 --
 -- @since 1.0.0.0
+{-# INLINABLE convolution #-}
 convolution ::
   forall p.
   (HasCallStack, AM.Modulus p) =>
@@ -106,6 +107,7 @@ convolution a b
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 --
 -- @since 1.0.0.0
+{-# INLINABLE convolutionRaw #-}
 convolutionRaw ::
   forall p a.
   (HasCallStack, AM.Modulus p, Integral a, VU.Unbox a) =>
@@ -135,6 +137,7 @@ convolutionRaw _ a b
 -- - \(O(n\log{n})\), where \(n = |a| + |b|\).
 --
 -- @since 1.0.0.0
+{-# INLINABLE convolution64 #-}
 convolution64 ::
   (HasCallStack) =>
   VU.Vector Int ->
