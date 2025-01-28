@@ -239,7 +239,7 @@ mulMintImpl !bt (Matrix h w vecA) (Matrix h' w' vecB) =
           (VU.unsafeSlice (w * row) w vecA)
     !_ = ACIA.runtimeAssert (w == h') "AtCoder.Extra.Matrix.mulMintImpl: matrix size mismatch"
 
--- | \(O(w n^3)\) Calculates \(M^k\).
+-- | \(O(w n^3)\) Returns \(M^k\).
 --
 -- @since 1.1.0.0
 {-# INLINE pow #-}
@@ -251,7 +251,7 @@ pow k mat
   where
     !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.pow: matrix size mismatch"
 
--- | \(O(w n^3)\) Calculates \(M^k\), taking the mod.
+-- | \(O(w n^3)\) Returns \(M^k\), taking the mod.
 --
 -- @since 1.1.0.0
 {-# INLINE powMod #-}
@@ -263,7 +263,7 @@ powMod m k mat
   where
     !_ = ACIA.runtimeAssert (hM mat == wM mat) "AtCoder.Extra.Matrix.powMod: matrix size mismatch"
 
--- | \(O(w n^3)\) Calculates \(M^k\), specialized to `M.ModInt`.
+-- | \(O(w n^3)\) Returns \(M^k\), specialized to `M.ModInt`.
 --
 -- @since 1.1.0.0
 {-# INLINE powMint #-}

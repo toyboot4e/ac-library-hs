@@ -52,7 +52,7 @@ import GHC.Stack (HasCallStack)
 --
 -- ==== Constraints
 -- - \(0 \le n\)
--- - \(1 \le m\)
+-- - \(1 \le m \lt 2^{31}\)
 --
 -- ==== Complexity
 -- - \(O(\log n)\)
@@ -145,6 +145,10 @@ invGcd a0 b
            in inner t s' m1 m0'
 
 -- | Returns the primitive root of the given `Int`.
+--
+-- ==== Constraints
+-- - The input must be a prime number.
+-- - The input must be less than \(2^31\).
 --
 -- @since 1.0.0.0
 {-# INLINE primitiveRoot #-}
