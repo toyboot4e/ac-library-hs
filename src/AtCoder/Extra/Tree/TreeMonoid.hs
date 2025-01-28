@@ -163,6 +163,7 @@ data Commutativity
     )
 
 -- | \(O(n)\)
+{-# INLINE buildImpl #-}
 buildImpl ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
   Hld.Hld ->
@@ -181,6 +182,7 @@ buildImpl hldTM commuteTM weightPolicyTM weights = do
 -- | \(O(n)\) Creates a `TreeMonoid` with weights on vertices.
 --
 -- @since 1.1.0.0
+{-# INLINE fromVerts #-}
 fromVerts ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | `Hld.Hld`.
@@ -204,6 +206,7 @@ fromVerts hld@Hld.Hld {indexHld} commuteTM xs_ = do
 -- duplicated: only one of \((u, v, w)\) or \((v, u, w)\) is needed.
 --
 -- @since 1.1.0.0
+{-# INLINE fromEdges #-}
 fromEdges ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | `Hld.Hld`.
@@ -227,6 +230,7 @@ fromEdges hld@Hld.Hld {indexHld} commuteTM edges = do
 -- | \(O(\log^2 n)\) Returns the product of the path between two vertices \(u\), \(v\) (invlusive).
 --
 -- @since 1.1.0.0
+{-# INLINE prod #-}
 prod :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> Vertex -> m a
 prod TreeMonoid {..} u v = do
   case commuteTM of
@@ -236,6 +240,7 @@ prod TreeMonoid {..} u v = do
 -- | \(O(\log n)\) Returns the product of the subtree rooted at the given `Vertex`.
 --
 -- @since 1.1.0.0
+{-# INLINE prodSubtree #-}
 prodSubtree :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> m a
 prodSubtree TreeMonoid {..} subtreeRoot = do
   let (!l, !r) = Hld.subtreeSegmentInclusive hldTM subtreeRoot
@@ -250,6 +255,7 @@ prodSubtree TreeMonoid {..} subtreeRoot = do
 -- | \(O(1)\) Reads a `TreeMonoid` value on a `Vertex`.
 --
 -- @since 1.1.0.0
+{-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> m a
 read TreeMonoid {..} i_ = do
   let !i = Hld.indexHld hldTM VG.! i_
@@ -258,6 +264,7 @@ read TreeMonoid {..} i_ = do
 -- | \(O(\log n)\) Write a `TreeMonoid` value on a `Vertex`.
 --
 -- @since 1.1.0.0
+{-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> a -> m ()
 write TreeMonoid {..} i_ x = do
   let !i = Hld.indexHld hldTM VG.! i_
@@ -268,6 +275,7 @@ write TreeMonoid {..} i_ x = do
 -- | \(O(\log n)\) Exchanges a `TreeMonoid` value on a `Vertex`.
 --
 -- @since 1.1.0.0
+{-# INLINE exchange #-}
 exchange :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> a -> m a
 exchange TreeMonoid {..} i_ x = do
   let !i = Hld.indexHld hldTM VG.! i_
@@ -279,6 +287,7 @@ exchange TreeMonoid {..} i_ x = do
 -- | \(O(\log n)\) Modifies a `TreeMonoid` value on a `Vertex`.
 --
 -- @since 1.1.0.0
+{-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> (a -> a) -> Int -> m ()
 modify TreeMonoid {..} f i_ = do
   let !i = Hld.indexHld hldTM VG.! i_
@@ -289,6 +298,7 @@ modify TreeMonoid {..} f i_ = do
 -- | \(O(\log n)\) Modifies a `TreeMonoid` value on a `Vertex`.
 --
 -- @since 1.1.0.0
+{-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> (a -> m a) -> Int -> m ()
 modifyM TreeMonoid {..} f i_ = do
   let !i = Hld.indexHld hldTM VG.! i_
