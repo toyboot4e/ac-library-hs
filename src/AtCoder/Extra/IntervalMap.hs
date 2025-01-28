@@ -109,6 +109,7 @@ newtype IntervalMap s a = IntervalMap
 -- | \(O(n)\) Creates an empty `IntervalMap`.
 --
 -- @since 1.1.0.0
+{-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (IntervalMap (PrimState m) a)
 new = fmap IntervalMap . IM.new
 
@@ -121,6 +122,7 @@ new = fmap IntervalMap . IM.new
 -- [(0,(2,10)),(2,(4,11)),(4,(6,12))]
 --
 -- @since 1.1.0.0
+{-# INLINE build #-}
 build :: (PrimMonad m, Eq a, VU.Unbox a) => VU.Vector a -> m (IntervalMap (PrimState m) a)
 build xs = buildM xs onAdd
   where
@@ -130,6 +132,7 @@ build xs = buildM xs onAdd
 -- interval, while performing @onAdd@ hook for each interval.
 --
 -- @since 1.1.0.0
+{-# INLINE buildM #-}
 buildM ::
   (PrimMonad m, Eq a, VU.Unbox a) =>
   -- | Input values
@@ -159,6 +162,7 @@ capacity = IM.capacity . unITM
 -- | \(O(\log n)\) Returns whether a point \(x\) is contained within any of the intervals.
 --
 -- @since 1.1.0.0
+{-# INLINE contains #-}
 contains :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> m Bool
 contains itm i = intersects itm i (i + 1)
 
@@ -166,6 +170,7 @@ contains itm i = intersects itm i (i + 1)
 -- intervals.
 --
 -- @since 1.1.0.0
+{-# INLINE intersects #-}
 intersects :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m Bool
 intersects (IntervalMap dim) l r
   | l >= r = pure False
@@ -178,6 +183,7 @@ intersects (IntervalMap dim) l r
 -- | \(O(\log n)\) Looks up an interval that fully contains \([l, r)\).
 --
 -- @since 1.1.0.0
+{-# INLINE lookup #-}
 lookup :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m (Maybe (Int, Int, a))
 lookup (IntervalMap im) l r
   | l >= r = pure Nothing
@@ -192,6 +198,7 @@ lookup (IntervalMap im) l r
 -- Throws an error if no such interval exists.
 --
 -- @since 1.1.0.0
+{-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m a
 read itm l r = do
   res <- readMaybe itm l r
@@ -203,6 +210,7 @@ read itm l r = do
 -- Returns `Nothing` if no such interval exists.
 --
 -- @since 1.1.0.0
+{-# INLINE readMaybe #-}
 readMaybe :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m (Maybe a)
 readMaybe (IntervalMap dim) l r
   | l >= r = pure Nothing
@@ -217,6 +225,7 @@ readMaybe (IntervalMap dim) l r
 -- map. Overwrites any overlapping intervals.
 --
 -- @since 1.1.0.0
+{-# INLINE insert #-}
 insert :: (PrimMonad m, Eq a, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> a -> m ()
 insert itm l r x = insertM itm l r x onAdd onDel
   where
@@ -228,6 +237,7 @@ insert itm l r x = insertM itm l r x onAdd onDel
 -- hooks.
 --
 -- @since 1.1.0.0
+{-# INLINE insertM #-}
 insertM ::
   (PrimMonad m, Eq a, VU.Unbox a) =>
   -- | The map
@@ -341,6 +351,7 @@ insertM (IntervalMap dim) l0 r0 x onAdd onDel
 -- | Amortized \(O(\log n)\) Deletes an interval \([l, r)\) from the map.
 --
 -- @since 1.1.0.0
+{-# INLINE delete #-}
 delete :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m ()
 delete itm l r = deleteM itm l r onAdd onDel
   where
@@ -351,6 +362,7 @@ delete itm l r = deleteM itm l r onAdd onDel
 -- changes via @onAdd@ and @onDel@ hooks.
 --
 -- @since 1.1.0.0
+{-# INLINE deleteM #-}
 deleteM ::
   (PrimMonad m, VU.Unbox a) =>
   -- | The map
@@ -422,6 +434,7 @@ deleteM (IntervalMap dim) l0 r0 onAdd onDel
 -- | \(O(\log n)\) Shorthand for overwriting the value of an interval that contains \([l, r)\).
 --
 -- @since 1.1.0.0
+{-# INLINE overwrite #-}
 overwrite :: (PrimMonad m, Eq a, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> a -> m ()
 overwrite itm l r x = do
   res <- lookup itm l r
@@ -433,6 +446,7 @@ overwrite itm l r x = do
 -- Tracks interval state changes via @onAdd@ and @onDel@ hooks.
 --
 -- @since 1.1.0.0
+{-# INLINE overwriteM #-}
 overwriteM ::
   (PrimMonad m, Eq a, VU.Unbox a) =>
   -- | The map
@@ -458,5 +472,6 @@ overwriteM itm l r x onAdd onDel = do
 -- where \([l, r)\) is the interval and \(x\) is the associated value.
 --
 -- @since 1.1.0.0
+{-# INLINE freeze #-}
 freeze :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> m (VU.Vector (Int, (Int, a)))
 freeze = IM.assocs . unITM
