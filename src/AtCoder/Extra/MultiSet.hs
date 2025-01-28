@@ -117,6 +117,7 @@ data MultiSet s = MultiSet
 -- | \(O(n)\) Creates a `MultiSet` with capacity \(n\).
 --
 -- @since 1.1.0.0
+{-# INLINE new #-}
 new :: (PrimMonad m) => Int -> m (MultiSet (PrimState m))
 new n = do
   mapMS <- HM.new n
@@ -127,12 +128,14 @@ new n = do
 -- hash map.
 --
 -- @since 1.1.0.0
+{-# INLINE capacity #-}
 capacity :: MultiSet s -> Int
 capacity = HM.capacity . mapMS
 
 -- | \(O(1)\) Returns the number of distinct keys with positive counts.
 --
 -- @since 1.1.0.0
+{-# INLINE size #-}
 size :: (PrimMonad m) => MultiSet (PrimState m) -> m Int
 size MultiSet {..} = do
   VGM.unsafeRead cntMS 0
@@ -140,6 +143,7 @@ size MultiSet {..} = do
 -- | \(O(1)\) Looks up the count for a key.
 --
 -- @since 1.1.0.0
+{-# INLINE lookup #-}
 lookup :: (PrimMonad m) => MultiSet (PrimState m) -> Int -> m (Maybe Int)
 lookup MultiSet {..} k = do
   HM.lookup mapMS k <&> \case
@@ -149,6 +153,7 @@ lookup MultiSet {..} k = do
 -- | \(O(1)\) Tests whether \(k\) is in the set.
 --
 -- @since 1.1.0.0
+{-# INLINE member #-}
 member :: (PrimMonad m) => MultiSet (PrimState m) -> Int -> m Bool
 member MultiSet {..} k = do
   HM.lookup mapMS k <&> \case
@@ -158,18 +163,21 @@ member MultiSet {..} k = do
 -- | \(O(1)\) Tests whether \(k\) is not in the set.
 --
 -- @since 1.1.0.0
+{-# INLINE notMember #-}
 notMember :: (PrimMonad m) => MultiSet (PrimState m) -> Int -> m Bool
 notMember ms k = not <$> member ms k
 
 -- | \(O(1)\) Increments the count of a key.
 --
 -- @since 1.1.0.0
+{-# INLINE inc #-}
 inc :: (HasCallStack, PrimMonad m) => MultiSet (PrimState m) -> Int -> m ()
 inc ms k = add ms k 1
 
 -- | \(O(1)\) Decrements the count of a key.
 --
 -- @since 1.1.0.0
+{-# INLINE dec #-}
 dec :: (HasCallStack, PrimMonad m) => MultiSet (PrimState m) -> Int -> m ()
 dec ms k = sub ms k 1
 
@@ -177,6 +185,7 @@ dec ms k = sub ms k 1
 -- the \((k, c)\) pair is inserted. If \(v\) is negative, it falls back to `sub`.
 --
 -- @since 1.1.0.0
+{-# INLINE add #-}
 add :: (HasCallStack, PrimMonad m) => MultiSet (PrimState m) -> Int -> Int -> m ()
 add ms@MultiSet {..} k v = case compare v 0 of
   LT -> sub ms k (-v)
@@ -195,6 +204,7 @@ add ms@MultiSet {..} k v = case compare v 0 of
 -- `add`.
 --
 -- @since 1.1.0.0
+{-# INLINE sub #-}
 sub :: (HasCallStack, PrimMonad m) => MultiSet (PrimState m) -> Int -> Int -> m ()
 sub ms@MultiSet {..} k v = case compare v 0 of
   LT -> add ms k (-v)
@@ -214,6 +224,7 @@ sub ms@MultiSet {..} k v = case compare v 0 of
 -- | \(O(1)\) Inserts a key-count pair into the set. `MultiSet` is actually a count map.
 --
 -- @since 1.1.0.0
+{-# INLINE insert #-}
 insert :: (HasCallStack, PrimMonad m) => MultiSet (PrimState m) -> Int -> Int -> m ()
 insert MultiSet {..} k v
   | v <= 0 = error $ "AtCoder.Extra.Multiset.insert: new count must be positive`" ++ show k ++ "`: `" ++ show v ++ "`"
@@ -229,6 +240,7 @@ insert MultiSet {..} k v
 -- number of distinct keys that can be inserted into the internal hash map.
 --
 -- @since 1.1.0.0
+{-# INLINE delete #-}
 delete :: (HasCallStack, PrimMonad m) => MultiSet (PrimState m) -> Int -> m ()
 delete MultiSet {..} k = do
   HM.lookup mapMS k >>= \case
