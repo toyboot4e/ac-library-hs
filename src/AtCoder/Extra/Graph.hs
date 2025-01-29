@@ -104,6 +104,8 @@ swapDupe' = VU.concatMap (\(!u, !v) -> VU.fromListN 2 [(u, v), (v, u)])
 scc :: Csr w -> V.Vector (VU.Vector Int)
 scc = ACISCC.sccCsr
 
+-- TODO: change scc to take arbitrary graph form
+
 -- | \(O(n \log n + m)\) Returns the lexicographically smallest topological ordering of the given
 -- graph.
 --
@@ -119,7 +121,7 @@ scc = ACISCC.sccCsr
 -- [1,2,4,0,3]
 --
 -- @since 1.1.0.0
-{-# INLINE topSort #-}
+{-# INLINABLE topSort #-}
 topSort :: Int -> (Int -> VU.Vector Int) -> VU.Vector Int
 topSort n gr = runST $ do
   inDeg <- VUM.replicate n (0 :: Int)
@@ -168,7 +170,7 @@ topSort n gr = runST $ do
 -- [[3,2],[0,3,1]]
 --
 -- @since 1.2.0.0
-{-# INLINE blockCut #-}
+{-# INLINABLE blockCut #-}
 blockCut :: Int -> (Int -> VU.Vector Int) -> Csr ()
 blockCut n gr = runST $ do
   low <- VUM.replicate n (0 :: Int)
