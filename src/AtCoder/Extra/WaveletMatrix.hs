@@ -99,14 +99,14 @@ build ys =
 -- original array if you can.
 --
 -- @since 1.1.0.0
-{-# INLINE access #-}
+{-# INLINABLE access #-}
 access :: WaveletMatrix -> Int -> Maybe Int
 access WaveletMatrix {..} i = (xDictWM VG.!) <$> Rwm.access rawWM i
 
 -- | \(O(\log |S|)\) Returns the number of \(y\) in \([l, r)\).
 --
 -- @since 1.1.0.0
-{-# INLINE rank #-}
+{-# INLINABLE rank #-}
 rank ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -123,7 +123,7 @@ rank wm l r y = rankBetween wm l r y (y + 1)
 -- | \(O(\log |S|)\) Returns the number of \(y\) in \([l, r) \times [y_1, y_2)\).
 --
 -- @since 1.1.0.0
-{-# INLINE rankBetween #-}
+{-# INLINABLE rankBetween #-}
 rankBetween ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -151,7 +151,7 @@ rankBetween WaveletMatrix {..} l r y1 y2
 -- not found.
 --
 -- @since 1.1.0.0
-{-# INLINE select #-}
+{-# INLINABLE select #-}
 select :: WaveletMatrix -> Int -> Maybe Int
 select wm = selectKth wm 0
 
@@ -159,7 +159,7 @@ select wm = selectKth wm 0
 -- if no such occurrence exists.
 --
 -- @since 1.1.0.0
-{-# INLINE selectKth #-}
+{-# INLINABLE selectKth #-}
 selectKth ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -180,7 +180,7 @@ selectKth WaveletMatrix {..} k y = do
 -- (0-based) of \(y\) in the sequence, or `Nothing` if no such occurrence exists.
 --
 -- @since 1.1.0.0
-{-# INLINE selectIn #-}
+{-# INLINABLE selectIn #-}
 selectIn ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -198,7 +198,7 @@ selectIn wm l r = selectKthIn wm l r 0
 -- (0-based) of \(y\) in the sequence, or `Nothing` if no such occurrence exists.
 --
 -- @since 1.1.0.0
-{-# INLINE selectKthIn #-}
+{-# INLINABLE selectKthIn #-}
 selectKthIn ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -223,7 +223,7 @@ selectKthIn WaveletMatrix {..} l r k y = do
 -- largest value. Note that duplicated values are treated as distinct occurrences.
 --
 -- @since 1.1.0.0
-{-# INLINE kthLargestIn #-}
+{-# INLINABLE kthLargestIn #-}
 kthLargestIn ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -243,7 +243,7 @@ kthLargestIn WaveletMatrix {..} l r k
 -- \(k\)-th (0-based) largest value. Note that duplicated values are treated as distinct occurrences.
 --
 -- @since 1.1.0.0
-{-# INLINE ikthLargestIn #-}
+{-# INLINABLE ikthLargestIn #-}
 ikthLargestIn ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -263,7 +263,7 @@ ikthLargestIn WaveletMatrix {..} l r k
 -- smallest value. Note that duplicated values are treated as distinct occurrences.
 --
 -- @since 1.1.0.0
-{-# INLINE kthSmallestIn #-}
+{-# INLINABLE kthSmallestIn #-}
 kthSmallestIn ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -283,7 +283,7 @@ kthSmallestIn WaveletMatrix {..} l r k
 -- \(k\)-th (0-based) smallest value. Note that duplicated values are treated as distinct occurrences.
 --
 -- @since 1.1.0.0
-{-# INLINE ikthSmallestIn #-}
+{-# INLINABLE ikthSmallestIn #-}
 ikthSmallestIn ::
   WaveletMatrix ->
   -- | \(l\)
@@ -301,7 +301,7 @@ ikthSmallestIn WaveletMatrix {..} l r k
 -- | \(O(\log |S|)\)
 --
 -- @since 1.1.0.0
-{-# INLINE unsafeKthSmallestIn #-}
+{-# INLINABLE unsafeKthSmallestIn #-}
 unsafeKthSmallestIn :: WaveletMatrix -> Int -> Int -> Int -> Int
 unsafeKthSmallestIn WaveletMatrix {..} l r k =
   xDictWM VG.! Rwm.unsafeKthSmallestIn rawWM l r k
@@ -309,7 +309,7 @@ unsafeKthSmallestIn WaveletMatrix {..} l r k =
 -- | \(O(\log |S|)\) Looks up the maximum \(y\) in \([l, r) \times (-\infty, y_0]\).
 --
 -- @since 1.1.0.0
-{-# INLINE lookupLE #-}
+{-# INLINABLE lookupLE #-}
 lookupLE ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -334,7 +334,7 @@ lookupLE wm l r y0
 -- | \(O(\log |S|)\) Looks up the maximum \(y\) in \([l, r) \times (-\infty, y_0)\).
 --
 -- @since 1.1.0.0
-{-# INLINE lookupLT #-}
+{-# INLINABLE lookupLT #-}
 lookupLT ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -351,7 +351,7 @@ lookupLT wm l r y0 = lookupLE wm l r (y0 - 1)
 -- | \(O(\log |S|)\) Looks up the minimum \(y\) in \([l, r) \times [y_0, \infty)\).
 --
 -- @since 1.1.0.0
-{-# INLINE lookupGE #-}
+{-# INLINABLE lookupGE #-}
 lookupGE ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -376,7 +376,7 @@ lookupGE wm l r y0
 -- | \(O(\log |S|)\) Looks up the minimum \(y\) in \([l, r) \times (y_0, \infty)\).
 --
 -- @since 1.1.0.0
-{-# INLINE lookupGT #-}
+{-# INLINABLE lookupGT #-}
 lookupGT ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -394,7 +394,7 @@ lookupGT wm l r y0 = lookupGE wm l r (y0 + 1)
 -- ascending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
 --
 -- @since 1.1.0.0
-{-# INLINE assocsIn #-}
+{-# INLINABLE assocsIn #-}
 assocsIn :: WaveletMatrix -> Int -> Int -> [(Int, Int)]
 assocsIn WaveletMatrix {..} l r = Rwm.assocsWith rawWM l r (xDictWM VG.!)
 
@@ -402,6 +402,6 @@ assocsIn WaveletMatrix {..} l r = Rwm.assocsWith rawWM l r (xDictWM VG.!)
 -- descending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
 --
 -- @since 1.1.0.0
-{-# INLINE descAssocsIn #-}
+{-# INLINABLE descAssocsIn #-}
 descAssocsIn :: WaveletMatrix -> Int -> Int -> [(Int, Int)]
 descAssocsIn WaveletMatrix {..} l r = Rwm.descAssocsInWith rawWM l r (xDictWM VG.!)
