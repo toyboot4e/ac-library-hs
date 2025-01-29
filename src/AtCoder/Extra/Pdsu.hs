@@ -46,7 +46,8 @@ where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -130,9 +131,14 @@ new n f = Pdsu n <$> VUM.replicate n (-1 {- size 1 -}) <*> VUM.replicate n (memp
 -- @since 1.1.0.0
 {-# INLINE leader #-}
 leader :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> m Int
-leader Pdsu {..} v0 = inner v0
+leader pdsu v0 = stToPrim $ leaderST pdsu v0
   where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.leader" v0 nPdsu
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.leader" v0 $ nPdsu pdsu
+
+{-# INLINE leaderST #-}
+leaderST :: (Semigroup a, VU.Unbox a) => Pdsu s a -> Int -> ST s Int
+leaderST Pdsu {..} v0 = inner v0
+  where
     inner v = do
       p <- VGM.read parentOrSizePdsu v
       if {- size? -} p < 0
@@ -156,9 +162,9 @@ leader Pdsu {..} v0 = inner v0
 -- @since 1.1.0.0
 {-# INLINE pot #-}
 pot :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> m a
-pot dsu@Pdsu {..} v1 = do
+pot dsu@Pdsu {..} v1 = stToPrim $ do
   -- Perform path compression
-  _ <- leader dsu v1
+  _ <- leaderST dsu v1
   VGM.read potentialPdsu v1
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.pot" v1 nPdsu
@@ -169,7 +175,13 @@ pot dsu@Pdsu {..} v1 = do
 -- @since 1.1.0.0
 {-# INLINE same #-}
 same :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m Bool
-same !dsu !v1 !v2 = (==) <$> leader dsu v1 <*> leader dsu v2
+same !dsu !v1 !v2 = stToPrim $ do
+  l1 <- leaderST dsu v1
+  l2 <- leaderST dsu v2
+  pure $ l1 == l2
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.same" v1 $ nPdsu dsu
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.same" v2 $ nPdsu dsu
 
 -- TODO: call it unsafeDiff
 
@@ -204,13 +216,18 @@ unsafeDiff !dsu !v1 !v2 = do
 -- @since 1.1.0.0
 {-# INLINE merge #-}
 merge :: (HasCallStack, PrimMonad m, Monoid a, Ord a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> a -> m Bool
-merge dsu@Pdsu {..} v10 v20 !dp0 = inner v10 v20 dp0
+merge dsu v10 v20 !dp0 = stToPrim $ mergeST dsu v10 v20 dp0
   where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.merge" v10 nPdsu
-    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.merge" v20 nPdsu
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.merge" v10 $ nPdsu dsu
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.merge" v20 $ nPdsu dsu
+
+{-# INLINE mergeST #-}
+mergeST :: (HasCallStack, Monoid a, Ord a, VU.Unbox a) => Pdsu s a -> Int -> Int -> a -> ST s Bool
+mergeST dsu@Pdsu {..} v10 v20 !dp0 = inner v10 v20 dp0
+  where
     inner v1 v2 !dp = do
-      !r1 <- leader dsu v1
-      !r2 <- leader dsu v2
+      !r1 <- leaderST dsu v1
+      !r2 <- leaderST dsu v2
       if r1 == r2
         then pure False
         else do
@@ -274,17 +291,21 @@ canMerge !dsu !v1 !v2 !dp = do
 -- @since 1.1.0.0
 {-# INLINE size #-}
 size :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> m Int
-size !dsu !v = (negate <$>) . VGM.read (parentOrSizePdsu dsu) =<< leader dsu v
+size !dsu !v = stToPrim $ do
+  l <- leaderST dsu v
+  negate <$> VGM.read (parentOrSizePdsu dsu) l
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.size" v $ nPdsu dsu
 
 -- | \(O(n)\) Divides the graph into connected components and returns the list of them.
 --
 -- @since 1.1.0.0
 {-# INLINE groups #-}
 groups :: (PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> m (V.Vector (VU.Vector Int))
-groups dsu@Pdsu {..} = do
+groups dsu@Pdsu {..} = stToPrim $ do
   groupSize <- VUM.replicate nPdsu (0 :: Int)
   leaders <- VU.generateM nPdsu $ \i -> do
-    li <- leader dsu i
+    li <- leaderST dsu i
     VGM.modify groupSize (+ 1) li
     pure li
   result <- do
