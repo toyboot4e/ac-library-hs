@@ -98,7 +98,7 @@ scc g = do
 -- | \(O(n + m)\) API) Returns a pair of @(# of scc, scc id)@.
 --
 -- @since 1.1.0.0
-{-# INLINE sccIdsCsr #-}
+{-# INLINABLE sccIdsCsr #-}
 sccIdsCsr :: ACICSR.Csr w -> (Int, VU.Vector Int)
 sccIdsCsr g@ACICSR.Csr {..} = runST $ do
   -- see also the Wikipedia: https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm#The_algorithm_in_pseudocode
@@ -173,7 +173,7 @@ sccIdsCsr g@ACICSR.Csr {..} = runST $ do
 -- | \(O(n + m)\) Returns the strongly connected components.
 --
 -- @since 1.1.0.0
-{-# INLINE sccCsr #-}
+{-# INLINABLE sccCsr #-}
 sccCsr :: ACICSR.Csr w -> V.Vector (VU.Vector Int)
 sccCsr g = runST $ do
   groups <- V.mapM VUM.unsafeNew $ VU.convert counts
