@@ -72,23 +72,27 @@ prop_mid = QC.testProperty "mid" $ do
 
 unit_butterfly :: TestTree
 unit_butterfly = testCase "butterfly" $ do
-  let modInt :: Int -> AM.ModInt998244353
-      modInt = AM.new
   let expected = VU.fromList [10, 998244351, 173167434, 825076915]
-  vec <- VU.unsafeThaw $ VU.map modInt $ VU.fromList [1, 2, 3, 4]
-  info <- ACIC.newInfo @_ @998244353
-  ACIC.butterfly info vec
-  (expected @=?) =<< VU.unsafeFreeze vec
+  let xs = VU.create $ do
+        let modInt :: Int -> AM.ModInt998244353
+            modInt = AM.new
+        vec <- VU.unsafeThaw $ VU.map modInt $ VU.fromList [1, 2, 3, 4]
+        info <- ACIC.newInfo @_ @998244353
+        ACIC.butterfly info vec
+        pure vec
+  expected @?= xs
 
 unit_invButterfly :: TestTree
 unit_invButterfly = testCase "invButterfly" $ do
-  let modInt :: Int -> AM.ModInt998244353
-      modInt = AM.new
   let expected = VU.fromList [10, 911660634, 998244349, 86583717]
-  vec <- VU.unsafeThaw $ VU.map modInt $ VU.fromList [1, 2, 3, 4]
-  info <- ACIC.newInfo @_ @998244353
-  ACIC.butterflyInv info vec
-  (expected @=?) =<< VU.unsafeFreeze vec
+  let xs = VU.create $ do
+        let modInt :: Int -> AM.ModInt998244353
+            modInt = AM.new
+        vec <- VU.unsafeThaw $ VU.map modInt $ VU.fromList [1, 2, 3, 4]
+        info <- ACIC.newInfo @_ @998244353
+        ACIC.butterflyInv info vec
+        pure vec
+  expected @=? xs
 
 testWithRangeMint ::
   forall p.

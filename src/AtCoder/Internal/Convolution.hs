@@ -26,7 +26,7 @@ import AtCoder.Internal.Bit qualified as ACIB
 import AtCoder.ModInt qualified as AM
 import Control.Monad (when)
 import Control.Monad.Fix (fix)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.ST (ST)
 import Data.Bits (bit, complement, countTrailingZeros, (.<<.), (.>>.))
 import Data.Foldable
 import Data.Vector.Generic qualified as VG
@@ -58,8 +58,8 @@ data FftInfo p = FftInfo
 -- | \(O(\log m)\) Creates an `FftInfo`.
 --
 -- @since 1.0.0.0
-{-# INLINE newInfo #-}
-newInfo :: forall m p. (PrimMonad m, AM.Modulus p) => m (FftInfo p)
+{-# INLINABLE newInfo #-}
+newInfo :: forall s p. (AM.Modulus p) => ST s (FftInfo p)
 newInfo = do
   let !g = AM.primitiveRootModulus (proxy# @p)
   let !m = fromIntegral $ natVal' (proxy# @p)
@@ -111,13 +111,13 @@ newInfo = do
   pure FftInfo {..}
 
 -- | @since 1.0.0.0
-{-# INLINE butterfly #-}
+{-# INLINABLE butterfly #-}
 butterfly ::
-  forall m p.
-  (PrimMonad m, AM.Modulus p) =>
+  forall s p.
+  (AM.Modulus p) =>
   FftInfo p ->
-  VUM.MVector (PrimState m) (AM.ModInt p) ->
-  m ()
+  VUM.MVector s (AM.ModInt p) ->
+  ST s ()
 butterfly FftInfo {..} a = do
   let n = VUM.length a
   let h = countTrailingZeros n
@@ -175,13 +175,13 @@ butterfly FftInfo {..} a = do
           loop $ len + 2
 
 -- | @since 1.0.0.0
-{-# INLINE butterflyInv #-}
+{-# INLINABLE butterflyInv #-}
 butterflyInv ::
-  forall m p.
-  (PrimMonad m, AM.Modulus p) =>
+  forall s p.
+  (AM.Modulus p) =>
   FftInfo p ->
-  VUM.MVector (PrimState m) (AM.ModInt p) ->
-  m ()
+  VUM.MVector s (AM.ModInt p) ->
+  ST s ()
 butterflyInv FftInfo {..} a = do
   let n = VUM.length a
   let h = countTrailingZeros n
@@ -240,7 +240,7 @@ butterflyInv FftInfo {..} a = do
           loop $ len - 2
 
 -- | @since 1.0.0.0
-{-# INLINE convolutionNaive #-}
+{-# INLINABLE convolutionNaive #-}
 convolutionNaive ::
   forall p.
   (AM.Modulus p) =>
