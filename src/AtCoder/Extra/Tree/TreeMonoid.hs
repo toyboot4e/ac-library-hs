@@ -252,7 +252,7 @@ prodSubtree TreeMonoid {..} subtreeRoot = do
         then pure mempty
         else ST.prod segFTM (l + 1) (r + 1)
 
--- | \(O(1)\) Reads a `TreeMonoid` value on a `Vertex`.
+-- | \(O(1)\) Reads a monoid value of a `Vertex`.
 --
 -- @since 1.1.0.0
 {-# INLINE read #-}
@@ -261,7 +261,7 @@ read TreeMonoid {..} i_ = do
   let !i = Hld.indexHld hldTM VG.! i_
   ST.read segFTM i
 
--- | \(O(\log n)\) Write a `TreeMonoid` value on a `Vertex`.
+-- | \(O(\log n)\) Writes to the monoid value of a vertex.
 --
 -- @since 1.1.0.0
 {-# INLINE write #-}
@@ -272,7 +272,7 @@ write TreeMonoid {..} i_ x = do
   when (commuteTM == NonCommute) $ do
     ST.write segBTM i $ Dual x
 
--- | \(O(\log n)\) Exchanges a `TreeMonoid` value on a `Vertex`.
+-- | \(O(\log n)\) Writes to the monoid value of a vertex and returns the old value.
 --
 -- @since 1.1.0.0
 {-# INLINE exchange #-}
@@ -284,7 +284,7 @@ exchange TreeMonoid {..} i_ x = do
     ST.write segBTM i $ Dual x
   pure res
 
--- | \(O(\log n)\) Modifies a `TreeMonoid` value on a `Vertex`.
+-- | \(O(\log n)\) Modifies the monoid value of a vertex with a pure function.
 --
 -- @since 1.1.0.0
 {-# INLINE modify #-}
@@ -295,7 +295,7 @@ modify TreeMonoid {..} f i_ = do
   when (commuteTM == NonCommute) $ do
     ST.modify segBTM (Dual . f . getDual) i
 
--- | \(O(\log n)\) Modifies a `TreeMonoid` value on a `Vertex`.
+-- | \(O(\log n)\) Modifies the monoid value of a vertex with a monadic function.
 --
 -- @since 1.1.0.0
 {-# INLINE modifyM #-}
