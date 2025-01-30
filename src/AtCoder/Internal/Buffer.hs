@@ -185,7 +185,7 @@ popBack Buffer {..} = do
 
 -- | \(O(1)\) Removes the last element from the buffer and discards it.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE popBack_ #-}
 popBack_ :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m ()
 popBack_ buf = do

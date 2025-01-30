@@ -102,7 +102,7 @@ new h w vec
 
 -- | \(O(n^2)\) Creates an NxN square matrix.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE square #-}
 square :: (HasCallStack, VU.Unbox a) => Int -> VU.Vector a -> Matrix a
 square n = new n n
@@ -290,7 +290,7 @@ read2d view i j = do
 
 -- | \(O(hw \min(h, w))\) Returns the rank of the matrix.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE rank #-}
 rank :: (Fractional a, Eq a, VU.Unbox a) => Matrix a -> Int
 rank (Matrix h w vec) = runST $ do
@@ -335,7 +335,7 @@ rank (Matrix h w vec) = runST $ do
 -- ==== Constraints
 -- - The input must be a square matrix.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE inv #-}
 inv :: forall a. (Fractional a, Eq a, VU.Unbox a) => Matrix a -> Maybe (a, Matrix a)
 inv mat@(Matrix n _ _) = do
@@ -349,7 +349,7 @@ inv mat@(Matrix n _ _) = do
 -- ==== Constraints
 -- - The input must be a square matrix.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE invRaw #-}
 invRaw :: forall a. (Fractional a, Eq a, VU.Unbox a) => Matrix a -> Maybe (a, V.Vector (VU.Vector a))
 invRaw (Matrix h w vec) = runST $ do
@@ -411,7 +411,7 @@ invRaw (Matrix h w vec) = runST $ do
 
 -- | \(O(hw \min(h, w))\) Returns the rank of the matrix.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE detMod #-}
 detMod :: Int -> Matrix Int -> Int
 detMod m (Matrix h w vecA) = runST $ do
@@ -479,7 +479,7 @@ detMod m (Matrix h w vecA) = runST $ do
 
 -- | \(O(hw \min(h, w))\) Returns the rank of the matrix.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE detMint #-}
 detMint :: forall a. (KnownNat a) => Matrix (M.ModInt a) -> M.ModInt a
 detMint matA = M.new . detMod m $ map M.val matA

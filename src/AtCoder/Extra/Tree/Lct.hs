@@ -59,7 +59,7 @@
 -- >>> VU.generateM 4 (Lct.root lct)
 -- [2,1,2,1]
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 module AtCoder.Extra.Tree.Lct
   ( -- Link/cut tree
     Lct (..),
@@ -129,65 +129,65 @@ nullLct = (== -1)
 
 -- | Link/cut tree.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 data Lct s a = Lct
   { -- | The number of vertices.
     --
-    -- @since 1.2.0.0
+-- @since 1.1.1.0
     nLct :: {-# UNPACK #-} !Int,
     -- | Decomposed node data storage: left children.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     lLct :: !(VUM.MVector s Vertex),
     -- | Decomposed node data storage: right children.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     rLct :: !(VUM.MVector s Vertex),
     -- | Decomposed node data storage: parents.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     pLct :: !(VUM.MVector s Vertex),
     -- | Decomposed node data storage: subtree sizes.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     sLct :: !(VUM.MVector s Int),
     -- | Decomposed node data storage: reverse flag.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     revLct :: !(VUM.MVector s Bit),
     -- | Decomposed node data storage: monoid values.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     vLct :: !(VUM.MVector s a),
     -- | Decomposed node data storage: monoid products.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     prodLct :: !(VUM.MVector s a),
     -- | Decomposed node data storage: dual monod product (right fold). This is required for
     -- non-commutative monoids only.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     dualProdLct :: !(VUM.MVector s a),
     -- | Decomposed node data storage: path-parent monoid product. This works for subtree product
     -- queries over commutative monoids only.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     midLct :: !(VUM.MVector s a),
     -- | Decomposed node data storage: monoid product of subtree. This works for subtree product
     -- queries over commutative monoids only.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     subtreeProdLct :: !(VUM.MVector s a),
     -- | Inverse operator of the monoid. This works for subtree product queries over commutative
     -- monoids only.
     --
-    -- @since 1.2.0.0
+    -- @since 1.1.1.0
     invOpLct :: !(a -> a)
   }
 
 -- | \(O(n)\) Creates a link/cut tree with \(n\) vertices and no edges.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE new #-}
 new :: (PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (Lct (PrimState m) a)
 new = newInv id
@@ -195,14 +195,14 @@ new = newInv id
 -- | \(O(n + m \log n)\) Creates a link/cut tree with an inverse operator, initial monoid values and
 -- no edges. This setup enables subtree queries (`prodSubtree`).
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE newInv #-}
 newInv :: (PrimMonad m, Monoid a, VU.Unbox a) => (a -> a) -> Int -> m (Lct (PrimState m) a)
 newInv !invOpLct nLct = buildInv invOpLct (VU.replicate nLct mempty) VU.empty
 
 -- | \(O(n + m \log n)\) Creates a link/cut tree of initial monoid values and initial edges.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE build #-}
 build ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
@@ -217,7 +217,7 @@ build = buildInv id
 -- | \(O(n + m \log n)\) Creates a link/cut tree with an inverse operator, initial monoid values and
 -- initial edges. This setup enables subtree queries (`prodSubtree`).
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE buildInv #-}
 buildInv ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
@@ -482,7 +482,7 @@ eraseLightST Lct {subtreeProdLct, midLct, invOpLct} p c = do
 
 -- | Amortized \(O(\log n)\). Writes the monoid value of a vertex.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> a -> m ()
 write lct v x = stToPrim $ do
@@ -494,7 +494,7 @@ write lct v x = stToPrim $ do
 
 -- | Amortized \(O(\log n)\). Modifies the monoid value of a vertex with a pure function.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> (a -> a) -> Vertex -> m ()
 modify lct f v = stToPrim $ do
@@ -506,7 +506,7 @@ modify lct f v = stToPrim $ do
 
 -- | Amortized \(O(\log n)\). Modifies the monoid value of a vertex with a monadic function.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> (a -> m a) -> Vertex -> m ()
 modifyM lct f v = do
@@ -545,7 +545,7 @@ linkST lct@Lct {pLct, rLct} c p = do
 -- | Amortized \(O(\log n)\). Creates an edge between \(c\) and \(p\). In the represented tree, the
 -- parent of \(c\) will be \(p\) after this operation.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE link #-}
 link :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> m ()
 link lct c p = stToPrim $ linkST lct c p
@@ -586,7 +586,7 @@ cutST lct@Lct {pLct, lLct} u v = do
 
 -- | Amortized \(O(\log N)\). Deletes an edge between \(u\) and \(v\).
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE cut #-}
 cut :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> m ()
 cut lct u v = stToPrim $ cutST lct u v
@@ -606,7 +606,7 @@ evertST lct v = do
 
 -- | Amortized \(O(\log n)\). Makes \(v\) a new root of the underlying tree.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE evert #-}
 evert :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> m ()
 evert lct v = stToPrim $ evertST lct v
@@ -662,7 +662,7 @@ exposeST lct@Lct {pLct, rLct} v0 = do
 -- tree). After the opeartion, \(v\) will be the new root and all the children will be detached from
 -- the preferred path.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE expose #-}
 expose :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> m Vertex
 expose lct v = stToPrim $ exposeST lct v
@@ -671,7 +671,7 @@ expose lct v = stToPrim $ exposeST lct v
 
 -- | Amortized \(O(\log n)\). `expose` with the return value discarded.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE expose_ #-}
 expose_ :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> m ()
 expose_ lct v0 = stToPrim $ do
@@ -687,7 +687,7 @@ expose_ lct v0 = stToPrim $ do
 -- | \(O(\log n)\) Returns the root of the underlying tree. Two vertices in the same connected
 -- component have the same root vertex.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE root #-}
 root :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Int -> m Vertex
 root lct@Lct {lLct} c0 = stToPrim $ do
@@ -708,7 +708,7 @@ root lct@Lct {lLct} c0 = stToPrim $ do
 
 -- | \(O(\log n)\) Returns the parent vertex in the underlying tree.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE parent #-}
 parent :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Int -> m (Maybe Vertex)
 parent lct@Lct {lLct, rLct} x = stToPrim $ do
@@ -764,7 +764,7 @@ jumpST lct@Lct {lLct, rLct, sLct} u0 v0 k0 = do
 -- ==== Constraints
 -- - The \(k\)-th vertex must exist.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE jump #-}
 jump :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> Int -> m Vertex
 jump lct u v k = stToPrim $ jumpST lct u v k
@@ -775,7 +775,7 @@ jump lct u v k = stToPrim $ jumpST lct u v k
 -- ==== Constraints
 -- - \(u\) and \(v\) must be in the same connected component.
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE lca #-}
 lca :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Int -> Int -> m Vertex
 lca lct u v = stToPrim $ do
@@ -791,7 +791,7 @@ lca lct u v = stToPrim $ do
 
 -- | Amortized \(O(\log n)\). Folds a path between \(u\) and \(v\) (inclusive).
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE prodPath #-}
 prodPath :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> m a
 prodPath lct@Lct {prodLct} u v = stToPrim $ do
@@ -811,7 +811,7 @@ prodPath lct@Lct {prodLct} u v = stToPrim $ do
 -- ==== Constraints
 -- - The inverse operator has to be set on consturction (`newInv` or `buildInv`).
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE prodSubtree #-}
 prodSubtree ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>

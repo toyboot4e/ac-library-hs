@@ -169,7 +169,7 @@ topSort n gr = runST $ do
 -- >>> V.generate (Gr.nCsr bct - n) ((bct `Gr.adj`) . (+ n))
 -- [[3,2],[0,3,1]]
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINABLE blockCut #-}
 blockCut :: Int -> (Int -> VU.Vector Int) -> Csr ()
 blockCut n gr = runST $ do
@@ -254,7 +254,7 @@ blockCut n gr = runST $ do
 -- >>> Gr.blockCutComponents n (gr `Gr.adj`)
 -- [[3,2],[0,3,1]]
 --
--- @since 1.2.0.0
+-- @since 1.1.1.0
 {-# INLINE blockCutComponents #-}
 blockCutComponents :: Int -> (Int -> VU.Vector Int) -> V.Vector (VU.Vector Int)
 blockCutComponents n gr =

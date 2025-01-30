@@ -1,5 +1,12 @@
 # Revision history for acl-hs
 
+## 1.1.1.0 -- Jan 2025
+
+- Added `AtCoder.Extra.Tree.Lct`
+- Added `blockCut`, `blockCutComponents` in `AtCoder.Extra.Graph`
+- Added `popBack_` in `AtCoder.Internal.Buffer`
+- Added `square`, `rank`, `inv`, `invRaw`, `detMod`, `detMint` in `AtCoder.Extra.Matrix`
+
 ## 1.1.0.0 -- Jan 2025
 
 - Removed `RangeSetId` and `RangeAddId` from `AtCoder.Extra.Monoid`.
