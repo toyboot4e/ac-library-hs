@@ -5,7 +5,7 @@ module AtCoder.Extra.Math
   ( -- * Re-exports from the internal math module
     isPrime32,
     ACIM.invGcd,
-    ACIM.primitiveRoot,
+    primitiveRoot32,
 
     -- * Binary exponentiation
 
@@ -26,8 +26,10 @@ module AtCoder.Extra.Math
   )
 where
 
+import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Math qualified as ACIM
 import Data.Bits ((.>>.))
+import GHC.Stack (HasCallStack)
 
 -- | \(O(k \log^3 n) (k = 3)\). Returns whether the given `Int` value is a prime number.
 --
@@ -38,8 +40,23 @@ import Data.Bits ((.>>.))
 --
 -- @since 1.1.0.0
 {-# INLINE isPrime32 #-}
-isPrime32 :: Int -> Bool
-isPrime32 = ACIM.isPrime
+isPrime32 :: (HasCallStack) => Int -> Bool
+isPrime32 x = ACIM.isPrime x
+  where
+    !_ = ACIA.runtimeAssert (x < 4759123141) $ "AtCoder.Extra.Math.isPrime32: given too large number `" ++ show x ++ "`"
+
+-- | Returns the primitive root of the given `Int`.
+--
+-- ==== Constraints
+-- - The input must be a prime number.
+-- - The input must be less than \(2^32\).
+--
+-- @since 1.2.0.0
+{-# INLINE primitiveRoot32 #-}
+primitiveRoot32 :: (HasCallStack) => Int -> Int
+primitiveRoot32 x = ACIM.primitiveRoot x
+  where
+    !_ = ACIA.runtimeAssert (x < (1 .>>. 32)) $ "AtCoder.Extra.Math.primitiveRoot32: given too large number `" ++ show x ++ "`"
 
 -- | Calculates \(x^n\) with custom multiplication operator using the binary exponentiation
 -- technique.
