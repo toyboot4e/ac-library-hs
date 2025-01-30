@@ -46,7 +46,7 @@ module AtCoder.Dsu
   ( -- * Disjoint set union
     Dsu (nDsu),
 
-    -- * Constructor
+    -- * Constructors
     new,
 
     -- * Merging

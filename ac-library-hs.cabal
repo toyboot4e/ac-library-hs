@@ -4,7 +4,7 @@ name:            ac-library-hs
 -- PVP summary:  +-+------- breaking API changes
 --               | | +----- non-breaking API additions
 --               | | | +--- code changes with no API change
-version:         1.1.0.0
+version:         1.1.1.0
 synopsis:        Data structures and algorithms
 description:
   Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive
@@ -74,15 +74,11 @@ library
     AtCoder.Convolution
     AtCoder.Dsu
     AtCoder.Extra.Bisect
+    AtCoder.Extra.Graph
     AtCoder.Extra.HashMap
     AtCoder.Extra.IntervalMap
     AtCoder.Extra.IntMap
     AtCoder.Extra.IntSet
-    AtCoder.Extra.Graph
-    AtCoder.Extra.Tree
-    AtCoder.Extra.Tree.Hld
-    AtCoder.Extra.Tree.Lct
-    AtCoder.Extra.Tree.TreeMonoid
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid
     AtCoder.Extra.Monoid.Affine1
@@ -92,9 +88,13 @@ library
     AtCoder.Extra.Monoid.RollingHash
     AtCoder.Extra.Monoid.V2
     AtCoder.Extra.MultiSet
+    AtCoder.Extra.Pdsu
     AtCoder.Extra.Semigroup.Matrix
     AtCoder.Extra.Semigroup.Permutation
-    AtCoder.Extra.Pdsu
+    AtCoder.Extra.Tree
+    AtCoder.Extra.Tree.Hld
+    AtCoder.Extra.Tree.Lct
+    AtCoder.Extra.Tree.TreeMonoid
     AtCoder.Extra.WaveletMatrix
     AtCoder.Extra.WaveletMatrix.BitVector
     AtCoder.Extra.WaveletMatrix.Raw
@@ -246,10 +246,11 @@ test-suite benchlib-test
     , hspec
     , mtl
     , QuickCheck
-    -- , quickcheck-instances
     , random
     , tagged
     , tasty
     , tasty-hunit
     , tasty-quickcheck
     , tasty-rerun
+
+-- , quickcheck-instances
