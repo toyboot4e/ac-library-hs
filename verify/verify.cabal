@@ -200,6 +200,16 @@ executable yosupo-biconnected-components-util
   main-is:       yosupo-biconnected-components-util.hs
   build-depends: verify
 
+executable yosupo-dynamic-sequence-range-affine-range-sum
+  import:        app-local
+  main-is:       yosupo-dynamic-sequence-range-affine-range-sum.hs
+  build-depends: verify
+
+executable yosupo-dynamic-sequence-range-affine-range-sum-raw
+  import:        app-local
+  main-is:       yosupo-dynamic-sequence-range-affine-range-sum-raw.hs
+  build-depends: verify
+
 executable yosupo-dynamic-tree-vertex-add-path-sum
   import:        app-local
   main-is:       yosupo-dynamic-tree-vertex-add-path-sum.hs
@@ -325,6 +335,11 @@ executable yosupo-range-affine-range-sum-Mat2x2
   main-is:       yosupo-range-affine-range-sum-Mat2x2.hs
   build-depends: verify
 
+executable yosupo-range-affine-range-sum-seq
+  import:        app-local
+  main-is:       yosupo-range-affine-range-sum-seq.hs
+  build-depends: verify
+
 executable yosupo-range-affine-point-get
   import:        app-local
   main-is:       yosupo-range-affine-point-get.hs
@@ -335,6 +350,11 @@ executable yosupo-range-set-range-composite
   main-is:       yosupo-range-set-range-composite.hs
   build-depends: verify
 
+executable yosupo-range-set-range-composite-seq
+  import:        app-local
+  main-is:       yosupo-range-set-range-composite-seq.hs
+  build-depends: verify
+
 executable yosupo-rectangle-sum
   import:        app-local
   main-is:       yosupo-rectangle-sum.hs
@@ -343,6 +363,16 @@ executable yosupo-rectangle-sum
 executable yosupo-point-add-rectangle-sum
   import:        app-local
   main-is:       yosupo-point-add-rectangle-sum.hs
+  build-depends: verify
+
+executable yosupo-range-reverse-range-sum
+  import:        app-local
+  main-is:       yosupo-range-reverse-range-sum.hs
+  build-depends: verify
+
+executable yosupo-range-reverse-range-sum-raw
+  import:        app-local
+  main-is:       yosupo-range-reverse-range-sum-raw.hs
   build-depends: verify
 
 executable yosupo-scc
