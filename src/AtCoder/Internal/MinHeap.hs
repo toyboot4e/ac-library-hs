@@ -6,7 +6,7 @@
 --
 -- ==== __Example__
 -- >>> import AtCoder.Internal.MinHeap qualified as MH
--- >>> heap <- MH.new @Int 4
+-- >>> heap <- MH.new @_ @Int 4
 -- >>> MH.capacity heap
 -- 4
 --
@@ -54,7 +54,8 @@ module AtCoder.Internal.MinHeap
 where
 
 import Control.Monad (when)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -85,7 +86,7 @@ data Heap s a = Heap
 --
 -- @since 1.0.0.0
 {-# INLINE new #-}
-new :: (VU.Unbox a, PrimMonad m) => Int -> m (Heap (PrimState m) a)
+new :: (PrimMonad m, VU.Unbox a) => Int -> m (Heap (PrimState m) a)
 new n = do
   sizeBH_ <- VUM.replicate 1 0
   dataBH <- VUM.unsafeNew n
@@ -102,29 +103,26 @@ capacity = VUM.length . dataBH
 --
 -- @since 1.0.0.0
 {-# INLINE length #-}
-length :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m Int
+length :: (PrimMonad m, VU.Unbox a) => Heap (PrimState m) a -> m Int
 length Heap {sizeBH_} = VGM.unsafeRead sizeBH_ 0
 
 -- | \(O(1)\) Returns `True` if the heap is empty.
 --
 -- @since 1.0.0.0
 {-# INLINE null #-}
-null :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m Bool
+null :: (PrimMonad m, VU.Unbox a) => Heap (PrimState m) a -> m Bool
 null = (<$>) (== 0) . length
 
 -- | \(O(1)\) Sets the `length` to zero.
 --
 -- @since 1.0.0.0
 {-# INLINE clear #-}
-clear :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
+clear :: (PrimMonad m, VU.Unbox a) => Heap (PrimState m) a -> m ()
 clear Heap {sizeBH_} = VGM.unsafeWrite sizeBH_ 0 0
 
--- | \(O(\log n)\) Inserts an element to the heap.
---
--- @since 1.0.0.0
-{-# INLINE push #-}
-push :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> a -> m ()
-push Heap {..} x = do
+{-# INLINEABLE pushST #-}
+pushST :: (HasCallStack, Ord a, VU.Unbox a) => Heap s a -> a -> ST s ()
+pushST Heap {..} x = do
   i0 <- VGM.unsafeRead sizeBH_ 0
   VGM.write dataBH i0 x
   VGM.unsafeWrite sizeBH_ 0 $ i0 + 1
@@ -136,13 +134,16 @@ push Heap {..} x = do
           siftUp iParent
   siftUp i0
 
--- | \(O(\log n)\) Removes the last element from the heap and returns it, or `Nothing` if it is
--- empty.
+-- | \(O(\log n)\) Inserts an element to the heap.
 --
 -- @since 1.0.0.0
-{-# INLINE pop #-}
-pop :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
-pop heap@Heap {..} = do
+{-# INLINE push #-}
+push :: (HasCallStack, PrimMonad m, Ord a, VU.Unbox a) => Heap (PrimState m) a -> a -> m ()
+push heap x = stToPrim $ pushST heap x
+
+{-# INLINEABLE popST #-}
+popST :: (HasCallStack, Ord a, VU.Unbox a) => Heap s a -> ST s (Maybe a)
+popST heap@Heap {..} = do
   len <- length heap
   if len == 0
     then pure Nothing
@@ -178,13 +179,21 @@ pop heap@Heap {..} = do
       siftDown 0
       pure $ Just root
 
+-- | \(O(\log n)\) Removes the last element from the heap and returns it, or `Nothing` if it is
+-- empty.
+--
+-- @since 1.0.0.0
+{-# INLINE pop #-}
+pop :: (HasCallStack, PrimMonad m, Ord a, VU.Unbox a) => Heap (PrimState m) a -> m (Maybe a)
+pop heap = stToPrim $ popST heap
+
 -- | \(O(\log n)\) `pop` with the return value discarded.
 --
 -- @since 1.0.0.0
 {-# INLINE pop_ #-}
 pop_ :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
 pop_ heap = do
-  _ <- pop heap
+  _ <- stToPrim $ popST heap
   pure ()
 
 -- | \(O(1)\) Returns the smallest value in the heap, or `Nothing` if it is empty.
