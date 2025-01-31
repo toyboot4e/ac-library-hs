@@ -122,7 +122,8 @@ where
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
 import Control.Monad (unless, when)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Bits (bit, countLeadingZeros, countTrailingZeros, testBit, (.&.), (.<<.), (.>>.))
 import Data.Foldable (for_)
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -319,6 +320,21 @@ data LazySegTree s f a = LazySegTree
     lzLst :: !(VUM.MVector s f)
   }
 
+{-# INLINE buildST #-}
+buildST :: (Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => VU.Vector a -> ST s (LazySegTree s f a)
+buildST vs = do
+  let nLst = VU.length vs
+  let sizeLst = ACIBIT.bitCeil nLst
+  let logLst = countTrailingZeros sizeLst
+  dLst <- VUM.replicate (2 * sizeLst) mempty
+  lzLst <- VUM.replicate sizeLst mempty
+  VU.iforM_ vs $ \i v -> do
+    VGM.write dLst (sizeLst + i) v
+  let segtree = LazySegTree {..}
+  for_ [sizeLst - 1, sizeLst - 2 .. 1] $ \i -> do
+    updateST segtree i
+  pure segtree
+
 -- | Creates an array of length \(n\). All the elements are initialized to `mempty`.
 --
 -- ==== Constraints
@@ -331,7 +347,7 @@ data LazySegTree s f a = LazySegTree
 {-# INLINE new #-}
 new :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Int -> m (LazySegTree (PrimState m) f a)
 new nLst
-  | nLst >= 0 = build $ VU.replicate nLst mempty
+  | nLst >= 0 = stToPrim $ buildST $ VU.replicate nLst mempty
   | otherwise = error $ "new: given negative size `" ++ show nLst ++ "`"
 
 -- | Creates an array with initial values \(vs\).
@@ -345,18 +361,17 @@ new nLst
 -- @since 1.0.0.0
 {-# INLINE build #-}
 build :: (PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => VU.Vector a -> m (LazySegTree (PrimState m) f a)
-build vs = do
-  let nLst = VU.length vs
-  let sizeLst = ACIBIT.bitCeil nLst
-  let logLst = countTrailingZeros sizeLst
-  dLst <- VUM.replicate (2 * sizeLst) mempty
-  lzLst <- VUM.replicate sizeLst mempty
-  VU.iforM_ vs $ \i v -> do
-    VGM.write dLst (sizeLst + i) v
-  let segtree = LazySegTree {..}
-  for_ [sizeLst - 1, sizeLst - 2 .. 1] $ \i -> do
-    update segtree i
-  pure segtree
+build vs = stToPrim $ buildST vs
+
+{-# INLINE writeST #-}
+writeST :: (SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree s f a -> Int -> a -> ST s ()
+writeST self@LazySegTree {..} p x = do
+  let p' = p + sizeLst
+  for_ [logLst, logLst - 1 .. 1] $ \i -> do
+    pushST self $ p' .>>. i
+  VGM.unsafeWrite dLst p' x
+  for_ [1 .. logLst] $ \i -> do
+    updateST self $ p' .>>. i
 
 -- | Sets \(p\)-th value of the array to \(x\).
 --
@@ -369,14 +384,19 @@ build vs = do
 -- @since 1.0.0.0
 {-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> a -> m ()
-write self@LazySegTree {..} p x = do
-  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.write" p nLst
+write self p x = stToPrim $ writeST self p x
+  where
+    !_ = ACIA.checkIndex "AtCoder.LazySegTree.write" p (nLst self)
+
+{-# INLINE modifyST #-}
+modifyST :: (SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree s f a -> (a -> a) -> Int -> ST s ()
+modifyST self@LazySegTree {..} f p = do
   let p' = p + sizeLst
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
-    push self $ p' .>>. i
-  VGM.write dLst p' x
+    pushST self $ p' .>>. i
+  VGM.unsafeModify dLst f p'
   for_ [1 .. logLst] $ \i -> do
-    update self $ p' .>>. i
+    updateST self $ p' .>>. i
 
 -- | (Extra API) Modifies \(p\)-th value with a function \(f\).
 --
@@ -389,14 +409,9 @@ write self@LazySegTree {..} p x = do
 -- @since 1.0.0.0
 {-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> (a -> a) -> Int -> m ()
-modify self@LazySegTree {..} f p = do
-  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.modify" p nLst
-  let p' = p + sizeLst
-  for_ [logLst, logLst - 1 .. 1] $ \i -> do
-    push self $ p' .>>. i
-  VGM.modify dLst f p'
-  for_ [1 .. logLst] $ \i -> do
-    update self $ p' .>>. i
+modify self f p = stToPrim $ modifyST self f p
+  where
+    !_ = ACIA.checkIndex "AtCoder.LazySegTree.modify" p (nLst self)
 
 -- | (Extra API) Modifies \(p\)-th value with a monadic function \(f\).
 --
@@ -410,13 +425,24 @@ modify self@LazySegTree {..} f p = do
 {-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> (a -> m a) -> Int -> m ()
 modifyM self@LazySegTree {..} f p = do
-  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.modify" p nLst
+  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.modifyM" p nLst
+  let p' = p + sizeLst
+  stToPrim $ for_ [logLst, logLst - 1 .. 1] $ \i -> do
+    pushST self $ p' .>>. i
+  VGM.modifyM dLst f p'
+  stToPrim $ for_ [1 .. logLst] $ \i -> do
+    updateST self $ p' .>>. i
+
+{-# INLINE exchangeST #-}
+exchangeST :: (SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree s f a -> Int -> a -> ST s a
+exchangeST self@LazySegTree {..} p x = do
   let p' = p + sizeLst
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
-    push self $ p' .>>. i
-  VGM.modifyM dLst f p'
+    pushST self $ p' .>>. i
+  res <- VGM.unsafeExchange dLst p' x
   for_ [1 .. logLst] $ \i -> do
-    update self $ p' .>>. i
+    updateST self $ p' .>>. i
+  pure res
 
 -- | (Extra API) Sets \(p\)-th value of the array to \(x\) and returns the old value.
 --
@@ -429,15 +455,17 @@ modifyM self@LazySegTree {..} f p = do
 -- @since 1.1.0.0
 {-# INLINE exchange #-}
 exchange :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> a -> m a
-exchange self@LazySegTree {..} p x = do
-  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.exchange" p nLst
+exchange self p x = stToPrim $ exchangeST self p x
+  where
+    !_ = ACIA.checkIndex "AtCoder.LazySegTree.exchange" p (nLst self)
+
+{-# INLINE readST #-}
+readST :: (SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree s f a -> Int -> ST s a
+readST self@LazySegTree {..} p = do
   let p' = p + sizeLst
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
-    push self $ p' .>>. i
-  res <- VGM.exchange dLst p' x
-  for_ [1 .. logLst] $ \i -> do
-    update self $ p' .>>. i
-  pure res
+    pushST self $ p' .>>. i
+  VGM.unsafeRead dLst p'
 
 -- | Returns \(p\)-th value of the array.
 --
@@ -450,12 +478,9 @@ exchange self@LazySegTree {..} p x = do
 -- @since 1.0.0.0
 {-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m a
-read self@LazySegTree {..} p = do
-  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.read" p nLst
-  let p' = p + sizeLst
-  for_ [logLst, logLst - 1 .. 1] $ \i -> do
-    push self $ p' .>>. i
-  VGM.read dLst p'
+read self p = stToPrim $ readST self p
+  where
+    !_ = ACIA.checkIndex "AtCoder.LazySegTree.read" p (nLst self)
 
 -- | Returns the product of \([a[l], ..., a[r - 1]]\), assuming the properties of the monoid. It
 -- returns `mempty` if \(l = r\).
@@ -472,7 +497,7 @@ prod :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a
 prod self@LazySegTree {nLst} l0 r0
   | not (ACIA.testInterval l0 r0 nLst) = ACIA.errorInterval "AtCoder.LazySegTree.prod" l0 r0 nLst
   | l0 == r0 = pure mempty
-  | otherwise = unsafeProd self l0 r0
+  | otherwise = stToPrim $ unsafeProdST self l0 r0
 
 -- | Total variant of `prod`. Returns the product of \([a[l], ..., a[r - 1]]\), assuming the
 -- properties of the monoid. Returns `Just` `mempty` if \(l = r\). It returns `Nothing` if the
@@ -487,17 +512,17 @@ prodMaybe :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Un
 prodMaybe self@LazySegTree {nLst} l0 r0
   | not (ACIA.testInterval l0 r0 nLst) = pure Nothing
   | l0 == r0 = pure (Just mempty)
-  | otherwise = Just <$> unsafeProd self l0 r0
+  | otherwise = stToPrim $ Just <$> unsafeProdST self l0 r0
 
 -- | Internal implementation of `prod`.
-{-# INLINE unsafeProd #-}
-unsafeProd :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> m a
-unsafeProd self@LazySegTree {..} l0 r0 = do
+{-# INLINE unsafeProdST #-}
+unsafeProdST :: (SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree s f a -> Int -> Int -> ST s a
+unsafeProdST self@LazySegTree {..} l0 r0 = do
   let l = l0 + sizeLst
   let r = r0 + sizeLst
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
-    when (((l .>>. i) .<<. i) /= l) $ push self $ l .>>. i
-    when (((r .>>. i) .<<. i) /= r) $ push self $ (r - 1) .>>. i
+    when (((l .>>. i) .<<. i) /= l) $ pushST self $ l .>>. i
+    when (((r .>>. i) .<<. i) /= r) $ pushST self $ (r - 1) .>>. i
   inner l (r - 1) mempty mempty
   where
     -- NOTE: we're using inclusive range [l, r] for simplicity
@@ -525,6 +550,19 @@ unsafeProd self@LazySegTree {..} l0 r0 = do
 allProd :: (PrimMonad m, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m a
 allProd LazySegTree {..} = VGM.read dLst 1
 
+{-# INLINE applyAtST #-}
+applyAtST :: (SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree s f a -> Int -> f -> ST s ()
+applyAtST self@LazySegTree {..} p f = do
+  let p' = p + sizeLst
+  -- propagate
+  for_ [logLst, logLst - 1 .. 1] $ \i -> do
+    pushST self $ p' .>>. i
+  let !len = bit $! logLst - (63 - countLeadingZeros p')
+  VGM.modify dLst (segActWithLength len f) p'
+  -- evaluate
+  for_ [1 .. logLst] $ \i -> do
+    updateST self $ p' .>>. i
+
 -- | Applies @segAct f@ to an index \(p\).
 --
 -- ==== Constraints
@@ -536,17 +574,36 @@ allProd LazySegTree {..} = VGM.read dLst 1
 -- @since 1.0.0.0
 {-# INLINE applyAt #-}
 applyAt :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
-applyAt self@LazySegTree {..} p f = do
-  let !_ = ACIA.checkIndex "AtCoder.LazySegTree.applyAt" p nLst
-  let p' = p + sizeLst
-  -- propagate
-  for_ [logLst, logLst - 1 .. 1] $ \i -> do
-    push self $ p' .>>. i
-  let !len = bit $! logLst - (63 - countLeadingZeros p')
-  VGM.modify dLst (segActWithLength len f) p'
-  -- evaluate
-  for_ [1 .. logLst] $ \i -> do
-    update self $ p' .>>. i
+applyAt self p f = stToPrim $ applyAtST self p f
+  where
+    !_ = ACIA.checkIndex "AtCoder.LazySegTree.applyAt" p (nLst self)
+
+{-# INLINE applyInST #-}
+applyInST :: (SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree s f a -> Int -> Int -> f -> ST s ()
+applyInST self@LazySegTree {..} l0 r0 f
+  | l0 == r0 = pure ()
+  | otherwise = do
+      let l = l0 + sizeLst
+      let r = r0 + sizeLst
+      -- propagate
+      for_ [logLst, logLst - 1 .. 1] $ \i -> do
+        when (((l .>>. i) .<<. i) /= l) $ pushST self (l .>>. i)
+        when (((r .>>. i) .<<. i) /= r) $ pushST self ((r - 1) .>>. i)
+      inner l (r - 1)
+      -- evaluate
+      for_ [1 .. logLst] $ \i -> do
+        when (((l .>>. i) .<<. i) /= l) $ updateST self (l .>>. i)
+        when (((r .>>. i) .<<. i) /= r) $ updateST self ((r - 1) .>>. i)
+  where
+    -- NOTE: we're using inclusive range [l, r] for simplicity
+    inner l r
+      | l > r = pure ()
+      | otherwise = do
+          when (testBit l 0) $ do
+            allApplyST self l f
+          unless (testBit r 0) $ do
+            allApplyST self r f
+          inner ((l + 1) .>>. 1) ((r - 1) .>>. 1)
 
 -- | Applies @segAct f@ to an interval \([l, r)\).
 --
@@ -559,31 +616,9 @@ applyAt self@LazySegTree {..} p f = do
 -- @since 1.0.0.0
 {-# INLINE applyIn #-}
 applyIn :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> Int -> f -> m ()
-applyIn self@LazySegTree {..} l0 r0 f
-  | l0 == r0 = pure ()
-  | otherwise = do
-      let l = l0 + sizeLst
-      let r = r0 + sizeLst
-      -- propagate
-      for_ [logLst, logLst - 1 .. 1] $ \i -> do
-        when (((l .>>. i) .<<. i) /= l) $ push self (l .>>. i)
-        when (((r .>>. i) .<<. i) /= r) $ push self ((r - 1) .>>. i)
-      inner l (r - 1)
-      -- evaluate
-      for_ [1 .. logLst] $ \i -> do
-        when (((l .>>. i) .<<. i) /= l) $ update self (l .>>. i)
-        when (((r .>>. i) .<<. i) /= r) $ update self ((r - 1) .>>. i)
+applyIn self l0 r0 f = stToPrim $ applyInST self l0 r0 f
   where
-    !_ = ACIA.checkInterval "AtCoder.LazySegTree.applyIn" l0 r0 nLst
-    -- NOTE: we're using inclusive range [l, r] for simplicity
-    inner l r
-      | l > r = pure ()
-      | otherwise = do
-          when (testBit l 0) $ do
-            allApply self l f
-          unless (testBit r 0) $ do
-            allApply self r f
-          inner ((l + 1) .>>. 1) ((r - 1) .>>. 1)
+    !_ = ACIA.checkInterval "AtCoder.LazySegTree.applyIn" l0 r0 (nLst self)
 
 -- | Applies a binary search on the segment tree. It returns an index \(l\) that satisfies both of the
 -- following.
@@ -629,8 +664,8 @@ minLeftM self@LazySegTree {..} r0 g = do
     then pure 0
     else do
       let r = r0 + sizeLst
-      for_ [logLst, logLst - 1 .. 1] $ \i -> do
-        push self $ (r - 1) .>>. i
+      stToPrim $ for_ [logLst, logLst - 1 .. 1] $ \i -> do
+        pushST self $ (r - 1) .>>. i
       inner r mempty
   where
     -- NOTE: Not ordinary bounds check!
@@ -651,9 +686,10 @@ minLeftM self@LazySegTree {..} r0 g = do
       | otherwise = r
     inner2 r sm
       | r < sizeLst = do
-          push self r
           let r' = 2 * r + 1
-          !sm' <- (<> sm) <$> VGM.read dLst r'
+          sm' <- stToPrim $ do
+            pushST self r
+            (<> sm) <$> VGM.read dLst r'
           b <- g sm'
           if b
             then inner2 (r' - 1) sm'
@@ -704,8 +740,8 @@ maxRightM self@LazySegTree {..} l0 g = do
     then pure nLst
     else do
       let l = l0 + sizeLst
-      for_ [logLst, logLst - 1 .. 1] $ \i -> do
-        push self (l .>>. i)
+      stToPrim $ for_ [logLst, logLst - 1 .. 1] $ \i -> do
+        pushST self (l .>>. i)
       inner l mempty
   where
     -- NOTE: Not ordinary bounds check!
@@ -728,9 +764,10 @@ maxRightM self@LazySegTree {..} l0 g = do
       | otherwise = l
     inner2 l !sm
       | l < sizeLst = do
-          push self l
           let l' = 2 * l
-          !sm' <- (sm <>) <$> VGM.read dLst l'
+          sm' <- stToPrim $ do
+            pushST self l
+            (sm <>) <$> VGM.read dLst l'
           b <- g sm'
           if b
             then inner2 (l' + 1) sm'
@@ -744,8 +781,8 @@ maxRightM self@LazySegTree {..} l0 g = do
 freeze :: (PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m (VU.Vector a)
 freeze self@LazySegTree {..} = do
   -- push all (we _could_ skip some elements)
-  for_ [1 .. sizeLst - 1] $ \i -> do
-    push self i
+  stToPrim $ for_ [1 .. sizeLst - 1] $ \i -> do
+    pushST self i
   VU.freeze . VUM.take nLst $ VUM.drop sizeLst dLst
 
 -- | \(O(n)\) Unsafely converts a mutable vector to an immutable one without copying. The mutable
@@ -756,32 +793,34 @@ freeze self@LazySegTree {..} = do
 unsafeFreeze :: (PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> m (VU.Vector a)
 unsafeFreeze self@LazySegTree {..} = do
   -- push all (we _could_ skip some elements)
-  for_ [1 .. sizeLst - 1] $ \i -> do
-    push self i
+  stToPrim $ for_ [1 .. sizeLst - 1] $ \i -> do
+    pushST self i
   VU.unsafeFreeze . VUM.take nLst $ VUM.drop sizeLst dLst
 
+-- NOTE (perf): these functions have to be inlined after all:
+
 -- | \(O(1)\)
-{-# INLINE update #-}
-update :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m ()
-update LazySegTree {..} k = do
+{-# INLINE updateST #-}
+updateST :: (Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree s f a -> Int -> ST s ()
+updateST LazySegTree {dLst} k = do
   opL <- VGM.read dLst $ 2 * k
   opR <- VGM.read dLst $ 2 * k + 1
   VGM.write dLst k $! opL <> opR
 
 -- | \(O(1)\)
-{-# INLINE allApply #-}
-allApply :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> f -> m ()
-allApply LazySegTree {..} k f = do
+{-# INLINE allApplyST #-}
+allApplyST :: (SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree s f a -> Int -> f -> ST s ()
+allApplyST LazySegTree {..} k f = do
   let !len = bit $! logLst - (63 - countLeadingZeros k)
   VGM.modify dLst (segActWithLength len f) k
   when (k < sizeLst) $ do
     VGM.modify lzLst (f <>) k
 
 -- | \(O(1)\)
-{-# INLINE push #-}
-push :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> m ()
-push self@LazySegTree {..} k = do
+{-# INLINE pushST #-}
+pushST :: (SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree s f a -> Int -> ST s ()
+pushST self@LazySegTree {lzLst} k = do
   lzK <- VGM.read lzLst k
-  allApply self (2 * k) lzK
-  allApply self (2 * k + 1) lzK
+  allApplyST self (2 * k) lzK
+  allApplyST self (2 * k + 1) lzK
   VGM.write lzLst k mempty

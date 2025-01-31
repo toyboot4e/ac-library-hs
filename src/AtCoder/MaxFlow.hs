@@ -64,7 +64,8 @@ import AtCoder.Internal.GrowVec qualified as ACIGV
 import AtCoder.Internal.Queue qualified as ACIQ
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Bit (Bit (..))
 import Data.Primitive.MutVar (readMutVar)
 import Data.Vector qualified as V
@@ -194,7 +195,7 @@ flow ::
   cap ->
   -- | Max flow
   m cap
-flow MfGraph {..} s t flowLimit = do
+flow MfGraph {..} s t flowLimit = stToPrim $ do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`source` vertex" s "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`sink` vertex" t "the number of vertices" nG
   let !_ = ACIA.runtimeAssert (s /= t) $ "AtCoder.MaxFlow.flow: `source` and `sink` vertex must be distinct: `" ++ show s ++ "`"
@@ -240,7 +241,7 @@ flow MfGraph {..} s t flowLimit = do
                   VGM.write iter v $ i + 1
                   (!to, !iRevEdge, !_) <- ACIGV.read (gG VG.! v) i
                   levelTo <- VGM.read level to
-                  revCap <- readCapacity gG to iRevEdge
+                  revCap <- readCapacityST gG to iRevEdge
                   if levelV <= levelTo || revCap == 0
                     then loop res
                     else do
@@ -248,8 +249,8 @@ flow MfGraph {..} s t flowLimit = do
                       if d <= 0
                         then loop res -- no flow. ignore
                         else do
-                          modifyCapacity (gG VG.! v) (+ d) i
-                          modifyCapacity (gG VG.! to) (subtract d) iRevEdge
+                          modifyCapacityST (gG VG.! v) (+ d) i
+                          modifyCapacityST (gG VG.! to) (subtract d) iRevEdge
                           let !res' = res + d
                           if res' == up
                             then pure res'
@@ -314,7 +315,7 @@ minCut ::
   Int ->
   -- | Minimum cut
   m (VU.Vector Bit)
-minCut MfGraph {..} s = do
+minCut MfGraph {..} s = stToPrim $ do
   visited <- VUM.replicate nG $ Bit False
   que <- ACIQ.new nG -- we could use a growable queue here
   ACIQ.pushBack que s
@@ -352,12 +353,12 @@ getEdge ::
   Int ->
   -- | Tuple of @(from, to, cap, flow)@
   m (Int, Int, cap, cap)
-getEdge MfGraph {..} i = do
+getEdge MfGraph {..} i = stToPrim $ do
   m <- ACIGV.length posG
   let !_ = ACIA.checkEdge "AtCoder.MaxFlow.getEdge" i m
   (!from, !iEdge) <- ACIGV.read posG i
   (!to, !iRevEdge, !cap) <- ACIGV.read (gG VG.! from) iEdge
-  revCap <- readCapacity gG to iRevEdge
+  revCap <- readCapacityST gG to iRevEdge
   pure (from, to, cap + revCap, revCap)
 
 -- | Returns the current internal state of the edges: @(from, to, cap, flow)@. The edges are ordered
@@ -400,32 +401,32 @@ changeEdge ::
   -- | New flow
   cap ->
   m ()
-changeEdge MfGraph {..} i newCap newFlow = do
+changeEdge MfGraph {..} i newCap newFlow = stToPrim $ do
   m <- ACIGV.length posG
   let !_ = ACIA.checkEdge "AtCoder.MaxFlow.changeEdge" i m
   let !_ = ACIA.runtimeAssert (0 <= newFlow && newFlow <= newCap) "AtCoder.MaxFlow.changeEdge: invalid flow or capacity" -- not Show
   (!from, !iEdge) <- ACIGV.read posG i
   (!to, !iRevEdge, !_) <- ACIGV.read (gG VG.! from) iEdge
-  writeCapacity gG from iEdge $! newCap - newFlow
-  writeCapacity gG to iRevEdge $! newFlow
+  writeCapacityST gG from iEdge $! newCap - newFlow
+  writeCapacityST gG to iRevEdge $! newFlow
 
 -- | \(O(1)\) Internal helper.
-{-# INLINE readCapacity #-}
-readCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACIGV.GrowVec (PrimState m) (Int, Int, cap)) -> Int -> Int -> m cap
-readCapacity gvs v i = do
+{-# INLINE readCapacityST #-}
+readCapacityST :: (Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACIGV.GrowVec s (Int, Int, cap)) -> Int -> Int -> ST s cap
+readCapacityST gvs v i = do
   (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV $ gvs VG.! v
   VGM.read c i
 
 -- | \(O(1)\) Internal helper.
-{-# INLINE writeCapacity #-}
-writeCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACIGV.GrowVec (PrimState m) (Int, Int, cap)) -> Int -> Int -> cap -> m ()
-writeCapacity gvs v i cap = do
+{-# INLINE writeCapacityST #-}
+writeCapacityST :: (Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACIGV.GrowVec s (Int, Int, cap)) -> Int -> Int -> cap -> ST s ()
+writeCapacityST gvs v i cap = do
   (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV $ gvs VG.! v
   VGM.write c i cap
 
 -- | \(O(1)\) Internal helper.
-{-# INLINE modifyCapacity #-}
-modifyCapacity :: (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) => ACIGV.GrowVec (PrimState m) (Int, Int, cap) -> (cap -> cap) -> Int -> m ()
-modifyCapacity gv f i = do
+{-# INLINE modifyCapacityST #-}
+modifyCapacityST :: (Num cap, Ord cap, VU.Unbox cap) => ACIGV.GrowVec s (Int, Int, cap) -> (cap -> cap) -> Int -> ST s ()
+modifyCapacityST gv f i = do
   (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV gv
   VUM.modify c f i

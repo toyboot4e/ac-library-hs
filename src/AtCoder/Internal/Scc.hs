@@ -20,7 +20,7 @@ module AtCoder.Internal.Scc
 
     -- ** (Extra API) CSR API
     sccIdsCsr,
-    sccCsr
+    sccCsr,
   )
 where
 
@@ -28,8 +28,8 @@ import AtCoder.Internal.Csr qualified as ACICSR
 import AtCoder.Internal.GrowVec qualified as ACIGV
 import Control.Monad (unless, when)
 import Control.Monad.Fix (fix)
-import Control.Monad.Primitive (PrimMonad, PrimState)
-import Control.Monad.ST (runST)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST, runST)
 import Data.Foldable (for_)
 import Data.Maybe (fromJust)
 import Data.Vector qualified as V
@@ -75,12 +75,9 @@ sccIds SccGraph {..} = do
   csr <- ACICSR.build' nScc <$> ACIGV.unsafeFreeze edgesScc
   pure $ sccIdsCsr csr
 
--- | \(O(n + m)\) Returns the strongly connected components.
---
--- @since 1.0.0.0
-{-# INLINE scc #-}
-scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
-scc g = do
+-- NOTE(perf): faster without INLINEABLE (somehow)
+sccST :: SccGraph s -> ST s (V.Vector (VU.Vector Int))
+sccST g = do
   (!groupNum, !ids) <- sccIds g
   let counts = VU.create $ do
         vec <- VUM.replicate groupNum (0 :: Int)
@@ -95,10 +92,17 @@ scc g = do
     VGM.write (groups VG.! sccId) i v
   V.mapM VU.unsafeFreeze groups
 
+-- | \(O(n + m)\) Returns the strongly connected components.
+--
+-- @since 1.0.0.0
+{-# INLINE scc #-}
+scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
+scc g = stToPrim $ sccST g
+
 -- | \(O(n + m)\) API) Returns a pair of @(# of scc, scc id)@.
 --
 -- @since 1.1.0.0
-{-# INLINABLE sccIdsCsr #-}
+{-# INLINEABLE sccIdsCsr #-}
 sccIdsCsr :: ACICSR.Csr w -> (Int, VU.Vector Int)
 sccIdsCsr g@ACICSR.Csr {..} = runST $ do
   -- see also the Wikipedia: https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm#The_algorithm_in_pseudocode
@@ -173,7 +177,7 @@ sccIdsCsr g@ACICSR.Csr {..} = runST $ do
 -- | \(O(n + m)\) Returns the strongly connected components.
 --
 -- @since 1.1.0.0
-{-# INLINABLE sccCsr #-}
+{-# INLINEABLE sccCsr #-}
 sccCsr :: ACICSR.Csr w -> V.Vector (VU.Vector Int)
 sccCsr g = runST $ do
   groups <- V.mapM VUM.unsafeNew $ VU.convert counts

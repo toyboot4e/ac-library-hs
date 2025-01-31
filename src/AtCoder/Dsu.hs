@@ -65,7 +65,8 @@ where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.ST (ST)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -117,11 +118,11 @@ new nDsu
 -- @since 1.0.0.0
 {-# INLINE merge #-}
 merge :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Int
-merge dsu@Dsu {..} a b = do
+merge dsu@Dsu {..} a b = stToPrim $ do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" a nDsu
   let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" b nDsu
-  x <- leader dsu a
-  y <- leader dsu b
+  x <- leaderST dsu a
+  y <- leaderST dsu b
   if x == y
     then do
       pure x
@@ -169,6 +170,17 @@ same dsu@Dsu {..} a b = do
   lb <- leader dsu b
   pure $ la == lb
 
+{-# INLINE leaderST #-}
+leaderST :: Dsu s -> Int -> ST s Int
+leaderST dsu@Dsu {..} a = do
+  pa <- VGM.read parentOrSizeDsu a
+  if pa < 0
+    then pure a
+    else do
+      lpa <- leaderST dsu pa
+      VGM.write parentOrSizeDsu a lpa
+      pure lpa
+
 -- | Returns the representative of the connected component that contains the vertex \(a\).
 --
 -- ==== Constraints
@@ -180,15 +192,7 @@ same dsu@Dsu {..} a b = do
 -- @since 1.0.0.0
 {-# INLINE leader #-}
 leader :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
-leader dsu@Dsu {..} a = do
-  let !_ = ACIA.checkVertex "AtCoder.Dsu.leader" a nDsu
-  pa <- VGM.read parentOrSizeDsu a
-  if pa < 0
-    then pure a
-    else do
-      lpa <- leader dsu pa
-      VGM.write parentOrSizeDsu a lpa
-      pure lpa
+leader dsu a = stToPrim $ leaderST dsu a
 
 -- | Returns the size of the connected component that contains the vertex \(a\).
 --
@@ -201,9 +205,9 @@ leader dsu@Dsu {..} a = do
 -- @since 1.0.0.0
 {-# INLINE size #-}
 size :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
-size dsu@Dsu {..} a = do
+size dsu@Dsu {..} a = stToPrim $ do
   let !_ = ACIA.checkVertex "AtCoder.Dsu.size" a nDsu
-  la <- leader dsu a
+  la <- leaderST dsu a
   sizeLa <- VGM.read parentOrSizeDsu la
   pure (-sizeLa)
 
@@ -218,10 +222,10 @@ size dsu@Dsu {..} a = do
 -- @since 1.0.0.0
 {-# INLINE groups #-}
 groups :: (PrimMonad m) => Dsu (PrimState m) -> m (V.Vector (VU.Vector Int))
-groups dsu@Dsu {..} = do
+groups dsu@Dsu {..} = stToPrim $ do
   groupSize <- VUM.replicate nDsu (0 :: Int)
   leaders <- VU.generateM nDsu $ \i -> do
-    li <- leader dsu i
+    li <- leaderST dsu i
     VGM.modify groupSize (+ 1) li
     pure li
   result <- do

@@ -16,7 +16,8 @@ module AtCoder.Internal.McfCsr
   )
 where
 
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -42,12 +43,9 @@ data Csr s cap cost = Csr
     costCsr :: !(VU.Vector cost)
   }
 
--- | \(O(n + m)\) Creates `Csr`.
---
--- @since 1.0.0.0
-{-# INLINE build #-}
-build :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost, PrimMonad m) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> m (VU.Vector Int, Csr (PrimState m) cap cost)
-build n edges = do
+{-# INLINEABLE buildST #-}
+buildST :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> ST s (VU.Vector Int, Csr s cap cost)
+buildST n edges = do
   let m = VU.length edges
   -- craete the offsets first (this is a different step from ac-librar)
   let startCsr = VU.create $ do
@@ -91,6 +89,13 @@ build n edges = do
   revCsr <- VU.unsafeFreeze revVec
   costCsr <- VU.unsafeFreeze costVec
   pure (edgeIdx, Csr {..})
+
+-- | \(O(n + m)\) Creates `Csr`.
+--
+-- @since 1.0.0.0
+{-# INLINE build #-}
+build :: (HasCallStack, PrimMonad m, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> m (VU.Vector Int, Csr (PrimState m) cap cost)
+build n edges = stToPrim $ buildST n edges
 
 -- | \(O(1)\) Returns a vector of @(to, rev, cost)@.
 --

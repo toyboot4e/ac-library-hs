@@ -133,7 +133,7 @@ nullLct = (== -1)
 data Lct s a = Lct
   { -- | The number of vertices.
     --
--- @since 1.1.1.0
+    -- @since 1.1.1.0
     nLct :: {-# UNPACK #-} !Int,
     -- | Decomposed node data storage: left children.
     --
