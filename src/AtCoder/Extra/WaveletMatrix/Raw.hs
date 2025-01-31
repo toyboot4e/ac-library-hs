@@ -100,7 +100,7 @@ data RawWaveletMatrix = RawWaveletMatrix
 -- | \(O(n \log n)\) Creates a `RawWaveletMatrix` from a vector \(a\).
 --
 -- @since 1.1.0.0
-{-# INLINE build #-}
+{-# INLINEABLE build #-}
 build ::
   (HasCallStack) =>
   -- | The number of different values in the compressed vector.
@@ -157,7 +157,7 @@ build nx xs
 -- original array if you can.
 --
 -- @since 1.1.0.0
-{-# INLINABLE access #-}
+{-# INLINEABLE access #-}
 access :: RawWaveletMatrix -> Int -> Maybe Int
 access RawWaveletMatrix {..} i0
   | ACIA.testIndex i0 lengthRwm =
@@ -181,7 +181,7 @@ access RawWaveletMatrix {..} i0
 -- | \(O(\log |A|)\) Goes down the wavelet matrix for collecting the kth smallest value.
 --
 -- @since 1.1.0.0
-{-# INLINABLE goDown #-}
+{-# INLINEABLE goDown #-}
 goDown :: RawWaveletMatrix -> Int -> Int -> Int -> (Int, Int, Int, Int)
 goDown RawWaveletMatrix {..} l_ r_ k_ = V.ifoldl' step (0 :: Int, l_, r_, k_) bitsRwm
   where
@@ -207,7 +207,7 @@ goDown RawWaveletMatrix {..} l_ r_ k_ = V.ifoldl' step (0 :: Int, l_, r_, k_) bi
 -- | \(O(\log |A|)\) Goes up the wavelet matrix for collecting the value \(x\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE goUp #-}
+{-# INLINEABLE goUp #-}
 goUp :: RawWaveletMatrix -> Int -> Int -> Maybe Int
 goUp RawWaveletMatrix {..} i0 x =
   V.ifoldM'
@@ -222,7 +222,7 @@ goUp RawWaveletMatrix {..} i0 x =
 -- | \(O(\log |S|)\) Returns the number of \(y\) in \([l, r) \times [0, y_0)\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE rankLT #-}
+{-# INLINEABLE rankLT #-}
 rankLT :: RawWaveletMatrix -> Int -> Int -> Int -> Int
 rankLT RawWaveletMatrix {..} l_ r_ xr
   -- REMARK: This is required. The function below cannot handle the case N = 2^i and xr = N.
@@ -248,7 +248,7 @@ rankLT RawWaveletMatrix {..} l_ r_ xr
 -- | \(O(\log |S|)\) Returns the number of \(y\) in \([l, r)\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE rank #-}
+{-# INLINEABLE rank #-}
 rank ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -264,7 +264,7 @@ rank wm l r x = rankBetween wm l r x (x + 1)
 -- | \(O(\log |S|)\) Returns the number of \(y\) in \([l, r) \times [y_1, y_2)\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE rankBetween #-}
+{-# INLINEABLE rankBetween #-}
 rankBetween ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -283,7 +283,7 @@ rankBetween wm l r lx rx = rankLT wm l r rx - rankLT wm l r lx
 -- not found.
 --
 -- @since 1.1.0.0
-{-# INLINABLE select #-}
+{-# INLINEABLE select #-}
 select :: RawWaveletMatrix -> Int -> Maybe Int
 select wm = selectKth wm 0
 
@@ -291,7 +291,7 @@ select wm = selectKth wm 0
 -- if no such occurrence exists.
 --
 -- @since 1.1.0.0
-{-# INLINABLE selectKth #-}
+{-# INLINEABLE selectKth #-}
 selectKth ::
   RawWaveletMatrix ->
   -- | \(k\)
@@ -306,7 +306,7 @@ selectKth wm = selectKthIn wm 0 (lengthRwm wm)
 -- (0-based) of \(y\) in the sequence, or `Nothing` if no such occurrence exists.
 --
 -- @since 1.1.0.0
-{-# INLINABLE selectIn #-}
+{-# INLINEABLE selectIn #-}
 selectIn ::
   -- | A wavelet matrix
   RawWaveletMatrix ->
@@ -324,7 +324,7 @@ selectIn wm = selectKthIn wm 0
 -- (0-based) of \(y\) in the sequence, or `Nothing` if no such occurrence exists.
 --
 -- @since 1.1.0.0
-{-# INLINABLE selectKthIn #-}
+{-# INLINEABLE selectKthIn #-}
 selectKthIn ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -369,7 +369,7 @@ selectKthIn wm@RawWaveletMatrix {..} l_ r_ k x
 -- largest value. Note that duplicated values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
-{-# INLINABLE kthLargestIn #-}
+{-# INLINEABLE kthLargestIn #-}
 kthLargestIn ::
   -- | A wavelet matrix
   RawWaveletMatrix ->
@@ -390,7 +390,7 @@ kthLargestIn wm l r k
 -- \(k\)-th (0-based) largest value. Note that duplicated values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
-{-# INLINABLE ikthLargestIn #-}
+{-# INLINEABLE ikthLargestIn #-}
 ikthLargestIn ::
   -- | A wavelet matrix
   RawWaveletMatrix ->
@@ -411,7 +411,7 @@ ikthLargestIn wm l r k
 -- smallest value. Note that duplicated values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
-{-# INLINABLE kthSmallestIn #-}
+{-# INLINEABLE kthSmallestIn #-}
 kthSmallestIn ::
   -- | A wavelet matrix
   RawWaveletMatrix ->
@@ -432,7 +432,7 @@ kthSmallestIn wm l r k
 -- \(k\)-th (0-based) smallest value. Note that duplicated values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
-{-# INLINABLE ikthSmallestIn #-}
+{-# INLINEABLE ikthSmallestIn #-}
 ikthSmallestIn ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -452,21 +452,21 @@ ikthSmallestIn wm l r k
 -- values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
-{-# INLINABLE unsafeKthLargestIn #-}
+{-# INLINEABLE unsafeKthLargestIn #-}
 unsafeKthLargestIn :: RawWaveletMatrix -> Int -> Int -> Int -> Int
 unsafeKthLargestIn wm l r k = unsafeKthSmallestIn wm l r (r - l - (k + 1))
 
 -- | \(O(\log a)\)
 --
 -- @since 1.1.0.0
-{-# INLINABLE unsafeIKthLargestIn #-}
+{-# INLINEABLE unsafeIKthLargestIn #-}
 unsafeIKthLargestIn :: RawWaveletMatrix -> Int -> Int -> Int -> (Int, Int)
 unsafeIKthLargestIn wm l r k = unsafeIKthSmallestIn wm l r (r - l - (k + 1))
 
 -- | \(O(\log a)\)
 --
 -- @since 1.1.0.0
-{-# INLINABLE unsafeKthSmallestIn #-}
+{-# INLINEABLE unsafeKthSmallestIn #-}
 unsafeKthSmallestIn :: RawWaveletMatrix -> Int -> Int -> Int -> Int
 unsafeKthSmallestIn wm l_ r_ k_ =
   let (!x, !_, !_, !_) = goDown wm l_ r_ k_
@@ -475,7 +475,7 @@ unsafeKthSmallestIn wm l_ r_ k_ =
 -- | \(O(\log a)\)
 --
 -- @since 1.1.0.0
-{-# INLINABLE unsafeIKthSmallestIn #-}
+{-# INLINEABLE unsafeIKthSmallestIn #-}
 unsafeIKthSmallestIn :: RawWaveletMatrix -> Int -> Int -> Int -> (Int, Int)
 unsafeIKthSmallestIn wm l_ r_ k_ =
   let (!x, !l, !_, !k) = goDown wm l_ r_ k_
@@ -485,7 +485,7 @@ unsafeIKthSmallestIn wm l_ r_ k_ =
 -- | \(O(\log |S|)\) Looks up the maximum \(y\) in \([l, r) \times (-\infty, y_0]\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE lookupLE #-}
+{-# INLINEABLE lookupLE #-}
 lookupLE ::
   -- | A wavelet matrix
   RawWaveletMatrix ->
@@ -510,7 +510,7 @@ lookupLE wm l r x
 -- | \(O(\log a)\) Finds the maximum \(x\) in \([l, r)\) s.t. \(x_{0} \lt x\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE lookupLT #-}
+{-# INLINEABLE lookupLT #-}
 lookupLT ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -526,7 +526,7 @@ lookupLT wm l r x = lookupLE wm l r (x - 1)
 -- | \(O(\log |S|)\) Looks up the minimum \(y\) in \([l, r) \times [y_0, \infty)\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE lookupGE #-}
+{-# INLINEABLE lookupGE #-}
 lookupGE ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -551,7 +551,7 @@ lookupGE wm l r x
 -- | \(O(\log |S|)\) Looks up the minimum \(y\) in \([l, r) \times (y_0, \infty)\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE lookupGT #-}
+{-# INLINEABLE lookupGT #-}
 lookupGT ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -568,14 +568,14 @@ lookupGT wm l r x = lookupGE wm l r (x + 1)
 -- ascending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
 --
 -- @since 1.1.0.0
-{-# INLINABLE assocsIn #-}
+{-# INLINEABLE assocsIn #-}
 assocsIn :: RawWaveletMatrix -> Int -> Int -> [(Int, Int)]
 assocsIn wm l r = assocsWith wm l r id
 
 -- | \(O(\log A \min(|A|, L))\) Internal implementation of `assocs`.
 --
 -- @since 1.1.0.0
-{-# INLINABLE assocsWith #-}
+{-# INLINEABLE assocsWith #-}
 assocsWith :: RawWaveletMatrix -> Int -> Int -> (Int -> Int) -> [(Int, Int)]
 assocsWith RawWaveletMatrix {..} l_ r_ f
   | l'_ < r'_ = inner (0 :: Int) (0 :: Int) l'_ r'_ []
@@ -611,14 +611,14 @@ assocsWith RawWaveletMatrix {..} l_ r_ f
 -- descending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
 --
 -- @since 1.1.0.0
-{-# INLINABLE descAssocsIn #-}
+{-# INLINEABLE descAssocsIn #-}
 descAssocsIn :: RawWaveletMatrix -> Int -> Int -> [(Int, Int)]
 descAssocsIn wm l r = descAssocsInWith wm l r id
 
 -- | \(O(\log A \min(|A|, L))\) Internal implementation of `descAssoc`.
 --
 -- @since 1.1.0.0
-{-# INLINABLE descAssocsInWith #-}
+{-# INLINEABLE descAssocsInWith #-}
 descAssocsInWith :: RawWaveletMatrix -> Int -> Int -> (Int -> Int) -> [(Int, Int)]
 descAssocsInWith RawWaveletMatrix {..} l_ r_ f
   | l'_ < r'_ = inner (0 :: Int) (0 :: Int) l'_ r'_ []

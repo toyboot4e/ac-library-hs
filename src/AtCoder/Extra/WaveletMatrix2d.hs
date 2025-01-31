@@ -61,7 +61,8 @@ import AtCoder.Extra.WaveletMatrix.BitVector qualified as BV
 import AtCoder.Extra.WaveletMatrix.Raw qualified as Rwm
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.SegTree qualified as ST
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Bit (Bit (..))
 import Data.Bits (Bits (testBit))
 import Data.Maybe (fromJust, fromMaybe)
@@ -108,7 +109,7 @@ data WaveletMatrix2d s a = WaveletMatrix2d
 -- values for each point.
 --
 -- @since 1.1.0.0
-{-# INLINE new #-}
+{-# INLINEABLE new #-}
 new ::
   (PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | Inverse operator of the monoid
@@ -117,7 +118,7 @@ new ::
   VU.Vector (Int, Int) ->
   -- | A 2D wavelet matrix
   m (WaveletMatrix2d (PrimState m) a)
-new invWm2d xys = do
+new invWm2d xys = stToPrim $ do
   let n = VG.length xys
   let xyDictWm2d = VU.uniq . VU.modify (VAI.sortBy compare) $ xys
   let (!_, !ys) = VU.unzip xys
@@ -133,7 +134,7 @@ new invWm2d xys = do
 -- with initial monoid values. Monoids on a duplicate point are accumulated with `(<>)`.
 --
 -- @since 1.1.0.0
-{-# INLINE build #-}
+{-# INLINEABLE build #-}
 build ::
   (PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | Inverse operator of the monoid
@@ -142,7 +143,7 @@ build ::
   VU.Vector (Int, Int, a) ->
   -- | A 2D wavelet matrix
   m (WaveletMatrix2d (PrimState m) a)
-build invWm2d xysw = do
+build invWm2d xysw = stToPrim $ do
   let (!xs, !ys, !_) = VU.unzip3 xysw
   wm <- new invWm2d $ VU.zip xs ys
   -- not the fastest implementation though
@@ -153,17 +154,17 @@ build invWm2d xysw = do
 -- | \(O(1)\) Returns the monoid value at \((x, y)\).
 --
 -- @since 1.1.0.0
-{-# INLINE read #-}
-read :: (HasCallStack, VU.Unbox a, Monoid a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> (Int, Int) -> m a
+{-# INLINEABLE read #-}
+read :: (HasCallStack, PrimMonad m, VU.Unbox a, Monoid a) => WaveletMatrix2d (PrimState m) a -> (Int, Int) -> m a
 read WaveletMatrix2d {..} (!x, !y) = do
   ST.read (V.head segTreesWm2d) . fromJust $ lowerBound xyDictWm2d (x, y)
 
 -- | \(O(\log^2 n)\) Writes the monoid value at \((x, y)\). Access to unknown points are undefined.
 --
 -- @since 1.1.0.0
-{-# INLINE write #-}
-write :: (HasCallStack, Monoid a, VU.Unbox a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> (Int, Int) -> a -> m ()
-write WaveletMatrix2d {..} (!x, !y) v = do
+{-# INLINEABLE write #-}
+write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => WaveletMatrix2d (PrimState m) a -> (Int, Int) -> a -> m ()
+write WaveletMatrix2d {..} (!x, !y) v = stToPrim $ do
   let !i_ = fromJust $ lowerBound xyDictWm2d (x, y)
   V.ifoldM'_
     ( \i iRow (!bits, !seg) -> do
@@ -182,9 +183,9 @@ write WaveletMatrix2d {..} (!x, !y) v = do
 -- undefined.
 --
 -- @since 1.1.0.0
-{-# INLINE modify #-}
-modify :: (HasCallStack, Monoid a, VU.Unbox a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> (a -> a) -> (Int, Int) -> m ()
-modify WaveletMatrix2d {..} f (!x, !y) = do
+{-# INLINEABLE modify #-}
+modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => WaveletMatrix2d (PrimState m) a -> (a -> a) -> (Int, Int) -> m ()
+modify WaveletMatrix2d {..} f (!x, !y) = stToPrim $ do
   let !i_ = fromJust $ lowerBound xyDictWm2d (x, y)
   V.ifoldM'_
     ( \i iRow (!bits, !seg) -> do
@@ -202,8 +203,8 @@ modify WaveletMatrix2d {..} f (!x, !y) = do
 -- | \(O(\log^2 n)\) Returns the monoid product in \([l, r) \times [y_1, y_2)\).
 --
 -- @since 1.1.0.0
-{-# INLINE prod #-}
-prod :: (HasCallStack, VU.Unbox a, Monoid a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> Int -> Int -> Int -> Int -> m a
+{-# INLINEABLE prod #-}
+prod :: (HasCallStack, PrimMonad m, VU.Unbox a, Monoid a) => WaveletMatrix2d (PrimState m) a -> Int -> Int -> Int -> Int -> m a
 prod wm@WaveletMatrix2d {..} !xl !xr !yl !yr
   | xl' >= xr' || yl' >= yr' = pure mempty
   | otherwise = unsafeProd wm xl' xr' yl' yr'
@@ -221,8 +222,8 @@ prod wm@WaveletMatrix2d {..} !xl !xr !yl !yr
 -- intervals.
 --
 -- @since 1.1.0.0
-{-# INLINE prodMaybe #-}
-prodMaybe :: (VU.Unbox a, Monoid a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> Int -> Int -> Int -> Int -> m (Maybe a)
+{-# INLINEABLE prodMaybe #-}
+prodMaybe :: (PrimMonad m, VU.Unbox a, Monoid a) => WaveletMatrix2d (PrimState m) a -> Int -> Int -> Int -> Int -> m (Maybe a)
 prodMaybe wm@WaveletMatrix2d {..} !xl !xr !yl !yr
   | not (ACIA.testInterval xl' xr' (VG.length xDict)) = pure Nothing
   | not (ACIA.testInterval yl' yr' (VG.length yDictWm2d)) = pure Nothing
@@ -239,8 +240,8 @@ prodMaybe wm@WaveletMatrix2d {..} !xl !xr !yl !yr
 -- | \(O(\log^2 n)\) Return the monoid product of all of the points in the wavelet matrix.
 --
 -- @since 1.1.0.0
-{-# INLINE allProd #-}
-allProd :: (HasCallStack, VU.Unbox a, Monoid a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> m a
+{-# INLINEABLE allProd #-}
+allProd :: (HasCallStack, PrimMonad m, PrimMonad m, VU.Unbox a, Monoid a) => WaveletMatrix2d (PrimState m) a -> m a
 allProd WaveletMatrix2d {..} = do
   -- ST.allProd (V.last segTreesWm2d)
   ST.allProd (V.head segTreesWm2d)
@@ -249,17 +250,15 @@ allProd WaveletMatrix2d {..} = do
 --
 -- @since 1.1.0.0
 {-# INLINE unsafeProd #-}
-unsafeProd :: (VU.Unbox a, Monoid a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> Int -> Int -> Int -> Int -> m a
-unsafeProd wm xl' xr' yl' yr' = do
+unsafeProd :: (PrimMonad m, VU.Unbox a, Monoid a) => WaveletMatrix2d (PrimState m) a -> Int -> Int -> Int -> Int -> m a
+unsafeProd wm xl' xr' yl' yr' = stToPrim $ do
   sR <- prodLT wm xl' xr' yr'
   sL <- prodLT wm xl' xr' yl'
   pure $! sR <> invWm2d wm sL
 
 -- | \(O(\log^2 n)\)
---
--- @since 1.1.0.0
-{-# INLINE prodLT #-}
-prodLT :: (Monoid a, VU.Unbox a, PrimMonad m) => WaveletMatrix2d (PrimState m) a -> Int -> Int -> Int -> m a
+{-# INLINEABLE prodLT #-}
+prodLT :: (Monoid a, VU.Unbox a) => WaveletMatrix2d s a -> Int -> Int -> Int -> ST s a
 prodLT WaveletMatrix2d {..} !l_ !r_ yUpper = do
   (!res, !_, !_) <- do
     V.ifoldM'
@@ -280,32 +279,3 @@ prodLT WaveletMatrix2d {..} !l_ !r_ yUpper = do
       (mempty, l_, r_)
       $ V.zip (Rwm.bitsRwm rawWmWm2d) segTreesWm2d
   pure res
-
--- -- | \(O(\log n)\) Restore the original \(x\) coordinate from a compressed one. Access to unknown
--- -- points are undefined.
--- {-# INLINE indexX #-}
--- indexX :: (HasCallStack) => WaveletMatrix2d s a -> Int -> Int
--- indexX WaveletMatrix2d {xyDictWm2d} x = maybe err (VG.unsafeIndex xDict) $ lowerBound xDict x
---   where
---     (!xDict, !_) = VU.unzip xyDictWm2d
---     err = error $ "AtCoder.Extra.WaveletMatirx.SegTree.indexX: cannot index x (`" ++ show x ++ "`)"
-
--- -- | \(O(\log n)\) Restore the original \(y\) coordinate from a compressed one. Access to unknown
--- -- points are undefined.
--- {-# INLINE indexY #-}
--- indexY :: (HasCallStack) => WaveletMatrix2d s a -> Int -> Int
--- indexY WaveletMatrix2d {yDictWm2d} y = maybe err (VG.unsafeIndex yDictWm2d) $ lowerBound yDictWm2d y
---   where
---     err = error $ "AtCoder.Extra.WaveletMatirx.SegTree.indexY: cannot index y (`" ++ show y ++ "`)"
-
--- -- | \(O(\log n)\) Restore the original \((x, y)\) coordinates from a compressed one. Access to
--- -- unknown points are undefined.
--- {-# INLINE indexXY #-}
--- indexXY :: (HasCallStack) => WaveletMatrix2d s a -> Int -> Int -> (Int, Int)
--- indexXY WaveletMatrix2d {xyDictWm2d} x y = maybe err (VG.unsafeIndex xyDictWm2d) $ lowerBound xyDictWm2d (x, y)
---   where
---     err = error $ "AtCoder.Extra.WaveletMatirx.SegTree.indexXY: cannot index (x, y) `" ++ show (x, y) ++ "`"
-
--- {-# INLINE assocsWith #-}
--- assocsWith :: WaveletMatrix -> (Int -> Int) -> [(Int, Int)]
--- assocsWith WaveletMatrix {..} l_ r_ f
