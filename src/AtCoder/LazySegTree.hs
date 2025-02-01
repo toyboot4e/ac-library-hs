@@ -289,6 +289,14 @@ class (Monoid f) => SegAct f a where
   segActWithLength :: Int -> f -> a -> a
   segActWithLength _ = segAct
 
+-- | @since 1.2.0.0
+instance SegAct () a where
+  {-# INLINE segAct #-}
+  segAct _ = id
+  {-# INLINE segActWithLength #-}
+  segActWithLength :: Int -> f -> a -> a
+  segActWithLength _ _ = id
+
 -- | A lazily propagated segment tree defined around `SegAct`.
 --
 -- @since 1.0.0.0
