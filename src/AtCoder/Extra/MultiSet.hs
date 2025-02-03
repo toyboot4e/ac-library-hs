@@ -3,13 +3,14 @@
 -- | A fast, mutable multiset for `Int` keys backed by a @HashMap@.  Most operations are performed
 -- in \(O(1)\) time, but in average.
 --
+-- ==== Capacity limitation
+-- Access to each key creates a new entry. Note that entries cannot be invalidated due to the
+-- internal implementation (called /open addressing/). If the hash map is full,
+-- __access to a new key causes infinite loop__ .
+--
 -- ==== Invariant
 -- The count for each key must be non-negative. An exception is thrown if this invariant is
--- violated.
---
--- ==== Capacity limitation
--- The maximum number of distinct keys that can be inserted is fixed at \(n\), even if some keys are
--- deleted. This is due to the limitation of the internal @HashMap@.
+-- violated on `add` or `sub`.
 --
 -- ==== __Example__
 -- Create a `MultiSet` with capacity \(4\):

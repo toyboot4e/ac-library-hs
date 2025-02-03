@@ -6,8 +6,10 @@
 -- | A dense, fast `Int` hash map with a fixed-sized `capacity` of \(n\). Most operations are
 -- performed in \(O(1)\) time, but in average.
 --
--- NOTE: The entries (key - value pairs) cannot be invalidated due to the internal implementation
--- (called /open addressing/).
+-- ==== Capacity limitation
+-- Access to each key creates a new entry. Note that entries cannot be invalidated due to the
+-- internal implementation (called /open addressing/). If the hash map is full,
+-- __access to a new key causes an infinite loop__ .
 --
 -- ==== __Example__
 -- Create a `HashMap` with `capacity` \(10\):
@@ -76,7 +78,8 @@ where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (void, when)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.ST (ST)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Data.Bit (Bit (..))
 import Data.Bits (Bits (xor, (.&.)), (.>>.))
 import Data.Vector.Generic qualified as VG
@@ -171,10 +174,14 @@ hash hm x = fromIntegral $ (x3 `xor` (x3 .>>. 31)) .&. fromIntegral (maskHM hm)
 
 -- | \(O(1)\) (Internal) Hashed slot search.
 --
+-- ==== Constraint
+-- - The rest capacity must be non-zero. Otherwise it loops forever.
+--
 -- @since 1.1.0.0
-{-# INLINE index #-}
-index :: (PrimMonad m) => HashMap (PrimState m) a -> Int -> m Int
-index hm@HashMap {..} k = inner (hash hm k)
+{-# INLINE indexST #-}
+indexST :: (HasCallStack) => HashMap s a -> Int -> ST s Int
+indexST hm@HashMap {..} k = do
+  inner (hash hm k)
   where
     inner !h = do
       Bit b <- VGM.read usedHM h
@@ -187,11 +194,14 @@ index hm@HashMap {..} k = inner (hash hm k)
 -- | \(O(1)\) Return the value to which the specified key is mapped, or `Nothing` if this map
 -- contains no mapping for the key.
 --
+-- ==== Constraint
+-- - The rest capacity must be non-zero. Otherwise it loops forever.
+--
 -- @since 1.1.0.0
 {-# INLINE lookup #-}
 lookup :: (HasCallStack, VU.Unbox a, PrimMonad m) => HashMap (PrimState m) a -> Int -> m (Maybe a)
 lookup hm@HashMap {..} k = do
-  i <- index hm k
+  i <- stToPrim $ indexST hm k
   Bit b <- VGM.read usedHM i
   if b
     then Just <$> VGM.read valHM i
@@ -199,11 +209,14 @@ lookup hm@HashMap {..} k = do
 
 -- | \(O(1)\) Checks whether the hash map contains the element.
 --
+-- ==== Constraint
+-- - The rest capacity must be non-zero. Otherwise it loops forever.
+--
 -- @since 1.1.0.0
 {-# INLINE member #-}
 member :: (HasCallStack, PrimMonad m) => HashMap (PrimState m) a -> Int -> m Bool
 member hm@HashMap {..} k = do
-  i <- index hm k
+  i <- stToPrim $ indexST hm k
   Bit b <- VGM.read usedHM i
   -- TODO: is this key check necessary
   k' <- VGM.read keyHM i
@@ -211,12 +224,18 @@ member hm@HashMap {..} k = do
 
 -- | \(O(1)\) Checks whether the hash map does not contain the element.
 --
+-- ==== Constraint
+-- - The rest capacity must be non-zero. Otherwise it loops forever.
+--
 -- @since 1.1.0.0
 {-# INLINE notMember #-}
 notMember :: (HasCallStack, PrimMonad m) => HashMap (PrimState m) a -> Int -> m Bool
 notMember hm k = not <$> member hm k
 
 -- | \(O(1)\) Inserts a \((k, v)\) pair.
+--
+-- ==== Constraint
+-- - The rest capacity must be non-zero. Otherwise it loops forever.
 --
 -- @since 1.1.0.0
 {-# INLINE insert #-}
@@ -226,11 +245,14 @@ insert hm k v = void $ exchange hm k v
 -- | \(O(1)\) Inserts a \((k, v)\) pair. If the key exists, the function will insert the pair
 -- \((k, f(v_{\mathrm{new}}, v_{\mathrm{old}}))\).
 --
+-- ==== Constraint
+-- - The rest capacity must be non-zero. Otherwise it loops forever.
+--
 -- @since 1.1.0.0
 {-# INLINE insertWith #-}
 insertWith :: (HasCallStack, PrimMonad m, VU.Unbox a) => HashMap (PrimState m) a -> (a -> a -> a) -> Int -> a -> m ()
 insertWith hm@HashMap {..} f k v = do
-  i <- index hm k
+  i <- stToPrim $ indexST hm k
   Bit b <- VGM.exchange usedHM i $ Bit True
   if b
     then do
@@ -245,11 +267,14 @@ insertWith hm@HashMap {..} f k v = do
 -- | \(O(1)\) Inserts a \((k, v)\) pair and returns the old value, or `Nothing` if no such entry
 -- exists.
 --
+-- ==== Constraint
+-- - The rest capacity must be non-zero. Otherwise it loops forever.
+--
 -- @since 1.1.0.0
 {-# INLINE exchange #-}
 exchange :: (HasCallStack, PrimMonad m, VU.Unbox a) => HashMap (PrimState m) a -> Int -> a -> m (Maybe a)
 exchange hm@HashMap {..} k v = do
-  i <- index hm k
+  i <- stToPrim $ indexST hm k
   Bit b <- VGM.exchange usedHM i $ Bit True
   if b
     then do
@@ -268,7 +293,7 @@ exchange hm@HashMap {..} k v = do
 {-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, VU.Unbox a) => HashMap (PrimState m) a -> (a -> a) -> Int -> m ()
 modify hm@HashMap {..} f k = do
-  i <- index hm k
+  i <- stToPrim $ indexST hm k
   Bit b <- VGM.read usedHM i
   when b $ do
     VGM.modify valHM f i
@@ -279,7 +304,7 @@ modify hm@HashMap {..} f k = do
 {-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, VU.Unbox a) => HashMap (PrimState m) a -> (a -> m a) -> Int -> m ()
 modifyM hm@HashMap {..} f k = do
-  i <- index hm k
+  i <- stToPrim $ indexST hm k
   Bit b <- VGM.read usedHM i
   when b $ do
     VGM.modifyM valHM f i
