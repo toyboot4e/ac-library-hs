@@ -463,7 +463,7 @@ addLightST Lct {subtreeProdLct, midLct} p c = do
 -- | \(O(1)\) Called on changing a path-parent edge. This is for subtree folding.
 {-# INLINEABLE changeLightST #-}
 changeLightST :: Lct s a -> Vertex -> Vertex -> Vertex -> ST s ()
-changeLightST lct u v p = do
+changeLightST _lct _u _v _p = do
   pure ()
 
 -- | \(O(1)\) Called on erasing a path-parent edge. This is for subtree folding.
