@@ -125,18 +125,18 @@ ident n = Matrix n n $ VU.create $ do
     VGM.write vec (i + n * i) 1
   pure vec
 
--- FIXME: diag should not take `n`
-
 -- | \(O(n^2)\) Creates an NxN diagonal matrix.
 --
 -- @since 1.1.0.0
 {-# INLINE diag #-}
-diag :: (VU.Unbox a, Num a) => Int -> VU.Vector a -> Matrix a
-diag n xs = Matrix n n $ VU.create $ do
+diag :: (VU.Unbox a, Num a) => VU.Vector a -> Matrix a
+diag xs = Matrix n n $ VU.create $ do
   vec <- VUM.replicate (n * n) 0
   VU.iforM_ xs $ \i x -> do
     VGM.write vec (i + n * i) x
   pure vec
+  where
+    n = VU.length xs
 
 -- | \(O(n^2)\) Maps the `Matrix`.
 --
