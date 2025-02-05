@@ -64,7 +64,7 @@ module AtCoder.Extra.IntervalMap
 
     -- * Lookups
     contains,
-    intersects,
+    containsInterval,
     lookup,
     read,
     readMaybe,
@@ -164,15 +164,15 @@ capacity = IM.capacity . unITM
 -- @since 1.1.0.0
 {-# INLINE contains #-}
 contains :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> m Bool
-contains itm i = intersects itm i (i + 1)
+contains itm i = containsInterval itm i (i + 1)
 
 -- | \(O(\log n)\) Returns whether an interval \([l, r)\) is fully contained within any of the
 -- intervals.
 --
 -- @since 1.1.0.0
-{-# INLINE intersects #-}
-intersects :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m Bool
-intersects (IntervalMap dim) l r
+{-# INLINE containsInterval #-}
+containsInterval :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m Bool
+containsInterval (IntervalMap dim) l r
   | l >= r = pure False
   | otherwise = do
       res <- IM.lookupLE dim l

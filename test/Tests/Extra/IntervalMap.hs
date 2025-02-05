@@ -53,7 +53,7 @@ instance QC.Arbitrary Init where
 
 data Query
   = Contains Int
-  | Intersects (Int, Int)
+  | ContainsInterval (Int, Int)
   | Lookup (Int, Int)
   | -- | Read (Int, Int)
     ReadMaybe (Int, Int)
@@ -80,7 +80,7 @@ queryGen :: Int -> QC.Gen Query
 queryGen n = do
   QC.oneof
     [ Contains <$> keyGen,
-      Intersects <$> intervalGen n,
+      ContainsInterval <$> intervalGen n,
       Lookup <$> intervalGen n,
       ReadMaybe <$> intervalGen n,
       Insert <$> intervalGen n <*> valGen,
@@ -113,7 +113,7 @@ handleRef vec q = do
   case q of
     Contains i -> do
       pure . B $ VU.any (\(!l, !r, !_) -> l <= i && i < r) intervals
-    Intersects (!l, !r)
+    ContainsInterval (!l, !r)
       | l >= r -> pure $ B False
       | otherwise -> pure . B $ VU.any (\(!l', !r', !_) -> l' <= l && r <= r') intervals
     Lookup (!l, !r)
@@ -148,8 +148,8 @@ handleAcl :: (HasCallStack, PrimMonad m) => MutVar (PrimState m) (M.Map Int Int)
 handleAcl freq itm q = case q of
   Contains i -> do
     B <$> ITM.contains itm i
-  Intersects (!l, !r) -> do
-    B <$> ITM.intersects itm l r
+  ContainsInterval (!l, !r) -> do
+    B <$> ITM.containsInterval itm l r
   Lookup (!l, !r) -> do
     LRX <$> ITM.lookup itm l r
   ReadMaybe (!l, !r) -> do
