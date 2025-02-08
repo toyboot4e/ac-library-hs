@@ -11,7 +11,7 @@ description:
   programming on [AtCoder](https://atcoder.jp/).
 
   - Functions primarily use half-open interval \([l, r)\).
-  - The extra module contains additional utilities beyond the original C++ library.
+  - The `Extra` module contains additional utilities beyond the original C++ library.
 
 category:        Algorithms, Data Structures
 license:         CC0-1.0
@@ -34,17 +34,6 @@ common warnings
   ghc-options: -Wall
 
 common dependencies
-  -- AtCoder environment (2023 -)
-  -- if impl(ghc ==9.4.5)
-  --   build-depends:
-  --     , base               ==4.17.1.0
-  --     , bitvec             ^>=1.1.4.0
-  --     , bytestring         ^>=0.11.4.0
-  --     , primitive          ^>=0.8.0.0
-  --     , vector             ^>=0.13.0.0
-  --     , vector-algorithms  ^>=0.9.0.1
-  --     , wide-word
-
   build-depends:
     , base               >=4.9     && <4.22
     , bitvec             <1.2

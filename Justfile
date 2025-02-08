@@ -65,6 +65,7 @@ many-test opts='':
 [private]
 alias mt := many-test
 
+# touches all the verification source files
 touch:
     touch verify/app/*
 
