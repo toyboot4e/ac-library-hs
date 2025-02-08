@@ -1,5 +1,14 @@
 # Revision history for acl-hs
 
+## 1.2.0.0 -- Feb 2025
+
+- Added `AtCoder.Extra.Seq`
+- Tweaked `INLINE` settings for less compile time
+- Breaking changes:
+  - `Matrix.diag` now does not take length parameter
+  - `Extra.Math.primitiveRoot` is renamed to `primitiveRoot32`
+  - `Internal.Convolution` functions now use `ST` instead of `PrimMonad`
+
 ## 1.1.1.0 -- Jan 2025
 
 - Added `AtCoder.Extra.Tree.Lct`
