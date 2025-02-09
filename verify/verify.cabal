@@ -325,6 +325,11 @@ executable yosupo-predecessor-problem-containers
   main-is:       yosupo-predecessor-problem-containers.hs
   build-depends: verify
 
+executable yosupo-predecessor-problem-map
+  import:        app-local
+  main-is:       yosupo-predecessor-problem-map.hs
+  build-depends: verify
+
 executable yosupo-range-affine-range-sum
   import:        app-local
   main-is:       yosupo-range-affine-range-sum.hs

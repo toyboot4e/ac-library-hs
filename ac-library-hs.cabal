@@ -82,6 +82,7 @@ library
     AtCoder.Extra.Semigroup.Matrix
     AtCoder.Extra.Semigroup.Permutation
     AtCoder.Extra.Seq
+    AtCoder.Extra.Seq.Map
     AtCoder.Extra.Seq.Raw
     AtCoder.Extra.Tree
     AtCoder.Extra.Tree.Hld
@@ -144,6 +145,7 @@ test-suite ac-library-hs-test
     Tests.Extra.Semigroup.Matrix
     Tests.Extra.Semigroup.Permutation
     Tests.Extra.Seq
+    Tests.Extra.Seq.Map
     Tests.Extra.WaveletMatrix
     Tests.Extra.WaveletMatrix.BitVector
     Tests.Extra.WaveletMatrix.Raw

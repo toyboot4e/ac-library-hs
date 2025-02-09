@@ -467,7 +467,7 @@ exchange seq (Handle hRoot) k v = stToPrim $ do
 --
 -- @since 1.2.0.0
 {-# INLINE prod #-}
-prod :: (HasCallStack, Show a, PrimMonad m, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq (PrimState m) f a -> Handle (PrimState m) -> Int -> Int -> m a
+prod :: (HasCallStack, PrimMonad m, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq (PrimState m) f a -> Handle (PrimState m) -> Int -> Int -> m a
 prod seq (Handle hRoot) l r = stToPrim $ do
   root <- VGM.unsafeRead hRoot 0
   (!v, !root') <- Seq.prodST seq root l r
@@ -475,19 +475,22 @@ prod seq (Handle hRoot) l r = stToPrim $ do
   pure v
 
 -- | Amortized \(O(\log n)\). Returns the monoid product in an interval \([l, r)\). Returns
--- `Nothing` if an invalid interval is given.
+-- `Nothing` if the interval is invalid.
 --
 -- @since 1.2.0.0
-{-# INLINE prodMaybe #-}
+{-# INLINEABLE prodMaybe #-}
 prodMaybe :: (HasCallStack, PrimMonad m, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq (PrimState m) f a -> Handle (PrimState m) -> Int -> Int -> m (Maybe a)
 prodMaybe seq (Handle handle) l r = stToPrim $ do
   root <- VGM.unsafeRead handle 0
-  res <- Seq.prodMaybeST seq root l r
-  case res of
-    Just (!v, !root') -> do
-      VGM.unsafeWrite handle 0 root'
-      pure $ Just v
-    Nothing -> pure Nothing
+  if P.nullIndex root
+    then pure $ Just mempty
+    else do
+      res <- Seq.prodMaybeST seq root l r
+      case res of
+        Just (!v, !root') -> do
+          VGM.unsafeWrite handle 0 root'
+          pure $ Just v
+        Nothing -> pure Nothing
 
 -- | Amortized \(O(\log n)\). Returns the monoid product of the whole sequence.
 --

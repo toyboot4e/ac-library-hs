@@ -82,6 +82,17 @@ module AtCoder.Extra.Seq.Raw
 
     -- * Conversions
     freezeST,
+
+    -- * Internals
+    -- | These functions are exported primarily for @Map@ implementations.
+    splitMaxRightWithST,
+    maxRightWithST,
+    updateNodeST,
+    writeNodeST,
+    modifyNodeST,
+    exchangeNodeST,
+    propNodeST,
+    applyNodeST,
   )
 where
 
@@ -203,8 +214,8 @@ newSeqST seq@Seq {..} !xs = do
         | otherwise = do
             let !m = (l + r) `div` 2
             rootL <- inner l m
-            rootR <- inner (m + 1) r
             root <- newNodeST seq (xs VG.! m)
+            rootR <- inner (m + 1) r
             unless (P.nullIndex rootL) $ do
               VGM.write lSeq (coerce root) rootL
               VGM.write pSeq (coerce rootL) root
@@ -424,7 +435,7 @@ sliceST seq@Seq {..} root l r
           --    [        )
           --             * root' (splayed)
           --          * rootL (detached from the root)
-          -- \* rootL' (splayed)
+          -- * rootL' (splayed)
           --    * right(rootL'): node that corresponds to [l, r)
           root' <- splayKthST seq root r
           rootL <- VGM.read lSeq $ coerce root'
@@ -584,13 +595,12 @@ prodAllST seq@Seq {..} root = do
 --
 -- ==== Constraints
 -- - \(0 \le l \le r \le n\)
--- - The root must point to a non-empty sequence.
 --
 -- @since 1.2.0.0
 {-# INLINEABLE applyInST #-}
 applyInST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> Int -> Int -> f -> ST s P.Index
 applyInST seq@Seq {..} root l r act = do
-  assertRootST seq root
+  -- assertRootOrNullST seq root
   s <- if P.nullIndex root then pure 0 else VGM.read sSeq (coerce root)
   let !_ = ACIA.checkInterval "AtCoder.Extra.Seq.applyInST" l r s
   if l == r
@@ -1085,7 +1095,7 @@ imaxRightM seq@Seq {..} root0 f = do
               if P.nullIndex l
                 then pure offset
                 else (offset +) <$> VGM.read sSeq (coerce l)
-            b <- f pos v
+            !b <- f pos v
             if b
               then do
                 r <- stToPrim $ VGM.read rSeq $ coerce root
@@ -1155,7 +1165,7 @@ imaxRightProdM seq@Seq {..} root0 f = do
               VGM.write rSeq (coerce root) rootR
               updateNodeST seq root
               pure $! acc <> prodRoot
-            b <- f pos prodM
+            !b <- f pos prodM
             if b
               then do
                 r <- stToPrim $ VGM.read rSeq $ coerce root
@@ -1174,7 +1184,7 @@ imaxRightProdM seq@Seq {..} root0 f = do
 -- | Amortized \(O(n)\). Returns the sequence of monoid values.
 --
 -- @since 1.2.0.0
-{-# INLINE freezeST #-}
+{-# INLINEABLE freezeST #-}
 freezeST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> ST s (VU.Vector a)
 freezeST seq@Seq {sSeq, lSeq, rSeq, vSeq} root0
   | P.nullIndex root0 = pure VU.empty
@@ -1194,12 +1204,83 @@ freezeST seq@Seq {sSeq, lSeq, rSeq, vSeq} root0
       VU.unsafeFreeze res
 
 -- -------------------------------------------------------------------------------------------------
--- Node methods
+-- Internals and node methods
 -- -------------------------------------------------------------------------------------------------
 
--- NOTE(pref): inlining these functions are important for the speed
+-- | Amortized \(O(\log n)\).
+--
+-- @since 1.2.1.0
+{-# INLINEABLE splitMaxRightWithST #-}
+splitMaxRightWithST ::
+  (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) =>
+  -- | Sequence storage
+  Seq s f a ->
+  -- | Root node
+  P.Index ->
+  -- | User predicate \(f(i)\)
+  (P.Index -> ST s Bool) ->
+  -- | (left, right) sequences where \(f\) holds for the left
+  ST s (P.Index, P.Index)
+splitMaxRightWithST seq@Seq {..} root f
+  | P.nullIndex root = pure (P.undefIndex, P.undefIndex)
+  | otherwise = do
+      assertRootST seq root
+      (!c, !_) <- maxRightWithST seq root f
+      if P.nullIndex c
+        then do
+          -- `f` does hot hold
+          splayST seq root True
+          pure (P.undefIndex, root)
+        else do
+          splayST seq c True
+          right <- VGM.read rSeq (coerce c)
+          if P.nullIndex right
+            then do
+              -- `f` holds for the whole sequence
+              pure (c, P.undefIndex)
+            else do
+              -- `f` holds for part of the sequence. detach the right child
+              VGM.write pSeq (coerce right) P.undefIndex
+              VGM.write rSeq (coerce c) P.undefIndex
+              updateNodeST seq c
+              pure (c, right)
+
+-- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
+-- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
+--
+-- ==== Constraints
+-- - The node must be a root.
+--
+-- @since 1.2.1.0
+{-# INLINEABLE maxRightWithST #-}
+maxRightWithST ::
+  (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) =>
+  -- | Sequence storage
+  Seq s f a ->
+  -- | Root node
+  P.Index ->
+  -- | User predicate
+  (P.Index -> ST s Bool) ->
+  -- | (rightmost node, new root)
+  ST s (P.Index, P.Index)
+maxRightWithST seq@Seq {..} root0 f = do
+  let inner parent lastYes root
+        | P.nullIndex root = pure (lastYes, parent)
+        | otherwise = do
+            stToPrim $ propNodeST seq root
+            !b <- f root
+            if b
+              then inner root root =<< VGM.read rSeq (coerce root)
+              else inner root lastYes =<< VGM.read lSeq (coerce root)
+  (!yes, !root') <- inner P.undefIndex P.undefIndex root0
+  stToPrim $ splayST seq root' True
+  pure (yes, root')
+
+-- NOTE(pref): inlining node functions are important for the speed
 
 -- | \(O(1)\) Recomputes the node size and the monoid product.
+--
+-- @since 1.2.1.0
 {-# INLINEABLE updateNodeST #-}
 updateNodeST :: (Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> ST s ()
 updateNodeST Seq {..} i = do
@@ -1224,6 +1305,8 @@ updateNodeST Seq {..} i = do
   VGM.write prodSeq (coerce i) prod''
 
 -- | \(O(1)\) Writes to the monoid value of a node.
+--
+-- @since 1.2.1.0
 {-# INLINE writeNodeST #-}
 writeNodeST :: (Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> a -> ST s ()
 writeNodeST seq@Seq {..} root v = do
@@ -1232,6 +1315,8 @@ writeNodeST seq@Seq {..} root v = do
   updateNodeST seq root
 
 -- | \(O(1)\) Modifies the monoid value of a node.
+--
+-- @since 1.2.1.0
 {-# INLINE modifyNodeST #-}
 modifyNodeST :: (HasCallStack, Monoid a, VU.Unbox a) => Seq s f a -> (a -> a) -> P.Index -> ST s ()
 modifyNodeST seq@Seq {..} f root = do
@@ -1240,6 +1325,8 @@ modifyNodeST seq@Seq {..} f root = do
   updateNodeST seq root
 
 -- | \(O(1)\) Exchanges the monoid value of a node.
+--
+-- @since 1.2.1.0
 {-# INLINE exchangeNodeST #-}
 exchangeNodeST :: (HasCallStack, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> a -> ST s a
 exchangeNodeST seq@Seq {..} root v = do
@@ -1263,6 +1350,8 @@ reverseNodeST seq@Seq {..} i = do
   VGM.modify revSeq (xor (Bit True)) $ coerce i
 
 -- | Amortized \(O(\log n)\). Propgates the lazily propagated values on a node.
+--
+-- @since 1.2.1.0
 {-# INLINE propNodeST #-}
 -- NOTE(pref): Although this function is large, inlining it needs for the speed.
 propNodeST :: (HasCallStack, SegAct f a, Eq f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> ST s ()
@@ -1293,7 +1382,7 @@ propNodeST seq@Seq {..} i = do
 -- | Amortized \(O(\log n)\). Propagetes from the root to the given node.
 {-# INLINE propNodeFromRootST #-}
 propNodeFromRootST :: (HasCallStack, SegAct f a, VU.Unbox f, VU.Unbox a, Monoid a) => Seq s f a -> P.Index -> ST s ()
-propNodeFromRootST Seq {..} i0 = inner i0
+propNodeFromRootST Seq {..} = inner
   where
     inner i = do
       p <- VGM.read pSeq $ coerce i
@@ -1302,6 +1391,8 @@ propNodeFromRootST Seq {..} i0 = inner i0
       inner i
 
 -- | Amortized \(O(\log n)\). Propgates at a node.
+--
+-- @since 1.2.1.0
 {-# INLINE applyNodeST #-}
 applyNodeST :: (HasCallStack, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> f -> ST s ()
 applyNodeST Seq {..} i act = do
