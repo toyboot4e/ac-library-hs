@@ -18,6 +18,10 @@ module AtCoder.Extra.Seq.Raw
     freeNodeST,
     freeSubtreeST,
 
+    -- * Metadata
+    capacity,
+    lengthST,
+
     -- * Merge/split
     mergeST,
     merge3ST,
@@ -233,6 +237,26 @@ freeSubtreeST Seq {lSeq, rSeq, poolSeq} c0
             unless (P.nullIndex cr) (inner cr)
       inner c0
       P.free poolSeq c0
+
+-- -------------------------------------------------------------------------------------------------
+-- Metadata
+-- -------------------------------------------------------------------------------------------------
+
+-- | \(O(1)\) Returns the capacity of the sequence storage.
+--
+-- @since 1.2.1.0
+{-# INLINE capacity #-}
+capacity :: Seq s f a -> Int
+capacity = nSeq
+
+-- | \(O(1)\) Returns the length of a sequence or a subtree.
+--
+-- @since 1.2.1.0
+{-# INLINE lengthST #-}
+lengthST :: Seq s f a -> P.Index -> ST s Int
+lengthST Seq {..} i
+  | P.nullIndex i = pure 0
+  | otherwise = VGM.read sSeq (coerce i)
 
 -- -------------------------------------------------------------------------------------------------
 -- Merge/split

@@ -112,6 +112,10 @@ module AtCoder.Extra.Seq
     newNode,
     newSeq,
 
+    -- * Metadata
+    capacity,
+    length,
+
     -- * Merge/split
     merge,
     merge3,
@@ -173,7 +177,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
-import Prelude hiding (read, reverse, seq)
+import Prelude hiding (length, read, reverse, seq)
 
 -- | `Handle` for a sequence in `Seq`. It internally stores the root node and updates it
 -- following splaying operations, as `Seq` utilizes a splay tree structure.
@@ -244,6 +248,26 @@ free seq (Handle handle) = stToPrim $ do
   c0 <- VGM.unsafeRead handle 0
   Seq.freeSubtreeST seq c0
   VGM.write handle 0 P.undefIndex
+
+-- -------------------------------------------------------------------------------------------------
+-- Meta
+-- -------------------------------------------------------------------------------------------------
+
+-- | \(O(1)\) Returns the capacity of the sequence storage.
+--
+-- @since 1.2.1.0
+{-# INLINE capacity #-}
+capacity :: Seq s f a -> Int
+capacity = Seq.capacity
+
+-- | \(O(1)\) Returns the length of the sequence.
+--
+-- @since 1.2.1.0
+{-# INLINE length #-}
+length :: (PrimMonad m) => Seq (PrimState m) f a -> Handle (PrimState m) -> m Int
+length seq (Handle handle) = stToPrim $ do
+  i <- VGM.unsafeRead handle 0
+  Seq.lengthST seq i
 
 -- -------------------------------------------------------------------------------------------------
 -- Merge/split
