@@ -1182,20 +1182,22 @@ imaxRightProdM seq@Seq {..} root0 f = do
 -- @since 1.2.0.0
 {-# INLINE freezeST #-}
 freezeST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> ST s (VU.Vector a)
-freezeST seq@Seq {sSeq, lSeq, rSeq, vSeq} root0 = do
-  size <- VGM.read sSeq (coerce root0)
-  res <- VUM.unsafeNew size
-  let inner i root
-        | P.nullIndex root = pure i
-        | otherwise = do
-            -- visit from left to right
-            propNodeST seq root
-            i' <- inner i =<< VGM.read lSeq (coerce root)
-            vx <- VGM.read vSeq (coerce root)
-            VGM.write res i' vx
-            inner (i' + 1) =<< VGM.read rSeq (coerce root)
-  _ <- inner 0 root0
-  VU.unsafeFreeze res
+freezeST seq@Seq {sSeq, lSeq, rSeq, vSeq} root0
+  | P.nullIndex root0 = pure VU.empty
+  | otherwise = do
+    size <- VGM.read sSeq (coerce root0)
+    res <- VUM.unsafeNew size
+    let inner i root
+          | P.nullIndex root = pure i
+          | otherwise = do
+              -- visit from left to right
+              propNodeST seq root
+              i' <- inner i =<< VGM.read lSeq (coerce root)
+              vx <- VGM.read vSeq (coerce root)
+              VGM.write res i' vx
+              inner (i' + 1) =<< VGM.read rSeq (coerce root)
+    _ <- inner 0 root0
+    VU.unsafeFreeze res
 
 -- -------------------------------------------------------------------------------------------------
 -- Node methods
