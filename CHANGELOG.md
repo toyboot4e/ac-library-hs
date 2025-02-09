@@ -8,6 +8,7 @@
   - `Matrix.diag` now does not take length parameter
   - `Extra.Math.primitiveRoot` is renamed to `primitiveRoot32`
   - `Internal.Convolution` functions now use `ST` instead of `PrimMonad`
+  - `SegAct` implementation for `Extra.Monoid.RangeAdd` over `Max` and `Min` were fixed
 
 ## 1.1.1.0 -- Jan 2025
 
