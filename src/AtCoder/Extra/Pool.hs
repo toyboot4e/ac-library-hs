@@ -40,6 +40,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Primitive qualified as VP
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
 -- | Fixed-sized array for \(O(1)\) allocation and \(O(1)\) clearing after \(O(n)\) construction.
@@ -81,9 +82,9 @@ nullIndex = (== undefIndex)
 -- | \(O(n)\) Creates a pool with the specified @capacity@.
 {-# INLINE new #-}
 new :: (VU.Unbox a, PrimMonad m) => Int -> m (Pool (PrimState m) a)
-new capacity = do
-  dataPool <- VUM.unsafeNew capacity
-  freePool <- B.new capacity
+new cap = do
+  dataPool <- VUM.unsafeNew cap
+  freePool <- B.new cap
   nextPool <- VUM.replicate 1 (Index 0)
   pure Pool {..}
 
@@ -113,7 +114,7 @@ size Pool {..} = do
 -- ==== Constraints
 -- - The number of elements must not exceed the `capacity`.
 {-# INLINE alloc #-}
-alloc :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> a -> m Index
+alloc :: (HasCallStack, PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> a -> m Index
 alloc Pool {..} !x = do
   B.popBack freePool >>= \case
     Just i -> pure i

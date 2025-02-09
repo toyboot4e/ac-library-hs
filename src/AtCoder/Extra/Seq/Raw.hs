@@ -177,7 +177,7 @@ resetST Seq {poolSeq} = stToPrim $ P.clear poolSeq
 --
 -- @since 1.2.0.0
 {-# INLINEABLE newNodeST #-}
-newNodeST :: (Monoid f, VU.Unbox f, VU.Unbox a) => Seq s f a -> a -> ST s P.Index
+newNodeST :: (HasCallStack, Monoid f, VU.Unbox f, VU.Unbox a) => Seq s f a -> a -> ST s P.Index
 newNodeST Seq {..} x = do
   i <- P.alloc poolSeq ()
   VGM.write lSeq (coerce i) P.undefIndex
@@ -194,7 +194,7 @@ newNodeST Seq {..} x = do
 --
 -- @since 1.2.0.0
 {-# INLINEABLE newSeqST #-}
-newSeqST :: (Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> VU.Vector a -> ST s P.Index
+newSeqST :: (HasCallStack, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> VU.Vector a -> ST s P.Index
 newSeqST seq@Seq {..} !xs = do
   -- [l, r)
   let inner l r

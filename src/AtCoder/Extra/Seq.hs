@@ -229,14 +229,14 @@ reset seq = stToPrim $ Seq.resetST seq
 --
 -- @since 1.2.0.0
 {-# INLINE newNode #-}
-newNode :: (PrimMonad m, Monoid f, VU.Unbox f, VU.Unbox a) => Seq (PrimState m) f a -> a -> m (Handle (PrimState m))
+newNode :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, VU.Unbox a) => Seq (PrimState m) f a -> a -> m (Handle (PrimState m))
 newNode seq x = stToPrim $ newHandle =<< Seq.newNodeST seq x
 
 -- | \(O(n)\) Allocates a new sequence.
 --
 -- @since 1.2.0.0
 {-# INLINE newSeq #-}
-newSeq :: (PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq (PrimState m) f a -> VU.Vector a -> m (Handle (PrimState m))
+newSeq :: (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq (PrimState m) f a -> VU.Vector a -> m (Handle (PrimState m))
 newSeq seq !xs = stToPrim $ newHandle =<< Seq.newSeqST seq xs
 
 -- | \(O(n)\) Frees a sequence and invalidates the handle.
