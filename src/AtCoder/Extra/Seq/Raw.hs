@@ -918,9 +918,6 @@ ilowerBoundProdM seq root f = do
 -- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
 --
--- ==== Constraints
--- - The node must be a root.
---
 -- @since 1.2.0.0
 {-# INLINE isplitMaxRightST #-}
 isplitMaxRightST ::
@@ -937,9 +934,6 @@ isplitMaxRightST seq root f = stToPrim $ isplitMaxRightM seq root (\i x -> pure 
 
 -- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
---
--- ==== Constraints
--- - The node must be a root.
 --
 -- @since 1.2.0.0
 {-# INLINEABLE isplitMaxRightM #-}
@@ -980,9 +974,6 @@ isplitMaxRightM seq@Seq {..} root f
 -- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
 --
--- ==== Constraints
--- - The node must be a root.
---
 -- @since 1.2.0.0
 {-# INLINE isplitMaxRightProdST #-}
 isplitMaxRightProdST ::
@@ -999,9 +990,6 @@ isplitMaxRightProdST seq root f = stToPrim $ isplitMaxRightProdM seq root (\i x 
 
 -- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
---
--- ==== Constraints
--- - The node must be a root.
 --
 -- @since 1.2.0.0
 {-# INLINEABLE isplitMaxRightProdM #-}
