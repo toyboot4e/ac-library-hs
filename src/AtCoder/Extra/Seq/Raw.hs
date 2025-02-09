@@ -267,12 +267,8 @@ mergeST seq@Seq {pSeq, lSeq} lRoot rRoot
   | P.nullIndex lRoot = pure rRoot
   | P.nullIndex rRoot = pure lRoot
   | otherwise = do
-      do
-        -- TODO: delete
-        lp <- VGM.read pSeq (coerce lRoot)
-        rp <- VGM.read pSeq (coerce rRoot)
-        let !_ = ACIA.runtimeAssert (lp == rp) "AtCoder.Extra.Seq.Raw.mergeST: given non-root node"
-        pure ()
+      assertRootST seq lRoot
+      assertRootST seq rRoot
       rRoot' <- splayKthST seq rRoot 0
       VGM.write lSeq (coerce rRoot') lRoot
       VGM.write pSeq (coerce lRoot) rRoot'
@@ -745,6 +741,7 @@ rotateST Seq {..} !i = do
 {-# INLINEABLE splayST #-}
 splayST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> Bool -> ST s ()
 splayST seq@Seq {..} i doneParentProp = do
+  -- we have no chance to call `splayST` with `doneParentProp == False` though
   if doneParentProp
     then propNodeST seq i
     else propNodeFromRootST seq i
@@ -829,7 +826,6 @@ ilowerBoundST ::
   ST s (Int, P.Index)
 ilowerBoundST seq root f = stToPrim $ do
   (!r, !_, !root') <- imaxRightST seq root f
-  splayST seq root' True
   pure (r, root')
 
 -- | Amortized \(O(\log n)\).
@@ -851,7 +847,6 @@ ilowerBoundM ::
   m (Int, P.Index)
 ilowerBoundM seq root f = do
   (!r, !_, !root') <- imaxRightM seq root f
-  stToPrim $ splayST seq root' True
   pure (r, root')
 
 -- | Amortized \(O(\log n)\).
@@ -1208,7 +1203,7 @@ updateNodeST Seq {..} i = do
   VGM.write sSeq (coerce i) size''
   VGM.write prodSeq (coerce i) prod''
 
--- | \(O(1)\) Writes to the monoid.
+-- | \(O(1)\) Writes to the monoid value of a node.
 {-# INLINE writeNodeST #-}
 writeNodeST :: (Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> a -> ST s ()
 writeNodeST seq@Seq {..} root v = do
@@ -1216,7 +1211,7 @@ writeNodeST seq@Seq {..} root v = do
   VGM.write vSeq (coerce root) v
   updateNodeST seq root
 
--- | \(O(1)\) Modifies the monoid.
+-- | \(O(1)\) Modifies the monoid value of a node.
 {-# INLINE modifyNodeST #-}
 modifyNodeST :: (HasCallStack, Monoid a, VU.Unbox a) => Seq s f a -> (a -> a) -> P.Index -> ST s ()
 modifyNodeST seq@Seq {..} f root = do
@@ -1224,7 +1219,7 @@ modifyNodeST seq@Seq {..} f root = do
   VGM.modify vSeq f $ coerce root
   updateNodeST seq root
 
--- | \(O(1)\) Modifies the monoid.
+-- | \(O(1)\) Exchanges the monoid value of a node.
 {-# INLINE exchangeNodeST #-}
 exchangeNodeST :: (HasCallStack, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> a -> ST s a
 exchangeNodeST seq@Seq {..} root v = do
@@ -1254,6 +1249,7 @@ propNodeST :: (HasCallStack, SegAct f a, Eq f, VU.Unbox f, Monoid a, VU.Unbox a)
 propNodeST seq@Seq {..} i = do
   -- action
   act <- VGM.exchange lazySeq (coerce i) mempty
+  -- this is where `Eq f` is required:
   when (act /= mempty) $ do
     l <- VGM.read lSeq $ coerce i
     unless (P.nullIndex l) $ do
