@@ -61,6 +61,7 @@ module AtCoder.Extra.IntervalMap
 
     -- * Metadata
     capacity,
+    size,
 
     -- * Lookups
     contains,
@@ -91,7 +92,6 @@ where
 import AtCoder.Extra.IntMap qualified as IM
 import Control.Monad (foldM_)
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
-import Data.Vector.Generic qualified as G
 import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
 import Prelude hiding (lookup, read)
@@ -106,7 +106,7 @@ newtype IntervalMap s a = IntervalMap
     unITM :: IM.IntMap s (Int, a)
   }
 
--- | \(O(n)\) Creates an empty `IntervalMap`.
+-- | \(O(n)\) Creates an empty `IntervalMap` with capacity \(n\).
 --
 -- @since 1.1.0.0
 {-# INLINE new #-}
@@ -142,14 +142,14 @@ buildM ::
   -- | The map
   m (IntervalMap (PrimState m) a)
 buildM xs onAdd = do
-  dim <- IM.new (G.length xs)
-  foldM_ (step dim) (0 :: Int) $ G.group xs
+  dim <- IM.new (VU.length xs)
+  foldM_ (step dim) (0 :: Int) $ VU.group xs
   pure $ IntervalMap dim
   where
     step dim !l !xs' = do
-      let !l' = l + G.length xs'
-      IM.insert dim l (l', G.head xs')
-      onAdd l l' (G.head xs')
+      let !l' = l + VU.length xs'
+      IM.insert dim l (l', VU.head xs')
+      onAdd l l' (VU.head xs')
       pure l'
 
 -- | \(O(1)\) Returns the capacity \(n\), where the interval \([0, n)\) is managed by the map.
@@ -158,6 +158,13 @@ buildM xs onAdd = do
 {-# INLINE capacity #-}
 capacity :: IntervalMap s a -> Int
 capacity = IM.capacity . unITM
+
+-- | \(O(1)\) Returns the number of intervals in the map.
+--
+-- @since 1.2.1.0
+{-# INLINE size #-}
+size :: (PrimMonad m) => IntervalMap (PrimState m) a -> m Int
+size = IM.size . unITM
 
 -- | \(O(\log n)\) Returns whether a point \(x\) is contained within any of the intervals.
 --
