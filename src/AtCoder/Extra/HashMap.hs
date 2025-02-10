@@ -8,8 +8,7 @@
 --
 -- ==== Capacity limitation
 -- Access to each key creates a new entry. Note that entries cannot be invalidated due to the
--- internal implementation (called /open addressing/). If the hash map is full,
--- __access to a new key causes an infinite loop__ .
+-- internal implementation (called /open addressing/).
 --
 -- ==== __Example__
 -- Create a `HashMap` with `capacity` \(10\):
@@ -124,6 +123,7 @@ new :: (PrimMonad m, VU.Unbox a) => Int -> m (HashMap (PrimState m) a)
 new n = do
   let !k0 = 1
   let !k = until (>= 2 * n) (* 2) k0
+  -- we need extra space
   let !maxCapHM = k `div` 2
   restCapHM <- VUM.replicate 1 maxCapHM
   let !maskHM = k - 1
@@ -176,8 +176,6 @@ hash hm x = fromIntegral $ (x3 `xor` (x3 .>>. 31)) .&. fromIntegral (maskHM hm)
 --
 -- ==== Constraint
 -- - The rest capacity must be non-zero. Otherwise it loops forever.
---
--- @since 1.1.0.0
 {-# INLINE indexST #-}
 indexST :: (HasCallStack) => HashMap s a -> Int -> ST s Int
 indexST hm@HashMap {..} k = do

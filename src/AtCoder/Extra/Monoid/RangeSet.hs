@@ -77,7 +77,8 @@ act :: RangeSet a -> a -> a
 act (RangeSet (Bit True, !f)) _ = f
 act (RangeSet (Bit False, !_)) x = x
 
--- | Acts on @a@ with length in terms of `SegAct`.
+-- | \(O(1)\) Acts on @a@ with length in terms of `SegAct`. Be warned that it doesn't work well with
+-- idempotent monoids such as `Max` or `Min`.
 --
 -- @since 1.0.0.0
 {-# INLINE actWithLength #-}

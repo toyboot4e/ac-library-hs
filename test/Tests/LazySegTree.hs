@@ -93,6 +93,7 @@ unit_usage = testCase "usage" $ do
   (@?= Max 5) =<< LST.allProd seg
   LST.applyAt seg 2 $ Sum (-10)
   (@?= Max (-5)) =<< LST.prod seg 2 3
+  (@?= Max 5) =<< LST.allProd seg
   (@?= Max 0) =<< LST.prod seg 2 4
 
 unit_prodMaybeBounds :: TestTree

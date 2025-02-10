@@ -75,8 +75,8 @@ unRangeAdd (RangeAdd a) = a
 act :: (Semigroup a) => RangeAdd a -> a -> a
 act (RangeAdd dx) x = dx <> x
 
--- | \(O(1)\) Acts on @a@ with length in terms of `SegAct`. It doesn't work well with idempotent
--- monoids such as `Max` or `Min`.
+-- | \(O(1)\) Acts on @a@ with length in terms of `SegAct`. Be warned that it doesn't work well with
+-- idempotent monoids such as `Max` or `Min`.
 --
 -- @since 1.0.0.0
 {-# INLINE actWithLength #-}

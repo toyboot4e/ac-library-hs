@@ -79,7 +79,7 @@
 --
 -- @since 1.0.0.0
 module AtCoder.LazySegTree
-  ( -- Lazy segment tree
+  ( -- * Lazy segment tree
     SegAct (..),
     LazySegTree (nLst, sizeLst, logLst),
 
@@ -97,7 +97,7 @@ module AtCoder.LazySegTree
     -- * Products
     prod,
     prodMaybe,
-    allProd,
+    allProd, -- FIXME: rename to prodAll
 
     -- * Applications
     applyAt,
@@ -557,6 +557,7 @@ applyAtST self@LazySegTree {..} p f = do
   -- propagate
   for_ [logLst, logLst - 1 .. 1] $ \i -> do
     pushST self $ p' .>>. i
+  -- FIXME: length should be always `1`
   let !len = bit $! logLst - (63 - countLeadingZeros p')
   VGM.modify dLst (segActWithLength len f) p'
   -- evaluate

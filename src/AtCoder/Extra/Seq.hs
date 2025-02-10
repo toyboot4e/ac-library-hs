@@ -3,6 +3,10 @@
 
 -- | Dynamic sequence of monoid values with monoid actions on them through the `SegAct` instance.
 --
+-- ==== Performance
+-- This module is __slow__ as an ordinary dynamic sequence. Consider using another module if you
+-- don't need monoid products.
+--
 -- ==== __Example__
 --
 -- Create a `Seq` storage of length \(10\):
