@@ -319,11 +319,11 @@ rank (Matrix h w vec) = runST $ do
                 VGM.iforM_ (VGM.unsafeDrop j rowRk) $ \k_ x -> do
                   VGM.unsafeWrite rowRk (k_ + j) $! c * x
                 for_ [rk + 1 .. h - 1] $ \i -> do
-                  c <- read2d view i j
+                  c_ <- read2d view i j
                   rowI <- VGM.read view i
                   -- for_ [j .. w - 1] $ \k -> do
                   VGM.iforM_ (VGM.unsafeDrop j rowRk) $ \k_ ark -> do
-                    VGM.unsafeModify rowI (subtract (ark * c)) (k_ + j)
+                    VGM.unsafeModify rowI (subtract (ark * c_)) (k_ + j)
                 inner (rk + 1) (j + 1)
   inner 0 0
 
@@ -366,8 +366,8 @@ invRaw (Matrix h w vec) = runST $ do
             viewB' <- V.mapM VU.unsafeFreeze =<< V.unsafeFreeze viewB
             pure $ Just (det, viewB')
         | otherwise = do
-            let swapLoop k !det
-                  | k >= n = pure det
+            let swapLoop k !det_
+                  | k >= n = pure det_
                   | otherwise = do
                       aki <- read2d viewA k i
                       if aki /= 0
@@ -376,10 +376,10 @@ invRaw (Matrix h w vec) = runST $ do
                             then do
                               VGM.unsafeSwap viewA i k
                               VGM.unsafeSwap viewB i k
-                              pure (-det)
-                            else pure det
+                              pure (-det_)
+                            else pure det_
                         else do
-                          swapLoop (k + 1) det
+                          swapLoop (k + 1) det_
             det' <- swapLoop i det
             aii <- read2d viewA i i
             if aii == 0
@@ -395,13 +395,13 @@ invRaw (Matrix h w vec) = runST $ do
                   VGM.unsafeWrite rowBI j $! x * c
                 for_ [0 .. n - 1] $ \k -> do
                   when (i /= k) $ do
-                    c <- read2d viewA k i
+                    c_ <- read2d viewA k i
                     rowAK <- VGM.unsafeRead viewA k
                     rowBK <- VGM.unsafeRead viewB k
                     VGM.iforM_ (VGM.unsafeDrop i rowAI) $ \j_ aij -> do
-                      VGM.unsafeModify rowAK (subtract (aij * c)) (j_ + i)
+                      VGM.unsafeModify rowAK (subtract (aij * c_)) (j_ + i)
                     VGM.iforM_ rowBI $ \j bij -> do
-                      VGM.unsafeModify rowBK (subtract (bij * c)) j
+                      VGM.unsafeModify rowBK (subtract (bij * c_)) j
                 inner (i + 1) det''
 
   inner 0 (1 :: a)
@@ -421,25 +421,25 @@ detMod m (Matrix h w vecA) = runST $ do
   let inner i (!det :: Int)
         | i >= n = pure det
         | otherwise = do
-            let swapLoop j !det
-                  | j >= n = pure det
+            let swapLoop j !det_
+                  | j >= n = pure det_
                   | otherwise = do
                       aji <- read2d view j i
                       if aji == 0
-                        then swapLoop (j + 1) det
+                        then swapLoop (j + 1) det_
                         else do
                           if i /= j
                             then do
                               VGM.unsafeSwap view i j
-                              pure $! m - det
-                            else pure det
+                              pure $! m - det_
+                            else pure det_
             det' <- swapLoop i det
             det'' <- VU.foldM'
               ( \ !acc j -> do
-                  let visitDiag !det = do
+                  let visitDiag !det_ = do
                         aii <- read2d view i i
                         if aii == 0
-                          then pure det
+                          then pure det_
                           else do
                             aji <- read2d view j i
                             let !c = m - aji `div` aii
@@ -453,7 +453,7 @@ detMod m (Matrix h w vecA) = runST $ do
                               ()
                               (VGM.unsafeDrop i rowI)
                             VGM.unsafeSwap view i j
-                            visitDiag (m - det)
+                            visitDiag (m - det_)
                   acc' <- visitDiag acc
                   VGM.unsafeSwap view i j
                   pure $! m - acc'
