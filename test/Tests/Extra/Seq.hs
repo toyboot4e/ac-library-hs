@@ -14,6 +14,7 @@ import Data.Foldable (toList)
 import Data.List qualified as L
 import Data.Semigroup (Sum (..))
 import Data.Sequence qualified as S
+import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -326,10 +327,20 @@ prop_bisectIndex = do
     i4 <- VGM.read lastRight2 0
     pure . QC.conjoin $ map (QC.=== k) [i1, i2, i3, i4]
 
+prop_newSeq :: [Int] -> QC.Property
+prop_newSeq xs_ = do
+  let xs = VU.fromList xs_
+      ys = runST $ do
+        s <- Seq.new $ VU.length xs
+        root <- Seq.newSeq @_ @() @(Sum Int) s $ VU.map Sum xs
+        VU.map getSum <$> Seq.freeze s root
+   in xs QC.=== ys
+
 tests :: [TestTree]
 tests =
   [ unit_empty,
     unsafePerformIO spec_boundaries,
     QC.testProperty "random test" prop_randomTest,
-    QC.testProperty "bisect index" prop_bisectIndex
+    QC.testProperty "bisect index" prop_bisectIndex,
+    QC.testProperty "newSeq preserves the ordering" prop_newSeq
   ]
