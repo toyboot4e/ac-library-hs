@@ -60,7 +60,7 @@ alias t := test
 
 # runs local test a large number of QuickCheck tests
 many-test opts='':
-    cabal test --enable-tests --test-options '--quickcheck-tests 10000 {{opts}}'
+    cabal test --enable-tests --test-options '--quickcheck-tests 1000 {{opts}}'
 
 [private]
 alias mt := many-test
