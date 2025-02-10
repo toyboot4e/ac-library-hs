@@ -392,8 +392,8 @@ splitLrST seq@Seq {..} root = do
   s <- do
     rootL <- VGM.read lSeq (coerce root)
     if P.nullIndex rootL
-      then VGM.read sSeq (coerce rootL)
-      else pure 0
+      then pure 0
+      else VGM.read sSeq (coerce rootL)
   split3ST seq root s (s + 1)
 
 -- | Amortized \(O(\log n)\). Captures the root of a subtree of \([l, r)\). Splay the new root after
