@@ -833,9 +833,6 @@ splayKthST seq@Seq {..} root0 k0 = do
 
 -- | Amortized \(O(\log n)\).
 --
--- ==== Constraints
--- - The node must be a root.
---
 -- @since 1.2.0.0
 {-# INLINE ilowerBoundST #-}
 ilowerBoundST ::
@@ -849,13 +846,13 @@ ilowerBoundST ::
   -- | (r, root)
   ST s (Int, P.Index)
 ilowerBoundST seq root f = stToPrim $ do
-  (!r, !_, !root') <- imaxRightST seq root f
-  pure (r, root')
+  if P.nullIndex root
+    then pure (0, P.undefIndex)
+    else do
+      (!r, !_, !root') <- imaxRightST seq root f
+      pure (r, root')
 
 -- | Amortized \(O(\log n)\).
---
--- ==== Constraints
--- - The node must be a root.
 --
 -- @since 1.2.0.0
 {-# INLINE ilowerBoundM #-}
@@ -870,8 +867,11 @@ ilowerBoundM ::
   -- | (r, root)
   m (Int, P.Index)
 ilowerBoundM seq root f = do
-  (!r, !_, !root') <- imaxRightM seq root f
-  pure (r, root')
+  if P.nullIndex root
+    then pure (0, P.undefIndex)
+    else do
+      (!r, !_, !root') <- imaxRightM seq root f
+      pure (r, root')
 
 -- | Amortized \(O(\log n)\).
 --
@@ -891,8 +891,11 @@ ilowerBoundProdST ::
   -- | (r, root)
   ST s (Int, P.Index)
 ilowerBoundProdST seq root f = do
-  (!r, !_, !root') <- imaxRightProdST seq root f
-  pure (r, root')
+  if P.nullIndex root
+    then pure (0, P.undefIndex)
+    else do
+      (!r, !_, !root') <- imaxRightProdST seq root f
+      pure (r, root')
 
 -- | Amortized \(O(\log n)\).
 --
@@ -912,8 +915,11 @@ ilowerBoundProdM ::
   -- | (r, root)
   m (Int, P.Index)
 ilowerBoundProdM seq root f = do
-  (!r, !_, !root') <- imaxRightProdM seq root f
-  pure (r, root')
+  if P.nullIndex root
+    then pure (0, P.undefIndex)
+    else do
+      (!r, !_, !root') <- imaxRightProdM seq root f
+      pure (r, root')
 
 -- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).

@@ -336,11 +336,22 @@ prop_newSeq xs_ = do
         VU.map getSum <$> Seq.freeze s root
    in xs QC.=== ys
 
+prop_lowerBound :: Int -> [Int] -> QC.Property
+prop_lowerBound xRef xs_ = do
+  let xs = VU.modify VAI.sort $ VU.fromList xs_
+      expected = VU.length $ VU.takeWhile (<= xRef) xs
+      res = runST $ do
+        s <- Seq.new $ VU.length xs
+        root <- Seq.newSeq @_ @() @(Sum Int) s $ VU.map Sum xs
+        Seq.ilowerBound s root (\_ x -> x <= Sum xRef)
+   in expected QC.=== res
+
 tests :: [TestTree]
 tests =
   [ unit_empty,
     unsafePerformIO spec_boundaries,
     QC.testProperty "random test" prop_randomTest,
     QC.testProperty "bisect index" prop_bisectIndex,
-    QC.testProperty "newSeq preserves the ordering" prop_newSeq
+    QC.testProperty "newSeq preserves the ordering" prop_newSeq,
+    QC.testProperty "lowerBound" prop_lowerBound
   ]

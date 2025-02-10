@@ -607,9 +607,6 @@ detach seq (Handle hRoot) i = stToPrim $ do
 
 -- | Amortized \(O(\log n)\).
 --
--- ==== Constraints
--- - The sequence must be non-empty.
---
 -- @since 1.2.0.0
 {-# INLINE ilowerBound #-}
 ilowerBound ::
@@ -629,9 +626,6 @@ ilowerBound seq (Handle root0) f = stToPrim $ do
   pure r
 
 -- | Amortized \(O(\log n)\).
---
--- ==== Constraints
--- - The sequence must be non-empty.
 --
 -- @since 1.2.0.0
 {-# INLINE ilowerBoundM #-}
@@ -653,9 +647,6 @@ ilowerBoundM seq (Handle root0) f = do
 
 -- | Amortized \(O(\log n)\).
 --
--- ==== Constraints
--- - The sequence must be non-empty.
---
 -- @since 1.2.0.0
 {-# INLINE ilowerBoundProd #-}
 ilowerBoundProd ::
@@ -675,9 +666,6 @@ ilowerBoundProd seq (Handle root0) f = stToPrim $ do
   pure r
 
 -- | Amortized \(O(\log n)\).
---
--- ==== Constraints
--- - The sequence must be non-empty.
 --
 -- @since 1.2.0.0
 {-# INLINE ilowerBoundProdM #-}
@@ -699,9 +687,6 @@ ilowerBoundProdM seq (Handle root0) f = do
 
 -- | Amortized \(O(\log n)\). Splits a sequence into two with the user predicate and returns the
 -- right sequence handle.
---
--- ==== Constraints
--- - The sequence must be non-empty.
 --
 -- @since 1.2.0.0
 {-# INLINE isplitMaxRight #-}
@@ -725,9 +710,6 @@ isplitMaxRight seq (Handle root0) f = stToPrim $ do
 -- | Amortized \(O(\log n)\). Splits a sequence into two with the user predicate and returns the
 -- right sequence handle.
 --
--- ==== Constraints
--- - The sequence must be non-empty.
---
 -- @since 1.2.0.0
 {-# INLINEABLE isplitMaxRightM #-}
 isplitMaxRightM ::
@@ -750,9 +732,6 @@ isplitMaxRightM seq (Handle root0) f = do
 -- | Amortized \(O(\log n)\). Splits a sequence into two with the user predicate and returns the
 -- right sequence handle.
 --
--- ==== Constraints
--- - The sequence must be non-empty.
---
 -- @since 1.2.0.0
 {-# INLINE isplitMaxRightProd #-}
 isplitMaxRightProd ::
@@ -774,9 +753,6 @@ isplitMaxRightProd seq (Handle root0) f = stToPrim $ do
 
 -- | Amortized \(O(\log n)\). Splits a sequence into two with the user predicate and returns the
 -- right sequence handle.
---
--- ==== Constraints
--- - The sequence must be non-empty.
 --
 -- @since 1.2.0.0
 {-# INLINEABLE isplitMaxRightProdM #-}
