@@ -274,9 +274,9 @@ assertRootOrNullST :: (HasCallStack) => Seq s f a -> P.Index -> ST s ()
 assertRootOrNullST Seq {pSeq} i
   | P.nullIndex i = pure ()
   | otherwise = do
-    p <- VGM.read pSeq (coerce i)
-    let !_ = ACIA.runtimeAssert (P.nullIndex p) $ "AtCoder.Extra.Seq.Raw.assertRootOrNullST: not a root (node `" ++ show i ++ "`, parent `" ++ show p ++ "`)"
-    pure ()
+      p <- VGM.read pSeq (coerce i)
+      let !_ = ACIA.runtimeAssert (P.nullIndex p) $ "AtCoder.Extra.Seq.Raw.assertRootOrNullST: not a root (node `" ++ show i ++ "`, parent `" ++ show p ++ "`)"
+      pure ()
 
 -- | Amortized \(O(\log n)\). Merges two sequences \(l, r\) into one in the given order, ignoring
 -- empty sequences.
@@ -465,13 +465,13 @@ readMaybeST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, 
 readMaybeST seq@Seq {..} root k
   | P.nullIndex root = pure Nothing
   | otherwise = do
-    assertRootST seq root
-    s <- VGM.read sSeq (coerce root)
-    if 0 <= k && k < s
-      then do
-        root' <- splayKthST seq root k
-        Just . (,root') <$> VGM.read vSeq (coerce root')
-      else pure Nothing
+      assertRootST seq root
+      s <- VGM.read sSeq (coerce root)
+      if 0 <= k && k < s
+        then do
+          root' <- splayKthST seq root k
+          Just . (,root') <$> VGM.read vSeq (coerce root')
+        else pure Nothing
 
 -- | Amortized \(O(\log n)\). Writes to the \(k\)-th node's monoid value.
 --
@@ -543,13 +543,13 @@ prodMaybeST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, 
 prodMaybeST seq@Seq {sSeq} root l r
   | P.nullIndex root = pure Nothing
   | otherwise = do
-    s <- VGM.read sSeq (coerce root)
-    if not (ACIA.testInterval l r s)
-      then pure Nothing
-      else
-        if l == r
-          then pure $ Just (mempty, root)
-          else Just <$> unsafeProdST seq root l r
+      s <- VGM.read sSeq (coerce root)
+      if not (ACIA.testInterval l r s)
+        then pure Nothing
+        else
+          if l == r
+            then pure $ Just (mempty, root)
+            else Just <$> unsafeProdST seq root l r
 
 -- | Amortized \(O(\log n)\).
 --
@@ -609,9 +609,9 @@ applyToRootST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a
 applyToRootST seq@Seq {..} root act
   | P.nullIndex root = pure ()
   | otherwise = do
-    rootP <- VGM.read pSeq (coerce root)
-    when (P.nullIndex rootP) $ do
-      applyNodeST seq root act
+      rootP <- VGM.read pSeq (coerce root)
+      when (P.nullIndex rootP) $ do
+        applyNodeST seq root act
 
 -- | Amortized \(O(\log n)\). Reverses the sequence in \([l, r)\).
 --
@@ -625,17 +625,17 @@ reverseST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU
 reverseST seq@Seq {sSeq} root0 l r
   | P.nullIndex root0 = pure P.undefIndex
   | otherwise = do
-    s <- VGM.read sSeq (coerce root0)
-    if not (ACIA.testInterval l r s)
-      then pure root0
-      else
-        if l == r
-          then pure root0
-          else do
-            root' <- sliceST seq root0 l r
-            reverseNodeST seq root'
-            splayST seq root' True
-            pure root'
+      s <- VGM.read sSeq (coerce root0)
+      if not (ACIA.testInterval l r s)
+        then pure root0
+        else
+          if l == r
+            then pure root0
+            else do
+              root' <- sliceST seq root0 l r
+              reverseNodeST seq root'
+              splayST seq root' True
+              pure root'
 
 -- | Amortized \(O(\log n)\). Inserts a new node at \(k\) with initial monoid value \(v\). This
 -- functions for an empty index.
@@ -1173,19 +1173,19 @@ freezeST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.
 freezeST seq@Seq {sSeq, lSeq, rSeq, vSeq} root0
   | P.nullIndex root0 = pure VU.empty
   | otherwise = do
-    size <- VGM.read sSeq (coerce root0)
-    res <- VUM.unsafeNew size
-    let inner i root
-          | P.nullIndex root = pure i
-          | otherwise = do
-              -- visit from left to right
-              propNodeST seq root
-              i' <- inner i =<< VGM.read lSeq (coerce root)
-              vx <- VGM.read vSeq (coerce root)
-              VGM.write res i' vx
-              inner (i' + 1) =<< VGM.read rSeq (coerce root)
-    _ <- inner 0 root0
-    VU.unsafeFreeze res
+      size <- VGM.read sSeq (coerce root0)
+      res <- VUM.unsafeNew size
+      let inner i root
+            | P.nullIndex root = pure i
+            | otherwise = do
+                -- visit from left to right
+                propNodeST seq root
+                i' <- inner i =<< VGM.read lSeq (coerce root)
+                vx <- VGM.read vSeq (coerce root)
+                VGM.write res i' vx
+                inner (i' + 1) =<< VGM.read rSeq (coerce root)
+      _ <- inner 0 root0
+      VU.unsafeFreeze res
 
 -- -------------------------------------------------------------------------------------------------
 -- Node methods
