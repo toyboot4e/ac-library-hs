@@ -99,7 +99,10 @@
 module AtCoder.Extra.Seq
   ( -- * Seq
     Seq.Seq (..),
+
+    -- * Handle (re-exports)
     Handle (..),
+    -- TODO: hide
     newHandle,
     nullHandle,
     invalidateHandle,
@@ -171,24 +174,15 @@ module AtCoder.Extra.Seq
 where
 
 import AtCoder.Extra.Pool qualified as P
+import AtCoder.Extra.Pool (Handle (..), newHandle, nullHandle, invalidateHandle)
 import AtCoder.Extra.Seq.Raw (Seq (..))
 import AtCoder.Extra.Seq.Raw qualified as Seq
 import AtCoder.LazySegTree (SegAct (..))
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
-import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (length, read, reverse, seq)
-
--- | `Handle` for a sequence in `Seq`. It internally stores the root node and updates it
--- following splaying operations, as `Seq` utilizes a splay tree structure.
---
--- @since 1.2.0.0
-newtype Handle s = Handle
-  { -- | @since 1.2.0.0
-    unHandle :: VUM.MVector s P.Index
-  }
 
 -- | \(O(n)\) Creates a new `Seq` of length \(n\).
 --
@@ -196,29 +190,6 @@ newtype Handle s = Handle
 {-# INLINE new #-}
 new :: (PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Int -> m (Seq (PrimState m) f a)
 new n = stToPrim $ Seq.newST n
-
--- | \(O(1)\) Creates a new sequence `Handle` from a root node index.
---
--- @since 1.2.0.0
-{-# INLINE newHandle #-}
-newHandle :: (PrimMonad m) => P.Index -> m (Handle (PrimState m))
-newHandle x = stToPrim $ Handle <$> VUM.replicate 1 x
-
--- | \(O(1)\) Returns whether the sequence is empty.
---
--- @since 1.2.0.0
-{-# INLINE nullHandle #-}
-nullHandle :: (PrimMonad m) => Handle (PrimState m) -> m Bool
-nullHandle (Handle h) = stToPrim $ do
-  P.nullIndex <$> VGM.unsafeRead h 0
-
--- | \(O(1)\) Invalidates a sequence handle. Note that it does not change or `free` the sequence.
---
--- @since 1.2.0.0
-{-# INLINE invalidateHandle #-}
-invalidateHandle :: (PrimMonad m) => Handle (PrimState m) -> m ()
-invalidateHandle (Handle h) = stToPrim $ do
-  VGM.unsafeWrite h 0 P.undefIndex
 
 -- | \(O(1)\) Clears the sequence storage. All the handles must not be used again.
 --

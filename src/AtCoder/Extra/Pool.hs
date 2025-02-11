@@ -29,6 +29,12 @@ module AtCoder.Extra.Pool
     write,
     modify,
     exchange,
+
+    -- * Handle
+    Handle (..),
+    newHandle,
+    nullHandle,
+    invalidateHandle,
   )
 where
 
@@ -172,3 +178,32 @@ modify Pool {dataPool} !f !i = do
 exchange :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> Index -> a -> m a
 exchange Pool {dataPool} !i !x = do
   VGM.exchange dataPool (coerce i) x
+
+-- | Mutable `Handle` of an `Index`.
+--
+-- @since 1.2.0.0
+newtype Handle s = Handle
+  { -- | @since 1.2.0.0
+    unHandle :: VUM.MVector s Index
+  }
+
+-- | \(O(1)\) Creates a new sequence `Handle` from a root node index.
+--
+-- @since 1.2.0.0
+{-# INLINE newHandle #-}
+newHandle :: (PrimMonad m) => Index -> m (Handle (PrimState m))
+newHandle x = Handle <$> VUM.replicate 1 x
+
+-- | \(O(1)\) Returns whether the sequence is empty.
+--
+-- @since 1.2.0.0
+{-# INLINE nullHandle #-}
+nullHandle :: (PrimMonad m) => Handle (PrimState m) -> m Bool
+nullHandle (Handle h) = nullIndex <$> VGM.unsafeRead h 0
+
+-- | \(O(1)\) Invalidates a sequence handle. Note that it does not change or `free` the sequence.
+--
+-- @since 1.2.0.0
+{-# INLINE invalidateHandle #-}
+invalidateHandle :: (PrimMonad m) => Handle (PrimState m) -> m ()
+invalidateHandle (Handle h) = VGM.unsafeWrite h 0 undefIndex
