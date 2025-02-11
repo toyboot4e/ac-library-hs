@@ -120,9 +120,13 @@ alloc Pool {..} !x = do
     Just i -> pure i
     Nothing -> do
       Index i <- VGM.unsafeRead nextPool 0
-      VGM.unsafeWrite nextPool 0 $ coerce (i + 1)
-      VGM.write dataPool i x
-      pure $ coerce i
+      if i < VGM.length dataPool
+        then do
+          VGM.unsafeWrite nextPool 0 $ coerce (i + 1)
+          VGM.write dataPool i x
+          pure $ coerce i
+        else do
+          error "AtCoder.Extra.Pool.alloc: capacity out of bounds"
 
 -- | \(O(1)\) Frees an element. Be sure to not free a deleted element.
 --
