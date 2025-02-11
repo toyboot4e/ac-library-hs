@@ -10,6 +10,11 @@
 -- *** Exception: AtCoder.Internal.Assert.doctest: given invalid index `-1` over length `3`
 -- ...
 --
+-- >>> let !_ = checkIndexBounded "AtCoder.Internal.Assert.doctest" 2 1 3
+-- >>> let !_ = checkIndexBounded "AtCoder.Internal.Assert.doctest" (-1) 1 3
+-- *** Exception: AtCoder.Internal.Assert.doctest: given invalid index `-1` over bounds `[1, 3)`
+-- ...
+--
 -- >>> let !_ = checkVertex "AtCoder.Internal.Assert.doctest" 0 3
 -- >>> let !_ = checkVertex "AtCoder.Internal.Assert.doctest" (-1) 3
 -- *** Exception: AtCoder.Internal.Assert.doctest: given invalid vertex `-1` over the number of vertices `3`
@@ -30,6 +35,11 @@
 -- *** Exception: AtCoder.Internal.Assert.doctest: given invalid interval `[0, 4)` over length `3`
 -- ...
 --
+-- >>> let !_ = checkIntervalBounded "AtCoder.Internal.Assert.doctest"  2 4 0 5
+-- >>> let !_ = checkIntervalBounded "AtCoder.Internal.Assert.doctest" (-1) 0 0 5
+-- *** Exception: AtCoder.Internal.Assert.doctest: given invalid interval `[-1, 0)` over bounds `[0, 5)`
+-- ...
+--
 -- @since 1.0.0.0
 module AtCoder.Internal.Assert
   ( -- * Runtime assertion
@@ -38,10 +48,13 @@ module AtCoder.Internal.Assert
     -- * Tests
     testIndex,
     testInterval,
+    testIntervalBounded,
 
     -- * Index assertions
     checkIndex,
     errorIndex,
+    checkIndexBounded,
+    errorIndexBounded,
     checkVertex,
     errorVertex,
     checkEdge,
@@ -52,6 +65,8 @@ module AtCoder.Internal.Assert
     -- * Interval assertion
     checkInterval,
     errorInterval,
+    checkIntervalBounded,
+    errorIntervalBounded,
   )
 where
 
@@ -80,6 +95,13 @@ testIndex i n = 0 <= i && i < n
 testInterval :: Int -> Int -> Int -> Bool
 testInterval l r n = 0 <= l && l <= r && r <= n
 
+-- | \(O(1)\) Tests whether \([l, r)\) is a valid interval in \([l_0, r_0)\).
+--
+-- @since 1.2.1.0
+{-# INLINE testIntervalBounded #-}
+testIntervalBounded :: Int -> Int -> Int -> Int -> Bool
+testIntervalBounded l r l0 r0 = l0 <= l && l <= r && r <= r0
+
 -- | \(O(1)\) Asserts \(0 \leq i \lt n\) for an array index \(i\).
 --
 -- @since 1.0.0.0
@@ -96,6 +118,23 @@ checkIndex funcName i n
 errorIndex :: (HasCallStack) => String -> Int -> Int -> a
 errorIndex funcName i n =
   error $ funcName ++ ": given invalid index `" ++ show i ++ "` over length `" ++ show n ++ "`"
+
+-- | \(O(1)\) Asserts \(l_0 \leq i \lt r_0\) for an array index \(i\).
+--
+-- @since 1.2.1.0
+{-# INLINE checkIndexBounded #-}
+checkIndexBounded :: (HasCallStack) => String -> Int -> Int -> Int -> ()
+checkIndexBounded funcName i l r
+  | l <= i && i < r = ()
+  | otherwise = errorIndexBounded funcName i l r
+
+-- | \(O(1)\) Emits index boundary error.
+--
+-- @since 1.2.1.0
+{-# INLINE errorIndexBounded #-}
+errorIndexBounded :: (HasCallStack) => String -> Int -> Int -> Int -> a
+errorIndexBounded funcName i l r =
+  error $ funcName ++ ": given invalid index `" ++ show i ++ "` over bounds `[" ++ show l ++ ", " ++ show r ++ ")`"
 
 -- | \(O(1)\) Asserts \(0 \leq i \lt n\) for a graph vertex \(i\).
 --
@@ -162,3 +201,19 @@ checkInterval funcName l r n
 {-# INLINE errorInterval #-}
 errorInterval :: (HasCallStack) => String -> Int -> Int -> Int -> a
 errorInterval funcName l r n = error $ funcName ++ ": given invalid interval `[" ++ show l ++ ", " ++ show r ++ ")` over length `" ++ show n ++ "`"
+
+-- | \(O(1)\) Asserts \(0 \leq l \leq r \leq n\) for a half-open interval \([l, r)\).
+--
+-- @since 1.2.1.0
+{-# INLINE checkIntervalBounded #-}
+checkIntervalBounded :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> ()
+checkIntervalBounded funcName l r l0 r0
+  | testIntervalBounded l r l0 r0 = ()
+  | otherwise = errorIntervalBounded funcName l r l0 r0
+
+-- | \(O(1)\) Asserts \(0 \leq l \leq r \leq n\) for a half-open interval \([l, r)\).
+--
+-- @since 1.2.1.0
+{-# INLINE errorIntervalBounded #-}
+errorIntervalBounded :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> a
+errorIntervalBounded funcName l r l0 r0 = error $ funcName ++ ": given invalid interval `[" ++ show l ++ ", " ++ show r ++ ")` over bounds `[" ++ show l0 ++ ", " ++ show r0 ++ ")`"
