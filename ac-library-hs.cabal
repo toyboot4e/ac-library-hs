@@ -63,6 +63,12 @@ library
     AtCoder.Convolution
     AtCoder.Dsu
     AtCoder.Extra.Bisect
+    AtCoder.Extra.DynLazySegTree
+    AtCoder.Extra.DynLazySegTree.Persistent
+    AtCoder.Extra.DynLazySegTree.Raw
+    AtCoder.Extra.DynSegTree
+    AtCoder.Extra.DynSegTree.Raw
+    AtCoder.Extra.DynSegTree.Persistent
     AtCoder.Extra.Graph
     AtCoder.Extra.HashMap
     AtCoder.Extra.IntervalMap
@@ -134,6 +140,10 @@ test-suite ac-library-hs-test
     Tests.Convolution
     Tests.Dsu
     Tests.Extra.Bisect
+    Tests.Extra.DynLazySegTree
+    Tests.Extra.DynLazySegTree.Persistent
+    Tests.Extra.DynSegTree
+    Tests.Extra.DynSegTree.Persistent
     Tests.Extra.Graph
     Tests.Extra.HashMap
     Tests.Extra.IntervalMap

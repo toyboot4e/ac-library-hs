@@ -300,6 +300,26 @@ executable yosupo-point-set-range-composite
   main-is:       yosupo-point-set-range-composite.hs
   build-depends: verify
 
+executable yosupo-point-set-range-composite-large-array
+  import:        app-local
+  main-is:       yosupo-point-set-range-composite-large-array.hs
+  build-depends: verify
+
+executable yosupo-point-set-range-composite-large-array-persistent
+  import:        app-local
+  main-is:       yosupo-point-set-range-composite-large-array-persistent.hs
+  build-depends: verify
+
+executable yosupo-point-set-range-composite-large-array-lazy
+  import:        app-local
+  main-is:       yosupo-point-set-range-composite-large-array-lazy.hs
+  build-depends: verify
+
+executable yosupo-point-set-range-composite-large-array-lazy-persistent
+  import:        app-local
+  main-is:       yosupo-point-set-range-composite-large-array-lazy-persistent.hs
+  build-depends: verify
+
 executable yosupo-pow-of-matrix
   import:        app-local
   main-is:       yosupo-pow-of-matrix.hs
@@ -330,6 +350,11 @@ executable yosupo-predecessor-problem-map
   main-is:       yosupo-predecessor-problem-map.hs
   build-depends: verify
 
+executable yosupo-persistent-range-affine-range-sum
+  import:        app-local
+  main-is:       yosupo-persistent-range-affine-range-sum.hs
+  build-depends: verify
+
 executable yosupo-range-affine-range-sum
   import:        app-local
   main-is:       yosupo-range-affine-range-sum.hs
@@ -343,6 +368,11 @@ executable yosupo-range-affine-range-sum-Mat2x2
 executable yosupo-range-affine-range-sum-seq
   import:        app-local
   main-is:       yosupo-range-affine-range-sum-seq.hs
+  build-depends: verify
+
+executable yosupo-range-affine-range-sum-large-array
+  import:        app-local
+  main-is:       yosupo-range-affine-range-sum-large-array.hs
   build-depends: verify
 
 executable yosupo-range-affine-point-get

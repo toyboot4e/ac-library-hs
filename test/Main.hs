@@ -5,6 +5,10 @@ import Test.Tasty.Ingredients.Rerun
 import Tests.Convolution qualified
 import Tests.Dsu qualified
 import Tests.Extra.Bisect qualified
+import Tests.Extra.DynLazySegTree qualified
+import Tests.Extra.DynLazySegTree.Persistent qualified
+import Tests.Extra.DynSegTree qualified
+import Tests.Extra.DynSegTree.Persistent qualified
 import Tests.Extra.HashMap qualified
 import Tests.Extra.IntMap qualified
 import Tests.Extra.IntSet qualified
@@ -48,6 +52,10 @@ main =
         testGroup
           "Extra"
           [ testGroup "Bisect" Tests.Extra.Bisect.tests,
+            testGroup "DynLazySegTree" Tests.Extra.DynLazySegTree.tests,
+            testGroup "DynLazySegTree.Persistent" Tests.Extra.DynLazySegTree.Persistent.tests,
+            testGroup "DynSegTree" Tests.Extra.DynSegTree.tests,
+            testGroup "DynSegTree.Persistent" Tests.Extra.DynSegTree.Persistent.tests,
             testGroup "HashMap" Tests.Extra.HashMap.tests,
             testGroup "IntervalMap" Tests.Extra.IntervalMap.tests,
             testGroup "IntMap" Tests.Extra.IntMap.tests,
