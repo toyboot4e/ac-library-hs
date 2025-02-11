@@ -13,7 +13,6 @@
 --
 -- >>> import AtCoder.Extra.Monoid.RangeAdd qualified as RangeAdd
 -- >>> import AtCoder.Extra.Seq qualified as Seq
--- >>> import AtCoder.LazySegTree (SegAct (..))
 -- >>> import Data.Semigroup (Sum (..))
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> seq <- Seq.new @_ @(RangeAdd.RangeAdd (Sum Int)) @(Sum Int) 10
@@ -104,6 +103,9 @@ module AtCoder.Extra.Seq
     newHandle,
     nullHandle,
     invalidateHandle,
+
+    -- * Re-exports
+    SegAct (..),
 
     -- * Constructors
     new,
