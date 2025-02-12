@@ -24,6 +24,15 @@
 -- >>> GV.read growVec 1
 -- 20
 --
+-- >>> GV.readMaybe growVec (-1)
+-- Nothing
+--
+-- >>> GV.readMaybe growVec 0
+-- Just 10
+--
+-- >>> GV.readMaybe growVec 3
+-- Nothing
+--
 -- >>> GV.popBack growVec
 -- Just 12
 --
@@ -54,6 +63,7 @@ module AtCoder.Internal.GrowVec
 
     -- * Readings
     read,
+    readMaybe,
 
     -- * Modifications
 
@@ -157,6 +167,18 @@ read GrowVec {..} i = do
   let len = VUM.length vec
   let !_ = ACIA.checkIndex "AtCoder.Internal.GrowVec.read" i len
   VGM.read vec i
+
+-- | \(O(1)\) Yields the element at the given position, or `Nothing` if the index is out of range.
+--
+-- @since 1.2.1.0
+{-# INLINE readMaybe #-}
+readMaybe :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> m (Maybe a)
+readMaybe GrowVec {..} i = do
+  vec <- readMutVar vecGV
+  len <- VGM.unsafeRead posGV 0
+  if ACIA.testIndex i len
+    then Just <$> VGM.unsafeRead vec i
+    else pure Nothing
 
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
 -- out of range.

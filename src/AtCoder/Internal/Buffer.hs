@@ -20,10 +20,19 @@
 -- >>> length buf
 -- 2
 --
--- Access each elements with `read`, `write`, `modify` or `modifyM`:
+-- Access each elements with `read`, `readMaybe`, `write`, `modify` or `modifyM`:
 --
 -- >>> B.read buf 0
 -- 10
+--
+-- >>> B.readMaybe buf (-1)
+-- Nothing
+--
+-- >>> B.readMaybe buf 0
+-- Just 10
+--
+-- >>> B.readMaybe buf 2
+-- Nothing
 --
 -- >>> B.write buf 1 0   -- [10, 0,  _  _]
 --
@@ -61,6 +70,7 @@ module AtCoder.Internal.Buffer
     -- * Reading
     back,
     read,
+    readMaybe,
 
     -- * Modifications
     pushBack,
@@ -158,6 +168,17 @@ read Buffer {..} i = do
   len <- VGM.read lenB 0
   let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.read" i len
   VGM.read vecB i
+
+-- | \(O(1)\) Yields the element at the given position, or `Nothing` if the index is out of range.
+--
+-- @since 1.2.1.0
+{-# INLINE readMaybe #-}
+readMaybe :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> Int -> m (Maybe a)
+readMaybe Buffer {..} i = do
+  len <- VGM.read lenB 0
+  if ACIA.testIndex i len
+    then Just <$> VGM.unsafeRead vecB i
+    else pure Nothing
 
 -- | \(O(1)\) Appends an element to the back.
 --
