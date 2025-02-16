@@ -112,8 +112,7 @@ size :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> m Int
 size Pool {..} = do
   !nFree <- B.length freePool
   Index !next <- VGM.unsafeRead nextPool 0
-  let !cap = VGM.length dataPool
-  pure $ cap - (next - nFree)
+  pure $ next - nFree
 
 -- | \(O(1)\) Allocates a new element.
 --
