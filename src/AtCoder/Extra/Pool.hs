@@ -59,8 +59,7 @@ data Pool s a = Pool
     nextPool :: !(VUM.MVector s Index)
   }
 
--- | Strongly typed index of pool items. User has to explicitly @corece@ on raw index use, but it's
--- ok as far as the end user don't see it.
+-- | Strongly typed index of pool items. User has to explicitly @corece@ on raw index use.
 newtype Index = Index {unIndex :: Int}
   deriving (Eq, VP.Prim)
   deriving newtype (Ord, Show)
@@ -112,8 +111,7 @@ size :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> m Int
 size Pool {..} = do
   !nFree <- B.length freePool
   Index !next <- VGM.unsafeRead nextPool 0
-  let !cap = VGM.length dataPool
-  pure $ cap - (next - nFree)
+  pure $ next - nFree
 
 -- | \(O(1)\) Allocates a new element.
 --
