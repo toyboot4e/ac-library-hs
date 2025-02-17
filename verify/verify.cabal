@@ -310,6 +310,16 @@ executable yosupo-point-set-range-composite-large-array-persistent
   main-is:       yosupo-point-set-range-composite-large-array-persistent.hs
   build-depends: verify
 
+executable yosupo-point-set-range-composite-large-array-sparse
+  import:        app-local
+  main-is:       yosupo-point-set-range-composite-large-array-sparse.hs
+  build-depends: verify
+
+executable yosupo-point-set-range-composite-large-array-sparse-persistent
+  import:        app-local
+  main-is:       yosupo-point-set-range-composite-large-array-sparse-persistent.hs
+  build-depends: verify
+
 executable yosupo-point-set-range-composite-large-array-lazy
   import:        app-local
   main-is:       yosupo-point-set-range-composite-large-array-lazy.hs

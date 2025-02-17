@@ -69,6 +69,9 @@ library
     AtCoder.Extra.DynSegTree
     AtCoder.Extra.DynSegTree.Raw
     AtCoder.Extra.DynSegTree.Persistent
+    AtCoder.Extra.DynSparseSegTree
+    AtCoder.Extra.DynSparseSegTree.Raw
+    AtCoder.Extra.DynSparseSegTree.Persistent
     AtCoder.Extra.Graph
     AtCoder.Extra.HashMap
     AtCoder.Extra.IntervalMap
@@ -144,6 +147,8 @@ test-suite ac-library-hs-test
     Tests.Extra.DynLazySegTree.Persistent
     Tests.Extra.DynSegTree
     Tests.Extra.DynSegTree.Persistent
+    Tests.Extra.DynSparseSegTree
+    Tests.Extra.DynSparseSegTree.Persistent
     Tests.Extra.Graph
     Tests.Extra.HashMap
     Tests.Extra.IntervalMap

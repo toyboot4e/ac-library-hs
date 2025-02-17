@@ -9,6 +9,8 @@ import Tests.Extra.DynLazySegTree qualified
 import Tests.Extra.DynLazySegTree.Persistent qualified
 import Tests.Extra.DynSegTree qualified
 import Tests.Extra.DynSegTree.Persistent qualified
+import Tests.Extra.DynSparseSegTree qualified
+import Tests.Extra.DynSparseSegTree.Persistent qualified
 import Tests.Extra.HashMap qualified
 import Tests.Extra.IntMap qualified
 import Tests.Extra.IntSet qualified
@@ -56,6 +58,8 @@ main =
             testGroup "DynLazySegTree.Persistent" Tests.Extra.DynLazySegTree.Persistent.tests,
             testGroup "DynSegTree" Tests.Extra.DynSegTree.tests,
             testGroup "DynSegTree.Persistent" Tests.Extra.DynSegTree.Persistent.tests,
+            testGroup "DynSparseSegTree" Tests.Extra.DynSparseSegTree.tests,
+            testGroup "DynSparseSegTree.Persistent" Tests.Extra.DynSparseSegTree.Persistent.tests,
             testGroup "HashMap" Tests.Extra.HashMap.tests,
             testGroup "IntervalMap" Tests.Extra.IntervalMap.tests,
             testGroup "IntMap" Tests.Extra.IntMap.tests,
