@@ -8,5 +8,5 @@ main = do
   (!n, !q) <- ints2
   ps <- ints
   qs <- VU.replicateM q ints2
-  let !lct = Lct.build (VU.replicate n ()) qs
+  lct <- Lct.build @_ @() (VU.replicate n ()) $ VU.imap ((,) . (+ 1)) ps
   printBSB . unlinesBSB =<< VU.mapM (\(!u, !v) -> Lct.lca lct u v) qs

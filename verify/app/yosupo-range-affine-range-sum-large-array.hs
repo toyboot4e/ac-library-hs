@@ -20,7 +20,7 @@ main = do
       1 -> (1,,,-1,-1) <$> intP <*> intP
       _ -> error "unreachable"
 
-  let cap = Seg.recommendedCapacity n q
+  let cap = Ldst.recommendedCapacity n q
   seg <- Ldst.new @_ @(Affine1 Mint) @(Sum Mint) cap 0 n
   root <- Ldst.newRoot seg
   res <- (`VU.mapMaybeM` qs) $ \case

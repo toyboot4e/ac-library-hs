@@ -17,7 +17,7 @@ main = do
   (!n, !q) <- ints2
   qs <- VU.replicateM q ints4
 
-  let cap = Seg.recommendedCapacity n q
+  let cap = Dst.recommendedCapacity n q
   seg <- Dst.new @_ @(Dual (Affine1 Mint)) cap 0 n
   root <- Dst.newRoot seg
 
