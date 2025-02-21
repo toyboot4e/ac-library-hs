@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 module Tests.Extra.Monoid (tests) where
 
 import AtCoder.Extra.Monoid

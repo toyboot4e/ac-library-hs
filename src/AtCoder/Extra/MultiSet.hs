@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | A fast, mutable multiset for `Int` keys backed by a @HashMap@.  Most operations are performed

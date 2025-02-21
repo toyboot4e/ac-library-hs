@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -13,9 +14,9 @@ import AtCoder.Internal.Math qualified as ACIM
 import BenchLib.MulMod.BarrettWideWord qualified as BarrettWideWord
 import Data.Bits
 import Data.Coerce (coerce)
-import Data.Tagged (Tagged(..))
 import Data.Proxy (Proxy)
 import Data.Ratio (denominator, numerator)
+import Data.Tagged (Tagged (..))
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Primitive qualified as P

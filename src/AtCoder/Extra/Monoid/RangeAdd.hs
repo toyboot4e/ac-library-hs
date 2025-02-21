@@ -1,3 +1,4 @@
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeFamilies #-}
 
 -- | Monoid action \(f: x \rightarrow x + d\).

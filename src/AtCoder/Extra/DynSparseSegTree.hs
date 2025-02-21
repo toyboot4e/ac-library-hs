@@ -1,3 +1,5 @@
+{-# LANGUAGE DisambiguateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeFamilies #-}
 
 -- | A dynamic, sparse segment tree that covers a half-open interval \([l_0, r_0)\). Nodes are

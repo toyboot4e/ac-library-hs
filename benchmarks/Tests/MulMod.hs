@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 -- | A bit tedious tests.
 module Tests.MulMod (tests) where
 

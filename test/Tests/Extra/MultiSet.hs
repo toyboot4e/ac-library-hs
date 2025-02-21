@@ -1,3 +1,5 @@
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module Tests.Extra.MultiSet (tests) where
@@ -203,8 +205,7 @@ prop_randomTest Init {..} = QCM.monadicIO $ do
             QCM.assertWith (sizeE == size) $ show ("- size", sizeE, size)
 
             pure (ref', recordKey keys query)
-          else
-            pure (ref, keys)
+          else pure (ref, keys)
     )
     (ref0, IS.empty)
     qs

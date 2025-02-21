@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 -- | Bisection methods and binary search functions. They partition a half-open interval \([l, r)\)
 -- into two and return either the left or the right point of the boundary.
 --

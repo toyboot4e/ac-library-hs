@@ -1,4 +1,5 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 
