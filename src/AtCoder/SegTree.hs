@@ -105,7 +105,7 @@ where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Data.Bits (countTrailingZeros, testBit, (.&.), (.>>.))
 import Data.Foldable (for_)
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -361,7 +361,7 @@ minLeft seg r0 f = minLeftM seg r0 (pure . f)
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0.0
-{-# INLINE minLeftM #-}
+{-# INLINEABLE minLeftM #-}
 minLeftM ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | The segment tree
@@ -383,7 +383,7 @@ minLeftM SegTree {..} r0 f = do
     !_ = ACIA.runtimeAssert (0 <= r0 && r0 <= nSt) $ "AtCoder.SegTree.minLeftM: given invalid `right` index `" ++ show r0 ++ "` over length `" ++ show nSt ++ "`"
     inner r !sm = do
       let r' = chooseBit $ r - 1
-      !sm' <- (<> sm) <$> VGM.read dSt r'
+      !sm' <- stToPrim $ (<> sm) <$> VGM.read dSt r'
       b <- f sm'
       if not b
         then do
@@ -398,7 +398,7 @@ minLeftM SegTree {..} r0 f = do
     inner2 r sm
       | r < sizeSt = do
           let r' = 2 * r + 1
-          !sm' <- (<> sm) <$> VGM.read dSt r'
+          !sm' <- stToPrim $ (<> sm) <$> VGM.read dSt r'
           b <- f sm'
           if b
             then inner2 (r' - 1) sm'
@@ -447,7 +447,7 @@ maxRight seg l0 f = maxRightM seg l0 (pure . f)
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0.0
-{-# INLINE maxRightM #-}
+{-# INLINEABLE maxRightM #-}
 maxRightM ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | The segment tree
@@ -460,7 +460,7 @@ maxRightM ::
   m Int
 maxRightM SegTree {..} l0 f = do
   b <- f mempty
-  let !_ = ACIA.runtimeAssert b "AtCoder.SegTree.maxRightM: `f mempty` returned `False`"
+  let !_ = ACIA.runtimeAssert b "AtCoder.SegTree.maxRightM: `f mempty` must return `True`"
   if l0 == nSt
     then pure nSt
     else inner (l0 + sizeSt) mempty
@@ -469,7 +469,7 @@ maxRightM SegTree {..} l0 f = do
     !_ = ACIA.runtimeAssert (0 <= l0 && l0 <= nSt) $ "AtCoder.SegTree.maxRightM: given invalid `left` index `" ++ show l0 ++ "` over length `" ++ show nSt ++ "`"
     inner l !sm = do
       let l' = chooseBit l
-      !sm' <- (sm <>) <$> VGM.read dSt l'
+      !sm' <- stToPrim $ (sm <>) <$> VGM.read dSt l'
       b <- f sm'
       if not b
         then do
@@ -486,7 +486,7 @@ maxRightM SegTree {..} l0 f = do
     inner2 l !sm
       | l < sizeSt = do
           let l' = 2 * l
-          !sm' <- (sm <>) <$> VGM.read dSt l'
+          !sm' <- stToPrim $ (sm <>) <$> VGM.read dSt l'
           b <- f sm'
           if b
             then inner2 (l' + 1) sm'

@@ -732,11 +732,11 @@ maxRight seg l0 g = maxRightM seg l0 (pure . g)
 -- - \(O(\log n)\)
 --
 -- @since 1.0.0.0
-{-# INLINE maxRightM #-}
+{-# INLINEABLE maxRightM #-}
 maxRightM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
 maxRightM self@LazySegTree {..} l0 g = do
   b <- g mempty
-  let !_ = ACIA.runtimeAssert b "AtCoder.LazySegTree.maxRightM: `g mempty` returned `False`"
+  let !_ = ACIA.runtimeAssert b "AtCoder.LazySegTree.maxRightM: `g mempty` must return `False`"
   if l0 == nLst
     then pure nLst
     else do
@@ -749,9 +749,9 @@ maxRightM self@LazySegTree {..} l0 g = do
     !_ = ACIA.runtimeAssert (0 <= l0 && l0 <= nLst) $ "AtCoder.LazySegTree.maxRightM: given invalid `left` index `" ++ show l0 ++ "` over length `" ++ show nLst ++ "`"
     inner l !sm = do
       let l' = chooseBit l
-      !sm' <- (sm <>) <$> VGM.read dLst l'
+      !sm' <- stToPrim $ (sm <>) <$> VGM.read dLst l'
       b <- g sm'
-      if not $ b
+      if not b
         then do
           inner2 l' sm
         else do
