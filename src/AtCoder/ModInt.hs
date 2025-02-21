@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 
@@ -158,6 +160,7 @@ type ModInt1000000007 = ModInt 1000000007
 
 -- | Retrieves the `Int` value from a `KnownNat`.
 --
+-- >>> :set -XDataKinds
 -- >>> import Data.Proxy (Proxy(..))
 -- >>> modVal (Proxy @42)
 -- 42
@@ -169,6 +172,7 @@ modVal p = fromIntegral $ natVal p
 
 -- | Retrieves the `Int` value from a `KnownNat`.
 --
+-- >>> :set -XDataKinds
 -- >>> :set -XMagicHash
 -- >>> import GHC.Exts (proxy#)
 -- >>> modVal# (proxy# @42)

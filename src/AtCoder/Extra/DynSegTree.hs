@@ -1,3 +1,4 @@
+{-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE TypeFamilies #-}
 
 -- | A dynamic segment tree that covers a half-open interval \([l_0, r_0)\). Nodes are

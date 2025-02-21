@@ -1,3 +1,4 @@
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeFamilies #-}
 
 -- | Monoid action \(f: x \rightarrow ax + b\). Less efficient than @Affine1@, but compatible with

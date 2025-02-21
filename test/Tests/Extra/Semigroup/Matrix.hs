@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds #-}
+
 module Tests.Extra.Semigroup.Matrix (tests) where
 
 import AtCoder.Extra.Semigroup.Matrix qualified as Mat

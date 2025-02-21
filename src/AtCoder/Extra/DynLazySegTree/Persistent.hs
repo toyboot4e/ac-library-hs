@@ -1,3 +1,4 @@
+{-# LANGUAGE DisambiguateRecordFields #-}
 {-# LANGUAGE TypeFamilies #-}
 
 -- | A dynamic, persistent, lazily propagated segment tree that covers a half-open interval

@@ -45,17 +45,6 @@ common dependencies
 
   default-language:   GHC2021
 
-  -- compatible with GHC2024:
-  default-extensions:
-    DataKinds
-    DerivingStrategies
-    DisambiguateRecordFields
-    ExplicitNamespaces
-    GADTs
-    LambdaCase
-    MonoLocalBinds
-    RoleAnnotations
-
 library
   import:          warnings
   import:          dependencies

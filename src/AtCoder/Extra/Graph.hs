@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 -- | Re-export of the @Csr@ module and generic graph search functions.
 --
 -- @since 1.1.0.0
@@ -58,7 +60,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- @since 1.1.0.0
 {-# INLINE swapDupe #-}
-swapDupe :: (VU.Unbox (Int, Int, w)) => VU.Vector (Int, Int, w) -> VU.Vector (Int, Int, w)
+swapDupe :: (VU.Unbox w) => VU.Vector (Int, Int, w) -> VU.Vector (Int, Int, w)
 swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 
 -- | \(O(n)\) Converts non-directed edges into directional edges. This is a convenient function for
@@ -86,7 +88,7 @@ swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 --
 -- @since 1.1.0.0
 {-# INLINE swapDupe' #-}
-swapDupe' :: (VU.Unbox (Int, Int)) => VU.Vector (Int, Int) -> VU.Vector (Int, Int)
+swapDupe' :: VU.Vector (Int, Int) -> VU.Vector (Int, Int)
 swapDupe' = VU.concatMap (\(!u, !v) -> VU.fromListN 2 [(u, v), (v, u)])
 
 -- | \(O(n + m)\) Returns the strongly connected components.

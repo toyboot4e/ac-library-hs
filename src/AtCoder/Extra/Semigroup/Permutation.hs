@@ -1,3 +1,5 @@
+{-# LANGUAGE DerivingStrategies #-}
+
 -- | A permutation represented by a vector, mainly for binary exponentiation.
 --
 -- The permutation is a left semigroup action: \(p_2 (p_1 x) = (p_2 \circ p_1) x\).

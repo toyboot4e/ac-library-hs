@@ -1,6 +1,7 @@
 -- This is a possible template of LazySegTree monoid instances for AtCoder contests.
 -- This code is copy-pasted to the lazy segtree document's example.
 
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeFamilies #-}
 
 import AtCoder.LazySegTree qualified as LST

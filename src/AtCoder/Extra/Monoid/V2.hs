@@ -1,3 +1,4 @@
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeFamilies #-}
 
 -- | A monoid acted on by `Mat2x2`, an affine transformation target.

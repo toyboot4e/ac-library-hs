@@ -198,6 +198,7 @@ import Prelude hiding (read)
 -- Define your monoid action @F@ and your acted monoid @X@:
 --
 -- @
+-- {-# LANGUAGE DerivingStrategies #-}
 -- {-# LANGUAGE TypeFamilies #-}
 --
 -- import AtCoder.LazySegTree qualified as LST

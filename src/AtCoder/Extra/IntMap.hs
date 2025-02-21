@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
 -- | A dense, fast `Int` map implemented as a 64-ary tree that covers an interval \([0, n)\).
