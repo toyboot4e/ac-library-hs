@@ -1,6 +1,7 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# OPTIONS_HADDOCK hide #-}
 
 -- | Base module for implementing dynamic sequences. It internaly uses a splay tree and user has to
 -- track the root node change.
@@ -84,6 +85,7 @@ module AtCoder.Extra.Seq.Raw
     freezeST,
 
     -- * Internals
+
     -- | These functions are exported primarily for @Map@ implementations.
     splitMaxRightWithST,
     maxRightWithST,
@@ -435,7 +437,7 @@ sliceST seq@Seq {..} root l r
           --    [        )
           --             * root' (splayed)
           --          * rootL (detached from the root)
-          -- * rootL' (splayed)
+          -- \* rootL' (splayed)
           --    * right(rootL'): node that corresponds to [l, r)
           root' <- splayKthST seq root r
           rootL <- VGM.read lSeq $ coerce root'

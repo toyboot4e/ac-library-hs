@@ -1,4 +1,5 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# OPTIONS_HADDOCK hide #-}
 
 -- original implementation:
 -- <https://miti-7.hatenablog.com/entry/2018/04/28/152259>
