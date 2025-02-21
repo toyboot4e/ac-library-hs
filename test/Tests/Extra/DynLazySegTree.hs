@@ -11,7 +11,6 @@ import AtCoder.ModInt qualified as M
 import Control.Monad.ST (RealWorld, runST)
 import Data.Foldable (for_)
 import Data.Semigroup (Sum (..))
-import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -166,16 +165,15 @@ prop_randomTest Init {..} = QCM.monadicIO $ do
 
 -- prop_foldl is tested with large array verification problem
 
-prop_maxRight :: Int -> [QC.NonNegative Int] -> QC.Property
-prop_maxRight xRef xs_ =
-  not (null xs_) QC.==> do
-    let xs = VU.modify VAI.sort $ VU.fromList $ map (\(QC.NonNegative x) -> x) xs_
-        expected = VU.length . VU.takeWhile (<= xRef) $ VU.scanl1' (+) xs
-        res = runST $ do
-          seg <- Seg.new @_ @() @(Sum Int) (2 * VU.length xs) 0 (VU.length xs)
-          root <- Seg.newSeq seg $ VU.map Sum xs
-          Seg.maxRight seg root (<= Sum xRef)
-     in expected QC.=== res
+prop_maxRight :: Int -> QC.NonEmptyList (QC.NonNegative Int) -> QC.Property
+prop_maxRight xRef (QC.NonEmpty xs_) =
+  let xs = VU.fromList $ map (\(QC.NonNegative x) -> x) xs_
+      expected = VU.length . VU.takeWhile (<= xRef) $ VU.scanl1' (+) xs
+      res = runST $ do
+        seg <- Seg.new @_ @() @(Sum Int) (2 * VU.length xs) 0 (VU.length xs)
+        root <- Seg.newSeq seg $ VU.map Sum xs
+        Seg.maxRight seg root (<= Sum xRef)
+   in expected QC.=== res
 
 tests :: [TestTree]
 tests =
