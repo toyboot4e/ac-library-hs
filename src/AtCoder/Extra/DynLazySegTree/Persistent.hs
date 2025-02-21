@@ -81,6 +81,9 @@ module AtCoder.Extra.DynLazySegTree.Persistent
     maxRightM,
     -- -- * Conversions
     -- freeze,
+
+    -- * Clear
+    clear,
   )
 where
 
@@ -289,3 +292,11 @@ maxRight dst root f = do
 maxRightM :: (HasCallStack, PrimMonad m, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Raw.DynLazySegTree (PrimState m) f a -> P.Index -> (a -> m Bool) -> m Int
 maxRightM dst root f = do
   Raw.maxRightM dst root f
+
+-- | \(O(\log L)\) Claers all the nodes from the storage.
+--
+-- @since 1.2.2.0
+{-# INLINE clear #-}
+clear :: (PrimMonad m) => Raw.DynLazySegTree (PrimState m) f a -> m ()
+clear dst = do
+  P.clear (Raw.poolLdst dst)

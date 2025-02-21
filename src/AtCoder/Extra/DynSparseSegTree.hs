@@ -60,6 +60,9 @@ module AtCoder.Extra.DynSparseSegTree
     maxRightM,
     -- -- * Conversions
     -- freeze,
+
+    -- * Clear
+    clear,
   )
 where
 
@@ -183,3 +186,11 @@ maxRightM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Raw.DynSparseS
 maxRightM dst (P.Handle handle) f = do
   root <- VGM.read handle 0
   Raw.maxRightM dst root f
+
+-- | \(O(\log L)\) Claers all the nodes from the storage.
+--
+-- @since 1.2.2.0
+{-# INLINE clear #-}
+clear :: (PrimMonad m) => Raw.DynSparseSegTree (PrimState m) a -> m ()
+clear dst = do
+  P.clear (Raw.poolDsst dst)
