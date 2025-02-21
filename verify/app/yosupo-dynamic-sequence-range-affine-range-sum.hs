@@ -6,7 +6,6 @@ import Control.Monad.ST (runST)
 import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
-import Debug.Trace
 
 type Mint = M.ModInt 998244353
 

@@ -1,5 +1,12 @@
 # Revision history for acl-hs
 
+## 1.2.1.0 -- Feb 2025
+
+- Added dynamic segment family
+- Added `Extra.Seq.Map`
+- Fixed `Extra.Pool.size`
+- `Handle` is moved from `Extra.Seq` to `Extra.Pool`
+
 ## 1.2.0.0 -- Feb 2025
 
 - Added `AtCoder.Extra.Seq`
