@@ -43,16 +43,22 @@ module AtCoder.FenwickTree
     -- * Adding
     add,
 
-    -- * Accessor
+    -- * Accessors
     sum,
     sumMaybe,
+
+    -- * Bisection methods
+    maxRight,
+    maxRightM,
+    minLeft,
+    minLeftM,
   )
 where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
 import Control.Monad.Fix (fix)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Data.Bits
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -170,3 +176,186 @@ unsafeSum ft l r = do
   xr <- prefixSum ft r
   xl <- prefixSum ft l
   pure $! xr - xl
+
+-- | (Extra API) Applies a binary search on the Fenwick tree. It returns an index \(r\) that
+-- satisfies both of the following.
+--
+-- - \(r = l\) or \(f(a[l] + a[l + 1] + ... + a[r - 1])\) returns `True`.
+-- - \(r = n\) or \(f(a[l] + a[l + 1] + ... + a[r]))\) returns `False`.
+--
+-- If \(f\) is monotone, this is the maximum \(r\) that satisfies
+-- \(f(a[l] + a[l + 1] + ... + a[r - 1])\).
+--
+-- ==== Constraints
+-- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
+-- - \(f(0)\) returns `True`
+-- - \(0 \leq l \leq n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.2.2.0
+{-# INLINE maxRight #-}
+maxRight ::
+  (HasCallStack, PrimMonad m, Num a, VU.Unbox a) =>
+  -- | The Fenwick tree
+  FenwickTree (PrimState m) a ->
+  -- | \(l\)
+  Int ->
+  -- | \(p\): user predicate
+  (a -> Bool) ->
+  -- | \(r\): \(p\) holds for \([l, r)\)
+  m Int
+maxRight ft l0 f = maxRightM ft l0 (pure . f)
+
+-- | (Extra API) Monadic variant of `maxRight`.
+--
+-- ==== Constraints
+-- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
+-- - \(f(0)\) returns `True`
+-- - \(0 \leq l \leq n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.2.2.0
+{-# INLINEABLE maxRightM #-}
+maxRightM ::
+  forall m a.
+  (HasCallStack, PrimMonad m, Num a, VU.Unbox a) =>
+  -- | The Fenwick tree
+  FenwickTree (PrimState m) a ->
+  -- | \(l\)
+  Int ->
+  -- | \(p\): user predicate
+  (a -> m Bool) ->
+  -- | \(r\): \(p\) holds for \([l, r)\)
+  m Int
+maxRightM FenwickTree {..} l0 f = do
+  b0 <- f 0
+  let !_ = ACIA.runtimeAssert b0 "AtCoder.FenwickTree.maxRightM: `f 0` must return `True`"
+
+  let inner i !s
+        | odd i = do
+            ds <- stToPrim $ VGM.read dataFt (i - 1)
+            inner (i - 1) $! s - ds
+        | i == 0 = pure (i, 64 - countLeadingZeros nFt, s)
+        | i + bit k > nFt = pure (i, k, s)
+        | otherwise = do
+            t <- stToPrim $ (s +) <$> VGM.read dataFt (i + bit k - 1)
+            b <- f t
+            if not b
+              then pure (i, k, s)
+              else do
+                di <- stToPrim $ VGM.read dataFt (i - 1)
+                inner (i - i .&. (-i)) $! s - di
+        where
+          k = countTrailingZeros i - 1
+
+  -- we could start from an arbitrary l, but the API is limited to one
+  (!i0, !k0, !s0) <- inner l0 (0 :: a)
+
+  let inner2 i k_ !s
+        | k_ == 0 = pure i
+        | i + bit k - 1 < VGM.length dataFt = do
+            t <- stToPrim $ (s +) <$> VGM.read dataFt (i + bit k - 1)
+            b <- f t
+            if b
+              then inner2 (i + bit k) k t
+              else inner2 i k s
+        | otherwise = inner2 i k s
+        where
+          k = k_ - 1
+
+  inner2 i0 k0 s0
+
+-- | Applies a binary search on the Fenwick tree. It returns an index \(l\) that satisfies both of
+-- the following.
+--
+-- - \(l = r\) or \(f(a[l] + a[l + 1] + ... + a[r - 1])\) returns `True`.
+-- - \(l = 0\) or \(f(a[l - 1] + a[l] + ... + a[r - 1])\) returns `False`.
+--
+-- If \(f\) is monotone, this is the minimum \(l\) that satisfies
+-- \(f(a[l] + a[l + 1] + ... + a[r - 1])\).
+--
+-- ==== Constraints
+--
+-- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side
+--   effect.
+-- - \(f(0)\) returns `True`
+-- - \(0 \leq r \leq n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.2.2.0
+{-# INLINE minLeft #-}
+minLeft ::
+  (HasCallStack, PrimMonad m, Num a, VU.Unbox a) =>
+  -- | The Fenwick tree
+  FenwickTree (PrimState m) a ->
+  -- | \(r\)
+  Int ->
+  -- | \(p\): user prediate
+  (a -> Bool) ->
+  -- | \(l\): \(p\) holds for \([l, r)\)
+  m Int
+minLeft ft r0 f = minLeftM ft r0 (pure . f)
+
+-- | (Extra API) Monadic variant of `minLeft`.
+--
+-- ==== Constraints
+-- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
+-- - \(f(0)\) returns `True`
+-- - \(0 \leq l \leq n\)
+--
+-- ==== Complexity
+-- - \(O(\log n)\)
+--
+-- @since 1.2.2.0
+{-# INLINEABLE minLeftM #-}
+minLeftM ::
+  forall m a.
+  (HasCallStack, PrimMonad m, Num a, VU.Unbox a) =>
+  -- | The Fenwick tree
+  FenwickTree (PrimState m) a ->
+  -- | \(r\)
+  Int ->
+  -- | \(p\): user prediate
+  (a -> m Bool) ->
+  -- | \(l\): \(p\) holds for \([l, r)\)
+  m Int
+minLeftM FenwickTree {..} r0 f = do
+  b0 <- f 0
+  let !_ = ACIA.runtimeAssert b0 "AtCoder.FenwickTree.minLeftM: `f 0` must return `True`"
+
+  let inner i k !s
+        | i <= 0 = pure (i, k, s)
+        | otherwise = do
+            b <- f s
+            if not b
+              then pure (i, k, s)
+              else do
+                s' <- stToPrim $ (s +) <$> VGM.read dataFt (i - 1)
+                inner (i - i .&. (-i)) (countTrailingZeros i) s'
+
+  -- we could start from an arbitrary r, but the API is limited to n
+  (!i0, !k0, !s0) <- inner r0 (0 :: Int) (0 :: a)
+
+  b0_ <- f s0
+  if b0_
+    then do
+      let !_ = ACIA.runtimeAssert (i0 == 0) "AtCoder.FenwickTree.minLeftM: implementation error"
+      pure 0
+    else do
+      let inner2 i k_ !s
+            | k_ == 0 = pure i
+            | otherwise = do
+                let k = k_ - 1
+                t <- stToPrim $ (s -) <$> VGM.read dataFt (i + bit k - 1)
+                b <- f t
+                if b
+                  then inner2 i k s
+                  else inner2 (i + bit k) k t
+
+      (+ 1) <$> inner2 i0 k0 s0

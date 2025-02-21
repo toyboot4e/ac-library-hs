@@ -2,13 +2,16 @@
 module Tests.FenwickTree (tests) where
 
 import AtCoder.FenwickTree qualified as FT
+import Control.Monad.ST (runST)
 import Data.Foldable
 import Data.Vector.Unboxed qualified as VU
 import System.IO.Unsafe (unsafePerformIO)
 import Test.Hspec
+import Test.QuickCheck qualified as QC
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.Hspec
+import Test.Tasty.QuickCheck qualified as QC
 
 -- empty
 -- assign
@@ -79,10 +82,32 @@ spec_invalid = testSpec "invalid" $ do
   it "throws error" $ do
     FT.sum s 5 3 `shouldThrow` anyException
 
+prop_maxRight :: QC.NonNegative Int -> QC.NonEmptyList (QC.NonNegative Int) -> QC.Gen QC.Property
+prop_maxRight (QC.NonNegative xRef) (QC.NonEmpty xs_) = do
+  l0 <- QC.chooseInt (0, length xs_)
+  let xs = VU.fromList $ map (\(QC.NonNegative x) -> x) xs_
+      expected = (l0 +) . VU.length . VU.takeWhile (<= xRef) $ VU.scanl1' (+) $ VU.drop l0 xs
+      res = runST $ do
+        ft <- FT.build xs
+        FT.maxRight ft l0 (<= xRef)
+  pure $ expected QC.=== res
+
+prop_minLeft :: QC.NonNegative Int -> QC.NonEmptyList (QC.NonNegative Int) -> QC.Gen QC.Property
+prop_minLeft (QC.NonNegative xRef) (QC.NonEmpty xs_) = do
+  r0 <- QC.chooseInt (0, length xs_)
+  let xs = VU.fromList $ map (\(QC.NonNegative x) -> x) xs_
+      expected = (r0 -) . VU.length . VU.takeWhile (<= xRef) $ VU.scanl1' (+) $ VU.reverse $ VU.take r0 xs
+      res = runST $ do
+        ft <- FT.build xs
+        FT.minLeft ft r0 (<= xRef)
+  pure $ expected QC.=== res
+
 tests :: [TestTree]
 tests =
   [ unit_zero {- overFlowInt -},
     unit_naive,
     unsafePerformIO spec_invalid,
-    unit_sumMaybeBounds
+    unit_sumMaybeBounds,
+    QC.testProperty "maxRight" prop_maxRight,
+    QC.testProperty "minLeft" prop_minLeft
   ]
