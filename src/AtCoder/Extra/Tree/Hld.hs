@@ -225,92 +225,103 @@ new tree = newAt tree 0
 -- @since 1.1.0.0
 {-# INLINABLE newAt #-}
 newAt :: forall w. (HasCallStack) => Gr.Csr w -> Vertex -> Hld
-newAt tree root = runST $ do
-  -- Re-create adjacent vertices so that the biggest subtree's head vertex comes first.
-  --
-  -- We /could/ instead record the biggest adjacent subtree vertex for each vertex, but the other
-  -- DFS would be harder.
-  let (!tree', !parent, !depths, !subtreeSize) = runST $ do
-        adjVec <- VU.thaw (Gr.adjCsr tree)
-        parent_ <- VUM.unsafeNew n
-        depths_ <- VUM.unsafeNew n
-        subtreeSize_ <- VUM.unsafeNew n
+newAt tree root
+  | n == 1 =
+      Hld
+        0
+        (VU.singleton (-1))
+        (VU.singleton 0)
+        (VU.singleton (-1))
+        (VU.singleton 0)
+        (VU.singleton 0)
+        (VU.singleton 1)
+  | otherwise = runST $ do
+      -- Re-create adjacent vertices so that the biggest subtree's head vertex comes first.
+      --
+      -- We /could/ instead record the biggest adjacent subtree vertex for each vertex, but the other
+      -- DFS would be harder.
+      let (!tree', !parent, !depths, !subtreeSize) = runST $ do
+            adjVec <- VU.thaw (Gr.adjCsr tree)
+            parent_ <- VUM.unsafeNew n
+            depths_ <- VUM.unsafeNew n
+            subtreeSize_ <- VUM.unsafeNew n
 
-        _ <- (\f -> fix f 0 (-1) root) $ \loop depth p v1 -> do
-          VGM.write parent_ v1 p
-          VGM.write depths_ v1 depth
+            _ <- (\f -> fix f 0 (-1) root) $ \loop depth p v1 -> do
+              VGM.write parent_ v1 p
+              VGM.write depths_ v1 depth
 
-          (!size1, !eBig) <-
-            VU.foldM'
-              ( \(!size1, !eBig) (!e2, !v2) -> do
-                  if v2 == p
-                    then pure (size1, eBig)
-                    else do
-                      size2 <- loop (depth + 1) v1 v2
-                      -- NOTE: It's `>` because we should swap at least once if there's some vertex other
-                      -- that the parent_.
-                      pure (size1 + size2, if size1 > size2 then eBig else e2)
-              )
-              (1 :: Int, -1)
-              (tree `Gr.eAdj` v1)
+              (!size1, !eBig) <-
+                VU.foldM'
+                  ( \(!size1, !eBig) (!e2, !v2) -> do
+                      if v2 == p
+                        then pure (size1, eBig)
+                        else do
+                          size2 <- loop (depth + 1) v1 v2
+                          -- NOTE: It's `>` because we should swap at least once if there's some vertex other
+                          -- that the parent_.
+                          pure (size1 + size2, if size1 > size2 then eBig else e2)
+                  )
+                  (1 :: Int, -1)
+                  (tree `Gr.eAdj` v1)
 
-          -- move the biggest subtree's head to the first adjacent vertex.
-          -- it means the "heavy edge" or the longest segment.
-          when (eBig /= -1) $ do
-            VGM.swap adjVec eBig $ fst (VG.head (tree `Gr.eAdj` v1))
+              -- move the biggest subtree's head to the first adjacent vertex.
+              -- it means the "heavy edge" or the longest segment.
+              when (eBig /= -1) $ do
+                VGM.swap adjVec eBig $ fst (VG.head (tree `Gr.eAdj` v1))
 
-          -- record subtree size
-          VGM.write subtreeSize_ v1 size1
+              -- record subtree size
+              VGM.write subtreeSize_ v1 size1
 
-          pure size1
+              pure size1
 
-        !vec <- VU.unsafeFreeze adjVec
-        (tree {Gr.adjCsr = vec},,,)
-          <$> VU.unsafeFreeze parent_
-          <*> VU.unsafeFreeze depths_
-          <*> VU.unsafeFreeze subtreeSize_
+            !vec <- VU.unsafeFreeze adjVec
+            (tree {Gr.adjCsr = vec},,,)
+              <$> VU.unsafeFreeze parent_
+              <*> VU.unsafeFreeze depths_
+              <*> VU.unsafeFreeze subtreeSize_
 
-  -- vertex -> reindexed vertex index
-  indices <- VUM.replicate n (-1 :: Int)
+      -- vertex -> reindexed vertex index
+      indices <- VUM.replicate n (-1 :: Int)
 
-  -- vertex -> head vertex of the segment
-  heads <- VUM.replicate n (-1 :: Int)
+      -- vertex -> head vertex of the segment
+      heads <- VUM.replicate n (-1 :: Int)
 
-  _ <- (\f -> fix f (0 :: Int) root (-1) root) $ \loop acc h p v1 -> do
-    -- reindex:
-    VGM.write indices v1 acc
-    let !acc' = acc + 1
+      _ <- (\f -> fix f (0 :: Int) root (-1) root) $ \loop acc h p v1 -> do
+        -- reindex:
+        VGM.write indices v1 acc
+        let !acc' = acc + 1
 
-    VGM.write heads v1 h
+        VGM.write heads v1 h
 
-    -- when the first vertex is within the same segment:
-    let (!adj1, !rest) = fromJust $ VU.uncons (tree' `Gr.adj` v1)
-    acc'' <-
-      if adj1 == p
-        then pure acc'
-        else loop acc' h v1 adj1
+        -- when the first vertex is within the same segment:
+        let (!adj1, !rest) = fromJust $ VU.uncons (tree' `Gr.adj` v1)
+        acc'' <-
+          if adj1 == p
+            then pure acc'
+            else loop acc' h v1 adj1
 
-    -- the others are in other segments:
-    VU.foldM'
-      ( \a v2 -> do
-          if v2 == p
-            then pure a
-            else loop a v2 v1 v2
-      )
-      acc''
-      rest
+        -- the others are in other segments:
+        VU.foldM'
+          ( \a v2 -> do
+              if v2 == p
+                then pure a
+                else loop a v2 v1 v2
+          )
+          acc''
+          rest
 
-  !indices' <- VU.unsafeFreeze indices
-  let !revIndex = VU.update (VU.replicate n (-1)) $ VU.imap (flip (,)) indices'
+      !indices' <- VU.unsafeFreeze indices
+      let !revIndex = VU.update (VU.replicate n (-1)) $ VU.imap (flip (,)) indices'
 
-  Hld root parent indices'
-    <$> VU.unsafeFreeze heads
-    <*> pure revIndex
-    <*> pure depths
-    <*> pure subtreeSize
+      Hld root parent indices'
+        <$> VU.unsafeFreeze heads
+        <*> pure revIndex
+        <*> pure depths
+        <*> pure subtreeSize
   where
     !n = Gr.nCsr tree
     !_ = ACIA.runtimeAssert (2 * (Gr.nCsr tree - 1) == Gr.mCsr tree) "AtCoder.Extra.Hld.newAt: not a non-directed tree"
+    !_ = ACIA.runtimeAssert (n >= 1) "AtCoder.Extra.Hld.newAt: the tree must have at least one vertex"
 
 -- | \(O(\log n)\) Calculates the lowest common ancestor of \(u\) and \(v\).
 --
