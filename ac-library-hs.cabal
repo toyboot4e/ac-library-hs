@@ -43,7 +43,7 @@ common dependencies
     , vector-algorithms  <0.10
     , wide-word          <0.2
 
-  default-language:   GHC2021
+  default-language: GHC2021
 
 library
   import:          warnings
@@ -56,11 +56,11 @@ library
     AtCoder.Extra.DynLazySegTree.Persistent
     AtCoder.Extra.DynLazySegTree.Raw
     AtCoder.Extra.DynSegTree
-    AtCoder.Extra.DynSegTree.Raw
     AtCoder.Extra.DynSegTree.Persistent
+    AtCoder.Extra.DynSegTree.Raw
     AtCoder.Extra.DynSparseSegTree
-    AtCoder.Extra.DynSparseSegTree.Raw
     AtCoder.Extra.DynSparseSegTree.Persistent
+    AtCoder.Extra.DynSparseSegTree.Raw
     AtCoder.Extra.Graph
     AtCoder.Extra.HashMap
     AtCoder.Extra.IntervalMap

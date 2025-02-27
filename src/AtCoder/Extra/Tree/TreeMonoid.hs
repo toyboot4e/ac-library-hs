@@ -38,6 +38,7 @@
 -- >>> --    +
 -- >>> --    +--4--5
 -- >>> let n = 6
+-- >>> -- note that the edges must be bi-directed:
 -- >>> let tree = Gr.build' n . Gr.swapDupe' $ VU.fromList [(0, 1), (1, 2), (2, 3), (1, 4), (4, 5)]
 -- >>> let weights = VU.generate n Sum -- vertex `i` is given weight of `i`
 -- >>> let hld = Hld.new tree
@@ -63,8 +64,11 @@
 -- >>> --    +--4--5
 -- >>> let n = 6
 -- >>> let edges = VU.fromList [(0, 1, Sum (1 :: Int)), (1, 2, Sum 2), (2, 3, Sum 3), (1, 4, Sum 4), (4, 5, Sum 5)]
+-- >>> -- note that the edges must be bi-directed:
 -- >>> let tree = Gr.build n $ Gr.swapDupe edges
 -- >>> let hld = Hld.new tree
+-- >>> let hld = Hld.new tree
+-- >>> -- note that the edge doesn't have to be bi-directed:
 -- >>> tm <- TM.fromEdges hld {- `Sum` is commutative -} Commute edges
 -- >>> TM.prod tm 1 3
 -- Sum {getSum = 5}

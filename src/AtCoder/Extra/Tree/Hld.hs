@@ -75,6 +75,7 @@
 -- >>> --    +
 -- >>> --    +--4--5
 -- >>> let n = 6
+-- >>> -- note that the edges must be bi-directed:
 -- >>> let tree = Gr.build' n . Gr.swapDupe' $ VU.fromList [(0, 1), (1, 2), (2, 3), (1, 4), (4, 5)]
 -- >>> let hld = Hld.new tree
 --
@@ -215,15 +216,25 @@ data Hld = Hld
 
 -- | \(O(n)\) Creates an `Hld` with \(0\) as the root vertex.
 --
+-- ==== Constraints
+-- - \(n \ge 1\)
+-- - The input graph must be a tree; the edges must be non-directed (both \((u, v, w)\) and
+--   \((v, u, w)\) edges are required).
+--
 -- @since 1.1.0.0
-{-# INLINABLE new #-}
+{-# INLINEABLE new #-}
 new :: forall w. (HasCallStack) => Gr.Csr w -> Hld
 new tree = newAt tree 0
 
 -- | \(O(n)\) Creates an `Hld` with a root vertex specified.
 --
+-- ==== Constraints
+-- - \(n \ge 1\)
+-- - The input graph must be a tree; the edges must be non-directed (both \((u, v, w)\) and
+--   \((v, u, w)\) edges are required).
+--
 -- @since 1.1.0.0
-{-# INLINABLE newAt #-}
+{-# INLINEABLE newAt #-}
 newAt :: forall w. (HasCallStack) => Gr.Csr w -> Vertex -> Hld
 newAt tree root
   | n == 1 =
@@ -326,7 +337,7 @@ newAt tree root
 -- | \(O(\log n)\) Calculates the lowest common ancestor of \(u\) and \(v\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE lca #-}
+{-# INLINEABLE lca #-}
 lca :: (HasCallStack) => Hld -> Vertex -> Vertex -> Vertex
 lca Hld {..} = inner
   where
@@ -349,7 +360,7 @@ lca Hld {..} = inner
 -- is bigger than the depth of \(v\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE ancestor #-}
+{-# INLINEABLE ancestor #-}
 ancestor :: (HasCallStack) => Hld -> Vertex -> Int -> Vertex
 ancestor Hld {..} parent k0 = inner parent k0
   where
@@ -368,7 +379,7 @@ ancestor Hld {..} parent k0 = inner parent k0
 -- Throws an error if `k` is out
 --
 -- @since 1.1.0.0
-{-# INLINABLE jump #-}
+{-# INLINEABLE jump #-}
 jump :: (HasCallStack) => Hld -> Vertex -> Vertex -> Int -> Maybe Vertex
 jump hld@Hld {..} u v k
   | k > lenU + lenV = Nothing
@@ -384,7 +395,7 @@ jump hld@Hld {..} u v k
 -- | \(O(\log n)\) Returns the length of the path between \(u\) and \(v\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE lengthBetween #-}
+{-# INLINEABLE lengthBetween #-}
 lengthBetween :: (HasCallStack) => Hld -> Vertex -> Vertex -> Int
 lengthBetween hld@Hld {..} u v = du - dLca + dv - dLca
   where
@@ -396,7 +407,7 @@ lengthBetween hld@Hld {..} u v = du - dLca + dv - dLca
 -- | \(O(n)\) Returns the vertices on the path between \(u\) and \(v\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE path #-}
+{-# INLINEABLE path #-}
 path :: (HasCallStack) => Hld -> Vertex -> Vertex -> [Vertex]
 path hld@Hld {..} u v = concatMap expand $ pathSegmentsInclusive WeightsAreOnVertices hld u v
   where
@@ -411,7 +422,7 @@ path hld@Hld {..} u v = concatMap expand $ pathSegmentsInclusive WeightsAreOnVer
 -- `WeightsAreOnEdges`. This is the trick to put edge weights to on vertices.
 --
 -- @since 1.1.0.0
-{-# INLINABLE pathSegmentsInclusive #-}
+{-# INLINEABLE pathSegmentsInclusive #-}
 pathSegmentsInclusive :: (HasCallStack) => WeightPolicy -> Hld -> Vertex -> Vertex -> [(VertexHld, VertexHld)]
 pathSegmentsInclusive weightPolicy Hld {..} x0 y0 = done $ inner x0 [] y0 []
   where
@@ -451,7 +462,7 @@ pathSegmentsInclusive weightPolicy Hld {..} x0 y0 = done $ inner x0 [] y0 []
 -- corresponds to the subtree segments rooted at the given @subtreeRoot@.
 --
 -- @since 1.1.0.0
-{-# INLINABLE subtreeSegmentInclusive #-}
+{-# INLINEABLE subtreeSegmentInclusive #-}
 subtreeSegmentInclusive :: (HasCallStack) => Hld -> Vertex -> (VertexHld, VertexHld)
 subtreeSegmentInclusive Hld {..} subtreeRoot = (ir, ir + sr - 1)
   where
@@ -461,7 +472,7 @@ subtreeSegmentInclusive Hld {..} subtreeRoot = (ir, ir + sr - 1)
 -- | \(O(1)\) Returns `True` if \(u\) is in a subtree of \(r\).
 --
 -- @since 1.1.0.0
-{-# INLINABLE isInSubtree #-}
+{-# INLINEABLE isInSubtree #-}
 isInSubtree :: (HasCallStack) => Hld -> Vertex -> Vertex -> Bool
 isInSubtree hld@Hld {..} r_ u = l <= iu && iu <= r
   where
