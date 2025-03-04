@@ -330,6 +330,11 @@ executable yosupo-point-set-range-composite-large-array-lazy-persistent
   main-is:       yosupo-point-set-range-composite-large-array-lazy-persistent.hs
   build-depends: verify
 
+executable yosupo-dynamic-point-set-rectangle-affine-rectangle-sum
+  import:        app-local
+  main-is:       yosupo-dynamic-point-set-rectangle-affine-rectangle-sum.hs
+  build-depends: verify
+
 executable yosupo-pow-of-matrix
   import:        app-local
   main-is:       yosupo-pow-of-matrix.hs

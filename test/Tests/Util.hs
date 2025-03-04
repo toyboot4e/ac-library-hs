@@ -1,4 +1,4 @@
-module Tests.Util (myForAllShrink, laws, intervalGen) where
+module Tests.Util (myForAllShrink, laws, intervalGen, intervalGen') where
 
 import Data.Proxy (Proxy (..))
 import Data.Typeable (Typeable, typeRep)
@@ -43,7 +43,11 @@ laws =
 
 -- | Returns an interval [l, r) in [0, n)
 intervalGen :: Int -> QC.Gen (Int, Int)
-intervalGen n = do
-  l <- QC.chooseInt (0, n)
-  r <- QC.chooseInt (l, n)
+intervalGen = intervalGen' 0
+
+-- | Returns an interval [l, r) in [0, n)
+intervalGen' :: Int -> Int -> QC.Gen (Int, Int)
+intervalGen' xl xr = do
+  l <- QC.chooseInt (xl, xr)
+  r <- QC.chooseInt (l, xr)
   pure (l, r)

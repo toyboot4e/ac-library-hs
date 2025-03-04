@@ -4,6 +4,7 @@
 module Util
   ( Parser,
     intP,
+    mintP,
     intS1P,
     int2P,
     int3P,
@@ -27,6 +28,7 @@ module Util
 where
 
 import AtCoder.Extra.Semigroup.Matrix qualified as Mat
+import AtCoder.ModInt qualified as M
 import Control.Monad.Trans.State.Strict (StateT (..), evalStateT)
 import Data.ByteString.Builder qualified as BSB
 import Data.ByteString.Char8 qualified as BS
@@ -35,6 +37,7 @@ import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
+import GHC.TypeNats (KnownNat)
 import System.IO (stdout)
 
 -- TODO: use MonadState
@@ -46,6 +49,11 @@ type Parser = StateT BS.ByteString Maybe
 {-# INLINE intP #-}
 intP :: Parser Int
 intP = StateT $ BS.readInt . BS.dropSpace
+
+-- | Parses an `ModInt`.
+{-# INLINE mintP #-}
+mintP :: (KnownNat p) => Parser (M.ModInt p)
+mintP = StateT $ ((\(!a, !b) -> (M.new a, b)) <$>) . BS.readInt . BS.dropSpace
 
 -- | Parses an `Int` and subtracts @1@.
 {-# INLINE intS1P #-}

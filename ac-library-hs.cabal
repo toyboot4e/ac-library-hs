@@ -66,6 +66,7 @@ library
     AtCoder.Extra.IntervalMap
     AtCoder.Extra.IntMap
     AtCoder.Extra.IntSet
+    AtCoder.Extra.LazyKdTree
     AtCoder.Extra.Math
     AtCoder.Extra.Monoid
     AtCoder.Extra.Monoid.Affine1
@@ -143,6 +144,7 @@ test-suite ac-library-hs-test
     Tests.Extra.IntervalMap
     Tests.Extra.IntMap
     Tests.Extra.IntSet
+    Tests.Extra.LazyKdTree
     Tests.Extra.Math
     Tests.Extra.Monoid
     Tests.Extra.MultiSet
