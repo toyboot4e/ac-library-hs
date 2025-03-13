@@ -1,7 +1,10 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeFamilies #-}
 
--- | A monoid acted on by `Mat2x2`, an affine transformation target.
+-- | A monoid acted on by `Mat2x2` or `Affine1`, an affine transformation target.
+--
+-- ==== As an `Affine1` action target
+-- Compared to `Sum`, `V2` hold the length in the second value.
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Monoid.V2
@@ -9,9 +12,11 @@ module AtCoder.Extra.Monoid.V2
     V2 (..),
     V2Repr,
 
-    -- * Constructor
+    -- * Constructors
     new,
     unV2,
+    zero,
+    isZero,
   )
 where
 
@@ -39,12 +44,20 @@ newtype V2 a = V2 (V2Repr a)
 -- @since 1.1.0.0
 type V2Repr a = (a, a)
 
--- | \(O(1)\) Creates `V2` of length \(1\).
+-- | \(O(1)\) Creates a `V2` of length \(1\).
 --
 -- @since 1.1.0.0
 {-# INLINE new #-}
 new :: (Num a) => a -> V2 a
 new !a = V2 (a, 1)
+
+-- | \(O(1)\) Creates a `V2` of length \(0\), i.e., `mempty`. Note that this value does not change
+-- on affine transformation.
+--
+-- @since 1.2.2.0
+{-# INLINE zero #-}
+zero :: (Num a) => V2 a
+zero = V2 (0, 0)
 
 -- | \(O(1)\) Retrieves the value of `V2`, discarding the length information.
 --
@@ -52,6 +65,13 @@ new !a = V2 (a, 1)
 {-# INLINE unV2 #-}
 unV2 :: V2 a -> a
 unV2 (V2 (!a, !_)) = a
+
+-- | \(O(1)\) Returns whether the `V2` is equal to `zero`
+--
+-- @since 1.2.2.0
+{-# INLINE isZero #-}
+isZero :: (Num a, Eq a) => V2 a -> Bool
+isZero = (== zero)
 
 -- | @since 1.1.0.0
 instance (Num a) => Semigroup (V2 a) where

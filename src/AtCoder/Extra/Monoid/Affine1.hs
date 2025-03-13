@@ -24,6 +24,7 @@ module AtCoder.Extra.Monoid.Affine1
 where
 
 import AtCoder.Extra.Math qualified as ACEM
+import AtCoder.Extra.Monoid.V2 qualified as V2
 import AtCoder.LazySegTree (SegAct (..))
 import Data.Coerce (coerce)
 import Data.Foldable (foldl')
@@ -150,7 +151,15 @@ instance (Num a) => SegAct (Dual (Affine1 (Sum a))) (Sum a) where
   {-# INLINE segActWithLength #-}
   segActWithLength !len (Dual f) (Sum !x) = Sum $! actWithLength len (coerce f) x
 
--- not works as SegAct for Product, Min, and Max.
+-- | @since 1.2.2.0
+instance (Num a) => SegAct (Affine1 a) (V2.V2 a) where
+  {-# INLINE segAct #-}
+  segAct (Affine1 (!a, !b)) (V2.V2 (!v, !len)) = V2.V2 (a * v + b * len, len)
+
+-- | @since 1.2.2.0
+instance (Num a) => SegAct (Dual (Affine1 a)) (V2.V2 a) where
+  {-# INLINE segAct #-}
+  segAct (Dual (Affine1 (!a, !b))) (V2.V2 (!v, !len)) = V2.V2 (a * v + b * len, len)
 
 -- | @since 1.0.0.0
 newtype instance VU.MVector s (Affine1 a) = MV_Affine1 (VU.MVector s (Affine1Repr a))
