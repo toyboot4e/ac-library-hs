@@ -143,7 +143,7 @@ import Prelude hiding (read)
 --
 -- If you implement `SegAct` via `segActWithLength`, satisfy one more propety:
 --
--- [Linear left monoid action] @'segActWithLength' len f a = 'Data.Semigroup.stimes' len ('segAct' f a) a@.
+-- [Linear left monoid action] @'segActWithLength' len f (stimes len a) = 'Data.Semigroup.stimes' len ('segAct' f a)@.
 --
 -- ==== Invariant
 -- In `SegAct` instances, new semigroup values are always given from the left: @new '<>' old@. The

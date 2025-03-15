@@ -5,13 +5,6 @@ import Data.Vector.Unboxed qualified as VU
 import Util
 
 -- | Parses an `Int`.
-{-# INLINE mintP #-}
-mintP :: Parser (M.ModInt 998244353)
-mintP = do
-  x <- intP
-  pure $ M.new x
-
--- | Parses an `Int`.
 {-# INLINE affineP #-}
 affineP :: Parser (Affine1.Affine1 (M.ModInt 998244353))
 affineP = do

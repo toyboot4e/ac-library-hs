@@ -62,7 +62,7 @@ module AtCoder.Internal.Assert
     checkCustom,
     errorCustom,
 
-    -- * Interval assertion
+    -- * Interval assertions
     checkInterval,
     errorInterval,
     checkIntervalBounded,

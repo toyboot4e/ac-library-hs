@@ -77,6 +77,7 @@ module AtCoder.Extra.Seq.Map
 
     -- ** Products
     prodInInterval,
+    -- TODO: prodIn
 
     -- ** Applications
     applyInInterval,

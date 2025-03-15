@@ -3,7 +3,6 @@ import AtCoder.ModInt qualified as M
 import Control.Monad.Trans.State.Strict (evalStateT)
 import Data.ByteString.Char8 qualified as BS
 import Data.Maybe (fromJust)
-import Data.Semigroup (Semigroup (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
