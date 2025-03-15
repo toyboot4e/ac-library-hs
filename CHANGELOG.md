@@ -1,5 +1,11 @@
 # Revision history for acl-hs
 
+## 1.2.2.0 -- Feb 2025
+
+- Added `Extra.KdTree` and `Extra.LazyKdTree`.
+- Added `clear` function to the dynamic segment tree family.
+- Fixed `Extra.Hld.new` for a tree with a single vertex.
+
 ## 1.2.1.0 -- Feb 2025
 
 - Added dynamic segment tree family.
