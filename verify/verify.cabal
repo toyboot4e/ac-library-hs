@@ -140,6 +140,11 @@ executable alpc-l
   main-is:       alpc-l.hs
   build-depends: verify
 
+executable aoj-DSL_2_C
+  import:        app-local
+  main-is:       aoj-DSL_2_C.hs
+  build-depends: verify
+
 executable aoj-DSL_2_G
   import:        app-local
   main-is:       aoj-DSL_2_G.hs
