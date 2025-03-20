@@ -3,6 +3,7 @@
 ## 1.2.5.0 -- April 2025
 
 - Added AtCoder.`Extra.Mo`
+- Added AtCoder.`Extra.SqrtDecomposition`
 
 ## 1.2.4.0 -- April 2025
 

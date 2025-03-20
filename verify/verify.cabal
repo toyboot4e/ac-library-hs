@@ -62,6 +62,7 @@ common dependencies
     , containers
     , mtl
     , primitive          >=0.6.4.0 && <0.10
+    , QuickCheck
     , transformers
     , vector             >=0.13.0  && <0.14
     , vector-algorithms  <0.10
@@ -579,3 +580,9 @@ executable aoj-GRL_4_B
   import:        app-online
   main-is:       aoj-GRL_4_B.hs
   build-depends: verify
+
+executable past202303-open-o
+  import:        app-online
+  main-is:       past202303-open-o.hs
+  build-depends: verify
+

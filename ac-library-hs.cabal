@@ -88,6 +88,7 @@ library
     AtCoder.Extra.Seq
     AtCoder.Extra.Seq.Map
     AtCoder.Extra.Seq.Raw
+    AtCoder.Extra.SqrtDecomposition
     AtCoder.Extra.Tree
     AtCoder.Extra.Tree.Hld
     AtCoder.Extra.Tree.Lct
