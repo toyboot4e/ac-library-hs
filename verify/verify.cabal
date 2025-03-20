@@ -361,7 +361,9 @@ executable yosupo-point-set-range-composite-large-array-sparse
 
 executable yosupo-point-set-range-composite-large-array-sparse-persistent
   import:        app-local
-  main-is:       yosupo-point-set-range-composite-large-array-sparse-persistent.hs
+  main-is:
+    yosupo-point-set-range-composite-large-array-sparse-persistent.hs
+
   build-depends: verify
 
 executable yosupo-point-set-range-composite-large-array-lazy
@@ -371,12 +373,19 @@ executable yosupo-point-set-range-composite-large-array-lazy
 
 executable yosupo-point-set-range-composite-large-array-lazy-persistent
   import:        app-local
-  main-is:       yosupo-point-set-range-composite-large-array-lazy-persistent.hs
+  main-is:
+    yosupo-point-set-range-composite-large-array-lazy-persistent.hs
+
   build-depends: verify
 
 executable yosupo-shortest-path
   import:        app-local
   main-is:       yosupo-shortest-path.hs
+  build-depends: verify
+
+executable yosupo-static-range-inversions-query
+  import:        app-local
+  main-is:       yosupo-static-range-inversions-query.hs
   build-depends: verify
 
 executable yosupo-pow-of-matrix

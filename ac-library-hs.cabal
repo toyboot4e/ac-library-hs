@@ -70,6 +70,7 @@ library
     AtCoder.Extra.KdTree
     AtCoder.Extra.LazyKdTree
     AtCoder.Extra.Math
+    AtCoder.Extra.Mo
     AtCoder.Extra.Monoid
     AtCoder.Extra.Monoid.Affine1
     AtCoder.Extra.Monoid.Mat2x2
