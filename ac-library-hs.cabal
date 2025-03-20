@@ -79,6 +79,7 @@ library
     AtCoder.Extra.MultiSet
     AtCoder.Extra.Pdsu
     AtCoder.Extra.Pool
+    AtCoder.Extra.SegTree2d
     AtCoder.Extra.Semigroup.Matrix
     AtCoder.Extra.Semigroup.Permutation
     AtCoder.Extra.Seq
@@ -88,6 +89,7 @@ library
     AtCoder.Extra.Tree.Hld
     AtCoder.Extra.Tree.Lct
     AtCoder.Extra.Tree.TreeMonoid
+    AtCoder.Extra.Vector
     AtCoder.Extra.WaveletMatrix
     AtCoder.Extra.WaveletMatrix.BitVector
     AtCoder.Extra.WaveletMatrix.Raw
@@ -150,6 +152,7 @@ test-suite ac-library-hs-test
     Tests.Extra.Math
     Tests.Extra.Monoid
     Tests.Extra.MultiSet
+    Tests.Extra.SegTree2d
     Tests.Extra.Semigroup.Matrix
     Tests.Extra.Semigroup.Permutation
     Tests.Extra.Seq
