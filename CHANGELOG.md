@@ -1,5 +1,9 @@
 # Revision history for acl-hs
 
+## 1.2.2.1 -- March 2025
+
+- Reduced build time with `ST` monad and `INLINEABLE` pragmas.
+
 ## 1.2.2.0 -- Feb 2025
 
 - Added `Extra.KdTree` and `Extra.LazyKdTree`.

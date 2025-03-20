@@ -4,7 +4,7 @@ name:            ac-library-hs
 -- PVP summary:  +-+------- breaking API changes
 --               | | +----- non-breaking API additions
 --               | | | +--- code changes with no API change
-version:         1.2.2.0
+version:         1.2.2.1
 synopsis:        Data structures and algorithms
 description:
   Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive
