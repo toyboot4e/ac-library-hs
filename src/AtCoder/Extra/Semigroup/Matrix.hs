@@ -434,32 +434,33 @@ detMod m (Matrix h w vecA) = runST $ do
                               pure $! m - det_
                             else pure det_
             det' <- swapLoop i det
-            det'' <- VU.foldM'
-              ( \ !acc j -> do
-                  let visitDiag !det_ = do
-                        aii <- read2d view i i
-                        if aii == 0
-                          then pure det_
-                          else do
-                            aji <- read2d view j i
-                            let !c = m - aji `div` aii
-                            rowI <- VGM.unsafeRead view i
-                            rowJ <- VGM.unsafeRead view j
-                            -- NOTE: it's a reverse loop!
-                            VGM.ifoldrM'
-                              ( \k_ aik () -> do
-                                  VGM.unsafeModify rowJ ((`mod` m) . (+ aik * c)) (k_ + i)
-                              )
-                              ()
-                              (VGM.unsafeDrop i rowI)
-                            VGM.unsafeSwap view i j
-                            visitDiag (m - det_)
-                  acc' <- visitDiag acc
-                  VGM.unsafeSwap view i j
-                  pure $! m - acc'
-              )
-              det'
-              (VU.generate (n - (i + 1)) (+ (i + 1)))
+            det'' <-
+              VU.foldM'
+                ( \ !acc j -> do
+                    let visitDiag !det_ = do
+                          aii <- read2d view i i
+                          if aii == 0
+                            then pure det_
+                            else do
+                              aji <- read2d view j i
+                              let !c = m - aji `div` aii
+                              rowI <- VGM.unsafeRead view i
+                              rowJ <- VGM.unsafeRead view j
+                              -- NOTE: it's a reverse loop!
+                              VGM.ifoldrM'
+                                ( \k_ aik () -> do
+                                    VGM.unsafeModify rowJ ((`mod` m) . (+ aik * c)) (k_ + i)
+                                )
+                                ()
+                                (VGM.unsafeDrop i rowI)
+                              VGM.unsafeSwap view i j
+                              visitDiag (m - det_)
+                    acc' <- visitDiag acc
+                    VGM.unsafeSwap view i j
+                    pure $! m - acc'
+                )
+                det'
+                (VU.generate (n - (i + 1)) (+ (i + 1)))
 
             inner (i + 1) det''
 

@@ -59,6 +59,7 @@ import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Bits
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -90,11 +91,7 @@ data FenwickTree s a = FenwickTree
 -- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => Int -> m (FenwickTree (PrimState m) a)
-new nFt
-  | nFt >= 0 = do
-      dataFt <- VUM.replicate nFt 0
-      pure FenwickTree {..}
-  | otherwise = error $ "AtCoder.FenwickTree.new: given negative size `" ++ show nFt ++ "`"
+new = stToPrim . newST
 
 -- | Creates `FenwickTree` with initial values.
 --
@@ -102,12 +99,9 @@ new nFt
 -- - \(O(n)\)
 --
 -- @since 1.0.0.0
-build :: (PrimMonad m, Num a, VU.Unbox a) => VU.Vector a -> m (FenwickTree (PrimState m) a)
 {-# INLINE build #-}
-build xs = do
-  ft <- new $ VU.length xs
-  VU.iforM_ xs $ add ft
-  pure ft
+build :: (PrimMonad m, Num a, VU.Unbox a) => VU.Vector a -> m (FenwickTree (PrimState m) a)
+build = stToPrim . buildST
 
 -- | Adds \(x\) to \(p\)-th value of the array.
 --
@@ -120,26 +114,14 @@ build xs = do
 -- @since 1.0.0.0
 {-# INLINE add #-}
 add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()
-add FenwickTree {..} p0 x = do
-  let !_ = ACIA.checkIndex "AtCoder.FenwickTree.add" p0 nFt
-  let p1 = p0 + 1
-  flip fix p1 $ \loop p -> do
-    when (p <= nFt) $ do
-      VGM.modify dataFt (+ x) (p - 1)
-      loop $! p + (p .&. (-p))
+add ft p0 x = stToPrim $ addST ft p0 x
 
 -- | \(O(\log n)\) Calculates the sum in a half-open interval @[0, r)@.
 --
 -- @since 1.0.0.0
 {-# INLINE prefixSum #-}
 prefixSum :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> m a
-prefixSum FenwickTree {..} = inner 0
-  where
-    inner !acc !r
-      | r <= 0 = pure acc
-      | otherwise = do
-          dx <- VGM.read dataFt (r - 1)
-          inner (acc + dx) (r - r .&. (-r))
+prefixSum ft r = stToPrim $ prefixSumST ft r
 
 -- | Calculates the sum in a half-open interval \([l, r)\).
 --
@@ -152,9 +134,7 @@ prefixSum FenwickTree {..} = inner 0
 -- @since 1.0.0.0
 {-# INLINE sum #-}
 sum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
-sum ft@FenwickTree {nFt} l r
-  | not (ACIA.testInterval l r nFt) = ACIA.errorInterval "AtCoder.FenwickTree.sum" l r nFt
-  | otherwise = unsafeSum ft l r
+sum ft l r = stToPrim $ sumST ft l r
 
 -- | Total variant of `sum`. Calculates the sum in a half-open interval \([l, r)\). It returns
 -- `Nothing` if the interval is invalid.
@@ -165,17 +145,7 @@ sum ft@FenwickTree {nFt} l r
 -- @since 1.0.0.0
 {-# INLINE sumMaybe #-}
 sumMaybe :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m (Maybe a)
-sumMaybe ft@FenwickTree {nFt} l r
-  | not (ACIA.testInterval l r nFt) = pure Nothing
-  | otherwise = Just <$> unsafeSum ft l r
-
--- | Internal implementation of `sum`.
-{-# INLINE unsafeSum #-}
-unsafeSum :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m a
-unsafeSum ft l r = do
-  xr <- prefixSum ft r
-  xl <- prefixSum ft l
-  pure $! xr - xl
+sumMaybe ft l r = stToPrim $ sumMaybeST ft l r
 
 -- | (Extra API) Applies a binary search on the Fenwick tree. It returns an index \(r\) that
 -- satisfies both of the following.
@@ -359,3 +329,61 @@ minLeftM FenwickTree {..} r0 f = do
                   else inner2 (i + bit k) k t
 
       (+ 1) <$> inner2 i0 k0 s0
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE newST #-}
+newST :: (HasCallStack, Num a, VU.Unbox a) => Int -> ST s (FenwickTree s a)
+newST nFt
+  | nFt >= 0 = do
+      dataFt <- VUM.replicate nFt 0
+      pure FenwickTree {..}
+  | otherwise = error $ "AtCoder.FenwickTree.newST: given negative size `" ++ show nFt ++ "`"
+
+{-# INLINEABLE buildST #-}
+buildST :: (Num a, VU.Unbox a) => VU.Vector a -> ST s (FenwickTree s a)
+buildST xs = do
+  ft <- new $ VU.length xs
+  VU.iforM_ xs $ add ft
+  pure ft
+
+{-# INLINEABLE addST #-}
+addST :: (HasCallStack, Num a, VU.Unbox a) => FenwickTree s a -> Int -> a -> ST s ()
+addST FenwickTree {..} p0 x = do
+  let !_ = ACIA.checkIndex "AtCoder.FenwickTree.addST" p0 nFt
+  let p1 = p0 + 1
+  flip fix p1 $ \loop p -> do
+    when (p <= nFt) $ do
+      VGM.modify dataFt (+ x) (p - 1)
+      loop $! p + (p .&. (-p))
+
+{-# INLINEABLE prefixSumST #-}
+prefixSumST :: (Num a, VU.Unbox a) => FenwickTree s a -> Int -> ST s a
+prefixSumST FenwickTree {..} = inner 0
+  where
+    inner !acc !r
+      | r <= 0 = pure acc
+      | otherwise = do
+          dx <- VGM.read dataFt (r - 1)
+          inner (acc + dx) (r - r .&. (-r))
+
+{-# INLINEABLE sumST #-}
+sumST :: (HasCallStack, Num a, VU.Unbox a) => FenwickTree s a -> Int -> Int -> ST s a
+sumST ft@FenwickTree {nFt} l r
+  | not (ACIA.testInterval l r nFt) = ACIA.errorInterval "AtCoder.FenwickTree.sumST" l r nFt
+  | otherwise = unsafeSumST ft l r
+
+{-# INLINEABLE sumMaybeST #-}
+sumMaybeST :: (HasCallStack, Num a, VU.Unbox a) => FenwickTree s a -> Int -> Int -> ST s (Maybe a)
+sumMaybeST ft@FenwickTree {nFt} l r
+  | not (ACIA.testInterval l r nFt) = pure Nothing
+  | otherwise = Just <$> unsafeSumST ft l r
+
+{-# INLINEABLE unsafeSumST #-}
+unsafeSumST :: (HasCallStack, Num a, VU.Unbox a) => FenwickTree s a -> Int -> Int -> ST s a
+unsafeSumST ft l r = do
+  xr <- prefixSumST ft r
+  xl <- prefixSumST ft l
+  pure $! xr - xl

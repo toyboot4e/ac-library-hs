@@ -51,6 +51,7 @@ module AtCoder.Extra.Seq.Map
     delete_,
 
     -- ** Products
+
     -- sliceST,
     prod,
     prodMaybe,

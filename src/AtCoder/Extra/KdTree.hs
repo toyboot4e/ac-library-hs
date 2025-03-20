@@ -155,7 +155,7 @@ build2 xys = build xs ys
 -- | \(O(n \log n)\) Collects points in \([x_l, x_r) \times [y_l, y_r)\).
 --
 -- @since 1.2.2.0
-{-# INLINE findPointsIn #-}
+{-# INLINEABLE findPointsIn #-}
 findPointsIn ::
   (HasCallStack) =>
   -- | `KdTree`
@@ -200,7 +200,7 @@ findPointsIn KdTree {..} x1 x2 y1 y2 capacity
 -- point, or `Nothing` if the `KdTree` has no point.
 --
 -- @since 1.2.2.0
-{-# INLINE findNearestPoint #-}
+{-# INLINEABLE findNearestPoint #-}
 findNearestPoint ::
   (HasCallStack) =>
   -- | `KdTree`

@@ -78,7 +78,7 @@ import GHC.TypeNats (natVal')
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 --
 -- @since 1.0.0.0
-{-# INLINE convolution #-}
+{-# INLINEABLE convolution #-}
 convolution ::
   forall p.
   (HasCallStack, AM.Modulus p) =>
@@ -109,7 +109,7 @@ convolution a b
 -- - \(O(n\log{n} + \log{\mathrm{mod}})\), where \(n = |a| + |b|\).
 --
 -- @since 1.0.0.0
-{-# INLINE convolutionRaw #-}
+{-# INLINEABLE convolutionRaw #-}
 convolutionRaw ::
   forall p a.
   (HasCallStack, AM.Modulus p, Integral a, VU.Unbox a) =>
@@ -139,7 +139,7 @@ convolutionRaw _ a b
 -- - \(O(n\log{n})\), where \(n = |a| + |b|\).
 --
 -- @since 1.0.0.0
-{-# INLINE convolution64 #-}
+{-# INLINEABLE convolution64 #-}
 convolution64 ::
   (HasCallStack) =>
   VU.Vector Int ->
@@ -166,7 +166,6 @@ convolution64 a b
           -- !_ = ACIA.runtimeAssert (mod2 `mod` bit maxAbBit == 1) $ "AtCoder.Convolution.convolution64: `mod2` isn't enough to support an array of length `2^25`."
           -- !_ = ACIA.runtimeAssert (mod3 `mod` bit maxAbBit == 1) $ "AtCoder.Convolution.convolution64: `mod3` isn't enough to support an array of length `2^26`."
           !_ = ACIA.runtimeAssert (n + m - 1 <= bit maxAbBit) "AtCoder.Convolution.convolution64: given too long vector as input"
-          -- TODO: convolution vs convolutionRaw for the speed. I think the former is faster.
           c1 = convolution {- mod1 -} (VU.map (AM.new @754974721) a) (VU.map (AM.new @754974721) b)
           c2 = convolution {- mod2 -} (VU.map (AM.new @167772161) a) (VU.map (AM.new @167772161) b)
           c3 = convolution {- mod3 -} (VU.map (AM.new @469762049) a) (VU.map (AM.new @469762049) b)

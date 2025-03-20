@@ -16,11 +16,14 @@
 module AtCoder.Internal.Barrett
   ( -- * Barrett
     Barrett,
+
     -- * Constructor
     new32,
     new64,
+
     -- * Accessor
     umod,
+
     -- * Barrett reduction
     mulMod,
   )

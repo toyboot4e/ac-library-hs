@@ -88,7 +88,8 @@ module AtCoder.Internal.Buffer
 where
 
 import AtCoder.Internal.Assert qualified as ACIA
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -108,20 +109,14 @@ data Buffer s a = Buffer
 -- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (Buffer (PrimState m) a)
-new n = do
-  lenB <- VUM.replicate 1 (0 :: Int)
-  vecB <- VUM.unsafeNew n
-  pure Buffer {..}
+new n = stToPrim $ newST n
 
 -- | \(O(n)\) Creates a buffer with capacity \(n\) with initial values.
 --
 -- @since 1.0.0.0
 {-# INLINE build #-}
 build :: (PrimMonad m, VU.Unbox a) => VU.Vector a -> m (Buffer (PrimState m) a)
-build xs = do
-  lenB <- VUM.replicate 1 $ VU.length xs
-  vecB <- VU.thaw xs
-  pure Buffer {..}
+build xs = stToPrim $ buildST xs
 
 -- | \(O(1)\) Returns the array size.
 --
@@ -135,8 +130,7 @@ capacity = VUM.length . vecB
 -- @since 1.0.0.0
 {-# INLINE length #-}
 length :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m Int
-length Buffer {..} = do
-  VGM.read lenB 0
+length Buffer {..} = VGM.read lenB 0
 
 -- | \(O(1)\) Returns `True` if the buffer is empty.
 --
@@ -150,13 +144,7 @@ null = (<$>) (== 0) . length
 -- @since 1.0.0.0
 {-# INLINE back #-}
 back :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (Maybe a)
-back Buffer {..} = do
-  len <- VGM.read lenB 0
-  if len == 0
-    then pure Nothing
-    else do
-      x <- VGM.read vecB (len - 1)
-      pure $ Just x
+back = stToPrim . backST
 
 -- | \(O(1)\) Yields the element at the given position. Will throw an exception if the index is out
 -- of range.
@@ -164,54 +152,35 @@ back Buffer {..} = do
 -- @since 1.0.0.0
 {-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> Int -> m a
-read Buffer {..} i = do
-  len <- VGM.read lenB 0
-  let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.read" i len
-  VGM.read vecB i
+read buf i = stToPrim $ readST buf i
 
 -- | \(O(1)\) Yields the element at the given position, or `Nothing` if the index is out of range.
 --
 -- @since 1.2.1.0
 {-# INLINE readMaybe #-}
 readMaybe :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> Int -> m (Maybe a)
-readMaybe Buffer {..} i = do
-  len <- VGM.read lenB 0
-  if ACIA.testIndex i len
-    then Just <$> VGM.unsafeRead vecB i
-    else pure Nothing
+readMaybe buf i = stToPrim $ readMaybeST buf i
 
 -- | \(O(1)\) Appends an element to the back.
 --
 -- @since 1.0.0.0
 {-# INLINE pushBack #-}
 pushBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> a -> m ()
-pushBack Buffer {..} e = do
-  len <- VGM.read lenB 0
-  VGM.write vecB len e
-  VGM.write lenB 0 (len + 1)
+pushBack buf e = stToPrim $ pushBackST buf e
 
 -- | \(O(1)\) Removes the last element from the buffer and returns it, or `Nothing` if it is empty.
 --
 -- @since 1.0.0.0
 {-# INLINE popBack #-}
 popBack :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (Maybe a)
-popBack Buffer {..} = do
-  len <- VGM.read lenB 0
-  if len == 0
-    then pure Nothing
-    else do
-      x <- VGM.read vecB (len - 1)
-      VGM.write lenB 0 (len - 1)
-      pure $ Just x
+popBack buf = stToPrim $ popBackST buf
 
 -- | \(O(1)\) Removes the last element from the buffer and discards it.
 --
 -- @since 1.1.1.0
 {-# INLINE popBack_ #-}
 popBack_ :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m ()
-popBack_ buf = do
-  _ <- popBack buf
-  pure ()
+popBack_ buf = stToPrim $ popBackST_ buf
 
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
 -- out of bounds.
@@ -219,10 +188,7 @@ popBack_ buf = do
 -- @since 1.0.0.0
 {-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> Int -> a -> m ()
-write Buffer {..} i e = do
-  len <- VGM.read lenB 0
-  let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.write" i len
-  VGM.write vecB i e
+write buf i e = stToPrim $ writeST buf i e
 
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
 -- out of bounds.
@@ -230,19 +196,16 @@ write Buffer {..} i e = do
 -- @since 1.0.0.0
 {-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> (a -> a) -> Int -> m ()
-modify Buffer {..} f i = do
-  len <- VGM.read lenB 0
-  let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.modify" i len
-  VGM.modify vecB f i
+modify buf f i = stToPrim $ modifyST buf f i
 
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
 -- out of bounds.
 --
 -- @since 1.0.0.0
-{-# INLINE modifyM #-}
+{-# INLINEABLE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> (a -> m a) -> Int -> m ()
 modifyM Buffer {..} f i = do
-  len <- VGM.read lenB 0
+  len <- stToPrim $ VGM.read lenB 0
   let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.modifyM" i len
   VGM.modifyM vecB f i
 
@@ -251,7 +214,7 @@ modifyM Buffer {..} f i = do
 -- @since 1.0.0.0
 {-# INLINE clear #-}
 clear :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m ()
-clear Buffer {..} = do
+clear Buffer {..} = stToPrim $ do
   VGM.write lenB 0 0
 
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
@@ -259,9 +222,7 @@ clear Buffer {..} = do
 -- @since 1.0.0.0
 {-# INLINE freeze #-}
 freeze :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (VU.Vector a)
-freeze Buffer {..} = do
-  len <- VGM.read lenB 0
-  VU.freeze $ VUM.take len vecB
+freeze = stToPrim . freezeST
 
 -- | \(O(1)\) Unsafely converts a mutable vector to an immutable one without copying. The mutable
 -- vector may not be used after this operation.
@@ -269,6 +230,97 @@ freeze Buffer {..} = do
 -- @since 1.0.0.0
 {-# INLINE unsafeFreeze #-}
 unsafeFreeze :: (PrimMonad m, VU.Unbox a) => Buffer (PrimState m) a -> m (VU.Vector a)
-unsafeFreeze Buffer {..} = do
+unsafeFreeze = stToPrim . unsafeFreezeST
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE newST #-}
+newST :: (VU.Unbox a) => Int -> ST s (Buffer s a)
+newST n = do
+  lenB <- VUM.replicate 1 (0 :: Int)
+  vecB <- VUM.unsafeNew n
+  pure Buffer {..}
+
+{-# INLINEABLE buildST #-}
+buildST :: (VU.Unbox a) => VU.Vector a -> ST s (Buffer s a)
+buildST xs = do
+  lenB <- VUM.replicate 1 $ VU.length xs
+  vecB <- VU.thaw xs
+  pure Buffer {..}
+
+{-# INLINEABLE backST #-}
+backST :: (VU.Unbox a) => Buffer s a -> ST s (Maybe a)
+backST Buffer {..} = do
+  len <- VGM.read lenB 0
+  if len == 0
+    then pure Nothing
+    else do
+      x <- VGM.read vecB (len - 1)
+      pure $ Just x
+
+{-# INLINEABLE readST #-}
+readST :: (HasCallStack, VU.Unbox a) => Buffer s a -> Int -> ST s a
+readST Buffer {..} i = do
+  len <- VGM.read lenB 0
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.read" i len
+  VGM.read vecB i
+
+{-# INLINEABLE readMaybeST #-}
+readMaybeST :: (VU.Unbox a) => Buffer s a -> Int -> ST s (Maybe a)
+readMaybeST Buffer {..} i = do
+  len <- VGM.read lenB 0
+  if ACIA.testIndex i len
+    then Just <$> VGM.unsafeRead vecB i
+    else pure Nothing
+
+{-# INLINEABLE pushBackST #-}
+pushBackST :: (HasCallStack, VU.Unbox a) => Buffer s a -> a -> ST s ()
+pushBackST Buffer {..} e = do
+  len <- VGM.read lenB 0
+  VGM.write vecB len e
+  VGM.write lenB 0 (len + 1)
+
+{-# INLINEABLE popBackST #-}
+popBackST :: (VU.Unbox a) => Buffer s a -> ST s (Maybe a)
+popBackST Buffer {..} = do
+  len <- VGM.read lenB 0
+  if len == 0
+    then pure Nothing
+    else do
+      x <- VGM.read vecB (len - 1)
+      VGM.write lenB 0 (len - 1)
+      pure $ Just x
+
+{-# INLINEABLE popBackST_ #-}
+popBackST_ :: (VU.Unbox a) => Buffer s a -> ST s ()
+popBackST_ buf = do
+  _ <- popBack buf
+  pure ()
+
+{-# INLINEABLE writeST #-}
+writeST :: (HasCallStack, VU.Unbox a) => Buffer s a -> Int -> a -> ST s ()
+writeST Buffer {..} i e = do
+  len <- VGM.read lenB 0
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.write" i len
+  VGM.write vecB i e
+
+{-# INLINEABLE modifyST #-}
+modifyST :: (HasCallStack, VU.Unbox a) => Buffer s a -> (a -> a) -> Int -> ST s ()
+modifyST Buffer {..} f i = do
+  len <- VGM.read lenB 0
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Buffer.modify" i len
+  VGM.modify vecB f i
+
+{-# INLINEABLE freezeST #-}
+freezeST :: (VU.Unbox a) => Buffer s a -> ST s (VU.Vector a)
+freezeST Buffer {..} = do
+  len <- VGM.read lenB 0
+  VU.freeze $ VUM.take len vecB
+
+{-# INLINEABLE unsafeFreezeST #-}
+unsafeFreezeST :: (VU.Unbox a) => Buffer s a -> ST s (VU.Vector a)
+unsafeFreezeST Buffer {..} = do
   len <- VGM.read lenB 0
   VU.unsafeFreeze $ VUM.take len vecB

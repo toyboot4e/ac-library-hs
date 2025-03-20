@@ -134,7 +134,7 @@ build' n edges = build n $ VU.zip3 us vs (VU.replicate (VU.length us) ())
 {-# INLINE build1 #-}
 build1 :: (HasCallStack) => Int -> VU.Vector (Int, Int) -> Csr Int
 build1 n edges = build n $ VU.zip3 us vs (VU.replicate (VU.length us) (1 :: Int))
- where
+  where
     (!us, !vs) = VU.unzip edges
 
 -- | \(O(1)\) Returns the adjacent vertices.

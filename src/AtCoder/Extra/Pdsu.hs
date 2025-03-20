@@ -135,7 +135,102 @@ leader pdsu v0 = stToPrim $ leaderST pdsu v0
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.leader" v0 $ nPdsu pdsu
 
+-- | \(O(\alpha(n))\) Returns \(p(v)\), the potential value of vertex \(v\) relative to the
+-- reprensetative of its group.
+--
+-- @since 1.1.0.0
+{-# INLINE pot #-}
+pot :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> m a
+pot dsu v1 = stToPrim $ potST dsu v1
+
+-- | \(O(\alpha(n))\) Returns whether the vertices \(a\) and \(b\) are in the same connected
+-- component.
+--
+-- @since 1.1.0.0
+{-# INLINE same #-}
+same :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m Bool
+same dsu v1 v2 = stToPrim $ sameST dsu v1 v2
+
+-- | \(O(\alpha(n))\) Returns the potential of \(v_1\) relative to \(v_2\): \(p(v_1) \cdot p^{-1}(v_2)\)
+-- if the two vertices belong to the same group. Returns `Nothing` when the two vertices are not
+-- connected.
+--
+-- @since 1.1.0.0
+{-# INLINE diff #-}
+diff :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m (Maybe a)
+diff dsu v1 v2 = stToPrim $ diffST dsu v1 v2
+
+-- | \(O(\alpha(n))\) Returns the potential of \(v_1\) relative to \(v_2\): \(p(v_1) \cdot p^{-1}(v_2)\)
+-- if the two vertices belong to the same group. Returns meaningless value if the two vertices are
+-- not connected.
+--
+-- @since 1.1.0.0
+{-# INLINE unsafeDiff #-}
+unsafeDiff :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m a
+unsafeDiff dsu v1 v2 = stToPrim $ unsafeDiffST dsu v1 v2
+
+-- | \(O(\alpha(n))\) Merges \(v_1\) to \(v_2\) with differential (relative) potential
+-- \(\mathrm{dp}\): \(p(v1) := \mathrm{dp} \cdot p(v2)\). Returns `True` if they're newly merged.
+--
+-- @since 1.1.0.0
+{-# INLINE merge #-}
+merge :: (HasCallStack, PrimMonad m, Monoid a, Ord a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> a -> m Bool
+merge dsu v10 v20 !dp0 = stToPrim $ mergeST dsu v10 v20 dp0
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.merge" v10 $ nPdsu dsu
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.merge" v20 $ nPdsu dsu
+
+-- | \(O(\alpha(n))\) `merge` with the return value discarded.
+--
+-- @since 1.1.0.0
+{-# INLINE merge_ #-}
+merge_ :: (HasCallStack, PrimMonad m, Monoid a, Ord a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> a -> m ()
+merge_ !dsu !v1 !v2 !dp = stToPrim $ do
+  _ <- mergeST dsu v1 v2 dp
+  pure ()
+
+-- | \(O(\alpha(n))\) Returns `True` if the two vertices belong to different groups or they belong
+-- to the same group under the condition \(p(v_1) = dp \cdot p(v_2)\). It's just a convenient
+-- helper function.
+--
+-- @since 1.1.0.0
+{-# INLINE canMerge #-}
+canMerge :: (HasCallStack, PrimMonad m, Semigroup a, Eq a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> a -> m Bool
+canMerge dsu v1 v2 dp = stToPrim $ canMergeST dsu v1 v2 dp
+
+-- | \(O(\alpha(n))\) Returns the number of vertices belonging to the same group.
+--
+-- @since 1.1.0.0
+{-# INLINE size #-}
+size :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> m Int
+size !dsu !v = stToPrim $ do
+  l <- leaderST dsu v
+  negate <$> VGM.read (parentOrSizePdsu dsu) l
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.size" v $ nPdsu dsu
+
+-- | \(O(n)\) Divides the graph into connected components and returns the list of them.
+--
+-- @since 1.1.0.0
+{-# INLINE groups #-}
+groups :: (PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> m (V.Vector (VU.Vector Int))
+groups dsu = stToPrim $ groupsST dsu
+
+-- | \(O(n)\) Clears the `Pdsu` to the initial state.
+--
+-- @since 1.1.0.0
+{-# INLINE clear #-}
+clear :: forall m a. (PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> m ()
+clear !dsu = do
+  VGM.set (potentialPdsu dsu) (mempty @a)
+  VGM.set (parentOrSizePdsu dsu) (-1 {- size -})
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
 {-# INLINE leaderST #-}
+-- NOTE(perf): INLINE makes it a bit faster
 leaderST :: (Semigroup a, VU.Unbox a) => Pdsu s a -> Int -> ST s Int
 leaderST Pdsu {..} v0 = inner v0
   where
@@ -156,72 +251,16 @@ leaderST Pdsu {..} v0 = inner v0
             VGM.modify potentialPdsu (<> pp) v
           pure r
 
--- | \(O(\alpha(n))\) Returns \(p(v)\), the potential value of vertex \(v\) relative to the
--- reprensetative of its group.
---
--- @since 1.1.0.0
-{-# INLINE pot #-}
-pot :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> m a
-pot dsu@Pdsu {..} v1 = stToPrim $ do
+{-# INLINEABLE potST #-}
+potST :: (HasCallStack, Semigroup a, VU.Unbox a) => Pdsu s a -> Int -> ST s a
+potST dsu@Pdsu {..} v1 = do
   -- Perform path compression
   _ <- leaderST dsu v1
   VGM.read potentialPdsu v1
   where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.pot" v1 nPdsu
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.potST" v1 nPdsu
 
--- | \(O(\alpha(n))\) Returns whether the vertices \(a\) and \(b\) are in the same connected
--- component.
---
--- @since 1.1.0.0
-{-# INLINE same #-}
-same :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m Bool
-same !dsu !v1 !v2 = stToPrim $ do
-  l1 <- leaderST dsu v1
-  l2 <- leaderST dsu v2
-  pure $ l1 == l2
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.same" v1 $ nPdsu dsu
-    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.same" v2 $ nPdsu dsu
-
--- TODO: call it unsafeDiff
-
--- | \(O(\alpha(n))\) Returns the potential of \(v_1\) relative to \(v_2\): \(p(v_1) \cdot p^{-1}(v_2)\)
--- if the two vertices belong to the same group. Returns `Nothing` when the two vertices are not
--- connected.
---
--- @since 1.1.0.0
-{-# INLINE diff #-}
-diff :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m (Maybe a)
-diff !dsu !v1 !v2 = do
-  b <- same dsu v1 v2
-  if b
-    then Just <$> unsafeDiff dsu v1 v2
-    else pure Nothing
-
--- | \(O(\alpha(n))\) Returns the potential of \(v_1\) relative to \(v_2\): \(p(v_1) \cdot p^{-1}(v_2)\)
--- if the two vertices belong to the same group. Returns meaningless value if the two vertices are
--- not connected.
---
--- @since 1.1.0.0
-{-# INLINE unsafeDiff #-}
-unsafeDiff :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m a
-unsafeDiff !dsu !v1 !v2 = do
-  p1 <- pot dsu v1
-  p2 <- pot dsu v2
-  pure $ p1 <> invertPdsu dsu p2
-
--- | \(O(\alpha(n))\) Merges \(v_1\) to \(v_2\) with differential (relative) potential
--- \(\mathrm{dp}\): \(p(v1) := \mathrm{dp} \cdot p(v2)\). Returns `True` if they're newly merged.
---
--- @since 1.1.0.0
-{-# INLINE merge #-}
-merge :: (HasCallStack, PrimMonad m, Monoid a, Ord a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> a -> m Bool
-merge dsu v10 v20 !dp0 = stToPrim $ mergeST dsu v10 v20 dp0
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.merge" v10 $ nPdsu dsu
-    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.merge" v20 $ nPdsu dsu
-
-{-# INLINE mergeST #-}
+{-# INLINEABLE mergeST #-}
 mergeST :: (HasCallStack, Monoid a, Ord a, VU.Unbox a) => Pdsu s a -> Int -> Int -> a -> ST s Bool
 mergeST dsu@Pdsu {..} v10 v20 !dp0 = inner v10 v20 dp0
   where
@@ -261,24 +300,10 @@ mergeST dsu@Pdsu {..} v10 v20 !dp0 = inner v10 v20 dp0
             else do
               inner v2 v1 $ invertPdsu dp
 
--- | \(O(\alpha(n))\) `merge` with the return value discarded.
---
--- @since 1.1.0.0
-{-# INLINE merge_ #-}
-merge_ :: (HasCallStack, PrimMonad m, Monoid a, Ord a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> a -> m ()
-merge_ !dsu !v1 !v2 !dp = do
-  _ <- merge dsu v1 v2 dp
-  pure ()
-
--- | \(O(\alpha(n))\) Returns `True` if the two vertices belong to different groups or they belong
--- to the same group under the condition \(p(v_1) = dp \cdot p(v_2)\). It's just a convenient
--- helper function.
---
--- @since 1.1.0.0
-{-# INLINE canMerge #-}
-canMerge :: (HasCallStack, PrimMonad m, Semigroup a, Eq a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> a -> m Bool
-canMerge !dsu !v1 !v2 !dp = do
-  b <- same dsu v1 v2
+{-# INLINEABLE canMergeST #-}
+canMergeST :: (HasCallStack, Semigroup a, Eq a, VU.Unbox a) => Pdsu s a -> Int -> Int -> a -> ST s Bool
+canMergeST dsu v1 v2 dp = do
+  b <- sameST dsu v1 v2
   if not b
     then pure True
     else do
@@ -286,23 +311,34 @@ canMerge !dsu !v1 !v2 !dp = do
       !p2 <- VGM.read (potentialPdsu dsu) v2
       pure $ p1 == dp <> p2
 
--- | \(O(\alpha(n))\) Returns the number of vertices belonging to the same group.
---
--- @since 1.1.0.0
-{-# INLINE size #-}
-size :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> m Int
-size !dsu !v = stToPrim $ do
-  l <- leaderST dsu v
-  negate <$> VGM.read (parentOrSizePdsu dsu) l
+{-# INLINEABLE sameST #-}
+sameST :: (HasCallStack, Semigroup a, VU.Unbox a) => Pdsu s a -> Int -> Int -> ST s Bool
+sameST !dsu !v1 !v2 = stToPrim $ do
+  l1 <- leaderST dsu v1
+  l2 <- leaderST dsu v2
+  pure $ l1 == l2
   where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.size" v $ nPdsu dsu
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.sameST" v1 $ nPdsu dsu
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.sameST" v2 $ nPdsu dsu
 
--- | \(O(n)\) Divides the graph into connected components and returns the list of them.
---
--- @since 1.1.0.0
-{-# INLINE groups #-}
-groups :: (PrimMonad m, Semigroup a, VU.Unbox a) => Pdsu (PrimState m) a -> m (V.Vector (VU.Vector Int))
-groups dsu@Pdsu {..} = stToPrim $ do
+{-# INLINEABLE diffST #-}
+diffST :: (HasCallStack, Monoid a, VU.Unbox a) => Pdsu s a -> Int -> Int -> ST s (Maybe a)
+diffST dsu v1 v2 = do
+  b <- sameST dsu v1 v2
+  if b
+    then Just <$> unsafeDiffST dsu v1 v2
+    else pure Nothing
+
+{-# INLINEABLE unsafeDiffST #-}
+unsafeDiffST :: (HasCallStack, Monoid a, VU.Unbox a) => Pdsu s a -> Int -> Int -> ST s a
+unsafeDiffST !dsu !v1 !v2 = do
+  p1 <- potST dsu v1
+  p2 <- potST dsu v2
+  pure $ p1 <> invertPdsu dsu p2
+
+{-# INLINEABLE groupsST #-}
+groupsST :: (Semigroup a, VU.Unbox a) => Pdsu s a -> ST s (V.Vector (VU.Vector Int))
+groupsST dsu@Pdsu {..} = do
   groupSize <- VUM.replicate nPdsu (0 :: Int)
   leaders <- VU.generateM nPdsu $ \i -> do
     li <- leaderST dsu i
@@ -316,12 +352,3 @@ groups dsu@Pdsu {..} = stToPrim $ do
     VGM.write (result VG.! li) i' i
     VGM.write groupSize li i'
   V.filter (not . VU.null) <$> V.mapM VU.unsafeFreeze result
-
--- | \(O(n)\) Clears the `Pdsu` to the initial state.
---
--- @since 1.1.0.0
-{-# INLINE clear #-}
-clear :: forall m a. (PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> m ()
-clear !dsu = do
-  VGM.set (potentialPdsu dsu) (mempty @a)
-  VGM.set (parentOrSizePdsu dsu) (-1 {- size -})

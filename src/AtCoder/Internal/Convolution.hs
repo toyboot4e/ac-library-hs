@@ -58,7 +58,7 @@ data FftInfo p = FftInfo
 -- | \(O(\log m)\) Creates an `FftInfo`.
 --
 -- @since 1.0.0.0
-{-# INLINABLE newInfo #-}
+{-# INLINEABLE newInfo #-}
 newInfo :: forall s p. (AM.Modulus p) => ST s (FftInfo p)
 newInfo = do
   let !g = AM.primitiveRootModulus (proxy# @p)
@@ -111,7 +111,7 @@ newInfo = do
   pure FftInfo {..}
 
 -- | @since 1.0.0.0
-{-# INLINABLE butterfly #-}
+{-# INLINEABLE butterfly #-}
 butterfly ::
   forall s p.
   (AM.Modulus p) =>
@@ -175,7 +175,7 @@ butterfly FftInfo {..} a = do
           loop $ len + 2
 
 -- | @since 1.0.0.0
-{-# INLINABLE butterflyInv #-}
+{-# INLINEABLE butterflyInv #-}
 butterflyInv ::
   forall s p.
   (AM.Modulus p) =>
@@ -240,7 +240,7 @@ butterflyInv FftInfo {..} a = do
           loop $ len - 2
 
 -- | @since 1.0.0.0
-{-# INLINABLE convolutionNaive #-}
+{-# INLINEABLE convolutionNaive #-}
 convolutionNaive ::
   forall p.
   (AM.Modulus p) =>
@@ -263,7 +263,7 @@ convolutionNaive a b = VU.create $ do
   pure ans
 
 -- | @since 1.0.0.0
-{-# INLINE convolutionFft #-}
+{-# INLINEABLE convolutionFft #-}
 convolutionFft ::
   forall p.
   (AM.Modulus p) =>

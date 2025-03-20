@@ -123,7 +123,7 @@ scc = ACISCC.sccCsr
 -- [1,2,4,0,3]
 --
 -- @since 1.1.0.0
-{-# INLINABLE topSort #-}
+{-# INLINEABLE topSort #-}
 topSort :: Int -> (Int -> VU.Vector Int) -> VU.Vector Int
 topSort n gr = runST $ do
   inDeg <- VUM.replicate n (0 :: Int)
@@ -172,7 +172,7 @@ topSort n gr = runST $ do
 -- [[3,2],[0,3,1]]
 --
 -- @since 1.1.1.0
-{-# INLINABLE blockCut #-}
+{-# INLINEABLE blockCut #-}
 blockCut :: Int -> (Int -> VU.Vector Int) -> Csr ()
 blockCut n gr = runST $ do
   low <- VUM.replicate n (0 :: Int)

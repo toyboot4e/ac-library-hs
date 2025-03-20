@@ -92,6 +92,7 @@ where
 import AtCoder.Extra.IntMap qualified as IM
 import Control.Monad (foldM_)
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
 import Prelude hiding (lookup, read)
@@ -148,7 +149,7 @@ buildM xs onAdd = do
   where
     step dim !l !xs' = do
       let !l' = l + VU.length xs'
-      IM.insert dim l (l', VU.head xs')
+      stToPrim $ IM.insert dim l (l', VU.head xs')
       onAdd l l' (VU.head xs')
       pure l'
 
@@ -171,7 +172,7 @@ size = IM.size . unITM
 -- @since 1.1.0.0
 {-# INLINE contains #-}
 contains :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> m Bool
-contains itm i = containsInterval itm i (i + 1)
+contains itm i = stToPrim $ containsIntervalST itm i (i + 1)
 
 -- | \(O(\log n)\) Returns whether an interval \([l, r)\) is fully contained within any of the
 -- intervals.
@@ -179,27 +180,14 @@ contains itm i = containsInterval itm i (i + 1)
 -- @since 1.1.0.0
 {-# INLINE containsInterval #-}
 containsInterval :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m Bool
-containsInterval (IntervalMap dim) l r
-  | l >= r = pure False
-  | otherwise = do
-      res <- IM.lookupLE dim l
-      pure $ case res of
-        Just (!_, (!r', !_)) -> r <= r'
-        _ -> False
+containsInterval itm l r = stToPrim $ containsIntervalST itm l r
 
 -- | \(O(\log n)\) Looks up an interval that fully contains \([l, r)\).
 --
 -- @since 1.1.0.0
 {-# INLINE lookup #-}
 lookup :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m (Maybe (Int, Int, a))
-lookup (IntervalMap im) l r
-  | l >= r = pure Nothing
-  | otherwise = do
-      res <- IM.lookupLE im l
-      pure $ case res of
-        Just (!l', (!r', !a))
-          | r <= r' -> Just (l', r', a)
-        _ -> Nothing
+lookup itm l r = stToPrim $ lookupST itm l r
 
 -- | \(O(\log n)\) Looks up an interval that fully contains \([l, r)\) and reads out the value.
 -- Throws an error if no such interval exists.
@@ -207,11 +195,7 @@ lookup (IntervalMap im) l r
 -- @since 1.1.0.0
 {-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m a
-read itm l r = do
-  res <- readMaybe itm l r
-  pure $ case res of
-    Just !a -> a
-    Nothing -> error $ "[read] not a member: " ++ show (l, r)
+read itm l r = stToPrim $ readST itm l r
 
 -- | \(O(\log n)\) Looks up an interval that fully contains \([l, r)\) and reads out the value.
 -- Returns `Nothing` if no such interval exists.
@@ -219,14 +203,7 @@ read itm l r = do
 -- @since 1.1.0.0
 {-# INLINE readMaybe #-}
 readMaybe :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> m (Maybe a)
-readMaybe (IntervalMap dim) l r
-  | l >= r = pure Nothing
-  | otherwise = do
-      res <- IM.lookupLE dim l
-      pure $ case res of
-        Just (!_, (!r', !a))
-          | r <= r' -> Just a
-        _ -> Nothing
+readMaybe itm l r = stToPrim $ readMaybeST itm l r
 
 -- | Amortized \(O(\log n)\) Inserts an interval \([l, r)\) with associated value \(v\) into the
 -- map. Overwrites any overlapping intervals.
@@ -244,7 +221,7 @@ insert itm l r x = insertM itm l r x onAdd onDel
 -- hooks.
 --
 -- @since 1.1.0.0
-{-# INLINABLE insertM #-}
+{-# INLINEABLE insertM #-}
 insertM ::
   (PrimMonad m, Eq a, VU.Unbox a) =>
   -- | The map
@@ -376,7 +353,7 @@ delete itm l r = deleteM itm l r onAdd onDel
 -- changes via @onAdd@ and @onDel@ hooks.
 --
 -- @since 1.1.0.0
-{-# INLINABLE deleteM #-}
+{-# INLINEABLE deleteM #-}
 deleteM ::
   (PrimMonad m, VU.Unbox a) =>
   -- | The map
@@ -453,11 +430,7 @@ deleteM (IntervalMap dim) l0 r0 onAdd onDel
 -- @since 1.1.0.0
 {-# INLINE overwrite #-}
 overwrite :: (PrimMonad m, Eq a, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> a -> m ()
-overwrite itm l r x = do
-  res <- lookup itm l r
-  case res of
-    Just (!l', !r', !_) -> insert itm l' r' x
-    Nothing -> pure ()
+overwrite itm l r x = stToPrim $ overwriteST itm l r x
 
 -- | \(O(\log n)\). Shorthand for overwriting the value of an interval that contains \([l, r)\).
 -- Tracks interval state changes via @onAdd@ and @onDel@ hooks.
@@ -480,7 +453,7 @@ overwriteM ::
   (Int -> Int -> a -> m ()) ->
   m ()
 overwriteM itm l r x onAdd onDel = do
-  res <- lookup itm l r
+  res <- stToPrim $ lookupST itm l r
   case res of
     Just (!l', !r', !_) -> insertM itm l' r' x onAdd onDel
     Nothing -> pure ()
@@ -492,3 +465,55 @@ overwriteM itm l r x onAdd onDel = do
 {-# INLINE freeze #-}
 freeze :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> m (VU.Vector (Int, (Int, a)))
 freeze = IM.assocs . unITM
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE containsIntervalST #-}
+containsIntervalST :: (VU.Unbox a) => IntervalMap s a -> Int -> Int -> ST s Bool
+containsIntervalST (IntervalMap dim) l r
+  | l >= r = pure False
+  | otherwise = do
+      res <- IM.lookupLE dim l
+      pure $ case res of
+        Just (!_, (!r', !_)) -> r <= r'
+        _ -> False
+
+{-# INLINEABLE lookupST #-}
+lookupST :: (VU.Unbox a) => IntervalMap s a -> Int -> Int -> ST s (Maybe (Int, Int, a))
+lookupST (IntervalMap im) l r
+  | l >= r = pure Nothing
+  | otherwise = do
+      res <- IM.lookupLE im l
+      pure $ case res of
+        Just (!l', (!r', !a))
+          | r <= r' -> Just (l', r', a)
+        _ -> Nothing
+
+{-# INLINEABLE readST #-}
+readST :: (HasCallStack, VU.Unbox a) => IntervalMap s a -> Int -> Int -> ST s a
+readST itm l r = do
+  res <- readMaybeST itm l r
+  pure $ case res of
+    Just !a -> a
+    Nothing -> error $ "AtCoder.Extra.IntervalMap.readST: not a member: " ++ show (l, r)
+
+{-# INLINEABLE readMaybeST #-}
+readMaybeST :: (VU.Unbox a) => IntervalMap s a -> Int -> Int -> ST s (Maybe a)
+readMaybeST (IntervalMap dim) l r
+  | l >= r = pure Nothing
+  | otherwise = do
+      res <- IM.lookupLE dim l
+      pure $ case res of
+        Just (!_, (!r', !a))
+          | r <= r' -> Just a
+        _ -> Nothing
+
+{-# INLINEABLE overwriteST #-}
+overwriteST :: (Eq a, VU.Unbox a) => IntervalMap s a -> Int -> Int -> a -> ST s ()
+overwriteST itm l r x = do
+  res <- lookupST itm l r
+  case res of
+    Just (!l', !r', !_) -> insert itm l' r' x
+    Nothing -> pure ()

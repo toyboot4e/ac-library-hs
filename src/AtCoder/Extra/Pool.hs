@@ -39,7 +39,8 @@ module AtCoder.Extra.Pool
 where
 
 import AtCoder.Internal.Buffer qualified as B
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Coerce
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -87,18 +88,12 @@ nullIndex = (== undefIndex)
 -- | \(O(n)\) Creates a pool with the specified @capacity@.
 {-# INLINE new #-}
 new :: (VU.Unbox a, PrimMonad m) => Int -> m (Pool (PrimState m) a)
-new cap = do
-  dataPool <- VUM.unsafeNew cap
-  freePool <- B.new cap
-  nextPool <- VUM.replicate 1 (Index 0)
-  pure Pool {..}
+new cap = stToPrim $ newST cap
 
 -- | \(O(1)\) Resets the pool to the initial state.
 {-# INLINE clear #-}
 clear :: (PrimMonad m) => Pool (PrimState m) a -> m ()
-clear Pool {..} = do
-  B.clear freePool
-  VGM.unsafeWrite nextPool 0 $ Index 0
+clear pool = stToPrim $ clearST pool
 
 -- | \(O(1)\) Returns the maximum number of elements the pool can store.
 {-# INLINE capacity #-}
@@ -108,10 +103,7 @@ capacity = VGM.length . dataPool
 -- | \(O(1)\) Returns the number of elements in the pool.
 {-# INLINE size #-}
 size :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> m Int
-size Pool {..} = do
-  !nFree <- B.length freePool
-  Index !next <- VGM.unsafeRead nextPool 0
-  pure $ next - nFree
+size pool = stToPrim $ sizeST pool
 
 -- | \(O(1)\) Allocates a new element.
 --
@@ -119,18 +111,7 @@ size Pool {..} = do
 -- - The number of elements must not exceed the `capacity`.
 {-# INLINE alloc #-}
 alloc :: (HasCallStack, PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> a -> m Index
-alloc Pool {..} !x = do
-  B.popBack freePool >>= \case
-    Just i -> pure i
-    Nothing -> do
-      Index i <- VGM.unsafeRead nextPool 0
-      if i < VGM.length dataPool
-        then do
-          VGM.unsafeWrite nextPool 0 $ coerce (i + 1)
-          VGM.write dataPool i x
-          pure $ coerce i
-        else do
-          error "AtCoder.Extra.Pool.alloc: capacity out of bounds"
+alloc pool x = stToPrim $ allocST pool x
 
 -- | \(O(1)\) Frees an element. Be sure to not free a deleted element.
 --
@@ -205,3 +186,43 @@ nullHandle (Handle h) = nullIndex <$> VGM.unsafeRead h 0
 {-# INLINE invalidateHandle #-}
 invalidateHandle :: (PrimMonad m) => Handle (PrimState m) -> m ()
 invalidateHandle (Handle h) = VGM.unsafeWrite h 0 undefIndex
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE newST #-}
+newST :: (VU.Unbox a) => Int -> ST s (Pool s a)
+newST cap = do
+  dataPool <- VUM.unsafeNew cap
+  freePool <- B.new cap
+  nextPool <- VUM.replicate 1 (Index 0)
+  pure Pool {..}
+
+{-# INLINEABLE clearST #-}
+clearST :: Pool s a -> ST s ()
+clearST Pool {..} = do
+  B.clear freePool
+  VGM.unsafeWrite nextPool 0 $ Index 0
+
+{-# INLINEABLE sizeST #-}
+sizeST :: (VU.Unbox a) => Pool s a -> ST s Int
+sizeST Pool {..} = do
+  !nFree <- B.length freePool
+  Index !next <- VGM.unsafeRead nextPool 0
+  pure $ next - nFree
+
+{-# INLINEABLE allocST #-}
+allocST :: (HasCallStack, VU.Unbox a) => Pool s a -> a -> ST s Index
+allocST Pool {..} !x = do
+  B.popBack freePool >>= \case
+    Just i -> pure i
+    Nothing -> do
+      Index i <- VGM.unsafeRead nextPool 0
+      if i < VGM.length dataPool
+        then do
+          VGM.unsafeWrite nextPool 0 $ coerce (i + 1)
+          VGM.write dataPool i x
+          pure $ coerce i
+        else do
+          error "AtCoder.Extra.Pool.allocST: capacity out of bounds"

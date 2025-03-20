@@ -25,7 +25,7 @@ import GHC.Stack (HasCallStack)
 -- | \(O(n^2)\) Internal implementation of suffix array creation (naive).
 --
 -- @since 1.0.0.0
-{-# INLINABLE saNaive #-}
+{-# INLINEABLE saNaive #-}
 saNaive :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 saNaive s =
   let n = VU.length s
@@ -48,7 +48,7 @@ saNaive s =
 -- | \(O(n \log n)\) Internal implementation of suffix array creation (doubling).
 --
 -- @since 1.0.0.0
-{-# INLINABLE saDoubling #-}
+{-# INLINEABLE saDoubling #-}
 saDoubling :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 saDoubling s = VU.create $ do
   let n = VU.length s
@@ -87,7 +87,7 @@ saDoubling s = VU.create $ do
 -- | \(O(n)\) Internal implementation of suffix array creation (suffix array induced sorting).
 --
 -- @since 1.0.0.0
-{-# INLINABLE saIsImpl #-}
+{-# INLINEABLE saIsImpl #-}
 saIsImpl ::
   (HasCallStack) =>
   -- | naive threshould

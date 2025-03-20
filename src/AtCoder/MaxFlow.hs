@@ -100,10 +100,7 @@ data MfGraph s cap = MfGraph
 -- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox cap) => Int -> m (MfGraph (PrimState m) cap)
-new nG = do
-  gG <- V.replicateM nG (ACIGV.new 0)
-  posG <- ACIGV.new 0
-  pure MfGraph {..}
+new nG = stToPrim $ newST nG
 
 -- | Adds an edge oriented from the vertex @from@ to the vertex @to@ with the capacity @cap@ and the
 -- flow amount \(0\). It returns an integer \(k\) such that this is the \(k\)-th edge that is added.
@@ -129,19 +126,7 @@ addEdge ::
   cap ->
   -- | Edge index
   m Int
-addEdge MfGraph {..} from to cap = do
-  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdge" "`from` vertex" from "the number of vertices" nG
-  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdge" "`to` vertex" to "the number of vertices" nG
-  let !_ = ACIA.runtimeAssert (0 <= cap) "AtCoder.MaxFlow.addEdge: given invalid edge `cap` less than `0`" -- not `Show cap`
-  m <- ACIGV.length posG
-  iEdge <- ACIGV.length (gG VG.! from)
-  ACIGV.pushBack posG (from, iEdge)
-  iRevEdge <- do
-    len <- ACIGV.length (gG VG.! to)
-    pure $ if from == to then len + 1 else len
-  ACIGV.pushBack (gG VG.! from) (to, iRevEdge, cap)
-  ACIGV.pushBack (gG VG.! to) (from, iEdge, 0)
-  pure m
+addEdge g from to cap = stToPrim $ addEdgeST g from to cap
 
 -- | `addEdge` with the return value discarded.
 --
@@ -165,8 +150,8 @@ addEdge_ ::
   -- | cap
   cap ->
   m ()
-addEdge_ graph from to cap = do
-  _ <- addEdge graph from to cap
+addEdge_ graph from to cap = stToPrim $ do
+  _ <- addEdgeST graph from to cap
   pure ()
 
 -- | Augments the flow from \(s\) to \(t\) as much as possible, until reaching the amount of
@@ -195,10 +180,168 @@ flow ::
   cap ->
   -- | Max flow
   m cap
-flow MfGraph {..} s t flowLimit = stToPrim $ do
-  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`source` vertex" s "the number of vertices" nG
-  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flow" "`sink` vertex" t "the number of vertices" nG
-  let !_ = ACIA.runtimeAssert (s /= t) $ "AtCoder.MaxFlow.flow: `source` and `sink` vertex must be distinct: `" ++ show s ++ "`"
+flow g s t flowLimit = stToPrim $ flowST g s t flowLimit
+
+-- | `flow` with no capacity limit.
+--
+-- ==== Constraints
+-- - \(s \neq t\)
+-- - \(0 \leq s, t \lt n\)
+--
+-- ==== Complexity
+-- - \(O((n + m) \sqrt{m})\) (if all the capacities are \(1\)),
+-- - \(O(n^2 m)\) (general), or
+-- - \(O(F(n + m))\), where \(F\) is the returned value
+--
+-- @since 1.0.0.0
+{-# INLINE maxFlow #-}
+maxFlow ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, Bounded cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Source @s@
+  Int ->
+  -- | Sink @t@
+  Int ->
+  -- | Max flow
+  m cap
+maxFlow graph s t = stToPrim $ flowST graph s t maxBound
+
+-- | Returns a vector of length \(n\), such that the \(i\)-th element is `True` if and only if there
+-- is a directed path from \(s\) to \(i\) in the residual network. The returned vector corresponds
+-- to a \(s-t\) minimum cut after calling @'maxFlow' s t@.
+--
+-- ==== Complexity
+-- - \(O(n + m)\), where \(m\) is the number of added edges.
+--
+-- @since 1.0.0.0
+{-# INLINE minCut #-}
+minCut ::
+  (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Source @s@
+  Int ->
+  -- | Minimum cut
+  m (VU.Vector Bit)
+minCut g s = stToPrim $ minCutST g s
+
+-- | \(O(1)\) Returns the current internal state of \(i\)-th edge: @(from, to, cap, flow)@. The
+-- edges are ordered in the same order as added by `addEdge`.
+--
+-- ==== Constraints
+-- - \(0 \leq i \lt m\)
+--
+-- ==== Complexity
+-- - \(O(1)\)
+--
+-- @since 1.0.0.0
+{-# INLINE getEdge #-}
+getEdge ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Vertex
+  Int ->
+  -- | Tuple of @(from, to, cap, flow)@
+  m (Int, Int, cap, cap)
+getEdge g i = stToPrim $ getEdgeST g i
+
+-- | Returns the current internal state of the edges: @(from, to, cap, flow)@. The edges are ordered
+-- in the same order as added by `addEdge`.
+--
+-- ==== Complexity
+-- - \(O(m)\), where \(m\) is the number of added edges.
+--
+-- @since 1.0.0.0
+{-# INLINE edges #-}
+edges ::
+  (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Vector of @(from, to, cap, flow)@
+  m (VU.Vector (Int, Int, cap, cap))
+edges g = stToPrim $ edgesST g
+
+-- | \(O(1)\) Changes the capacity and the flow amount of the $i$-th edge to @newCap@ and
+-- @newFlow@, respectively. It oes not change the capacity or the flow amount of other edges.
+--
+-- ==== Constraints
+-- - \(0 \leq \mathrm{newflow} \leq \mathrm{newcap}\)
+--
+-- ==== Complexity
+-- - \(O(1)\)
+--
+-- @since 1.0.0.0
+{-# INLINE changeEdge #-}
+changeEdge ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Edge index
+  Int ->
+  -- | New capacity
+  cap ->
+  -- | New flow
+  cap ->
+  m ()
+changeEdge g i newCap newFlow = stToPrim $ changeEdgeST g i newCap newFlow
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE newST #-}
+newST :: (PrimMonad m, VU.Unbox cap) => Int -> m (MfGraph (PrimState m) cap)
+newST nG = do
+  gG <- V.replicateM nG (ACIGV.new 0)
+  posG <- ACIGV.new 0
+  pure MfGraph {..}
+
+{-# INLINEABLE addEdgeST #-}
+addEdgeST ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | from
+  Int ->
+  -- | to
+  Int ->
+  -- | cap
+  cap ->
+  -- | Edge index
+  m Int
+addEdgeST MfGraph {..} from to cap = do
+  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdgeST" "`from` vertex" from "the number of vertices" nG
+  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdgeST" "`to` vertex" to "the number of vertices" nG
+  let !_ = ACIA.runtimeAssert (0 <= cap) "AtCoder.MaxFlow.addEdgeST: given invalid edge `cap` less than `0`" -- not `Show cap`
+  m <- ACIGV.length posG
+  iEdge <- ACIGV.length (gG VG.! from)
+  ACIGV.pushBack posG (from, iEdge)
+  iRevEdge <- do
+    len <- ACIGV.length (gG VG.! to)
+    pure $ if from == to then len + 1 else len
+  ACIGV.pushBack (gG VG.! from) (to, iRevEdge, cap)
+  ACIGV.pushBack (gG VG.! to) (from, iEdge, 0)
+  pure m
+
+{-# INLINEABLE flowST #-}
+flowST ::
+  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  -- | Graph
+  MfGraph (PrimState m) cap ->
+  -- | Source @s@
+  Int ->
+  -- | Sink @t@
+  Int ->
+  -- | Flow limit
+  cap ->
+  -- | Max flow
+  m cap
+flowST MfGraph {..} s t flowLimit = stToPrim $ do
+  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flowST" "`source` vertex" s "the number of vertices" nG
+  let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flowST" "`sink` vertex" t "the number of vertices" nG
+  let !_ = ACIA.runtimeAssert (s /= t) $ "AtCoder.MaxFlow.flowST: `source` and `sink` vertex must be distinct: `" ++ show s ++ "`"
 
   level <- VUM.unsafeNew nG
   que <- ACIQ.new nG
@@ -273,41 +416,8 @@ flow MfGraph {..} s t flowLimit = stToPrim $ do
               then pure flow_
               else loop $! flow_ + f
 
--- | `flow` with no capacity limit.
---
--- ==== Constraints
--- - \(s \neq t\)
--- - \(0 \leq s, t \lt n\)
---
--- ==== Complexity
--- - \(O((n + m) \sqrt{m})\) (if all the capacities are \(1\)),
--- - \(O(n^2 m)\) (general), or
--- - \(O(F(n + m))\), where \(F\) is the returned value
---
--- @since 1.0.0.0
-{-# INLINE maxFlow #-}
-maxFlow ::
-  (HasCallStack, PrimMonad m, Num cap, Ord cap, Bounded cap, VU.Unbox cap) =>
-  -- | Graph
-  MfGraph (PrimState m) cap ->
-  -- | Source @s@
-  Int ->
-  -- | Sink @t@
-  Int ->
-  -- | Max flow
-  m cap
-maxFlow graph s t = flow graph s t maxBound
-
--- | Returns a vector of length \(n\), such that the \(i\)-th element is `True` if and only if there
--- is a directed path from \(s\) to \(i\) in the residual network. The returned vector corresponds
--- to a \(s-t\) minimum cut after calling @'maxFlow' s t@.
---
--- ==== Complexity
--- - \(O(n + m)\), where \(m\) is the number of added edges.
---
--- @since 1.0.0.0
-{-# INLINE minCut #-}
-minCut ::
+{-# INLINEABLE minCutST #-}
+minCutST ::
   (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
   -- | Graph
   MfGraph (PrimState m) cap ->
@@ -315,7 +425,7 @@ minCut ::
   Int ->
   -- | Minimum cut
   m (VU.Vector Bit)
-minCut MfGraph {..} s = stToPrim $ do
+minCutST MfGraph {..} s = stToPrim $ do
   visited <- VUM.replicate nG $ Bit False
   que <- ACIQ.new nG -- we could use a growable queue here
   ACIQ.pushBack que s
@@ -334,18 +444,8 @@ minCut MfGraph {..} s = stToPrim $ do
         loop
   VU.unsafeFreeze visited
 
--- | \(O(1)\) Returns the current internal state of \(i\)-th edge: @(from, to, cap, flow)@. The
--- edges are ordered in the same order as added by `addEdge`.
---
--- ==== Constraints
--- - \(0 \leq i \lt m\)
---
--- ==== Complexity
--- - \(O(1)\)
---
--- @since 1.0.0.0
-{-# INLINE getEdge #-}
-getEdge ::
+{-# INLINEABLE getEdgeST #-}
+getEdgeST ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
   -- | Graph
   MfGraph (PrimState m) cap ->
@@ -353,7 +453,7 @@ getEdge ::
   Int ->
   -- | Tuple of @(from, to, cap, flow)@
   m (Int, Int, cap, cap)
-getEdge MfGraph {..} i = stToPrim $ do
+getEdgeST MfGraph {..} i = stToPrim $ do
   m <- ACIGV.length posG
   let !_ = ACIA.checkEdge "AtCoder.MaxFlow.getEdge" i m
   (!from, !iEdge) <- ACIGV.read posG i
@@ -361,36 +461,19 @@ getEdge MfGraph {..} i = stToPrim $ do
   revCap <- readCapacityST gG to iRevEdge
   pure (from, to, cap + revCap, revCap)
 
--- | Returns the current internal state of the edges: @(from, to, cap, flow)@. The edges are ordered
--- in the same order as added by `addEdge`.
---
--- ==== Complexity
--- - \(O(m)\), where \(m\) is the number of added edges.
---
--- @since 1.0.0.0
-{-# INLINE edges #-}
-edges ::
+{-# INLINEABLE edgesST #-}
+edgesST ::
   (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
   -- | Graph
   MfGraph (PrimState m) cap ->
   -- | Vector of @(from, to, cap, flow)@
   m (VU.Vector (Int, Int, cap, cap))
-edges g@MfGraph {posG} = do
+edgesST g@MfGraph {posG} = do
   len <- ACIGV.length posG
   VU.generateM len (getEdge g)
 
--- | \(O(1)\) Changes the capacity and the flow amount of the $i$-th edge to @newCap@ and
--- @newFlow@, respectively. It oes not change the capacity or the flow amount of other edges.
---
--- ==== Constraints
--- - \(0 \leq \mathrm{newflow} \leq \mathrm{newcap}\)
---
--- ==== Complexity
--- - \(O(1)\)
---
--- @since 1.0.0.0
-{-# INLINE changeEdge #-}
-changeEdge ::
+{-# INLINEABLE changeEdgeST #-}
+changeEdgeST ::
   (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
   -- | Graph
   MfGraph (PrimState m) cap ->
@@ -401,30 +484,27 @@ changeEdge ::
   -- | New flow
   cap ->
   m ()
-changeEdge MfGraph {..} i newCap newFlow = stToPrim $ do
+changeEdgeST MfGraph {..} i newCap newFlow = stToPrim $ do
   m <- ACIGV.length posG
-  let !_ = ACIA.checkEdge "AtCoder.MaxFlow.changeEdge" i m
-  let !_ = ACIA.runtimeAssert (0 <= newFlow && newFlow <= newCap) "AtCoder.MaxFlow.changeEdge: invalid flow or capacity" -- not Show
+  let !_ = ACIA.checkEdge "AtCoder.MaxFlow.changeEdgeST" i m
+  let !_ = ACIA.runtimeAssert (0 <= newFlow && newFlow <= newCap) "AtCoder.MaxFlow.changeEdgeST: invalid flow or capacity" -- not Show
   (!from, !iEdge) <- ACIGV.read posG i
   (!to, !iRevEdge, !_) <- ACIGV.read (gG VG.! from) iEdge
   writeCapacityST gG from iEdge $! newCap - newFlow
   writeCapacityST gG to iRevEdge $! newFlow
 
--- | \(O(1)\) Internal helper.
 {-# INLINE readCapacityST #-}
 readCapacityST :: (Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACIGV.GrowVec s (Int, Int, cap)) -> Int -> Int -> ST s cap
 readCapacityST gvs v i = do
   (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV $ gvs VG.! v
   VGM.read c i
 
--- | \(O(1)\) Internal helper.
 {-# INLINE writeCapacityST #-}
 writeCapacityST :: (Num cap, Ord cap, VU.Unbox cap) => V.Vector (ACIGV.GrowVec s (Int, Int, cap)) -> Int -> Int -> cap -> ST s ()
 writeCapacityST gvs v i cap = do
   (VUM.MV_3 _ _ _ c) <- readMutVar $ ACIGV.vecGV $ gvs VG.! v
   VGM.write c i cap
 
--- | \(O(1)\) Internal helper.
 {-# INLINE modifyCapacityST #-}
 modifyCapacityST :: (Num cap, Ord cap, VU.Unbox cap) => ACIGV.GrowVec s (Int, Int, cap) -> (cap -> cap) -> Int -> ST s ()
 modifyCapacityST gv f i = do

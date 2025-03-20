@@ -65,7 +65,8 @@ module AtCoder.Internal.Queue
   )
 where
 
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -86,10 +87,7 @@ data Queue s a = Queue
 -- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (Queue (PrimState m) a)
-new n = do
-  posQ <- VUM.replicate 2 (0 :: Int)
-  vecQ <- VUM.unsafeNew n
-  pure Queue {..}
+new n = stToPrim $ newST n
 
 -- | \(O(1)\) Returns the array size.
 --
@@ -103,10 +101,7 @@ capacity = VUM.length . vecQ
 -- @since 1.0.0.0
 {-# INLINE length #-}
 length :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Int
-length Queue {..} = do
-  l <- VGM.unsafeRead posQ 0
-  r <- VGM.unsafeRead posQ 1
-  pure $ r - l
+length que = stToPrim $ lengthST que
 
 -- | \(O(1)\) Returns `True` if the buffer is empty.
 --
@@ -120,56 +115,28 @@ null = (<$>) (== 0) . length
 -- @since 1.0.0.0
 {-# INLINE pushBack #-}
 pushBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> a -> m ()
-pushBack Queue {..} e = do
-  VGM.unsafeModifyM
-    posQ
-    ( \r -> do
-        VGM.write vecQ r e
-        pure $ r + 1
-    )
-    1
+pushBack que e = stToPrim $ pushBackST que e
 
 -- | \(O(1)\) Appends an element to the back. Will throw an exception if the index is out of range.
 --
 -- @since 1.0.0.0
 {-# INLINE pushFront #-}
 pushFront :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> a -> m ()
-pushFront Queue {..} e = do
-  l0 <- VGM.unsafeRead posQ 0
-  if l0 == 0
-    then error "AtCoder.Internal.Queue.pushFront: no empty front space"
-    else do
-      VGM.unsafeModifyM
-        posQ
-        ( \l -> do
-            VGM.write vecQ (l - 1) e
-            pure $ l - 1
-        )
-        0
+pushFront que e = stToPrim $ pushFrontST que e
 
 -- | \(O(1)\) Removes the first element from the queue and returns it, or `Nothing` if it is empty.
 --
 -- @since 1.0.0.0
 {-# INLINE popFront #-}
 popFront :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m (Maybe a)
-popFront Queue {..} = do
-  l <- VGM.unsafeRead posQ 0
-  r <- VGM.unsafeRead posQ 1
-  if l >= r
-    then pure Nothing
-    else do
-      x <- VGM.read vecQ l
-      VGM.unsafeWrite posQ 0 (l + 1)
-      pure $ Just x
+popFront que = stToPrim $ popFrontST que
 
 -- | \(O(1)\) `popFront` with the return value discarded.
 --
 -- @since 1.0.0.0
 {-# INLINE popFront_ #-}
 popFront_ :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m ()
-popFront_ que = do
-  _ <- popFront que
-  pure ()
+popFront_ que = stToPrim $ popFrontST_ que
 
 -- | \(O(1)\) Sets the `length` to zero.
 --
@@ -184,10 +151,7 @@ clear Queue {..} = do
 -- @since 1.0.0.0
 {-# INLINE freeze #-}
 freeze :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m (VU.Vector a)
-freeze Queue {..} = do
-  l <- VGM.unsafeRead posQ 0
-  r <- VGM.unsafeRead posQ 1
-  VU.freeze $ VUM.take (r - l) $ VUM.drop l vecQ
+freeze que = stToPrim $ freezeST que
 
 -- | \(O(1)\) Unsafely converts a mutable vector to an immutable one without copying. The mutable
 -- vector may not be used after this operation.
@@ -195,7 +159,85 @@ freeze Queue {..} = do
 -- @since 1.0.0.0
 {-# INLINE unsafeFreeze #-}
 unsafeFreeze :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m (VU.Vector a)
-unsafeFreeze Queue {..} = do
+unsafeFreeze que = stToPrim $ unsafeFreezeST que
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE newST #-}
+newST :: (VU.Unbox a) => Int -> ST s (Queue s a)
+newST n = do
+  posQ <- VUM.replicate 2 (0 :: Int)
+  vecQ <- VUM.unsafeNew n
+  pure Queue {..}
+
+{-# INLINEABLE lengthST #-}
+lengthST :: (VU.Unbox a) => Queue s a -> ST s Int
+lengthST Queue {..} = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  pure $ r - l
+
+{-# INLINEABLE pushBackST #-}
+pushBackST :: (HasCallStack, VU.Unbox a) => Queue s a -> a -> ST s ()
+pushBackST Queue {..} e = do
+  VGM.unsafeModifyM
+    posQ
+    ( \r -> do
+        VGM.write vecQ r e
+        pure $ r + 1
+    )
+    1
+
+{-# INLINEABLE pushFrontST #-}
+pushFrontST :: (HasCallStack, VU.Unbox a) => Queue s a -> a -> ST s ()
+pushFrontST Queue {..} e = do
+  l0 <- VGM.unsafeRead posQ 0
+  if l0 == 0
+    then error "AtCoder.Internal.Queue.pushFront: no empty front space"
+    else do
+      VGM.unsafeModifyM
+        posQ
+        ( \l -> do
+            VGM.write vecQ (l - 1) e
+            pure $ l - 1
+        )
+        0
+
+{-# INLINEABLE popFrontST #-}
+popFrontST :: (VU.Unbox a) => Queue s a -> ST s (Maybe a)
+popFrontST Queue {..} = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  if l >= r
+    then pure Nothing
+    else do
+      x <- VGM.read vecQ l
+      VGM.unsafeWrite posQ 0 (l + 1)
+      pure $ Just x
+
+{-# INLINEABLE popFrontST_ #-}
+popFrontST_ :: (VU.Unbox a) => Queue s a -> ST s ()
+popFrontST_ que = do
+  _ <- popFront que
+  pure ()
+
+{-# INLINEABLE clearST #-}
+clearST :: (VU.Unbox a) => Queue s a -> ST s ()
+clearST Queue {..} = do
+  VGM.set posQ 0
+
+{-# INLINEABLE freezeST #-}
+freezeST :: (VU.Unbox a) => Queue s a -> ST s (VU.Vector a)
+freezeST Queue {..} = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  VU.freeze $ VUM.take (r - l) $ VUM.drop l vecQ
+
+{-# INLINEABLE unsafeFreezeST #-}
+unsafeFreezeST :: (VU.Unbox a) => Queue s a -> ST s (VU.Vector a)
+unsafeFreezeST Queue {..} = do
   l <- VGM.unsafeRead posQ 0
   r <- VGM.unsafeRead posQ 1
   VU.unsafeFreeze $ VUM.take (r - l) $ VUM.drop l vecQ

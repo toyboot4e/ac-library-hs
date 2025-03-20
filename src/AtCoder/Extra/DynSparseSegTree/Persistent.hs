@@ -113,7 +113,7 @@ newRoot dst = stToPrim $ Raw.newRootST dst
 {-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Raw.DynSparseSegTree (PrimState m) a -> P.Index -> Int -> a -> m P.Index
 write dst root i x = stToPrim $ do
-     Raw.modifyMST dst root (pure . const x) i
+  Raw.modifyMST dst root (pure . const x) i
 
 -- | \(O(\log L)\) Modifies the monoid value of the node at \(i\).
 --
@@ -124,7 +124,7 @@ write dst root i x = stToPrim $ do
 {-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Raw.DynSparseSegTree (PrimState m) a -> P.Index -> (a -> a) -> Int -> m P.Index
 modify dst root f i = stToPrim $ do
-     Raw.modifyMST dst root (pure . f) i
+  Raw.modifyMST dst root (pure . f) i
 
 -- | \(O(\log L)\) Modifies the monoid value of the node at \(i\).
 --
@@ -135,7 +135,7 @@ modify dst root f i = stToPrim $ do
 {-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Raw.DynSparseSegTree (PrimState m) a -> P.Index -> (a -> m a) -> Int -> m P.Index
 modifyM dst root f i = do
-    Raw.modifyMST dst root f i
+  Raw.modifyMST dst root f i
 
 -- | \(O(\log L)\) Returns the monoid product in \([l, r)\).
 --

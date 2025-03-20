@@ -75,7 +75,18 @@ sccIds SccGraph {..} = do
   csr <- ACICSR.build' nScc <$> ACIGV.unsafeFreeze edgesScc
   pure $ sccIdsCsr csr
 
--- NOTE(perf): faster without INLINEABLE (somehow)
+-- | \(O(n + m)\) Returns the strongly connected components.
+--
+-- @since 1.0.0.0
+{-# INLINE scc #-}
+scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
+scc g = stToPrim $ sccST g
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE sccST #-}
 sccST :: SccGraph s -> ST s (V.Vector (VU.Vector Int))
 sccST g = do
   (!groupNum, !ids) <- sccIds g
@@ -91,13 +102,6 @@ sccST g = do
     VGM.write is sccId $ i + 1
     VGM.write (groups VG.! sccId) i v
   V.mapM VU.unsafeFreeze groups
-
--- | \(O(n + m)\) Returns the strongly connected components.
---
--- @since 1.0.0.0
-{-# INLINE scc #-}
-scc :: (PrimMonad m) => SccGraph (PrimState m) -> m (V.Vector (VU.Vector Int))
-scc g = stToPrim $ sccST g
 
 -- | \(O(n + m)\) API) Returns a pair of @(# of scc, scc id)@.
 --

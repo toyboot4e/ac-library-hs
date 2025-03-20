@@ -76,7 +76,8 @@ where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (unless, void)
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Bifunctor (bimap)
 import Data.Bits
   ( Bits (clearBit, setBit, testBit),
@@ -143,33 +144,14 @@ data IntSet s = IntSet
 -- @since 1.1.0.0
 {-# INLINE new #-}
 new :: (PrimMonad m) => Int -> m (IntSet (PrimState m))
-new capacityIS = do
-  vecIS <-
-    V.unfoldrExactNM
-      (max 1 logSize)
-      ( \len -> do
-          let !len' = (len + wordSize - 1) `div` wordSize
-          (,len') <$> VUM.replicate len' 0
-      )
-      capacityIS
-  sizeIS <- VUM.replicate 1 (0 :: Int)
-  pure IntSet {..}
-  where
-    (!_, !logSize) =
-      until
-        ((<= 1) . fst)
-        (bimap ((`div` wordSize) . (+ (wordSize - 1))) (+ 1))
-        (capacityIS, 0)
+new capacityIS = stToPrim $ newST capacityIS
 
 -- | \(O(n + m \log n)\) Creates an `IntSet` for the interval \([0, n)\) with initial values.
 --
 -- @since 1.1.0.0
 {-# INLINE build #-}
 build :: (PrimMonad m) => Int -> VU.Vector Int -> m (IntSet (PrimState m))
-build n vs = do
-  set <- new n
-  VU.forM_ vs (insert set)
-  pure set
+build n vs = stToPrim $ buildST n vs
 
 -- | \(O(1)\) Returns the capacity \(n\), where the interval \([0, n)\) is covered by the set.
 --
@@ -197,25 +179,143 @@ null = ((== 0) <$>) . size
 -- @since 1.1.0.0
 {-# INLINE member #-}
 member :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m Bool
-member IntSet {..} k
-  | ACIA.testIndex k capacityIS = do
-      let (!q, !r) = k `divMod` wordSize
-      (`testBit` r) <$> VGM.unsafeRead (VG.unsafeHead vecIS) q
-  | otherwise = pure False
+member is k = stToPrim $ memberST is k
 
 -- | \(O(\log n)\) Tests whether \(k\) is not in the set.
 --
 -- @since 1.1.0.0
 {-# INLINE notMember #-}
 notMember :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m Bool
-notMember dis k = not <$> member dis k
+notMember dis k = stToPrim $ not <$> memberST dis k
 
 -- | \(O(\log n)\) Looks up the smallest key \(k\) such that \(k \ge k_0\).
 --
 -- @since 1.1.0.0
 {-# INLINE lookupGE #-}
 lookupGE :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m (Maybe Int)
-lookupGE IntSet {..} i0
+lookupGE is i0 = stToPrim $ lookupGEST is i0
+
+-- | \(O(\log n)\) Looks up the smallest key \(k\) such that \(k \gt k_0\).
+--
+-- @since 1.1.0.0
+{-# INLINE lookupGT #-}
+lookupGT :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m (Maybe Int)
+lookupGT is k = stToPrim $ lookupGTST is k
+
+-- | \(O(\log n)\) Looks up the largest key \(k\) such that \(k \le k_0\).
+--
+-- @since 1.1.0.0
+{-# INLINE lookupLE #-}
+lookupLE :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m (Maybe Int)
+lookupLE is i0 = stToPrim $ lookupLEST is i0
+
+-- | \(O(\log n)\) Looks up the largest key \(k\) such that \(k \lt k_0\).
+--
+-- @since 1.1.0.0
+{-# INLINE lookupLT #-}
+lookupLT :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m (Maybe Int)
+lookupLT is k = stToPrim $ lookupLTST is k
+
+-- | \(O(\log n)\) Looks up the minimum key.
+--
+-- @since 1.1.0.0
+{-# INLINE lookupMin #-}
+lookupMin :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
+lookupMin is = stToPrim $ lookupMinST is
+
+-- | \(O(\log n)\) Looks up the maximum key.
+--
+-- @since 1.1.0.0
+{-# INLINE lookupMax #-}
+lookupMax :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
+lookupMax is = stToPrim $ lookupMaxST is
+
+-- | \(O(\log n)\) Inserts a key \(k\) into the set. If an entry with the same key already exists,
+-- it is overwritten.
+--
+-- @since 1.1.0.0
+{-# INLINE insert #-}
+insert :: (HasCallStack, PrimMonad m) => IntSet (PrimState m) -> Int -> m ()
+insert is k = stToPrim $ insertST is k
+
+-- | \(O(\log n)\) Deletes a key \(k\) from the set. Does nothing if no such key exists. Returns
+-- whether the key existed.
+--
+-- @since 1.1.0.0
+{-# INLINE delete #-}
+delete :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m Bool
+delete is k = stToPrim $ deleteST is k
+
+-- | \(O(\log n)\) Deletes a key \(k\) from the set. Does nothing if no such key exists.
+--
+-- @since 1.1.0.0
+{-# INLINE delete_ #-}
+delete_ :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m ()
+delete_ is k = stToPrim $ deleteST_ is k
+
+-- | \(O(\log n)\) Deletes the minimum key from the set. Returns `Nothing` if the set is empty.
+--
+-- @since 1.1.0.0
+{-# INLINE deleteMin #-}
+deleteMin :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
+deleteMin is = stToPrim $ deleteMinST is
+
+-- | \(O(\log n)\) Deletes the maximum key from the set. Returns `Nothing` if the set is empty.
+--
+-- @since 1.1.0.0
+{-# INLINE deleteMax #-}
+deleteMax :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
+deleteMax is = stToPrim $ deleteMaxST is
+
+-- | \(O(n \log n)\) Enumerates the keys in the map.
+--
+-- @since 1.1.0.0
+{-# INLINE keys #-}
+keys :: (PrimMonad m) => IntSet (PrimState m) -> m (VU.Vector Int)
+keys is = stToPrim $ keysST is
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE newST #-}
+newST :: Int -> ST s (IntSet s)
+newST capacityIS = do
+  vecIS <-
+    V.unfoldrExactNM
+      (max 1 logSize)
+      ( \len -> do
+          let !len' = (len + wordSize - 1) `div` wordSize
+          (,len') <$> VUM.replicate len' 0
+      )
+      capacityIS
+  sizeIS <- VUM.replicate 1 (0 :: Int)
+  pure IntSet {..}
+  where
+    (!_, !logSize) =
+      until
+        ((<= 1) . fst)
+        (bimap ((`div` wordSize) . (+ (wordSize - 1))) (+ 1))
+        (capacityIS, 0)
+
+{-# INLINEABLE buildST #-}
+buildST :: Int -> VU.Vector Int -> ST s (IntSet s)
+buildST n vs = do
+  set <- newST n
+  VU.forM_ vs (insertST set)
+  pure set
+
+{-# INLINEABLE memberST #-}
+memberST :: IntSet s -> Int -> ST s Bool
+memberST IntSet {..} k
+  | ACIA.testIndex k capacityIS = do
+      let (!q, !r) = k `divMod` wordSize
+      (`testBit` r) <$> VGM.unsafeRead (VG.unsafeHead vecIS) q
+  | otherwise = pure False
+
+{-# INLINEABLE lookupGEST #-}
+lookupGEST :: IntSet s -> Int -> ST s (Maybe Int)
+lookupGEST IntSet {..} i0
   | i0 >= capacityIS = pure Nothing
   | otherwise = inner 0 $ max 0 i0 -- REMARK: it's very important to keep @i@ non-negative.
   where
@@ -239,19 +339,13 @@ lookupGE IntSet {..} i0
       where
         (!q, !r) = i `divMod` wordSize
 
--- | \(O(\log n)\) Looks up the smallest key \(k\) such that \(k \gt k_0\).
---
--- @since 1.1.0.0
-{-# INLINE lookupGT #-}
-lookupGT :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m (Maybe Int)
-lookupGT is k = lookupGE is (k + 1)
+{-# INLINEABLE lookupGTST #-}
+lookupGTST :: IntSet s -> Int -> ST s (Maybe Int)
+lookupGTST is k = lookupGEST is (k + 1)
 
--- | \(O(\log n)\) Looks up the largest key \(k\) such that \(k \le k_0\).
---
--- @since 1.1.0.0
-{-# INLINE lookupLE #-}
-lookupLE :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m (Maybe Int)
-lookupLE IntSet {..} i0
+{-# INLINEABLE lookupLEST #-}
+lookupLEST :: IntSet s -> Int -> ST s (Maybe Int)
+lookupLEST IntSet {..} i0
   | i0 <= -1 = pure Nothing
   | otherwise = inner 0 $ min (capacityIS - 1) i0
   where
@@ -274,35 +368,22 @@ lookupLE IntSet {..} i0
       where
         (!q, !r) = i `divMod` wordSize
 
--- | \(O(\log n)\) Looks up the largest key \(k\) such that \(k \lt k_0\).
---
--- @since 1.1.0.0
-{-# INLINE lookupLT #-}
-lookupLT :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m (Maybe Int)
-lookupLT is k = lookupLE is (k - 1)
+{-# INLINEABLE lookupLTST #-}
+lookupLTST :: IntSet s -> Int -> ST s (Maybe Int)
+lookupLTST is k = lookupLEST is (k - 1)
 
--- | \(O(\log n)\) Looks up the minimum key.
---
--- @since 1.1.0.0
-{-# INLINE lookupMin #-}
-lookupMin :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
-lookupMin is = lookupGE is 0
+{-# INLINEABLE lookupMinST #-}
+lookupMinST :: IntSet s -> ST s (Maybe Int)
+lookupMinST is = lookupGEST is 0
 
--- | \(O(\log n)\) Looks up the maximum key.
---
--- @since 1.1.0.0
-{-# INLINE lookupMax #-}
-lookupMax :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
-lookupMax is = lookupLE is (capacityIS is - 1)
+{-# INLINEABLE lookupMaxST #-}
+lookupMaxST :: IntSet s -> ST s (Maybe Int)
+lookupMaxST is = lookupLEST is (capacityIS is - 1)
 
--- | \(O(\log n)\) Inserts a key \(k\) into the set. If an entry with the same key already exists,
--- it is overwritten.
---
--- @since 1.1.0.0
-{-# INLINE insert #-}
-insert :: (HasCallStack, PrimMonad m) => IntSet (PrimState m) -> Int -> m ()
-insert is@IntSet {..} k = do
-  b <- member is k
+{-# INLINEABLE insertST #-}
+insertST :: (HasCallStack) => IntSet s -> Int -> ST s ()
+insertST is@IntSet {..} k = do
+  b <- memberST is k
   unless b $ do
     VUM.unsafeModify sizeIS (+ 1) 0
     V.foldM'_
@@ -316,14 +397,10 @@ insert is@IntSet {..} k = do
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.IntSet.insert" k capacityIS
 
--- | \(O(\log n)\) Deletes a key \(k\) from the set. Does nothing if no such key exists. Returns
--- whether the key existed.
---
--- @since 1.1.0.0
-{-# INLINE delete #-}
-delete :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m Bool
-delete is@IntSet {..} k = do
-  b_ <- member is k
+{-# INLINEABLE deleteST #-}
+deleteST :: IntSet s -> Int -> ST s Bool
+deleteST is@IntSet {..} k = do
+  b_ <- memberST is k
   if b_
     then do
       VUM.unsafeModify sizeIS (subtract 1) 0
@@ -342,50 +419,38 @@ delete is@IntSet {..} k = do
       pure True
     else pure False
 
--- | \(O(\log n)\) Deletes a key \(k\) from the set. Does nothing if no such key exists.
---
--- @since 1.1.0.0
-{-# INLINE delete_ #-}
-delete_ :: (PrimMonad m) => IntSet (PrimState m) -> Int -> m ()
-delete_ is k = void $ delete is k
+{-# INLINEABLE deleteST_ #-}
+deleteST_ :: IntSet s -> Int -> ST s ()
+deleteST_ is k = void $ deleteST is k
 
--- | \(O(\log n)\) Deletes the minimum key from the set. Returns `Nothing` if the set is empty.
---
--- @since 1.1.0.0
-{-# INLINE deleteMin #-}
-deleteMin :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
-deleteMin is = do
-  lookupMin is
+{-# INLINEABLE deleteMinST #-}
+deleteMinST :: IntSet s -> ST s (Maybe Int)
+deleteMinST is = do
+  lookupMinST is
     >>= mapM
       ( \key -> do
-          delete_ is key
+          deleteST_ is key
           pure key
       )
 
--- | \(O(\log n)\) Deletes the maximum key from the set. Returns `Nothing` if the set is empty.
---
--- @since 1.1.0.0
-{-# INLINE deleteMax #-}
-deleteMax :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
-deleteMax is = do
-  lookupMax is
+{-# INLINEABLE deleteMaxST #-}
+deleteMaxST :: IntSet s -> ST s (Maybe Int)
+deleteMaxST is = do
+  lookupMaxST is
     >>= mapM
       ( \key -> do
-          delete_ is key
+          deleteST_ is key
           pure key
       )
 
--- | \(O(n \log n)\) Enumerates the keys in the map.
---
--- @since 1.1.0.0
-{-# INLINE keys #-}
-keys :: (PrimMonad m) => IntSet (PrimState m) -> m (VU.Vector Int)
-keys is@IntSet {sizeIS} = do
+{-# INLINEABLE keysST #-}
+keysST :: IntSet s -> ST s (VU.Vector Int)
+keysST is@IntSet {sizeIS} = do
   n <- VGM.unsafeRead sizeIS 0
   VU.unfoldrExactNM
     n
     ( \i -> do
-        i' <- fromJust <$> lookupGT is i
+        i' <- fromJust <$> lookupGTST is i
         pure (i', i')
     )
     (-1)

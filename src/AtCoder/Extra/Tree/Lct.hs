@@ -212,7 +212,7 @@ build ::
   VU.Vector (Vertex, Vertex) ->
   -- | Link/cut tree
   m (Lct (PrimState m) a)
-build = buildInv id
+build xs es = stToPrim $ buildInv id xs es
 
 -- | \(O(n + m \log n)\) Creates a link/cut tree with an inverse operator, initial monoid values and
 -- initial edges. This setup enables subtree queries (`prodSubtree`).
@@ -229,7 +229,205 @@ buildInv ::
   VU.Vector (Vertex, Vertex) ->
   -- | Link/cut tree
   m (Lct (PrimState m) a)
-buildInv !invOpLct xs es = do
+buildInv invOpLct xs es = stToPrim $ buildST invOpLct xs es
+
+-- -------------------------------------------------------------------------------------------------
+-- Write
+-- -------------------------------------------------------------------------------------------------
+
+-- | Amortized \(O(\log n)\). Writes the monoid value of a vertex.
+--
+-- @since 1.1.1.0
+{-# INLINE write #-}
+write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> a -> m ()
+write lct v x = stToPrim $ do
+  -- make @v@ the new root of the underlying tree:
+  evertST lct v
+  VGM.unsafeWrite (vLct lct) v x
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.write" v (nLct lct)
+
+-- | Amortized \(O(\log n)\). Modifies the monoid value of a vertex with a pure function.
+--
+-- @since 1.1.1.0
+{-# INLINE modify #-}
+modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> (a -> a) -> Vertex -> m ()
+modify lct f v = stToPrim $ do
+  -- make @v@ the new root of the underlying tree:
+  evertST lct v
+  VGM.unsafeModify (vLct lct) f v
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.modify" v (nLct lct)
+
+-- | Amortized \(O(\log n)\). Modifies the monoid value of a vertex with a monadic function.
+--
+-- @since 1.1.1.0
+{-# INLINE modifyM #-}
+modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> (a -> m a) -> Vertex -> m ()
+modifyM lct f v = do
+  -- make @v@ the new root of the underlying tree:
+  stToPrim $ evertST lct v
+  VGM.unsafeModifyM (vLct lct) f v
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.modifyM" v (nLct lct)
+
+-- -------------------------------------------------------------------------------------------------
+-- Link/cut operations
+-- -------------------------------------------------------------------------------------------------
+
+-- | Amortized \(O(\log n)\). Creates an edge between \(c\) and \(p\). In the represented tree, the
+-- parent of \(c\) will be \(p\) after this operation.
+--
+-- @since 1.1.1.0
+{-# INLINE link #-}
+link :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> m ()
+link lct c p = stToPrim $ linkST lct c p
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.link" c (nLct lct)
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.link" p (nLct lct)
+
+-- | Amortized \(O(\log N)\). Deletes an edge between \(u\) and \(v\).
+--
+-- @since 1.1.1.0
+{-# INLINE cut #-}
+cut :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> m ()
+cut lct u v = stToPrim $ cutST lct u v
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.cut" u (nLct lct)
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.cut" v (nLct lct)
+
+-- | Amortized \(O(\log n)\). Makes \(v\) a new root of the underlying tree.
+--
+-- @since 1.1.1.0
+{-# INLINE evert #-}
+evert :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> m ()
+evert lct v = stToPrim $ evertST lct v
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.evert" v (nLct lct)
+
+-- | Amortized \(O(\log n)\). Makes \(v\) and the root to be in the same preferred path (auxiliary
+-- tree). After the opeartion, \(v\) will be the new root and all the children will be detached from
+-- the preferred path.
+--
+-- @since 1.1.1.0
+{-# INLINE expose #-}
+expose :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> m Vertex
+expose lct v = stToPrim $ exposeST lct v
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.expose_" v (nLct lct)
+
+-- | Amortized \(O(\log n)\). `expose` with the return value discarded.
+--
+-- @since 1.1.1.0
+{-# INLINE expose_ #-}
+expose_ :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> m ()
+expose_ lct v0 = stToPrim $ do
+  _ <- exposeST lct v0
+  pure ()
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.expose_" v0 (nLct lct)
+
+-- -------------------------------------------------------------------------------------------------
+-- Jump, LCA
+-- -------------------------------------------------------------------------------------------------
+
+-- | \(O(\log n)\) Returns the root of the underlying tree. Two vertices in the same connected
+-- component have the same root vertex.
+--
+-- @since 1.1.1.0
+{-# INLINE root #-}
+root :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Int -> m Vertex
+root lct c0 = stToPrim $ rootST lct c0
+
+-- | \(O(\log n)\) Returns the parent vertex in the underlying tree.
+--
+-- @since 1.1.1.0
+{-# INLINE parent #-}
+parent :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Int -> m (Maybe Vertex)
+parent lct x = stToPrim $ parentST lct x
+
+-- | \(O(\log n)\) Given a path between \(u\) and \(v\), returns the \(k\)-th vertex of the path.
+--
+-- ==== Constraints
+-- - The \(k\)-th vertex must exist.
+--
+-- @since 1.1.1.0
+{-# INLINE jump #-}
+jump :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> Int -> m Vertex
+jump lct u v k = stToPrim $ jumpST lct u v k
+
+-- | \(O(\log n)\) Returns the LCA of \(u\) and \(v\). Because the root of the underlying changes
+-- in almost every operation, one might want to use `evert` beforehand.
+--
+-- ==== Constraints
+-- - \(u\) and \(v\) must be in the same connected component.
+--
+-- @since 1.1.1.0
+{-# INLINE lca #-}
+lca :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Int -> Int -> m Vertex
+lca lct u v = stToPrim $ do
+  ru <- rootST lct u
+  rv <- rootST lct v
+  let !_ = ACIA.runtimeAssert (ru == rv) $ "AtCoder.Extra.Lct.lca: given two vertices in different connected components " ++ show (u, v)
+  _ <- exposeST lct u
+  exposeST lct v
+
+-- -------------------------------------------------------------------------------------------------
+-- Monoid product
+-- -------------------------------------------------------------------------------------------------
+
+-- | Amortized \(O(\log n)\). Folds a path between \(u\) and \(v\) (inclusive).
+--
+-- @since 1.1.1.0
+{-# INLINE prodPath #-}
+prodPath :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> m a
+prodPath lct@Lct {prodLct} u v = stToPrim $ do
+  -- make @u@ the root of the underlying tree
+  evertST lct u
+  -- make @v@ in the same preferred path as @u@
+  _ <- exposeST lct v
+  -- now that @v@ is at the root of the auxiliary tree, its aggregation value is the path folding:
+  VGM.unsafeRead prodLct v
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.prodPath" u (nLct lct)
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.prodPath" v (nLct lct)
+
+-- | Amortized \(O(\log n)\). Fold the subtree under \(v\), considering \(p\) as the root-side
+-- vertex. Or, if \(p\) equals to \(v\), \(v\) will be the new root.
+--
+-- ==== Constraints
+-- - The inverse operator has to be set on consturction (`newInv` or `buildInv`).
+--
+-- @since 1.1.1.0
+{-# INLINE prodSubtree #-}
+prodSubtree ::
+  (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
+  -- | Link/cut tree
+  Lct (PrimState m) a ->
+  -- | Vertex
+  Vertex ->
+  -- | Root or parent
+  Vertex ->
+  -- | Subtree's monoid product
+  m a
+prodSubtree lct v rootOrParent = stToPrim $ prodSubtreeST lct v rootOrParent
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE buildST #-}
+buildST ::
+  (HasCallStack, Monoid a, VU.Unbox a) =>
+  -- | Inverse operator
+  (a -> a) ->
+  -- | Vertex monoid values
+  VU.Vector a ->
+  -- | Edges
+  VU.Vector (Vertex, Vertex) ->
+  -- | Link/cut tree
+  ST s (Lct s a)
+buildST invOpLct xs es = do
   lct <- do
     let !nLct = VU.length xs
     lLct <- VUM.replicate nLct undefLct
@@ -247,9 +445,7 @@ buildInv !invOpLct xs es = do
     link lct u v
   pure lct
 
--- -------------------------------------------------------------------------------------------------
--- Balancing
--- -------------------------------------------------------------------------------------------------
+-- * Balancing
 
 -- | \(O(1)\) Rotates up a non-root node.
 {-# INLINEABLE rotateST #-}
@@ -360,7 +556,7 @@ splayST lct@Lct {pLct} c = do
 -- * Node helpers
 
 -- | \(O(1)\)
-{-# INLINEABLE isRootNodeST #-}
+{-# INLINE isRootNodeST #-}
 isRootNodeST :: Lct s a -> Vertex -> ST s Bool
 isRootNodeST lct v = do
   (== RootNodeLct) <$> nodePlaceST lct v
@@ -474,51 +670,7 @@ eraseLightST Lct {subtreeProdLct, midLct, invOpLct} p c = do
   let !sub' = invOpLct sub
   VGM.unsafeModify midLct (<> sub') p
 
--- -------------------------------------------------------------------------------------------------
--- Write
--- -------------------------------------------------------------------------------------------------
-
--- TODO: read
-
--- | Amortized \(O(\log n)\). Writes the monoid value of a vertex.
---
--- @since 1.1.1.0
-{-# INLINE write #-}
-write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> a -> m ()
-write lct v x = stToPrim $ do
-  -- make @v@ the new root of the underlying tree:
-  evertST lct v
-  VGM.unsafeWrite (vLct lct) v x
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.write" v (nLct lct)
-
--- | Amortized \(O(\log n)\). Modifies the monoid value of a vertex with a pure function.
---
--- @since 1.1.1.0
-{-# INLINE modify #-}
-modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> (a -> a) -> Vertex -> m ()
-modify lct f v = stToPrim $ do
-  -- make @v@ the new root of the underlying tree:
-  evertST lct v
-  VGM.unsafeModify (vLct lct) f v
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.modify" v (nLct lct)
-
--- | Amortized \(O(\log n)\). Modifies the monoid value of a vertex with a monadic function.
---
--- @since 1.1.1.0
-{-# INLINE modifyM #-}
-modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> (a -> m a) -> Vertex -> m ()
-modifyM lct f v = do
-  -- make @v@ the new root of the underlying tree:
-  stToPrim $ evertST lct v
-  VGM.unsafeModifyM (vLct lct) f v
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.modifyM" v (nLct lct)
-
--- -------------------------------------------------------------------------------------------------
--- Link/cut operations
--- -------------------------------------------------------------------------------------------------
+-- * Link/cut
 
 -- | Amortized \(O(\log n)\).
 {-# INLINEABLE linkST #-}
@@ -541,17 +693,6 @@ linkST lct@Lct {pLct, rLct} c p = do
   VGM.unsafeWrite pLct c p
   VGM.unsafeWrite rLct p c
   updateNodeST lct p
-
--- | Amortized \(O(\log n)\). Creates an edge between \(c\) and \(p\). In the represented tree, the
--- parent of \(c\) will be \(p\) after this operation.
---
--- @since 1.1.1.0
-{-# INLINE link #-}
-link :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> m ()
-link lct c p = stToPrim $ linkST lct c p
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.link" c (nLct lct)
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.link" p (nLct lct)
 
 {-# INLINEABLE cutST #-}
 cutST :: (Monoid a, VU.Unbox a) => Lct s a -> Vertex -> Vertex -> ST s ()
@@ -584,16 +725,6 @@ cutST lct@Lct {pLct, lLct} u v = do
   VGM.unsafeWrite lLct v undefLct
   updateNodeST lct v
 
--- | Amortized \(O(\log N)\). Deletes an edge between \(u\) and \(v\).
---
--- @since 1.1.1.0
-{-# INLINE cut #-}
-cut :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> m ()
-cut lct u v = stToPrim $ cutST lct u v
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.cut" u (nLct lct)
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.cut" v (nLct lct)
-
 -- | Amortized \(O(\log n)\). Makes \(v\) a new root of the underlying tree.
 {-# INLINEABLE evertST #-}
 evertST :: (Monoid a, VU.Unbox a) => Lct s a -> Vertex -> ST s ()
@@ -603,15 +734,6 @@ evertST lct v = do
   -- reverse all the edges with respect to @v@: make @v@ a new root of the auxiliary tree.
   reverseNodeST lct v
   pushNodeST lct v
-
--- | Amortized \(O(\log n)\). Makes \(v\) a new root of the underlying tree.
---
--- @since 1.1.1.0
-{-# INLINE evert #-}
-evert :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> m ()
-evert lct v = stToPrim $ evertST lct v
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.evert" v (nLct lct)
 
 {-# INLINEABLE exposeST #-}
 exposeST :: (Monoid a, VU.Unbox a) => Lct s a -> Vertex -> ST s Vertex
@@ -658,39 +780,11 @@ exposeST lct@Lct {pLct, rLct} v0 = do
 
   pure res
 
--- | Amortized \(O(\log n)\). Makes \(v\) and the root to be in the same preferred path (auxiliary
--- tree). After the opeartion, \(v\) will be the new root and all the children will be detached from
--- the preferred path.
---
--- @since 1.1.1.0
-{-# INLINE expose #-}
-expose :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> m Vertex
-expose lct v = stToPrim $ exposeST lct v
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.expose_" v (nLct lct)
+-- * Jump, LCA
 
--- | Amortized \(O(\log n)\). `expose` with the return value discarded.
---
--- @since 1.1.1.0
-{-# INLINE expose_ #-}
-expose_ :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> m ()
-expose_ lct v0 = stToPrim $ do
-  _ <- exposeST lct v0
-  pure ()
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.expose_" v0 (nLct lct)
-
--- -------------------------------------------------------------------------------------------------
--- Jumo, LCA
--- -------------------------------------------------------------------------------------------------
-
--- | \(O(\log n)\) Returns the root of the underlying tree. Two vertices in the same connected
--- component have the same root vertex.
---
--- @since 1.1.1.0
-{-# INLINE root #-}
-root :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Int -> m Vertex
-root lct@Lct {lLct} c0 = stToPrim $ do
+{-# INLINEABLE rootST #-}
+rootST :: (HasCallStack, Monoid a, VU.Unbox a) => Lct s a -> Int -> ST s Vertex
+rootST lct@Lct {lLct} c0 = do
   _ <- exposeST lct c0
   pushNodeST lct c0
   let inner c = do
@@ -704,14 +798,11 @@ root lct@Lct {lLct} c0 = stToPrim $ do
   splayST lct c'
   pure c'
   where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.root" c0 (nLct lct)
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.rootST" c0 (nLct lct)
 
--- | \(O(\log n)\) Returns the parent vertex in the underlying tree.
---
--- @since 1.1.1.0
-{-# INLINE parent #-}
-parent :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Int -> m (Maybe Vertex)
-parent lct@Lct {lLct, rLct} x = stToPrim $ do
+{-# INLINEABLE parentST #-}
+parentST :: (HasCallStack, Monoid a, VU.Unbox a) => Lct s a -> Int -> ST s (Maybe Vertex)
+parentST lct@Lct {lLct, rLct} x = do
   _ <- exposeST lct x
   pushNodeST lct x
   xl <- VGM.unsafeRead lLct x
@@ -728,7 +819,7 @@ parent lct@Lct {lLct, rLct} x = stToPrim $ do
                 inner yr
       Just <$> inner xl
   where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.parent" x (nLct lct)
+    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.parentST" x (nLct lct)
 
 {-# INLINEABLE jumpST #-}
 jumpST :: (HasCallStack, Monoid a, VU.Unbox a) => Lct s a -> Vertex -> Vertex -> Int -> ST s Vertex
@@ -759,71 +850,18 @@ jumpST lct@Lct {lLct, rLct, sLct} u0 v0 k0 = do
   splayST lct res
   pure res
 
--- | \(O(\log n)\) Given a path between \(u\) and \(v\), returns the \(k\)-th vertex of the path.
---
--- ==== Constraints
--- - The \(k\)-th vertex must exist.
---
--- @since 1.1.1.0
-{-# INLINE jump #-}
-jump :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> Int -> m Vertex
-jump lct u v k = stToPrim $ jumpST lct u v k
-
--- | \(O(\log n)\) Returns the LCA of \(u\) and \(v\). Because the root of the underlying changes
--- in almost every operation, one might want to use `evert` beforehand.
---
--- ==== Constraints
--- - \(u\) and \(v\) must be in the same connected component.
---
--- @since 1.1.1.0
-{-# INLINE lca #-}
-lca :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Int -> Int -> m Vertex
-lca lct u v = stToPrim $ do
-  ru <- root lct u
-  rv <- root lct v
-  let !_ = ACIA.runtimeAssert (ru == rv) $ "AtCoder.Extra.Lct.lca: given two vertices in different connected components " ++ show (u, v)
-  _ <- exposeST lct u
-  exposeST lct v
-
--- -------------------------------------------------------------------------------------------------
--- Monoid produ\t
--- -------------------------------------------------------------------------------------------------
-
--- | Amortized \(O(\log n)\). Folds a path between \(u\) and \(v\) (inclusive).
---
--- @since 1.1.1.0
-{-# INLINE prodPath #-}
-prodPath :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> m a
-prodPath lct@Lct {prodLct} u v = stToPrim $ do
-  -- make @u@ the root of the underlying tree
-  evertST lct u
-  -- make @v@ in the same preferred path as @u@
-  _ <- exposeST lct v
-  -- now that @v@ is at the root of the auxiliary tree, its aggregation value is the path folding:
-  VGM.unsafeRead prodLct v
-  where
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.prodPath" u (nLct lct)
-    !_ = ACIA.checkIndex "AtCoder.Extra.Lct.prodPath" v (nLct lct)
-
--- | Amortized \(O(\log n)\). Fold the subtree under \(v\), considering \(p\) as the root-side
--- vertex. Or, if \(p\) equals to \(v\), \(v\) will be the new root.
---
--- ==== Constraints
--- - The inverse operator has to be set on consturction (`newInv` or `buildInv`).
---
--- @since 1.1.1.0
-{-# INLINE prodSubtree #-}
-prodSubtree ::
-  (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
+{-# INLINEABLE prodSubtreeST #-}
+prodSubtreeST ::
+  (HasCallStack, Monoid a, VU.Unbox a) =>
   -- | Link/cut tree
-  Lct (PrimState m) a ->
+  Lct s a ->
   -- | Vertex
   Vertex ->
   -- | Root or parent
   Vertex ->
   -- | Subtree's monoid product
-  m a
-prodSubtree lct@Lct {nLct, subtreeProdLct} v rootOrParent = stToPrim $ do
+  ST s a
+prodSubtreeST lct@Lct {nLct, subtreeProdLct} v rootOrParent = do
   if v == rootOrParent
     then do
       -- `v` will be the root

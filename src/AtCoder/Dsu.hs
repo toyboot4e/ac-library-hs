@@ -65,8 +65,8 @@ where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
-import Control.Monad.ST (ST)
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -98,11 +98,7 @@ data Dsu s = Dsu
 -- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (PrimMonad m) => Int -> m (Dsu (PrimState m))
-new nDsu
-  | nDsu >= 0 = do
-      parentOrSizeDsu <- VUM.replicate nDsu (-1)
-      pure Dsu {..}
-  | otherwise = error $ "new: given negative size (`" ++ show nDsu ++ "`)"
+new = stToPrim . newST
 
 -- | Adds an edge \((a, b)\). If the vertices \(a\) and \(b\) are in the same connected component, it
 -- returns the representative (`leader`) of this connected component. Otherwise, it returns the
@@ -118,22 +114,7 @@ new nDsu
 -- @since 1.0.0.0
 {-# INLINE merge #-}
 merge :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Int
-merge dsu@Dsu {..} a b = stToPrim $ do
-  let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" a nDsu
-  let !_ = ACIA.checkVertex "AtCoder.Dsu.merge" b nDsu
-  x <- leaderST dsu a
-  y <- leaderST dsu b
-  if x == y
-    then do
-      pure x
-    else do
-      px <- VGM.read parentOrSizeDsu x
-      py <- VGM.read parentOrSizeDsu y
-      when (-px < -py) $ do
-        VGM.swap parentOrSizeDsu x y
-      sizeY <- VGM.exchange parentOrSizeDsu y x
-      VGM.modify parentOrSizeDsu (+ sizeY) x
-      pure x
+merge dsu a b = stToPrim $ mergeST dsu a b
 
 -- | `merge` with the return value discarded.
 --
@@ -163,23 +144,7 @@ merge_ dsu a b = do
 -- @since 1.0.0.0
 {-# INLINE same #-}
 same :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Bool
-same dsu@Dsu {..} a b = do
-  let !_ = ACIA.checkVertex "AtCoder.Dsu.same" a nDsu
-  let !_ = ACIA.checkVertex "AtCoder.Dsu.same" b nDsu
-  la <- leader dsu a
-  lb <- leader dsu b
-  pure $ la == lb
-
-{-# INLINE leaderST #-}
-leaderST :: Dsu s -> Int -> ST s Int
-leaderST dsu@Dsu {..} a = do
-  pa <- VGM.read parentOrSizeDsu a
-  if pa < 0
-    then pure a
-    else do
-      lpa <- leaderST dsu pa
-      VGM.write parentOrSizeDsu a lpa
-      pure lpa
+same dsu a b = stToPrim $ sameST dsu a b
 
 -- | Returns the representative of the connected component that contains the vertex \(a\).
 --
@@ -205,11 +170,7 @@ leader dsu a = stToPrim $ leaderST dsu a
 -- @since 1.0.0.0
 {-# INLINE size #-}
 size :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
-size dsu@Dsu {..} a = stToPrim $ do
-  let !_ = ACIA.checkVertex "AtCoder.Dsu.size" a nDsu
-  la <- leaderST dsu a
-  sizeLa <- VGM.read parentOrSizeDsu la
-  pure (-sizeLa)
+size dsu a = stToPrim $ sizeST dsu a
 
 -- | Divides the graph into connected components and returns the vector of them.
 --
@@ -222,7 +183,71 @@ size dsu@Dsu {..} a = stToPrim $ do
 -- @since 1.0.0.0
 {-# INLINE groups #-}
 groups :: (PrimMonad m) => Dsu (PrimState m) -> m (V.Vector (VU.Vector Int))
-groups dsu@Dsu {..} = stToPrim $ do
+groups = stToPrim . groupsST
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE newST #-}
+newST :: Int -> ST s (Dsu s)
+newST nDsu
+  | nDsu >= 0 = do
+      parentOrSizeDsu <- VUM.replicate nDsu (-1)
+      pure Dsu {..}
+  | otherwise = error $ "AtCoder.Dsu.newST: given negative size (`" ++ show nDsu ++ "`)"
+
+{-# INLINEABLE mergeST #-}
+mergeST :: (HasCallStack) => Dsu s -> Int -> Int -> ST s Int
+mergeST dsu@Dsu {..} a b = do
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.mergeST" a nDsu
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.mergeST" b nDsu
+  x <- leaderST dsu a
+  y <- leaderST dsu b
+  if x == y
+    then do
+      pure x
+    else do
+      px <- VGM.read parentOrSizeDsu x
+      py <- VGM.read parentOrSizeDsu y
+      when (-px < -py) $ do
+        VGM.swap parentOrSizeDsu x y
+      sizeY <- VGM.exchange parentOrSizeDsu y x
+      VGM.modify parentOrSizeDsu (+ sizeY) x
+      pure x
+
+{-# INLINEABLE sameST #-}
+sameST :: (HasCallStack) => Dsu s -> Int -> Int -> ST s Bool
+sameST dsu@Dsu {..} a b = do
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.sameST" a nDsu
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.sameST" b nDsu
+  la <- leaderST dsu a
+  lb <- leaderST dsu b
+  pure $ la == lb
+
+-- TODO: INLINE?
+{-# INLINEABLE leaderST #-}
+leaderST :: Dsu s -> Int -> ST s Int
+leaderST dsu@Dsu {..} a = do
+  pa <- VGM.read parentOrSizeDsu a
+  if pa < 0
+    then pure a
+    else do
+      lpa <- leaderST dsu pa
+      VGM.write parentOrSizeDsu a lpa
+      pure lpa
+
+{-# INLINEABLE sizeST #-}
+sizeST :: (HasCallStack) => Dsu s -> Int -> ST s Int
+sizeST dsu@Dsu {..} a = do
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.sizeST" a nDsu
+  la <- leaderST dsu a
+  sizeLa <- VGM.read parentOrSizeDsu la
+  pure (-sizeLa)
+
+{-# INLINEABLE groupsST #-}
+groupsST :: Dsu s -> ST s (V.Vector (VU.Vector Int))
+groupsST dsu@Dsu {..} = do
   groupSize <- VUM.replicate nDsu (0 :: Int)
   leaders <- VU.generateM nDsu $ \i -> do
     li <- leaderST dsu i

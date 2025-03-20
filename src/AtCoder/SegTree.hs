@@ -106,6 +106,7 @@ where
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIBIT
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Bits (countTrailingZeros, testBit, (.&.), (.>>.))
 import Data.Foldable (for_)
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -145,9 +146,7 @@ data SegTree s a = SegTree
 -- @since 1.0.0.0
 {-# INLINE new #-}
 new :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (SegTree (PrimState m) a)
-new nSt
-  | nSt >= 0 = build $ VU.replicate nSt mempty
-  | otherwise = error $ "AtCoder.SegTree.new: given negative size (`" ++ show nSt ++ "`)"
+new n = stToPrim $ newST n
 
 -- | Creates an array with initial values.
 --
@@ -157,17 +156,7 @@ new nSt
 -- @since 1.0.0.0
 {-# INLINE build #-}
 build :: (PrimMonad m, Monoid a, VU.Unbox a) => VU.Vector a -> m (SegTree (PrimState m) a)
-build vs = do
-  let nSt = VU.length vs
-  let sizeSt = ACIBIT.bitCeil nSt
-  let logSt = countTrailingZeros sizeSt
-  dSt <- VUM.replicate (2 * sizeSt) mempty
-  VU.iforM_ vs $ \i v -> do
-    VGM.write dSt (sizeSt + i) v
-  let segtree = SegTree {..}
-  for_ [sizeSt - 1, sizeSt - 2 .. 1] $ \i -> do
-    update segtree i
-  pure segtree
+build vs = stToPrim $ buildST vs
 
 -- | Writes \(p\)-th value of the array to \(x\).
 --
@@ -180,11 +169,7 @@ build vs = do
 -- @since 1.0.0.0
 {-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m ()
-write self@SegTree {..} p x = do
-  let !_ = ACIA.checkIndex "AtCoder.SegTree.write" p nSt
-  VGM.write dSt (p + sizeSt) x
-  for_ [1 .. logSt] $ \i -> do
-    update self ((p + sizeSt) .>>. i)
+write self p x = stToPrim $ writeST self p x
 
 -- | (Extra API) Modifies \(p\)-th value with a function \(f\).
 --
@@ -197,11 +182,7 @@ write self@SegTree {..} p x = do
 -- @since 1.0.0.0
 {-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> a) -> Int -> m ()
-modify self@SegTree {..} f p = do
-  let !_ = ACIA.checkIndex "AtCoder.SegTree.modify" p nSt
-  VGM.modify dSt f (p + sizeSt)
-  for_ [1 .. logSt] $ \i -> do
-    update self ((p + sizeSt) .>>. i)
+modify self f p = stToPrim $ modifyST self f p
 
 -- | (Extra API) Modifies \(p\)-th value with a monadic function \(f\).
 --
@@ -217,8 +198,8 @@ modifyM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimSta
 modifyM self@SegTree {..} f p = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.modifyM" p nSt
   VGM.modifyM dSt f (p + sizeSt)
-  for_ [1 .. logSt] $ \i -> do
-    update self ((p + sizeSt) .>>. i)
+  stToPrim $ for_ [1 .. logSt] $ \i -> do
+    updateST self ((p + sizeSt) .>>. i)
 
 -- | (Extra API) Writes \(p\)-th value of the array to \(x\) and returns the old value.
 --
@@ -231,13 +212,7 @@ modifyM self@SegTree {..} f p = do
 -- @since 1.1.0.0
 {-# INLINE exchange #-}
 exchange :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m a
-exchange self@SegTree {..} p x = do
-  let !_ = ACIA.checkIndex "AtCoder.SegTree.exchange" p nSt
-  ret <- VGM.exchange dSt (p + sizeSt) x
-  VGM.write dSt (p + sizeSt) x
-  for_ [1 .. logSt] $ \i -> do
-    update self ((p + sizeSt) .>>. i)
-  pure ret
+exchange self p x = stToPrim $ exchangeST self p x
 
 -- | Returns \(p\)-th value of the array.
 --
@@ -267,7 +242,7 @@ read SegTree {..} p = do
 {-# INLINE prod #-}
 prod :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m a
 prod self@SegTree {nSt} l0 r0
-  | ACIA.testInterval l0 r0 nSt = unsafeProd self l0 r0
+  | ACIA.testInterval l0 r0 nSt = stToPrim $ unsafeProdST self l0 r0
   | otherwise = ACIA.errorInterval "AtCoder.SegTree.prod" l0 r0 nSt
 
 -- | Total variant of `prod`. Returns \(a[l] \cdot ... \cdot a[r - 1]\), assuming the properties of
@@ -281,28 +256,9 @@ prod self@SegTree {nSt} l0 r0
 {-# INLINE prodMaybe #-}
 prodMaybe :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m (Maybe a)
 prodMaybe self@SegTree {nSt} l0 r0
-  | ACIA.testInterval l0 r0 nSt = Just <$> unsafeProd self l0 r0
+  | ACIA.testInterval l0 r0 nSt = stToPrim $ Just <$> unsafeProdST self l0 r0
   -- l0 == r0 = pure (Just mempty)
   | otherwise = pure Nothing
-
--- | Internal implementation of `prod`.
-{-# INLINE unsafeProd #-}
-unsafeProd :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> Int -> m a
-unsafeProd SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
-  where
-    -- NOTE: we're using inclusive range [l, r] for simplicity
-    inner l r !smL !smR
-      | l > r = pure $! smL <> smR
-      | otherwise = do
-          !smL' <-
-            if testBit l 0
-              then (smL <>) <$> VGM.read dSt l
-              else pure smL
-          !smR' <-
-            if not $ testBit r 0
-              then (<> smR) <$> VGM.read dSt r
-              else pure smR
-          inner ((l + 1) .>>. 1) ((r - 1) .>>. 1) smL' smR'
 
 -- | Returns @a[0] <> ... <> a[n - 1]@, assuming the properties of the monoid. It returns `mempty`
 -- if \(n = 0\).
@@ -510,10 +466,77 @@ unsafeFreeze :: (PrimMonad m, VU.Unbox a) => SegTree (PrimState m) a -> m (VU.Ve
 unsafeFreeze SegTree {..} = do
   VU.unsafeFreeze . VUM.take nSt $ VUM.drop sizeSt dSt
 
--- | \(O(1)\)
-{-# INLINE update #-}
-update :: (PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> m ()
-update SegTree {..} k = do
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE newST #-}
+newST :: (HasCallStack, Monoid a, VU.Unbox a) => Int -> ST s (SegTree s a)
+newST nSt
+  | nSt >= 0 = build $ VU.replicate nSt mempty
+  | otherwise = error $ "AtCoder.SegTree.newST: given negative size (`" ++ show nSt ++ "`)"
+
+{-# INLINEABLE buildST #-}
+buildST :: (Monoid a, VU.Unbox a) => VU.Vector a -> ST s (SegTree s a)
+buildST vs = do
+  let nSt = VU.length vs
+  let sizeSt = ACIBIT.bitCeil nSt
+  let logSt = countTrailingZeros sizeSt
+  dSt <- VUM.replicate (2 * sizeSt) mempty
+  VU.iforM_ vs $ \i v -> do
+    VGM.write dSt (sizeSt + i) v
+  let segtree = SegTree {..}
+  for_ [sizeSt - 1, sizeSt - 2 .. 1] $ \i -> do
+    updateST segtree i
+  pure segtree
+
+{-# INLINEABLE writeST #-}
+writeST :: (HasCallStack, Monoid a, VU.Unbox a) => SegTree s a -> Int -> a -> ST s ()
+writeST self@SegTree {..} p x = do
+  let !_ = ACIA.checkIndex "AtCoder.SegTree.writeST" p nSt
+  VGM.write dSt (p + sizeSt) x
+  for_ [1 .. logSt] $ \i -> do
+    updateST self ((p + sizeSt) .>>. i)
+
+{-# INLINEABLE modifyST #-}
+modifyST :: (HasCallStack, Monoid a, VU.Unbox a) => SegTree s a -> (a -> a) -> Int -> ST s ()
+modifyST self@SegTree {..} f p = do
+  let !_ = ACIA.checkIndex "AtCoder.SegTree.modifyST" p nSt
+  VGM.modify dSt f (p + sizeSt)
+  for_ [1 .. logSt] $ \i -> do
+    updateST self ((p + sizeSt) .>>. i)
+
+{-# INLINEABLE exchangeST #-}
+exchangeST :: (HasCallStack, Monoid a, VU.Unbox a) => SegTree s a -> Int -> a -> ST s a
+exchangeST self@SegTree {..} p x = do
+  let !_ = ACIA.checkIndex "AtCoder.SegTree.exchangeST" p nSt
+  ret <- VGM.exchange dSt (p + sizeSt) x
+  VGM.write dSt (p + sizeSt) x
+  for_ [1 .. logSt] $ \i -> do
+    updateST self ((p + sizeSt) .>>. i)
+  pure ret
+
+{-# INLINEABLE unsafeProdST #-}
+unsafeProdST :: (Monoid a, VU.Unbox a) => SegTree s a -> Int -> Int -> ST s a
+unsafeProdST SegTree {..} l0 r0 = inner (l0 + sizeSt) (r0 + sizeSt - 1) mempty mempty
+  where
+    -- NOTE: we're using inclusive range [l, r] for simplicity
+    inner l r !smL !smR
+      | l > r = pure $! smL <> smR
+      | otherwise = do
+          !smL' <-
+            if testBit l 0
+              then (smL <>) <$> VGM.read dSt l
+              else pure smL
+          !smR' <-
+            if not $ testBit r 0
+              then (<> smR) <$> VGM.read dSt r
+              else pure smR
+          inner ((l + 1) .>>. 1) ((r - 1) .>>. 1) smL' smR'
+
+{-# INLINE updateST #-}
+updateST :: (Monoid a, VU.Unbox a) => SegTree s a -> Int -> ST s ()
+updateST SegTree {..} k = do
   opL <- VGM.read dSt $ 2 * k
   opR <- VGM.read dSt $ 2 * k + 1
   VGM.write dSt k $! opL <> opR

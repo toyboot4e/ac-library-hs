@@ -111,7 +111,8 @@ import AtCoder.Extra.Tree.Hld qualified as Hld
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.SegTree qualified as ST
 import Control.Monad
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Monoid (Dual (..))
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -166,23 +167,6 @@ data Commutativity
       Show
     )
 
--- | \(O(n)\)
-{-# INLINE buildImpl #-}
-buildImpl ::
-  (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
-  Hld.Hld ->
-  Commutativity ->
-  Hld.WeightPolicy ->
-  VU.Vector a ->
-  m (TreeMonoid a (PrimState m))
-buildImpl hldTM commuteTM weightPolicyTM weights = do
-  segFTM <- ST.build weights
-  segBTM <-
-    case commuteTM of
-      Commute -> ST.build VU.empty
-      NonCommute -> ST.build $ VU.map Dual weights
-  pure TreeMonoid {..}
-
 -- | \(O(n)\) Creates a `TreeMonoid` with weights on vertices.
 --
 -- @since 1.1.0.0
@@ -197,14 +181,7 @@ fromVerts ::
   VU.Vector a ->
   -- | A `TreeMonoid` with weights on vertices.
   m (TreeMonoid a (PrimState m))
-fromVerts hld@Hld.Hld {indexHld} commuteTM xs_ = do
-  let !_ = ACIA.runtimeAssert (VU.length indexHld == VU.length xs_) $ "AtCoder.Extra.Tree.TreeMonoid.fromVerts: vertex number mismatch (`" ++ show (VU.length indexHld) ++ "` and `" ++ show (VU.length xs_) ++ "`)"
-  let !xs = VU.create $ do
-        vec <- VUM.unsafeNew $ VU.length xs_
-        VU.iforM_ xs_ $ \i x -> do
-          VGM.write vec (indexHld VG.! i) x
-        pure vec
-  buildImpl hld commuteTM Hld.WeightsAreOnVertices xs
+fromVerts hld commuteTM xs_ = stToPrim $ fromVertsST hld commuteTM xs_
 
 -- | \(O(n)\) Creates a `TreeMonoid` with weignts on edges. The edges are not required to be
 -- duplicated: only one of \((u, v, w)\) or \((v, u, w)\) is needed.
@@ -221,83 +198,49 @@ fromEdges ::
   VU.Vector (Vertex, Vertex, a) ->
   -- | A `TreeMonoid` with weights on edges.
   m (TreeMonoid a (PrimState m))
-fromEdges hld@Hld.Hld {indexHld} commuteTM edges = do
-  let !xs = VU.create $ do
-        vec <- VUM.unsafeNew $ VU.length indexHld
-        VU.forM_ edges $ \(!u, !v, !w) -> do
-          let u' = indexHld VG.! u
-          let v' = indexHld VG.! v
-          VGM.write vec (max u' v') w
-        pure vec
-  buildImpl hld commuteTM Hld.WeightsAreOnEdges xs
+fromEdges hld commuteTM edges = stToPrim $ fromEdgesST hld commuteTM edges
 
 -- | \(O(\log^2 n)\) Returns the product of the path between two vertices \(u\), \(v\) (invlusive).
 --
 -- @since 1.1.0.0
 {-# INLINE prod #-}
 prod :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> Vertex -> m a
-prod TreeMonoid {..} u v = do
-  case commuteTM of
-    Commute -> Hld.prod weightPolicyTM hldTM (ST.prod segFTM) (ST.prod segFTM) u v
-    NonCommute -> Hld.prod weightPolicyTM hldTM (ST.prod segFTM) (\l r -> getDual <$> ST.prod segBTM l r) u v
+prod tm u v = stToPrim $ prodST tm u v
 
 -- | \(O(\log n)\) Returns the product of the subtree rooted at the given `Vertex`.
 --
 -- @since 1.1.0.0
 {-# INLINE prodSubtree #-}
 prodSubtree :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> m a
-prodSubtree TreeMonoid {..} subtreeRoot = do
-  let (!l, !r) = Hld.subtreeSegmentInclusive hldTM subtreeRoot
-  case weightPolicyTM of
-    Hld.WeightsAreOnVertices -> ST.prod segFTM l (r + 1)
-    Hld.WeightsAreOnEdges -> do
-      -- ignore the root of the subtree, which has the minimum index among the subtree vertices
-      if l == r
-        then pure mempty
-        else ST.prod segFTM (l + 1) (r + 1)
+prodSubtree tm subtreeRoot = stToPrim $ prodSubtreeST tm subtreeRoot
 
 -- | \(O(1)\) Reads a monoid value of a `Vertex`.
 --
 -- @since 1.1.0.0
 {-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> m a
-read TreeMonoid {..} i_ = do
-  let !i = Hld.indexHld hldTM VG.! i_
-  ST.read segFTM i
+read tm i_ = stToPrim $ readST tm i_
 
 -- | \(O(\log n)\) Writes to the monoid value of a vertex.
 --
 -- @since 1.1.0.0
 {-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> a -> m ()
-write TreeMonoid {..} i_ x = do
-  let !i = Hld.indexHld hldTM VG.! i_
-  ST.write segFTM i x
-  when (commuteTM == NonCommute) $ do
-    ST.write segBTM i $ Dual x
+write tm i_ x = stToPrim $ writeST tm i_ x
 
 -- | \(O(\log n)\) Writes to the monoid value of a vertex and returns the old value.
 --
 -- @since 1.1.0.0
 {-# INLINE exchange #-}
 exchange :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> a -> m a
-exchange TreeMonoid {..} i_ x = do
-  let !i = Hld.indexHld hldTM VG.! i_
-  !res <- ST.exchange segFTM i x
-  when (commuteTM == NonCommute) $ do
-    ST.write segBTM i $ Dual x
-  pure res
+exchange tm i_ x = stToPrim $ exchangeST tm i_ x
 
 -- | \(O(\log n)\) Modifies the monoid value of a vertex with a pure function.
 --
 -- @since 1.1.0.0
 {-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> (a -> a) -> Int -> m ()
-modify TreeMonoid {..} f i_ = do
-  let !i = Hld.indexHld hldTM VG.! i_
-  ST.modify segFTM f i
-  when (commuteTM == NonCommute) $ do
-    ST.modify segBTM (Dual . f . getDual) i
+modify tm f i_ = stToPrim $ modifyST tm f i_
 
 -- | \(O(\log n)\) Modifies the monoid value of a vertex with a monadic function.
 --
@@ -309,3 +252,106 @@ modifyM TreeMonoid {..} f i_ = do
   ST.modifyM segFTM f i
   when (commuteTM == NonCommute) $ do
     ST.modifyM segBTM ((Dual <$>) . f . getDual) i
+
+-- -------------------------------------------------------------------------------------------------
+-- INLINE
+-- -------------------------------------------------------------------------------------------------
+
+{-# INLINEABLE buildST #-}
+buildST ::
+  (HasCallStack, Monoid a, VU.Unbox a) =>
+  Hld.Hld ->
+  Commutativity ->
+  Hld.WeightPolicy ->
+  VU.Vector a ->
+  ST s (TreeMonoid a s)
+buildST hldTM commuteTM weightPolicyTM weights = do
+  segFTM <- ST.build weights
+  segBTM <-
+    case commuteTM of
+      Commute -> ST.build VU.empty
+      NonCommute -> ST.build $ VU.map Dual weights
+  pure TreeMonoid {..}
+
+{-# INLINEABLE fromVertsST #-}
+fromVertsST ::
+  (HasCallStack, Monoid a, VU.Unbox a) =>
+  Hld.Hld ->
+  Commutativity ->
+  VU.Vector a ->
+  ST s (TreeMonoid a s)
+fromVertsST hld@Hld.Hld {indexHld} commuteTM xs_ = do
+  let !_ = ACIA.runtimeAssert (VU.length indexHld == VU.length xs_) $ "AtCoder.Extra.Tree.TreeMonoid.fromVertsST: vertex number mismatch (`" ++ show (VU.length indexHld) ++ "` and `" ++ show (VU.length xs_) ++ "`)"
+  let !xs = VU.create $ do
+        vec <- VUM.unsafeNew $ VU.length xs_
+        VU.iforM_ xs_ $ \i x -> do
+          VGM.write vec (indexHld VG.! i) x
+        pure vec
+  buildST hld commuteTM Hld.WeightsAreOnVertices xs
+
+{-# INLINEABLE fromEdgesST #-}
+fromEdgesST ::
+  (HasCallStack, Monoid a, VU.Unbox a) =>
+  Hld.Hld ->
+  Commutativity ->
+  VU.Vector (Vertex, Vertex, a) ->
+  ST s (TreeMonoid a s)
+fromEdgesST hld@Hld.Hld {indexHld} commuteTM edges = do
+  let !xs = VU.create $ do
+        vec <- VUM.unsafeNew $ VU.length indexHld
+        VU.forM_ edges $ \(!u, !v, !w) -> do
+          let u' = indexHld VG.! u
+          let v' = indexHld VG.! v
+          VGM.write vec (max u' v') w
+        pure vec
+  buildST hld commuteTM Hld.WeightsAreOnEdges xs
+
+{-# INLINEABLE prodST #-}
+prodST :: (HasCallStack, Monoid a, VU.Unbox a) => TreeMonoid a s -> Vertex -> Vertex -> ST s a
+prodST TreeMonoid {..} u v = do
+  case commuteTM of
+    Commute -> Hld.prod weightPolicyTM hldTM (ST.prod segFTM) (ST.prod segFTM) u v
+    NonCommute -> Hld.prod weightPolicyTM hldTM (ST.prod segFTM) (\l r -> getDual <$> ST.prod segBTM l r) u v
+
+{-# INLINEABLE prodSubtreeST #-}
+prodSubtreeST :: (HasCallStack, Monoid a, VU.Unbox a) => TreeMonoid a s -> Vertex -> ST s a
+prodSubtreeST TreeMonoid {..} subtreeRoot = do
+  let (!l, !r) = Hld.subtreeSegmentInclusive hldTM subtreeRoot
+  case weightPolicyTM of
+    Hld.WeightsAreOnVertices -> ST.prod segFTM l (r + 1)
+    Hld.WeightsAreOnEdges -> do
+      -- ignore the root of the subtree, which has the minimum index among the subtree vertices
+      if l == r
+        then pure mempty
+        else ST.prod segFTM (l + 1) (r + 1)
+
+{-# INLINEABLE readST #-}
+readST :: (HasCallStack, Monoid a, VU.Unbox a) => TreeMonoid a s -> Vertex -> ST s a
+readST TreeMonoid {..} i_ = do
+  let !i = Hld.indexHld hldTM VG.! i_
+  ST.read segFTM i
+
+{-# INLINEABLE writeST #-}
+writeST :: (HasCallStack, Monoid a, VU.Unbox a) => TreeMonoid a s -> Vertex -> a -> ST s ()
+writeST TreeMonoid {..} i_ x = do
+  let !i = Hld.indexHld hldTM VG.! i_
+  ST.write segFTM i x
+  when (commuteTM == NonCommute) $ do
+    ST.write segBTM i $ Dual x
+
+{-# INLINEABLE exchangeST #-}
+exchangeST :: (HasCallStack, Monoid a, VU.Unbox a) => TreeMonoid a s -> Vertex -> a -> ST s a
+exchangeST TreeMonoid {..} i_ x = do
+  let !i = Hld.indexHld hldTM VG.! i_
+  !res <- ST.exchange segFTM i x
+  when (commuteTM == NonCommute) $ do
+    ST.write segBTM i $ Dual x
+  pure res
+
+{-# INLINEABLE modifyST #-}
+modifyST :: (HasCallStack, Monoid a, VU.Unbox a) => TreeMonoid a s -> (a -> a) -> Int -> ST s ()
+modifyST TreeMonoid {..} f i_ = do
+  let !i = Hld.indexHld hldTM VG.! i_
+  ST.modify segFTM f i
+  when (commuteTM == NonCommute) $ do
+    ST.modify segBTM (Dual . f . getDual) i

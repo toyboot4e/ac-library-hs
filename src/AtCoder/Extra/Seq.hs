@@ -173,8 +173,8 @@ module AtCoder.Extra.Seq
   )
 where
 
+import AtCoder.Extra.Pool (Handle (..), invalidateHandle, newHandle, nullHandle)
 import AtCoder.Extra.Pool qualified as P
-import AtCoder.Extra.Pool (Handle (..), newHandle, nullHandle, invalidateHandle)
 import AtCoder.Extra.Seq.Raw (Seq (..))
 import AtCoder.Extra.Seq.Raw qualified as Seq
 import AtCoder.LazySegTree (SegAct (..))

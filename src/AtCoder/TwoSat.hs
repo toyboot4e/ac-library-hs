@@ -23,10 +23,13 @@
 module AtCoder.TwoSat
   ( -- * TwoSat
     TwoSat (nTs),
+
     -- * Constructor
     new,
+
     -- * Clause building
     addClause,
+
     -- * Solvers
     satisfiable,
     answer,
@@ -36,7 +39,8 @@ where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Scc qualified as ACISCC
-import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST)
 import Data.Bit (Bit (..))
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -102,7 +106,11 @@ addClause TwoSat {..} i f j g = do
 -- @since 1.0.0.0
 {-# INLINE satisfiable #-}
 satisfiable :: (PrimMonad m) => TwoSat (PrimState m) -> m Bool
-satisfiable TwoSat {..} = do
+satisfiable = stToPrim . satisfiableST
+
+{-# INLINEABLE satisfiableST #-}
+satisfiableST :: TwoSat s -> ST s Bool
+satisfiableST TwoSat {..} = do
   (!_, !ids) <- ACISCC.sccIds sccTs
   let inner i
         | i >= nTs = pure True

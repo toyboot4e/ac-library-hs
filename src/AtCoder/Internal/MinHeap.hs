@@ -120,6 +120,45 @@ null = (<$>) (== 0) . length
 clear :: (PrimMonad m, VU.Unbox a) => Heap (PrimState m) a -> m ()
 clear Heap {sizeBH_} = VGM.unsafeWrite sizeBH_ 0 0
 
+-- | \(O(\log n)\) Inserts an element to the heap.
+--
+-- @since 1.0.0.0
+{-# INLINE push #-}
+push :: (HasCallStack, PrimMonad m, Ord a, VU.Unbox a) => Heap (PrimState m) a -> a -> m ()
+push heap x = stToPrim $ pushST heap x
+
+-- | \(O(\log n)\) Removes the last element from the heap and returns it, or `Nothing` if it is
+-- empty.
+--
+-- @since 1.0.0.0
+{-# INLINE pop #-}
+pop :: (HasCallStack, PrimMonad m, Ord a, VU.Unbox a) => Heap (PrimState m) a -> m (Maybe a)
+pop heap = stToPrim $ popST heap
+
+-- | \(O(\log n)\) `pop` with the return value discarded.
+--
+-- @since 1.0.0.0
+{-# INLINE pop_ #-}
+pop_ :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
+pop_ heap = do
+  _ <- stToPrim $ popST heap
+  pure ()
+
+-- | \(O(1)\) Returns the smallest value in the heap, or `Nothing` if it is empty.
+--
+-- @since 1.0.0.0
+{-# INLINE peek #-}
+peek :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
+peek heap = do
+  isNull <- null heap
+  if isNull
+    then pure Nothing
+    else Just <$> VGM.read (dataBH heap) 0
+
+-- -------------------------------------------------------------------------------------------------
+-- Internal
+-- -------------------------------------------------------------------------------------------------
+
 {-# INLINEABLE pushST #-}
 pushST :: (HasCallStack, Ord a, VU.Unbox a) => Heap s a -> a -> ST s ()
 pushST Heap {..} x = do
@@ -133,13 +172,6 @@ pushST Heap {..} x = do
           VGM.swap dataBH iParent i
           siftUp iParent
   siftUp i0
-
--- | \(O(\log n)\) Inserts an element to the heap.
---
--- @since 1.0.0.0
-{-# INLINE push #-}
-push :: (HasCallStack, PrimMonad m, Ord a, VU.Unbox a) => Heap (PrimState m) a -> a -> m ()
-push heap x = stToPrim $ pushST heap x
 
 {-# INLINEABLE popST #-}
 popST :: (HasCallStack, Ord a, VU.Unbox a) => Heap s a -> ST s (Maybe a)
@@ -178,31 +210,3 @@ popST heap@Heap {..} = do
 
       siftDown 0
       pure $ Just root
-
--- | \(O(\log n)\) Removes the last element from the heap and returns it, or `Nothing` if it is
--- empty.
---
--- @since 1.0.0.0
-{-# INLINE pop #-}
-pop :: (HasCallStack, PrimMonad m, Ord a, VU.Unbox a) => Heap (PrimState m) a -> m (Maybe a)
-pop heap = stToPrim $ popST heap
-
--- | \(O(\log n)\) `pop` with the return value discarded.
---
--- @since 1.0.0.0
-{-# INLINE pop_ #-}
-pop_ :: (HasCallStack, Ord a, VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m ()
-pop_ heap = do
-  _ <- stToPrim $ popST heap
-  pure ()
-
--- | \(O(1)\) Returns the smallest value in the heap, or `Nothing` if it is empty.
---
--- @since 1.0.0.0
-{-# INLINE peek #-}
-peek :: (VU.Unbox a, PrimMonad m) => Heap (PrimState m) a -> m (Maybe a)
-peek heap = do
-  isNull <- null heap
-  if isNull
-    then pure Nothing
-    else Just <$> VGM.read (dataBH heap) 0

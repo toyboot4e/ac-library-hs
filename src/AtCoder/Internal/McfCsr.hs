@@ -43,6 +43,24 @@ data Csr s cap cost = Csr
     costCsr :: !(VU.Vector cost)
   }
 
+-- | \(O(n + m)\) Creates `Csr`.
+--
+-- @since 1.0.0.0
+{-# INLINE build #-}
+build :: (HasCallStack, PrimMonad m, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> m (VU.Vector Int, Csr (PrimState m) cap cost)
+build n edges = stToPrim $ buildST n edges
+
+-- | \(O(1)\) Returns a vector of @(to, rev, cost)@.
+--
+-- @since 1.0.0.0
+{-# INLINE adj #-}
+adj :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost) => Csr s cap cost -> Int -> VU.Vector (Int, Int, cost)
+adj Csr {..} v = VU.slice offset len vec
+  where
+    offset = startCsr VG.! v
+    len = startCsr VG.! (v + 1) - offset
+    vec = VU.zip3 toCsr revCsr costCsr
+
 {-# INLINEABLE buildST #-}
 buildST :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> ST s (VU.Vector Int, Csr s cap cost)
 buildST n edges = do
@@ -89,21 +107,3 @@ buildST n edges = do
   revCsr <- VU.unsafeFreeze revVec
   costCsr <- VU.unsafeFreeze costVec
   pure (edgeIdx, Csr {..})
-
--- | \(O(n + m)\) Creates `Csr`.
---
--- @since 1.0.0.0
-{-# INLINE build #-}
-build :: (HasCallStack, PrimMonad m, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> m (VU.Vector Int, Csr (PrimState m) cap cost)
-build n edges = stToPrim $ buildST n edges
-
--- | \(O(1)\) Returns a vector of @(to, rev, cost)@.
---
--- @since 1.0.0.0
-{-# INLINE adj #-}
-adj :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost) => Csr s cap cost -> Int -> VU.Vector (Int, Int, cost)
-adj Csr {..} v = VU.slice offset len vec
-  where
-    offset = startCsr VG.! v
-    len = startCsr VG.! (v + 1) - offset
-    vec = VU.zip3 toCsr revCsr costCsr
