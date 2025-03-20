@@ -410,6 +410,11 @@ executable yosupo-point-add-rectangle-sum
   main-is:       yosupo-point-add-rectangle-sum.hs
   build-depends: verify
 
+executable yosupo-point-add-rectangle-sum-segtree-2d
+  import:        app-local
+  main-is:       yosupo-point-add-rectangle-sum-segtree-2d.hs
+  build-depends: verify
+
 executable yosupo-range-reverse-range-sum
   import:        app-local
   main-is:       yosupo-range-reverse-range-sum.hs
