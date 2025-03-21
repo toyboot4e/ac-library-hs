@@ -152,7 +152,7 @@ build2 xys = build xs ys
   where
     (!xs, !ys) = VU.unzip xys
 
--- | \(O(n \log n)\) Collects points in \([x_l, x_r) \times [y_l, y_r)\).
+-- | \(O(n)\) Collects points in \([x_1, x_2) \times [y_1, y_2)\).
 --
 -- @since 1.2.2.0
 {-# INLINEABLE findPointsIn #-}
@@ -160,17 +160,17 @@ findPointsIn ::
   (HasCallStack) =>
   -- | `KdTree`
   KdTree ->
-  -- | \(x_l\)
+  -- | \(x_1\)
   Int ->
-  -- | \(x_r\)
+  -- | \(x_2\)
   Int ->
-  -- | \(y_l\)
+  -- | \(y_1\)
   Int ->
-  -- | \(y_r\)
+  -- | \(y_2\)
   Int ->
-  -- | Maximum number of points in \([x_l, x_r) \times [y_l, y_r)\).
+  -- | Maximum number of points in \([x_1, x_2) \times [y_1, y_2)\).
   Int ->
-  -- | Point indices in \([x_l, x_r) \times [y_l, y_r)\).
+  -- | Point indices in \([x_1, x_2) \times [y_1, y_2)\).
   VU.Vector Int
 findPointsIn KdTree {..} x1 x2 y1 y2 capacity
   | nKt == 0 = VU.empty
