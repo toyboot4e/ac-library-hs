@@ -36,6 +36,7 @@ module AtCoder.Extra.LazyKdTree
     SegAct (..),
 
     -- * Constructors
+    new,
     build,
     build2,
     build3,
@@ -105,6 +106,23 @@ data LazyKdTree s f a = LazyKdTree
     -- @since 1.2.2.0
     posLkt :: !(VU.Vector Int)
   }
+
+-- | \(O(n \log n)\) Creates a `LazyKdTree` from @xs@ and @ys@.
+--
+-- ==== Constraints
+-- - \(|\mathrm{xs}| = |\mathrm{ys}|
+--
+-- @since 1.2.3.0
+{-# INLINE new #-}
+new ::
+  (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) =>
+  -- | \(x\) coordnates
+  VU.Vector Int ->
+  -- | \(y\) coordnates
+  VU.Vector Int ->
+  -- | `LazyKdTree`
+  m (LazyKdTree (PrimState m) f a)
+new xs ys = stToPrim $ buildST xs ys (VU.replicate (VU.length xs) mempty)
 
 -- | \(O(n \log n)\) Creates a `LazyKdTree` from @xs@, @ys@ and @ws@ vectors.
 --
