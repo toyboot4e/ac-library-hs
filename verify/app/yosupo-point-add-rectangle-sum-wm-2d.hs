@@ -4,7 +4,6 @@ import Data.Vector.Unboxed qualified as VU
 import Util
 
 -- verification-helper: PROBLEM https://judge.yosupo.jp/problem/point_add_rectangle_sum
--- #wavelet-matrix-2d
 main :: IO ()
 main = do
   (!n, !q) <- ints2
@@ -31,7 +30,7 @@ main = do
       ( \case
           (0, !x, !y, !w, !_) -> do
             WM.modify wm (<> Sum w) (x, y)
-            return Nothing
+            pure Nothing
           (1, !x1, !y1, !x2, !y2) -> do
             Just . getSum <$> WM.prod wm x1 x2 y1 y2
           _ -> error "unreachable"
