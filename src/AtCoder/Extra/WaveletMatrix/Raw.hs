@@ -249,7 +249,7 @@ rankLT RawWaveletMatrix {..} l_ r_ xr
 -- | \(O(\log |S|)\) Returns the number of \(y\) in \([l, r)\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE rank #-}
+{-# INLINE rank #-}
 rank ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -265,7 +265,7 @@ rank wm l r x = rankBetween wm l r x (x + 1)
 -- | \(O(\log |S|)\) Returns the number of \(y\) in \([l, r) \times [y_1, y_2)\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE rankBetween #-}
+{-# INLINE rankBetween #-}
 rankBetween ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -284,7 +284,7 @@ rankBetween wm l r lx rx = rankLT wm l r rx - rankLT wm l r lx
 -- not found.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE select #-}
+{-# INLINE select #-}
 select :: RawWaveletMatrix -> Int -> Maybe Int
 select wm = selectKth wm 0
 
@@ -292,7 +292,7 @@ select wm = selectKth wm 0
 -- if no such occurrence exists.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE selectKth #-}
+{-# INLINE selectKth #-}
 selectKth ::
   RawWaveletMatrix ->
   -- | \(k\)
@@ -307,7 +307,7 @@ selectKth wm = selectKthIn wm 0 (lengthRwm wm)
 -- (0-based) of \(y\) in the sequence, or `Nothing` if no such occurrence exists.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE selectIn #-}
+{-# INLINE selectIn #-}
 selectIn ::
   -- | A wavelet matrix
   RawWaveletMatrix ->
@@ -453,21 +453,21 @@ ikthSmallestIn wm l r k
 -- values are counted as distinct occurrences.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE unsafeKthLargestIn #-}
+{-# INLINE unsafeKthLargestIn #-}
 unsafeKthLargestIn :: RawWaveletMatrix -> Int -> Int -> Int -> Int
 unsafeKthLargestIn wm l r k = unsafeKthSmallestIn wm l r (r - l - (k + 1))
 
 -- | \(O(\log a)\)
 --
 -- @since 1.1.0.0
-{-# INLINEABLE unsafeIKthLargestIn #-}
+{-# INLINE unsafeIKthLargestIn #-}
 unsafeIKthLargestIn :: RawWaveletMatrix -> Int -> Int -> Int -> (Int, Int)
 unsafeIKthLargestIn wm l r k = unsafeIKthSmallestIn wm l r (r - l - (k + 1))
 
 -- | \(O(\log a)\)
 --
 -- @since 1.1.0.0
-{-# INLINEABLE unsafeKthSmallestIn #-}
+{-# INLINE unsafeKthSmallestIn #-}
 unsafeKthSmallestIn :: RawWaveletMatrix -> Int -> Int -> Int -> Int
 unsafeKthSmallestIn wm l_ r_ k_ =
   let (!x, !_, !_, !_) = goDown wm l_ r_ k_
@@ -511,7 +511,7 @@ lookupLE wm l r x
 -- | \(O(\log a)\) Finds the maximum \(x\) in \([l, r)\) s.t. \(x_{0} \lt x\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookupLT #-}
+{-# INLINE lookupLT #-}
 lookupLT ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -552,7 +552,7 @@ lookupGE wm l r x
 -- | \(O(\log |S|)\) Looks up the minimum \(y\) in \([l, r) \times (y_0, \infty)\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookupGT #-}
+{-# INLINE lookupGT #-}
 lookupGT ::
   RawWaveletMatrix ->
   -- | \(l\)
@@ -569,7 +569,7 @@ lookupGT wm l r x = lookupGE wm l r (x + 1)
 -- ascending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE assocsIn #-}
+{-# INLINE assocsIn #-}
 assocsIn :: RawWaveletMatrix -> Int -> Int -> [(Int, Int)]
 assocsIn wm l r = assocsWith wm l r id
 
@@ -612,7 +612,7 @@ assocsWith RawWaveletMatrix {..} l_ r_ f
 -- descending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE descAssocsIn #-}
+{-# INLINE descAssocsIn #-}
 descAssocsIn :: RawWaveletMatrix -> Int -> Int -> [(Int, Int)]
 descAssocsIn wm l r = descAssocsInWith wm l r id
 
