@@ -223,6 +223,7 @@ modifyM ::
   -- | Monadic tuple
   m ()
 modifyM kt@LazyKdTree {..} f i0 = do
+  let !_ = ACIA.checkIndex "AtCoder.Extra.LazyKdTree.modifyM" i0 nLkt
   let i_ = posLkt VG.! i0
   -- propagate lazily propagated monoid actions from the root:
   stToPrim $ for_ [logLkt, logLkt - 1 .. 1] $ \k -> do
