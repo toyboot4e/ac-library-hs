@@ -145,7 +145,7 @@ checkVertex funcName i n
   | 0 <= i && i < n = ()
   | otherwise = errorVertex funcName i n
 
--- | \(O(1)\) Asserts \(0 \leq i \lt n\) for a graph vertex \(i\).
+-- | \(O(1)\) Emits vertex boundary error.
 --
 -- @since 1.0.0.0
 {-# INLINE errorVertex #-}
@@ -162,7 +162,7 @@ checkEdge funcName i n
   | 0 <= i && i < n = ()
   | otherwise = errorEdge funcName i n
 
--- | \(O(1)\) Asserts \(0 \leq i \lt m\) for an edge index \(i\).
+-- | \(O(1)\) Emits edge index boundary error.
 --
 -- @since 1.0.0.0
 {-# INLINE errorEdge #-}
@@ -170,7 +170,7 @@ errorEdge :: (HasCallStack) => String -> Int -> Int -> a
 errorEdge funcName i n =
   error $ funcName ++ ": given invalid edge index `" ++ show i ++ "` over the number of edges `" ++ show n ++ "`"
 
--- | \(O(1)\) Asserts \(0 \leq i \lt m\) for an edge index \(i\).
+-- | \(O(1)\) Asserts index boundary with custom message.
 --
 -- @since 1.0.0.0
 {-# INLINE checkCustom #-}
@@ -179,7 +179,7 @@ checkCustom funcName indexName i setName n
   | testIndex i n = ()
   | otherwise = errorCustom funcName indexName i setName n
 
--- | \(O(1)\) Asserts \(0 \leq i \lt m\) for an edge index \(i\).
+-- | \(O(1)\) Emis custom index error.
 --
 -- @since 1.0.0.0
 {-# INLINE errorCustom #-}
@@ -195,7 +195,7 @@ checkInterval funcName l r n
   | testInterval l r n = ()
   | otherwise = errorInterval funcName l r n
 
--- | \(O(1)\) Asserts \(0 \leq l \leq r \leq n\) for a half-open interval \([l, r)\).
+-- | \(O(1)\) Emits interval boundary error.
 --
 -- @since 1.0.0.0
 {-# INLINE errorInterval #-}
@@ -211,7 +211,7 @@ checkIntervalBounded funcName l r l0 r0
   | testIntervalBounded l r l0 r0 = ()
   | otherwise = errorIntervalBounded funcName l r l0 r0
 
--- | \(O(1)\) Asserts \(0 \leq l \leq r \leq n\) for a half-open interval \([l, r)\).
+-- | \(O(1)\) Emits interval boundary error.
 --
 -- @since 1.2.1.0
 {-# INLINE errorIntervalBounded #-}

@@ -240,7 +240,7 @@ modifyM kt@LazyKdTree {..} f i0 = do
             inner i'
   stToPrim $ inner i_
 
--- | \(O(\log n)\) Returns monoid product in \([x_l, x_r) \times [y_l, y_r)\).
+-- | \(O(\sqrt n)\) Returns monoid product \(\Pi_{p \in [x_1, x_2) \times [y_1, y_2)} a_p\).
 --
 -- @since 1.2.2.0
 {-# INLINE prod #-}
@@ -248,19 +248,19 @@ prod ::
   (HasCallStack, PrimMonad m, Eq f, SegAct f a, Eq f, VU.Unbox f, Monoid a, VU.Unbox a) =>
   -- | `LazyKdTree`
   LazyKdTree (PrimState m) f a ->
-  -- | \(x_l\)
+  -- | \(x_1\)
   Int ->
-  -- | \(x_r\)
+  -- | \(x_2\)
   Int ->
-  -- | \(y_l\)
+  -- | \(y_1\)
   Int ->
-  -- | \(y_r\)
+  -- | \(y_2\)
   Int ->
-  -- | Monoid product in \([x_l, x_r) \times [y_l, y_r)\)
+  -- | \(\Pi_{p \in [x_1, x_2) \times [y_1, y_2)} a_p\)
   m a
 prod kt x1 x2 y1 y2 = stToPrim $ prodST kt x1 x2 y1 y2
 
--- | \(O(1)\) Returns monoid product of all the points.
+-- | \(O(1)\) Returns monoid product \(\Pi_{p \in [-\infty, \infty) \times [-\infty, \infty)} a_p\).
 --
 -- @since 1.2.2.0
 {-# INLINE allProd #-}
@@ -268,13 +268,13 @@ allProd ::
   (PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | `LazyKdTree`
   LazyKdTree (PrimState m) f a ->
-  -- | Monoid product in the whole space.
+  -- | \(\Pi_{p \in [-\infty, \infty) \times [-\infty, \infty)} a_p\)
   m a
 allProd kt = do
   -- In case of zero vertices, use `Maybe`:
   fromMaybe mempty <$> VGM.readMaybe (dataLkt kt) 1
 
--- | \(O(\log n)\) Applies a monoid action to points in \([x_l, x_r) \times [y_l, y_r)\).
+-- | \(O(\log n)\) Applies a monoid action to points in \([x_1, x_2) \times [y_1, y_2)\).
 --
 -- @since 1.2.2.0
 {-# INLINE applyIn #-}
@@ -282,13 +282,13 @@ applyIn ::
   (HasCallStack, PrimMonad m, Eq f, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) =>
   -- | `LazyKdTree`
   LazyKdTree (PrimState m) f a ->
-  -- | \(x_l\)
+  -- | \(x_1\)
   Int ->
-  -- | \(x_r\)
+  -- | \(x_2\)
   Int ->
-  -- | \(y_l\)
+  -- | \(y_1\)
   Int ->
-  -- | \(y_r\)
+  -- | \(y_2\)
   Int ->
   -- | \(f\)
   f ->

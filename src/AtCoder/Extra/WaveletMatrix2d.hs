@@ -4,6 +4,10 @@
 -- queries. Points cannot be added after construction, but monoid values in each point can be
 -- modified later.
 --
+-- ==== SegTree2d vs WaveletMatrix2d
+-- They basically the same functionalities and performance, however, in @ac-library-hs@, `SegTree2d`
+-- has better API and even outperforms @WaveletMatrix2d@.
+--
 -- ==== __Example__
 -- Create a `WaveletMatrix2d` with initial vertex values:
 --
@@ -200,7 +204,7 @@ modify WaveletMatrix2d {..} f (!x, !y) = stToPrim $ do
     i_
     $ V.zip (Rwm.bitsRwm rawWmWm2d) segTreesWm2d
 
--- | \(O(\log^2 n)\) Returns the monoid product in \([l, r) \times [y_1, y_2)\).
+-- | \(O(\log^2 n)\) Returns monoid product \(\Pi_{p \in [x_1, x_2) \times [y_1, y_2)} a_p\).
 --
 -- @since 1.1.0.0
 {-# INLINEABLE prod #-}
@@ -218,7 +222,7 @@ prod wm@WaveletMatrix2d {..} !xl !xr !yl !yr
     !_ = ACIA.checkInterval "AtCoder.Extra.WaveletMatrix.SegTree.prod (compressed x)" xl' xr' (VG.length xDict)
     !_ = ACIA.checkInterval "AtCoder.Extra.WaveletMatrix.SegTree.prod (compressed y)" yl' yr' (VG.length yDictWm2d)
 
--- | \(O(\log^2 n)\) Returns the monoid product in \([l, r) \times [y_1, y_2)\). Returns `Nothing` for invalid
+-- | \(O(\log^2 n)\) Returns the monoid product in \([x_1, x_2) \times [y_1, y_2)\). Returns `Nothing` for invalid
 -- intervals.
 --
 -- @since 1.1.0.0
@@ -237,7 +241,7 @@ prodMaybe wm@WaveletMatrix2d {..} !xl !xr !yl !yr
     yl' = fromMaybe 0 $ bisectR 0 (VG.length yDictWm2d) $ (< yl) . VG.unsafeIndex yDictWm2d
     yr' = fromMaybe (VG.length yDictWm2d) $ bisectR 0 (VG.length yDictWm2d) $ (< yr) . VG.unsafeIndex yDictWm2d
 
--- | \(O(\log^2 n)\) Return the monoid product of all of the points in the wavelet matrix.
+-- | \(O(\log^2 n)\) Return the monoid product in \([-\infty, \infty) \times [-\infty, \infty)\).
 --
 -- @since 1.1.0.0
 {-# INLINEABLE allProd #-}
