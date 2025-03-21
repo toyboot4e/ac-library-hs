@@ -405,6 +405,11 @@ executable yosupo-rectangle-sum
   main-is:       yosupo-rectangle-sum.hs
   build-depends: verify
 
+executable yosupo-point-add-rectangle-sum-kdtree
+  import:        app-local
+  main-is:       yosupo-point-add-rectangle-sum-kdtree.hs
+  build-depends: verify
+
 executable yosupo-point-add-rectangle-sum-segtree-2d
   import:        app-local
   main-is:       yosupo-point-add-rectangle-sum-segtree-2d.hs
