@@ -99,14 +99,14 @@ build ys =
 -- original array if you can.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE access #-}
+{-# INLINE access #-}
 access :: WaveletMatrix -> Int -> Maybe Int
 access WaveletMatrix {..} i = (xDictWM VG.!) <$> Rwm.access rawWM i
 
 -- | \(O(\log |S|)\) Returns the number of \(y\) in \([l, r)\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE rank #-}
+{-# INLINE rank #-}
 rank ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -151,7 +151,7 @@ rankBetween WaveletMatrix {..} l r y1 y2
 -- not found.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE select #-}
+{-# INLINE select #-}
 select :: WaveletMatrix -> Int -> Maybe Int
 select wm = selectKth wm 0
 
@@ -180,7 +180,7 @@ selectKth WaveletMatrix {..} k y = do
 -- (0-based) of \(y\) in the sequence, or `Nothing` if no such occurrence exists.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE selectIn #-}
+{-# INLINE selectIn #-}
 selectIn ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -301,7 +301,7 @@ ikthSmallestIn WaveletMatrix {..} l r k
 -- | \(O(\log |S|)\)
 --
 -- @since 1.1.0.0
-{-# INLINEABLE unsafeKthSmallestIn #-}
+{-# INLINE unsafeKthSmallestIn #-}
 unsafeKthSmallestIn :: WaveletMatrix -> Int -> Int -> Int -> Int
 unsafeKthSmallestIn WaveletMatrix {..} l r k =
   xDictWM VG.! Rwm.unsafeKthSmallestIn rawWM l r k
@@ -334,7 +334,7 @@ lookupLE wm l r y0
 -- | \(O(\log |S|)\) Looks up the maximum \(y\) in \([l, r) \times (-\infty, y_0)\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookupLT #-}
+{-# INLINE lookupLT #-}
 lookupLT ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -376,7 +376,7 @@ lookupGE wm l r y0
 -- | \(O(\log |S|)\) Looks up the minimum \(y\) in \([l, r) \times (y_0, \infty)\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookupGT #-}
+{-# INLINE lookupGT #-}
 lookupGT ::
   -- | A wavelet matrix
   WaveletMatrix ->
@@ -394,7 +394,7 @@ lookupGT wm l r y0 = lookupGE wm l r (y0 + 1)
 -- ascending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE assocsIn #-}
+{-# INLINE assocsIn #-}
 assocsIn :: WaveletMatrix -> Int -> Int -> [(Int, Int)]
 assocsIn WaveletMatrix {..} l r = Rwm.assocsWith rawWM l r (xDictWM VG.!)
 
@@ -402,6 +402,6 @@ assocsIn WaveletMatrix {..} l r = Rwm.assocsWith rawWM l r (xDictWM VG.!)
 -- descending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE descAssocsIn #-}
+{-# INLINE descAssocsIn #-}
 descAssocsIn :: WaveletMatrix -> Int -> Int -> [(Int, Int)]
 descAssocsIn WaveletMatrix {..} l r = Rwm.descAssocsInWith rawWM l r (xDictWM VG.!)
