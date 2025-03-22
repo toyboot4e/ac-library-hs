@@ -116,13 +116,6 @@ build = stToPrim . buildST
 add :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> a -> m ()
 add ft p0 x = stToPrim $ addST ft p0 x
 
--- | \(O(\log n)\) Calculates the sum in a half-open interval @[0, r)@.
---
--- @since 1.0.0.0
-{-# INLINE prefixSum #-}
-prefixSum :: (PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> m a
-prefixSum ft r = stToPrim $ prefixSumST ft r
-
 -- | Calculates the sum in a half-open interval \([l, r)\).
 --
 -- ==== Constraints
