@@ -61,6 +61,7 @@ module AtCoder.Internal.Assert
     testIntervalBounded,
     testPoint2d,
     testRect,
+    testRectShape,
 
     -- * Index assertions
     checkIndex,
@@ -85,6 +86,8 @@ module AtCoder.Internal.Assert
     errorPoint2d,
     checkRect,
     errorRect,
+    checkRectShape,
+    errorRectShape,
   )
 where
 
@@ -133,6 +136,13 @@ testPoint2d x y w h = 0 <= x && x < w && 0 <= y && y < h
 {-# INLINE testRect #-}
 testRect :: (HasCallStack) => Int -> Int -> Int -> Int -> Int -> Int -> Bool
 testRect x1 x2 y1 y2 w h = 0 <= x1 && x1 <= x2 && x2 <= w && 0 <= y1 && y1 <= y2 && y2 <= h
+
+-- | \(O(1)\) Tests \(x_1 \le x_2\) and \(y_1 \le \y_2\).
+--
+-- @since 1.2.3.0
+{-# INLINE testRectShape #-}
+testRectShape :: (HasCallStack) => Int -> Int -> Int -> Int -> Bool
+testRectShape x1 x2 y1 y2 = x1 <= x2 && y1 <= y2
 
 -- | \(O(1)\) Asserts \(0 \leq i \lt n\) for an array index \(i\).
 --
@@ -283,3 +293,20 @@ checkRect funcName x1 x2 y1 y2 w h
 errorRect :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> Int -> Int -> a
 errorRect funcName x1 x2 y1 y2 w h =
   error $ funcName ++ ": given invalid rectangle `[" ++ show x1 ++ ", " ++ show x2 ++ ") x [" ++ show y1 ++ ", " ++ show y2 ++ ")` for rectangle `[0, " ++ show w ++ ") x [0, " ++ show h ++ ")`"
+
+-- | \(O(1)\) Asserts \(x_1 \le x_2\) and \(y_1 \le \y_2\).
+--
+-- @since 1.2.3.0
+{-# INLINE checkRectShape #-}
+checkRectShape :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> ()
+checkRectShape funcName x1 x2 y1 y2
+  | testRectShape x1 x2 y1 y2 = ()
+  | otherwise = errorRectShape funcName x1 x2 y1 y2
+
+-- | \(O(1)\) Asserts rectangle boundary error.
+--
+-- @since 1.2.3.0
+{-# INLINE errorRectShape #-}
+errorRectShape :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> a
+errorRectShape funcName x1 x2 y1 y2 =
+  error $ funcName ++ ": given invalid rectangle `[" ++ show x1 ++ ", " ++ show x2 ++ ") x [" ++ show y1 ++ ", " ++ show y2 ++ ")`"
