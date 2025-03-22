@@ -23,6 +23,7 @@ module Util
     unwordsWithBSB,
     putBSB,
     printBSB,
+    show2,
     showMat,
   )
 where
@@ -155,6 +156,10 @@ putBSB = BSB.hPutBuilder stdout
 {-# INLINE printBSB #-}
 printBSB :: BSB.Builder -> IO ()
 printBSB = putBSB . (<> endlBSB)
+
+{-# INLINE show2 #-}
+show2 :: (Int, Int) -> BSB.Builder
+show2 (!a, !b) = BSB.intDec a <> wsBSB <> BSB.intDec b
 
 {-# INLINE showMat #-}
 showMat :: (Show a, VU.Unbox a) => Mat.Matrix a -> BSB.Builder

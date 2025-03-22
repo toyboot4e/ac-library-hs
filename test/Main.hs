@@ -21,6 +21,7 @@ import Tests.Extra.Math qualified
 import Tests.Extra.Monoid qualified
 import Tests.Extra.MultiSet qualified
 import Tests.Extra.SegTree2d qualified
+import Tests.Extra.SegTree2d.Dense qualified
 import Tests.Extra.Semigroup.Matrix qualified
 import Tests.Extra.Semigroup.Permutation qualified
 import Tests.Extra.Seq qualified
@@ -73,6 +74,7 @@ main =
             testGroup "Monoid" Tests.Extra.Monoid.tests,
             testGroup "MultiSet" Tests.Extra.MultiSet.tests,
             testGroup "SegTree2d" Tests.Extra.SegTree2d.tests,
+            testGroup "SegTree2d.Dense" Tests.Extra.SegTree2d.Dense.tests,
             testGroup "Semigroup.Matrix" Tests.Extra.Semigroup.Matrix.tests,
             testGroup "Semigroup.Permutation" Tests.Extra.Semigroup.Permutation.tests,
             testGroup "Seq" Tests.Extra.Seq.tests,

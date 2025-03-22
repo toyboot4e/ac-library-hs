@@ -80,6 +80,7 @@ library
     AtCoder.Extra.Pdsu
     AtCoder.Extra.Pool
     AtCoder.Extra.SegTree2d
+    AtCoder.Extra.SegTree2d.Dense
     AtCoder.Extra.Semigroup.Matrix
     AtCoder.Extra.Semigroup.Permutation
     AtCoder.Extra.Seq
@@ -153,6 +154,7 @@ test-suite ac-library-hs-test
     Tests.Extra.Monoid
     Tests.Extra.MultiSet
     Tests.Extra.SegTree2d
+    Tests.Extra.SegTree2d.Dense
     Tests.Extra.Semigroup.Matrix
     Tests.Extra.Semigroup.Permutation
     Tests.Extra.Seq
