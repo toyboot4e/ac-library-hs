@@ -20,16 +20,84 @@
 -- >>> Q.freeze que     -- [_  1, 2  _]
 -- [1,2]
 --
--- >>> Q.pushFront que 10   -- [10, 1, 2  _]
--- >>> Q.pushFront que 1000
--- *** Exception: AtCoder.Internal.Queue.pushFront: no empty front space
+-- >>> Q.readFront que 0
+-- 1
+--
+-- >>> Q.readFront que 1
+-- 2
+--
+-- >>> Q.readFront que (-1)
+-- *** Exception: AtCoder.Internal.Queue.readFront: index out of bounds
 -- ...
 --
--- >>> Q.unsafeFreeze que -- [10, 1, 2  _]
--- [10,1,2]
+-- >>> Q.readFront que 2
+-- *** Exception: AtCoder.Internal.Queue.readFront: index out of bounds
+-- ...
 --
--- >>> Q.clear que      -- [_  _  _  _]
+-- >>> Q.readMaybeFront que (-1)
+-- Nothing
+--
+-- >>> Q.readMaybeFront que 2
+-- Nothing
+--
+-- >>> Q.writeFront que 0 10 -- [_ 10, 2  _]
+-- >>> Q.writeFront que 1 20 -- [_ 10, 20 _]
+--
+-- >>> Q.writeFront que (-1) 777
+-- *** Exception: AtCoder.Internal.Queue.modifyFrontM: index out of bounds
+-- ...
+--
+-- >>> Q.writeFront que 2 777
+-- *** Exception: AtCoder.Internal.Queue.modifyFrontM: index out of bounds
+-- ...
+--
+-- >>> Q.readBack que 0
+-- 20
+--
+-- >>> Q.readBack que 1
+-- 10
+--
+-- >>> Q.readBack que (-1)
+-- *** Exception: AtCoder.Internal.Queue.readBack: index out of bounds
+-- ...
+--
+-- >>> Q.readBack que 2
+-- *** Exception: AtCoder.Internal.Queue.readBack: index out of bounds
+-- ...
+--
+-- >>> Q.readMaybeBack que (-1)
+-- Nothing
+--
+-- >>> Q.readMaybeBack que 2
+-- Nothing
+--
+-- >>> Q.writeBack que 0 200
+-- >>> Q.writeBack que 1 100
+--
+-- >>> Q.writeBack que (-1) 777
+-- *** Exception: AtCoder.Internal.Queue.modifyBackM: index out of bounds
+-- ...
+--
+-- >>> Q.writeBack que 2 777
+-- *** Exception: AtCoder.Internal.Queue.modifyBackM: index out of bounds
+-- ...
+--
+-- >>> Q.pushFront que 10 -- [10, 100, 200  _]
+-- >>> Q.pushFront que 1000
+-- *** Exception: AtCoder.Internal.Queue.pushFrontST: no empty front space
+-- ...
+--
+-- >>> Q.unsafeFreeze que -- [10, 100, 200  _]
+-- [10,100,200]
+--
+-- >>> Q.clear que        -- [_  _  _  _]
 -- >>> Q.peekBack que
+-- Nothing
+--
+-- >>> Q.popFront que
+-- Nothing
+--
+-- >>> Q.popBack que
 -- Nothing
 --
 -- >>> Q.pushBack que 0 -- [0  _  _  _]
@@ -43,6 +111,10 @@
 --
 -- >>> Q.freeze que
 -- [0,1]
+
+-- >>> Q.clear que
+-- >>> Q.freeze que
+-- []
 --
 -- @since 1.0.0.0
 module AtCoder.Internal.Queue
@@ -57,7 +129,7 @@ module AtCoder.Internal.Queue
     length,
     null,
 
-    -- * Modifications
+    -- * Element access
 
     -- ** Peek
     peekBack,
@@ -67,11 +139,23 @@ module AtCoder.Internal.Queue
     pushBack,
     pushFront,
 
-    -- ** Pop
+    -- ** op
     popBack,
     popBack_,
     popFront,
     popFront_,
+
+    -- ** Read/write/modify
+    readFront,
+    readBack,
+    readMaybeFront,
+    readMaybeBack,
+    writeFront,
+    writeBack,
+    modifyFront,
+    modifyFrontM,
+    modifyBack,
+    modifyBackM,
 
     -- ** Clear (reset)
     clear,
@@ -82,8 +166,10 @@ module AtCoder.Internal.Queue
   )
 where
 
+import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Control.Monad.ST (ST)
+import Data.Maybe (fromMaybe)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -183,6 +269,92 @@ popFront que = stToPrim $ popFrontST que
 popFront_ :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m ()
 popFront_ que = stToPrim $ popFrontST_ que
 
+-- | \(O(1)\) Returns the \(k\)-th value from the first element.
+--
+-- @since 1.2.3.0
+{-# INLINE readFront #-}
+readFront :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> Int -> m a
+readFront que i = stToPrim $ fromMaybe (error msg) <$> readMaybeFrontST que i
+  where
+    msg = "AtCoder.Internal.Queue.readFront: index out of bounds"
+
+-- | \(O(1)\) Returns the \(k\)-th value from the last element.
+--
+-- @since 1.2.3.0
+{-# INLINE readBack #-}
+readBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> Int -> m a
+readBack que i = stToPrim $ fromMaybe (error msg) <$> readMaybeBackST que i
+  where
+    msg = "AtCoder.Internal.Queue.readBack: index out of bounds"
+
+-- | \(O(1)\) Returns the \(k\)-th value from the first element.
+--
+-- @since 1.2.3.0
+{-# INLINE readMaybeFront #-}
+readMaybeFront :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> Int -> m (Maybe a)
+readMaybeFront que i = stToPrim $ readMaybeFrontST que i
+
+-- | \(O(1)\) Returns the \(k\)-th value from the last element.
+--
+-- @since 1.2.3.0
+{-# INLINE readMaybeBack #-}
+readMaybeBack :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> Int -> m (Maybe a)
+readMaybeBack que i = stToPrim $ readMaybeBackST que i
+
+-- | \(O(1)\) Writes to the \(k\)-th value from the first element.
+--
+-- @since 1.2.3.0
+{-# INLINE writeFront #-}
+writeFront :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> Int -> a -> m ()
+writeFront que i x = stToPrim $ do
+  modifyFrontM que (pure . const x) i
+
+-- | \(O(1)\) Writes to the \(k\)-th value from the last element.
+--
+-- @since 1.2.3.0
+{-# INLINE writeBack #-}
+writeBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> Int -> a -> m ()
+writeBack que i x = stToPrim $ do
+  modifyBackM que (pure . const x) i
+
+-- | \(O(1)\) Given user function \(f\), returns the \(k\)-th value from the first element.
+--
+-- @since 1.2.3.0
+{-# INLINE modifyFront #-}
+modifyFront :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> (a -> a) -> Int -> m ()
+modifyFront que f i = stToPrim $ do
+  modifyFrontM que (pure . f) i
+
+-- | \(O(1)\) Given user function \(f\), returns the \(k\)-th value from the last element.
+--
+-- @since 1.2.3.0
+{-# INLINE modifyBack #-}
+modifyBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> (a -> a) -> Int -> m ()
+modifyBack que f i = stToPrim $ do
+  modifyBackM que (pure . f) i
+
+-- | \(O(1)\) Given user function \(f\), returns the \(k\)-th value from the first element.
+--
+-- @since 1.2.3.0
+{-# INLINE modifyFrontM #-}
+modifyFrontM :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> (a -> m a) -> Int -> m ()
+modifyFrontM Queue {..} f i = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  let !_ = ACIA.runtimeAssert (0 <= i && i < r - l) "AtCoder.Internal.Queue.modifyFrontM: index out of bounds"
+  VGM.modifyM vecQ f (l + i)
+
+-- | \(O(1)\) Given user function \(f\), returns the \(k\)-th value from the last element.
+--
+-- @since 1.2.3.0
+{-# INLINE modifyBackM #-}
+modifyBackM :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> (a -> m a) -> Int -> m ()
+modifyBackM Queue {..} f i = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  let !_ = ACIA.runtimeAssert (0 <= i && i < r - l) "AtCoder.Internal.Queue.modifyBackM: index out of bounds"
+  VGM.modifyM vecQ f (r - 1 - i)
+
 -- | \(O(1)\) Sets the `length` to zero.
 --
 -- @since 1.0.0.0
@@ -257,16 +429,14 @@ pushBackST Queue {..} e = do
 pushFrontST :: (HasCallStack, VU.Unbox a) => Queue s a -> a -> ST s ()
 pushFrontST Queue {..} e = do
   l0 <- VGM.unsafeRead posQ 0
-  if l0 == 0
-    then error "AtCoder.Internal.Queue.pushFront: no empty front space"
-    else do
-      VGM.unsafeModifyM
-        posQ
-        ( \l -> do
-            VGM.write vecQ (l - 1) e
-            pure $ l - 1
-        )
-        0
+  let !_ = ACIA.runtimeAssert (l0 > 0) "AtCoder.Internal.Queue.pushFrontST: no empty front space"
+  VGM.unsafeModifyM
+    posQ
+    ( \l -> do
+        VGM.write vecQ (l - 1) e
+        pure $ l - 1
+    )
+    0
 
 {-# INLINEABLE popBackST #-}
 popBackST :: (VU.Unbox a) => Queue s a -> ST s (Maybe a)
@@ -303,6 +473,24 @@ popFrontST_ :: (VU.Unbox a) => Queue s a -> ST s ()
 popFrontST_ que = do
   _ <- popFrontST que
   pure ()
+
+{-# INLINEABLE readMaybeFrontST #-}
+readMaybeFrontST :: (VU.Unbox a) => Queue s a -> Int -> ST s (Maybe a)
+readMaybeFrontST Queue {..} i = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  if 0 <= i && i < r - l
+    then Just <$> VGM.read vecQ (l + i)
+    else pure Nothing
+
+{-# INLINEABLE readMaybeBackST #-}
+readMaybeBackST :: (VU.Unbox a) => Queue s a -> Int -> ST s (Maybe a)
+readMaybeBackST Queue {..} i = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  if 0 <= i && i < r - l
+    then Just <$> VGM.read vecQ (r - 1 - i)
+    else pure Nothing
 
 {-# INLINEABLE freezeST #-}
 freezeST :: (VU.Unbox a) => Queue s a -> ST s (VU.Vector a)
