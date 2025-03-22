@@ -40,6 +40,11 @@
 -- *** Exception: AtCoder.Internal.Assert.doctest: given invalid interval `[-1, 0)` over bounds `[0, 5)`
 -- ...
 --
+-- >>> let !_ = checkPoint2d "AtCoder.Internal.Assert.doctest"  1 1 2 2
+-- >>> let !_ = checkPoint2d "AtCoder.Internal.Assert.doctest" 4 4 2 2
+-- *** Exception: AtCoder.Internal.Assert.doctest: given invalid point `(4, 4)` for rectangle `[0, 2) x [0, 2)`
+-- ...
+--
 -- @since 1.0.0.0
 module AtCoder.Internal.Assert
   ( -- * Runtime assertion
@@ -49,6 +54,7 @@ module AtCoder.Internal.Assert
     testIndex,
     testInterval,
     testIntervalBounded,
+    testPoint2d,
 
     -- * Index assertions
     checkIndex,
@@ -67,6 +73,10 @@ module AtCoder.Internal.Assert
     errorInterval,
     checkIntervalBounded,
     errorIntervalBounded,
+
+    -- * Two-dimensional index assertions
+    checkPoint2d,
+    errorPoint2d,
   )
 where
 
@@ -101,6 +111,13 @@ testInterval l r n = 0 <= l && l <= r && r <= n
 {-# INLINE testIntervalBounded #-}
 testIntervalBounded :: Int -> Int -> Int -> Int -> Bool
 testIntervalBounded l r l0 r0 = l0 <= l && l <= r && r <= r0
+
+-- | \(O(1)\) Tests \((x, y) \in [0, w) \times [0, h)\).
+--
+-- @since 1.2.3.0
+{-# INLINE testPoint2d #-}
+testPoint2d :: (HasCallStack) => Int -> Int -> Int -> Int -> Bool
+testPoint2d x y w h = 0 <= x && x < w && 0 <= y && y < h
 
 -- | \(O(1)\) Asserts \(0 \leq i \lt n\) for an array index \(i\).
 --
@@ -217,3 +234,21 @@ checkIntervalBounded funcName l r l0 r0
 {-# INLINE errorIntervalBounded #-}
 errorIntervalBounded :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> a
 errorIntervalBounded funcName l r l0 r0 = error $ funcName ++ ": given invalid interval `[" ++ show l ++ ", " ++ show r ++ ")` over bounds `[" ++ show l0 ++ ", " ++ show r0 ++ ")`"
+
+-- | \(O(1)\) Asserts \(0 \leq i \lt n\) for a graph vertex \(i\).
+--
+-- @since 1.2.3.0
+{-# INLINE checkPoint2d #-}
+checkPoint2d :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> ()
+checkPoint2d funcName x y w h
+  | testPoint2d x y w h = ()
+  | otherwise = errorPoint2d funcName x y w h
+
+-- | \(O(1)\) Emits point boundary error.
+--
+-- @since 1.2.3.0
+{-# INLINE errorPoint2d #-}
+errorPoint2d :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> a
+errorPoint2d funcName x y w h =
+  error $ funcName ++ ": given invalid point `(" ++ show x ++ ", " ++ show y ++ ")` for rectangle `[0, " ++ show w ++ ") x [0, " ++ show h ++ ")`"
+
