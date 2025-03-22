@@ -29,11 +29,20 @@
 -- [10,1,2]
 --
 -- >>> Q.clear que      -- [_  _  _  _]
+-- >>> Q.peekBack que
+-- Nothing
+--
 -- >>> Q.pushBack que 0 -- [0  _  _  _]
+-- >>> Q.peekBack que
+-- Just 0
+--
 -- >>> Q.pushBack que 1 -- [0, 1  _  _]
 -- >>> Q.pushBack que 2 -- [0, 1, 2  _]
+-- >>> Q.popBack que    -- [0, 1  _  _]
+-- Just 2
+--
 -- >>> Q.freeze que
--- [0,1,2]
+-- [0,1]
 --
 -- @since 1.0.0.0
 module AtCoder.Internal.Queue
@@ -50,13 +59,21 @@ module AtCoder.Internal.Queue
 
     -- * Modifications
 
-    -- ** Push/pop
+    -- ** Peek
+    peekBack,
+    peekFront,
+
+    -- ** Push
     pushBack,
     pushFront,
+
+    -- ** Pop
+    popBack,
+    popBack_,
     popFront,
     popFront_,
 
-    -- ** Reset
+    -- ** Clear (reset)
     clear,
 
     -- * Conversions
@@ -110,6 +127,20 @@ length que = stToPrim $ lengthST que
 null :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m Bool
 null = (<$>) (== 0) . length
 
+-- | \(O(1)\) Peeks the last element in the queue.
+--
+-- @since 1.2.3.0
+{-# INLINE peekBack #-}
+peekBack :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m (Maybe a)
+peekBack que = stToPrim $ peekBackST que
+
+-- | \(O(1)\) Peeks the first element in the queue.
+--
+-- @since 1.2.3.0
+{-# INLINE peekFront #-}
+peekFront :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m (Maybe a)
+peekFront que = stToPrim $ peekFrontST que
+
 -- | \(O(1)\) Appends an element to the back. Will throw an exception if the index is out of range.
 --
 -- @since 1.0.0.0
@@ -123,6 +154,20 @@ pushBack que e = stToPrim $ pushBackST que e
 {-# INLINE pushFront #-}
 pushFront :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> a -> m ()
 pushFront que e = stToPrim $ pushFrontST que e
+
+-- | \(O(1)\) Removes the last element from the queue and returns it, or `Nothing` if it is empty.
+--
+-- @since 1.2.3.0
+{-# INLINE popBack #-}
+popBack :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m (Maybe a)
+popBack que = stToPrim $ popBackST que
+
+-- | \(O(1)\) `popBack` with the return value discarded.
+--
+-- @since 1.2.3.0
+{-# INLINE popBack_ #-}
+popBack_ :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m ()
+popBack_ que = stToPrim $ popBackST_ que
 
 -- | \(O(1)\) Removes the first element from the queue and returns it, or `Nothing` if it is empty.
 --
@@ -179,6 +224,24 @@ lengthST Queue {..} = do
   r <- VGM.unsafeRead posQ 1
   pure $ r - l
 
+{-# INLINEABLE peekBackST #-}
+peekBackST :: (VU.Unbox a) => Queue s a -> ST s (Maybe a)
+peekBackST Queue {..} = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  if l >= r
+    then pure Nothing
+    else Just <$> VGM.read vecQ (r - 1)
+
+{-# INLINEABLE peekFrontST #-}
+peekFrontST :: (VU.Unbox a) => Queue s a -> ST s (Maybe a)
+peekFrontST Queue {..} = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  if l >= r
+    then pure Nothing
+    else Just <$> VGM.read vecQ l
+
 {-# INLINEABLE pushBackST #-}
 pushBackST :: (HasCallStack, VU.Unbox a) => Queue s a -> a -> ST s ()
 pushBackST Queue {..} e = do
@@ -205,6 +268,24 @@ pushFrontST Queue {..} e = do
         )
         0
 
+{-# INLINEABLE popBackST #-}
+popBackST :: (VU.Unbox a) => Queue s a -> ST s (Maybe a)
+popBackST Queue {..} = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  if l >= r
+    then pure Nothing
+    else do
+      x <- VGM.read vecQ (r - 1)
+      VGM.unsafeWrite posQ 1 (r - 1)
+      pure $ Just x
+
+{-# INLINEABLE popBackST_ #-}
+popBackST_ :: (VU.Unbox a) => Queue s a -> ST s ()
+popBackST_ que = do
+  _ <- popBackST que
+  pure ()
+
 {-# INLINEABLE popFrontST #-}
 popFrontST :: (VU.Unbox a) => Queue s a -> ST s (Maybe a)
 popFrontST Queue {..} = do
@@ -220,13 +301,8 @@ popFrontST Queue {..} = do
 {-# INLINEABLE popFrontST_ #-}
 popFrontST_ :: (VU.Unbox a) => Queue s a -> ST s ()
 popFrontST_ que = do
-  _ <- popFront que
+  _ <- popFrontST que
   pure ()
-
-{-# INLINEABLE clearST #-}
-clearST :: (VU.Unbox a) => Queue s a -> ST s ()
-clearST Queue {..} = do
-  VGM.set posQ 0
 
 {-# INLINEABLE freezeST #-}
 freezeST :: (VU.Unbox a) => Queue s a -> ST s (VU.Vector a)
