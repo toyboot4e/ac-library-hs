@@ -45,6 +45,11 @@
 -- *** Exception: AtCoder.Internal.Assert.doctest: given invalid point `(4, 4)` for rectangle `[0, 2) x [0, 2)`
 -- ...
 --
+-- >>> let !_ = checkRect "AtCoder.Internal.Assert.doctest"  1 2 1 2 3 3
+-- >>> let !_ = checkRect "AtCoder.Internal.Assert.doctest" 1 2 1 2 1 1
+-- *** Exception: AtCoder.Internal.Assert.doctest: given invalid rectangle `[1, 2) x [1, 2)` for rectangle `[0, 1) x [0, 1)`
+-- ...
+--
 -- @since 1.0.0.0
 module AtCoder.Internal.Assert
   ( -- * Runtime assertion
@@ -55,6 +60,7 @@ module AtCoder.Internal.Assert
     testInterval,
     testIntervalBounded,
     testPoint2d,
+    testRect,
 
     -- * Index assertions
     checkIndex,
@@ -77,6 +83,8 @@ module AtCoder.Internal.Assert
     -- * Two-dimensional index assertions
     checkPoint2d,
     errorPoint2d,
+    checkRect,
+    errorRect,
   )
 where
 
@@ -118,6 +126,13 @@ testIntervalBounded l r l0 r0 = l0 <= l && l <= r && r <= r0
 {-# INLINE testPoint2d #-}
 testPoint2d :: (HasCallStack) => Int -> Int -> Int -> Int -> Bool
 testPoint2d x y w h = 0 <= x && x < w && 0 <= y && y < h
+
+-- | \(O(1)\) Tests \([x_1, x_2) \times [y_1 y_2) \in [0, w) \times [0, h)\).
+--
+-- @since 1.2.3.0
+{-# INLINE testRect #-}
+testRect :: (HasCallStack) => Int -> Int -> Int -> Int -> Int -> Int -> Bool
+testRect x1 x2 y1 y2 w h = 0 <= x1 && x1 <= x2 && x2 <= w && 0 <= y1 && y1 <= y2 && y2 <= h
 
 -- | \(O(1)\) Asserts \(0 \leq i \lt n\) for an array index \(i\).
 --
@@ -252,3 +267,19 @@ errorPoint2d :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> a
 errorPoint2d funcName x y w h =
   error $ funcName ++ ": given invalid point `(" ++ show x ++ ", " ++ show y ++ ")` for rectangle `[0, " ++ show w ++ ") x [0, " ++ show h ++ ")`"
 
+-- | \(O(1)\) Asserts \([x_1, x_2) \times [y_1 y_2) \in [0, w) \times [0, h)\).
+--
+-- @since 1.2.3.0
+{-# INLINE checkRect #-}
+checkRect :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> Int -> Int -> ()
+checkRect funcName x1 x2 y1 y2 w h
+  | testRect x1 x2 y1 y2 w h = ()
+  | otherwise = errorRect funcName x1 x2 y1 y2 w h
+
+-- | \(O(1)\) Asserts rectangle boundary error.
+--
+-- @since 1.2.3.0
+{-# INLINE errorRect #-}
+errorRect :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> Int -> Int -> a
+errorRect funcName x1 x2 y1 y2 w h =
+  error $ funcName ++ ": given invalid rectangle `[" ++ show x1 ++ ", " ++ show x2 ++ ") x [" ++ show y1 ++ ", " ++ show y2 ++ ")` for rectangle `[0, " ++ show w ++ ") x [0, " ++ show h ++ ")`"
