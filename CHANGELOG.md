@@ -1,5 +1,9 @@
 # Revision history for acl-hs
 
+## 1.2.3.0 -- March 2025
+
+- Added `Extra.SegTree2d` and `Extra.SegTree2d.Dense`.
+
 ## 1.2.2.1 -- March 2025
 
 - Reduced build time with `ST` monad and `INLINEABLE` pragmas.
