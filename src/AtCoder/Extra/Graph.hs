@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | Re-export of the @Csr@ module and generic graph search functions.
 --
@@ -13,6 +14,7 @@ module AtCoder.Extra.Graph
     swapDupe,
     swapDupe',
     scc,
+    rev,
 
     -- * Graph search
     topSort,
@@ -106,7 +108,33 @@ swapDupe' = VU.concatMap (\(!u, !v) -> VU.fromListN 2 [(u, v), (v, u)])
 scc :: Csr w -> V.Vector (VU.Vector Int)
 scc = ACISCC.sccCsr
 
--- TODO: change scc to take arbitrary graph form
+-- | \(O(n + m)\) Returns a reverse graph, where original edges \((u, v, w)\) are transposed to be
+-- \((v, u, w)\).
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> -- 0 == 1 -> 2 -> 3
+-- >>> let gr = Gr.build' 4 $ VU.fromList [(0, 1), (1, 0), (1, 2), (2, 3)]
+-- >>> map (Gr.adj gr) [0 .. 3]
+-- [[1],[0,2],[3],[]]
+--
+-- >>> -- 0 == 1 <- 2 <- 3
+-- >>> let revGr = Gr.rev gr
+-- >>> map (Gr.adj revGr) [0 .. 3]
+-- [[1],[0],[1],[2]]
+--
+-- @since 1.2.3.0
+{-# INLINEABLE rev #-}
+rev :: (VU.Unbox w) => Csr w -> Csr w
+rev Csr {..} = Csr.build nCsr revEdges
+  where
+    vws = VU.zip adjCsr wCsr
+    revEdges = flip VU.concatMap (VU.generate nCsr id) $ \v1 ->
+      let !o1 = VU.unsafeIndex startCsr v1
+          !o2 = VU.unsafeIndex startCsr (v1 + 1)
+          !vw2s = VU.unsafeSlice o1 (o2 - o1) vws
+       in VU.map (\(!v2, !w2) -> (v2, v1, w2)) vw2s
 
 -- | \(O(n \log n + m)\) Returns the lexicographically smallest topological ordering of the given
 -- graph.
