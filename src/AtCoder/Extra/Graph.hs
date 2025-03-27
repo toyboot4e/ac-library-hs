@@ -16,26 +16,38 @@ module AtCoder.Extra.Graph
     scc,
     rev,
 
-    -- * Graph search
+    -- * Generic graph functions
     topSort,
     blockCut,
     blockCutComponents,
+
+    -- * Shortest path search functions (opinionated)
+
+    -- ** BFS
+    bfs,
+    bfsTree,
+    bfs01,
   )
 where
 
 import AtCoder.Extra.IntSet qualified as IS
+import AtCoder.Extra.Ix0 (Bounds0, Ix0 (..))
 import AtCoder.Internal.Buffer qualified as B
 import AtCoder.Internal.Csr as Csr
+import AtCoder.Internal.Queue qualified as Q
 import AtCoder.Internal.Scc qualified as ACISCC
 import Control.Monad (when)
+import Control.Monad.Fix (fix)
 import Control.Monad.ST (runST)
 import Data.Bit (Bit (..))
 import Data.Foldable (for_)
 import Data.Maybe (fromJust)
 import Data.Vector qualified as V
+import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import GHC.Stack (HasCallStack)
 
 -- | \(O(n)\) Converts non-directed edges into directional edges. This is a convenient function for
 -- making an input to `build`.
@@ -135,6 +147,10 @@ rev Csr {..} = Csr.build nCsr revEdges
           !o2 = VU.unsafeIndex startCsr (v1 + 1)
           !vw2s = VU.unsafeSlice o1 (o2 - o1) vws
        in VU.map (\(!v2, !w2) -> (v2, v1, w2)) vw2s
+
+-- -------------------------------------------------------------------------------------------------
+-- Generic graph search
+-- -------------------------------------------------------------------------------------------------
 
 -- | \(O(n \log n + m)\) Returns the lexicographically smallest topological ordering of the given
 -- graph.
@@ -291,3 +307,184 @@ blockCutComponents n gr =
   let bct = blockCut n gr
       d = nCsr bct - n
    in V.generate d ((bct `adj`) . (+ n))
+
+-- -------------------------------------------------------------------------------------------------
+-- Opinionated graph search functions
+-- -------------------------------------------------------------------------------------------------
+
+-- The implementations can be a bit simpler with `whenJustM`
+
+-- | \(O(n + m)\) Opinionated breadth-first search that returns a distance array.
+--
+-- @since 1.2.4.0
+{-# INLINEABLE bfs #-}
+bfs ::
+  forall i w.
+  (HasCallStack, Ix0 i, VU.Unbox i, VU.Unbox w, Num w, Eq w) =>
+  -- | Boundary
+  Bounds0 i ->
+  -- | Graph function that takes a vertex and their distance and returns adjacent vertices with
+  -- edge weights, where \(w > 0\)
+  (i -> w -> VU.Vector (i, w)) ->
+  -- | Distance assignment for unreachable vertices.
+  w ->
+  -- | Weighted source vertices
+  VU.Vector (i, w) ->
+  -- | Distance array in one-dimensional index. Unreachable vertices are given distance of @undefW@.
+  VU.Vector w
+bfs bnd0 gr undefW sources
+  | VU.null sources = VU.replicate nVerts (-1)
+  | otherwise = VU.create $ do
+      dist <- VUM.replicate @_ @w nVerts undefW
+      -- NOTE: We only need capacity of `n`, as first appearance of vertex is with minimum distance.
+      queue <- Q.new nVerts
+
+      -- set source values
+      VU.forM_ sources $ \(!src, !w0) -> do
+        -- TODO: assert w1 <= w2
+        let !i = index0 bnd0 src
+        !lastD <- VGM.read dist i
+        -- Note that duplicate inputs are pruned here:
+        when (lastD == undefW) $ do
+          VGM.write dist i w0
+          Q.pushBack queue src
+
+      -- run BFS
+      fix $ \loop -> do
+        Q.popFront queue >>= \case
+          Nothing -> pure ()
+          Just v1 -> do
+            !d1 <- VGM.read dist $! index0 bnd0 v1
+            VU.forM_ (gr v1 d1) $ \(!v2, !dw) -> do
+              let !i2 = index0 bnd0 v2
+              !lastD <- VGM.read dist i2
+              when (lastD == undefW) $ do
+                VGM.write dist i2 $! d1 + dw
+                Q.pushBack queue v2
+            loop
+
+      pure dist
+  where
+    !nVerts = rangeSize0 bnd0
+
+-- | \(O(n + m)\) Opinionated breadth-first search that returns a distance array and a predecessor
+-- array.
+--
+-- @since 1.2.4.0
+{-# INLINEABLE bfsTree #-}
+bfsTree ::
+  forall i w.
+  (HasCallStack, Ix0 i, VU.Unbox i, VU.Unbox w, Num w, Eq w) =>
+  -- | Boundary
+  Bounds0 i ->
+  -- | Graph function that takes a vertex and their distance and returns adjacent vertices with
+  -- edge weights, where \(w > 0\)
+  (i -> w -> VU.Vector (i, w)) ->
+  -- | Distance assignment for unreachable vertices.
+  w ->
+  -- | Weighted source vertices
+  VU.Vector (i, w) ->
+  -- | (Distance vector in one-dimensional index, Predecessor array (@-1@ represents none))
+  (VU.Vector w, VU.Vector Int)
+bfsTree bnd0 gr undefW sources
+  | VU.null sources = (VU.replicate nVerts undefW, VU.replicate nVerts (-1))
+  | otherwise = runST $ do
+      dist <- VUM.replicate @_ @w nVerts undefW
+      prev <- VUM.replicate @_ @Int nVerts (-1)
+      -- NOTE: We only need capacity of `n`, as first appearance of vertex is always with the
+      -- minimum distance.
+      queue <- Q.new nVerts
+
+      -- set source values
+      VU.forM_ sources $ \(!src, !w0) -> do
+        -- TODO: assert w1 <= w2
+        let !i = index0 bnd0 src
+        !lastD <- VGM.read dist i
+        -- Note that duplicate inputs are pruned here:
+        when (lastD == undefW) $ do
+          VGM.write dist i w0
+          -- VGM.write prev i (-1)
+          Q.pushBack queue src
+
+      -- run BFS
+      fix $ \loop -> do
+        Q.popFront queue >>= \case
+          Nothing -> pure ()
+          Just v1 -> do
+            let !i1 = index0 bnd0 v1
+            !d1 <- VGM.read dist i1
+            VU.forM_ (gr v1 d1) $ \(!v2, !dw) -> do
+              let !i2 = index0 bnd0 v2
+              !lastD <- VGM.read dist i2
+              when (lastD == undefW) $ do
+                VGM.write dist i2 $! d1 + dw
+                VGM.write prev i2 i1
+                Q.pushBack queue v2
+            loop
+
+      (,) <$> VU.unsafeFreeze dist <*> VU.unsafeFreeze prev
+  where
+    !nVerts = rangeSize0 bnd0
+
+-- | \(O(n + m)\) Opinionated 01-BFS that returns a distance array.
+--
+-- @since 1.2.4.0
+{-# INLINEABLE bfs01 #-}
+bfs01 ::
+  forall i.
+  (HasCallStack, Ix0 i, VU.Unbox i) =>
+  -- | Zero-based index boundary.
+  Bounds0 i ->
+  -- | Graph function that takes the vertex, current distance and returns adjacent vertices with
+  -- edge weights, where \(w > 0\)
+  (i -> Int -> VU.Vector (i, Int)) ->
+  -- | Capacity of deque, often the number of edges.
+  Int ->
+  -- | Distance assignment for unreachable vertices.
+  VU.Vector (i, Int) ->
+  -- | Distance array in one-dimensional index. Unreachable vertices are given distance of `-1`.
+  VU.Vector Int
+bfs01 !bnd0 !gr !capactiy !sources
+  | VU.null sources = VU.replicate nVerts (-1)
+  | otherwise = VU.create $ do
+      dist <- VUM.replicate nVerts undef
+      -- NOTE: Just like Dijkstra, we need capacity of `m`, as the first appearance of a vertex is not
+      -- always with minimum distance.
+      deque <- Q.newDeque @_ @(i, Int) (capactiy + 1)
+
+      -- set source values
+      VU.forM_ sources $ \(!src, !w0) -> do
+        -- TODO: assert x1 <= w2
+        let !i = index0 bnd0 src
+        !lastD <- VGM.read dist i
+        -- Note that duplicate inputs are pruned here:
+        when (lastD == undef) $ do
+          VGM.write dist i w0
+          Q.pushBack deque (src, w0)
+
+      let step !vExt0 !w0 = do
+            let !i0 = index0 bnd0 vExt0
+            !wReserved0 <- VGM.read dist i0
+            when (w0 == wReserved0) $ do
+              VU.forM_ (gr vExt0 w0) $ \(!vExt, !dw) -> do
+                let !w = w0 + dw
+                let !i = index0 bnd0 vExt
+                !wReserved <- VGM.read dist i
+                -- NOTE: Do pruning just like Dijkstra:
+                when (wReserved == undef || w < wReserved) $ do
+                  VGM.write dist i w
+                  if dw == 0
+                    then Q.pushFront deque (vExt, w)
+                    else Q.pushBack deque (vExt, w)
+
+      fix $ \popLoop -> do
+        Q.popFront deque >>= \case
+          Nothing -> pure ()
+          Just (!vExt0, !w0) -> do
+            step vExt0 w0
+            popLoop
+
+      pure dist
+  where
+    !undef = -1 :: Int
+    !nVerts = rangeSize0 bnd0

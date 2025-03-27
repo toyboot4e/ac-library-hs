@@ -175,6 +175,11 @@ executable aoj-2842-2
   main-is:       aoj-2842-2.hs
   build-depends: verify
 
+executable aoj-3528
+  import:        app-local
+  main-is:       aoj-3528.hs
+  build-depends: verify
+
 executable past202109-k
   import:        app-local
   main-is:       past202109-k.hs

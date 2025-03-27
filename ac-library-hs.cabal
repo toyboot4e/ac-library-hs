@@ -66,6 +66,7 @@ library
     AtCoder.Extra.IntervalMap
     AtCoder.Extra.IntMap
     AtCoder.Extra.IntSet
+    AtCoder.Extra.Ix0
     AtCoder.Extra.KdTree
     AtCoder.Extra.LazyKdTree
     AtCoder.Extra.Math
