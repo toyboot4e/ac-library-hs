@@ -2,7 +2,11 @@
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Tree
-  ( -- * Tree folding
+  ( -- * Tree properties
+    diameter,
+    diameterPath,
+
+    -- * Tree folding
 
     -- | These function are built around the three type parameters: \(w\), \(f\) and \(a\).
     --
@@ -16,12 +20,35 @@ module AtCoder.Extra.Tree
   )
 where
 
+import AtCoder.Extra.Graph qualified as Gr
 import Data.Functor.Identity (runIdentity)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
+
+-- | \(O(n + m)\) Returns the endpoints of the diameter of a tree and their distance: \(((u, v), w)\).
+{-# INLINEABLE diameter #-}
+diameter :: (HasCallStack, VU.Unbox w, Num w, Ord w) => Gr.Csr w -> w -> ((Int, Int), w)
+diameter gr !undefW =
+  let !bfs1 = Gr.bfs (Gr.nCsr gr) (const . Gr.adjW gr) undefW $ VU.singleton (0, 0)
+      !from = VU.maxIndex bfs1
+      !bfs2 = Gr.bfs (Gr.nCsr gr) (const . Gr.adjW gr) undefW $ VU.singleton (from, 0)
+      !to = VU.maxIndex bfs2
+      !w = VU.maximum bfs2
+   in ((from, to), w)
+
+-- | \(O(n + m)\) Returns the weight of the tree diameter and the path of it.
+{-# INLINEABLE diameterPath #-}
+diameterPath :: (HasCallStack, Show w, VU.Unbox w, Num w, Ord w) => Gr.Csr w -> w -> (VU.Vector Int, w)
+diameterPath gr !undefW =
+  let !bfs1 = Gr.bfs (Gr.nCsr gr) (const . Gr.adjW gr) undefW $ VU.singleton (0, 0)
+      !from = VU.maxIndex bfs1
+      (!bfs2, !parents) = Gr.trackingBfs (Gr.nCsr gr) (const . Gr.adjW gr) undefW $ VU.singleton (from, 0)
+      !to = VU.maxIndex bfs2
+      !w = bfs2 VG.! to
+   in (Gr.constructPathFromRoot parents to, w)
 
 {-# INLINE foldImpl #-}
 foldImpl ::
@@ -164,6 +191,7 @@ scan n tree acc0At toF act root = VG.create $ do
 --
 -- @since 1.1.0.0
 {-# INLINE foldReroot #-}
+-- TODO: change it to `INLINEABLE` instead
 foldReroot ::
   forall w f a.
   (HasCallStack, VU.Unbox w, VU.Unbox a, VU.Unbox f, Monoid f) =>

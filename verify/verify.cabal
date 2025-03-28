@@ -460,6 +460,11 @@ executable yosupo-suffixarray
   main-is:       yosupo-suffixarray.hs
   build-depends: verify
 
+executable yosupo-tree-diameter
+  import:        app-local
+  main-is:       yosupo-tree-diameter.hs
+  build-depends: verify
+
 executable yosupo-tree-path-composite-sum
   import:        app-local
   main-is:       yosupo-tree-path-composite-sum.hs

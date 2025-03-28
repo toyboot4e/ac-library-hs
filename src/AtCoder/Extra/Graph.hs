@@ -25,8 +25,12 @@ module AtCoder.Extra.Graph
 
     -- ** BFS
     bfs,
-    bfsTree,
+    trackingBfs,
     bfs01,
+
+    -- ** Path reconstruction
+    constructPathFromRoot,
+    constructPathToRoot,
   )
 where
 
@@ -371,8 +375,8 @@ bfs bnd0 gr undefW sources
 -- array.
 --
 -- @since 1.2.4.0
-{-# INLINEABLE bfsTree #-}
-bfsTree ::
+{-# INLINEABLE trackingBfs #-}
+trackingBfs ::
   forall i w.
   (HasCallStack, Ix0 i, VU.Unbox i, VU.Unbox w, Num w, Eq w) =>
   -- | Boundary
@@ -386,7 +390,7 @@ bfsTree ::
   VU.Vector (i, w) ->
   -- | (Distance vector in one-dimensional index, Predecessor array (@-1@ represents none))
   (VU.Vector w, VU.Vector Int)
-bfsTree bnd0 gr undefW sources
+trackingBfs bnd0 gr undefW sources
   | VU.null sources = (VU.replicate nVerts undefW, VU.replicate nVerts (-1))
   | otherwise = runST $ do
       dist <- VUM.replicate @_ @w nVerts undefW
@@ -488,3 +492,18 @@ bfs01 !bnd0 !gr !capactiy !sources
   where
     !undef = -1 :: Int
     !nVerts = rangeSize0 bnd0
+
+-- | \(O(n)\) Given a predecessor array, retrieves a path from the root to a vertex.
+--
+-- @since 1.2.4.0
+constructPathFromRoot :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
+constructPathFromRoot parents = VU.reverse . constructPathToRoot parents
+
+-- | \(O(n)\) Given a predecessor array, retrieves a path from a vertex to the root.
+--
+-- @since 1.2.4.0
+constructPathToRoot :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
+constructPathToRoot parents = VU.unfoldr f
+  where
+    f (-1) = Nothing
+    f v = Just (v, parents VG.! v)
