@@ -53,7 +53,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | \(O(n)\) Converts non-directed edges into directional edges. This is a convenient function for
+-- | \(O(n)\) Converts directed edges into non-directed edges. This is a convenient function for
 -- making an input to `build`.
 --
 -- ==== __Example__
@@ -81,7 +81,7 @@ import GHC.Stack (HasCallStack)
 swapDupe :: (VU.Unbox w) => VU.Vector (Int, Int, w) -> VU.Vector (Int, Int, w)
 swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 
--- | \(O(n)\) Converts non-directed edges into directional edges. This is a convenient function for
+-- | \(O(n)\) Converts directed edges into non-directed edges. This is a convenient function for
 -- making an input to `build'`.
 --
 -- ==== __Example__
@@ -147,13 +147,13 @@ rev Csr {..} = Csr.build nCsr revEdges
   where
     vws = VU.zip adjCsr wCsr
     revEdges = flip VU.concatMap (VU.generate nCsr id) $ \v1 ->
-      let !o1 = VU.unsafeIndex startCsr v1
-          !o2 = VU.unsafeIndex startCsr (v1 + 1)
-          !vw2s = VU.unsafeSlice o1 (o2 - o1) vws
+      let !o1 = startCsr VG.! v1
+          !o2 = startCsr VG.! (v1 + 1)
+          !vw2s = VU.slice o1 (o2 - o1) vws
        in VU.map (\(!v2, !w2) -> (v2, v1, w2)) vw2s
 
 -- -------------------------------------------------------------------------------------------------
--- Generic graph search
+-- Generic graph search functions
 -- -------------------------------------------------------------------------------------------------
 
 -- | \(O(n \log n + m)\) Returns the lexicographically smallest topological ordering of the given
@@ -187,19 +187,18 @@ topSort n gr = runST $ do
       IS.insert que v
 
   buf <- B.new n
-  let run = do
-        IS.deleteMin que >>= \case
-          Nothing -> pure ()
-          Just u -> do
-            B.pushBack buf u
-            VU.forM_ (gr u) $ \v -> do
-              nv <- subtract 1 <$> VGM.read inDeg v
-              VGM.write inDeg v nv
-              when (nv == 0) $ do
-                IS.insert que v
-            run
+  fix $ \loop -> do
+    IS.deleteMin que >>= \case
+      Nothing -> pure ()
+      Just u -> do
+        B.pushBack buf u
+        VU.forM_ (gr u) $ \v -> do
+          nv <- subtract 1 <$> VGM.read inDeg v
+          VGM.write inDeg v nv
+          when (nv == 0) $ do
+            IS.insert que v
+        loop
 
-  run
   B.unsafeFreeze buf
 
 -- | \(O(n + m)\) Returns a [block cut tree](https://en.wikipedia.org/wiki/Biconnected_component)

@@ -5,12 +5,11 @@
 
 module Tests.SegTree (tests) where
 
-import Data.Monoid (Sum(..))
 import AtCoder.Internal.Assert
 import AtCoder.SegTree qualified as ST
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Char (chr, ord)
-import Data.Foldable
+import Data.Foldable (for_)
 import Data.Monoid
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
