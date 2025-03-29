@@ -77,9 +77,13 @@ import Prelude hiding (length, null)
 -- @since 1.0.0.0
 data Heap s a = Heap
   { -- | Size of the heap.
-    sizeBH_ :: !(VUM.MVector s Int),
+    --
+    -- @since 1.2.4.0
+    sizeH :: !(VUM.MVector s Int),
     -- | Storage.
-    dataBH :: !(VUM.MVector s a)
+    --
+    -- @since 1.2.4.0
+    dataH :: !(VUM.MVector s a)
   }
 
 -- | \(O(n)\) Creates a `Heap` with capacity \(n\).
@@ -88,8 +92,8 @@ data Heap s a = Heap
 {-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (Heap (PrimState m) a)
 new n = do
-  sizeBH_ <- VUM.replicate 1 0
-  dataBH <- VUM.unsafeNew n
+  sizeH <- VUM.replicate 1 0
+  dataH <- VUM.unsafeNew n
   pure Heap {..}
 
 -- | \(O(1)\) Returns the maximum number of elements in the heap.
@@ -97,14 +101,14 @@ new n = do
 -- @since 1.0.0.0
 {-# INLINE capacity #-}
 capacity :: (VU.Unbox a) => Heap s a -> Int
-capacity = VUM.length . dataBH
+capacity = VUM.length . dataH
 
 -- | \(O(1)\) Returns the number of elements in the heap.
 --
 -- @since 1.0.0.0
 {-# INLINE length #-}
 length :: (PrimMonad m, VU.Unbox a) => Heap (PrimState m) a -> m Int
-length Heap {sizeBH_} = VGM.unsafeRead sizeBH_ 0
+length Heap {sizeH} = VGM.unsafeRead sizeH 0
 
 -- | \(O(1)\) Returns `True` if the heap is empty.
 --
@@ -118,7 +122,7 @@ null = (<$>) (== 0) . length
 -- @since 1.0.0.0
 {-# INLINE clear #-}
 clear :: (PrimMonad m, VU.Unbox a) => Heap (PrimState m) a -> m ()
-clear Heap {sizeBH_} = VGM.unsafeWrite sizeBH_ 0 0
+clear Heap {sizeH} = VGM.unsafeWrite sizeH 0 0
 
 -- | \(O(\log n)\) Inserts an element to the heap.
 --
@@ -153,7 +157,7 @@ peek heap = do
   isNull <- null heap
   if isNull
     then pure Nothing
-    else Just <$> VGM.read (dataBH heap) 0
+    else Just <$> VGM.read (dataH heap) 0
 
 -- -------------------------------------------------------------------------------------------------
 -- Internal
@@ -162,14 +166,14 @@ peek heap = do
 {-# INLINEABLE pushST #-}
 pushST :: (HasCallStack, Ord a, VU.Unbox a) => Heap s a -> a -> ST s ()
 pushST Heap {..} x = do
-  i0 <- VGM.unsafeRead sizeBH_ 0
-  VGM.write dataBH i0 x
-  VGM.unsafeWrite sizeBH_ 0 $ i0 + 1
+  i0 <- VGM.unsafeRead sizeH 0
+  VGM.write dataH i0 x
+  VGM.unsafeWrite sizeH 0 $ i0 + 1
   let siftUp i = when (i > 0) $ do
         let iParent = (i - 1) `div` 2
-        xParent <- VGM.read dataBH iParent
+        xParent <- VGM.read dataH iParent
         when (x < xParent) $ do
-          VGM.swap dataBH iParent i
+          VGM.swap dataH iParent i
           siftUp iParent
   siftUp i0
 
@@ -181,31 +185,31 @@ popST heap@Heap {..} = do
     then pure Nothing
     else do
       let n = len - 1
-      VGM.unsafeWrite sizeBH_ 0 n
+      VGM.unsafeWrite sizeH 0 n
       -- copy the last element to the root
-      root <- VGM.read dataBH 0
-      VGM.swap dataBH 0 n
+      root <- VGM.read dataH 0
+      VGM.swap dataH 0 n
 
       -- xl <= xr <= x
       let siftDown i = do
             let il = 2 * i + 1
             let ir = il + 1
             when (il < n) $ do
-              x <- VGM.read dataBH i
-              xl <- VGM.read dataBH il
+              x <- VGM.read dataH i
+              xl <- VGM.read dataH il
               if ir < n
                 then do
                   -- IMPORTANT: swap with the smaller child
-                  xr <- VGM.read dataBH ir
+                  xr <- VGM.read dataH ir
                   if xl <= xr && xl < x
                     then do
-                      VGM.swap dataBH i il
+                      VGM.swap dataH i il
                       siftDown il
                     else when (xr < x) $ do
-                      VGM.swap dataBH i ir
+                      VGM.swap dataH i ir
                       siftDown ir
                 else when (xl < x) $ do
-                  VGM.swap dataBH i il
+                  VGM.swap dataH i il
                   siftDown il
 
       siftDown 0
