@@ -28,6 +28,10 @@ module AtCoder.Extra.Graph
     trackingBfs,
     bfs01,
 
+    -- ** Dijkstra
+    dijkstra,
+    trackingDijkstra,
+
     -- ** Path reconstruction
     constructPathFromRoot,
     constructPathToRoot,
@@ -38,6 +42,7 @@ import AtCoder.Extra.IntSet qualified as IS
 import AtCoder.Extra.Ix0 (Bounds0, Ix0 (..))
 import AtCoder.Internal.Buffer qualified as B
 import AtCoder.Internal.Csr as Csr
+import AtCoder.Internal.MinHeap qualified as MH
 import AtCoder.Internal.Queue qualified as Q
 import AtCoder.Internal.Scc qualified as ACISCC
 import Control.Monad (when)
@@ -492,6 +497,107 @@ bfs01 !bnd0 !gr !capactiy !sources
       pure dist
   where
     !undef = -1 :: Int
+    !nVerts = rangeSize0 bnd0
+
+-- | \(O((n + m) \log n)\) Dijkstra's algorithm.
+{-# INLINEABLE dijkstra #-}
+dijkstra ::
+  forall i w.
+  (HasCallStack, Ix0 i, Ord i, VU.Unbox i, Num w, Ord w, VU.Unbox w) =>
+  -- | Bounds
+  Bounds0 i ->
+  -- | Graph function that takes a vertex and their distance and returns adjacent vertices with
+  -- edge weights, where \(w \ge 0\)
+  (i -> w -> VU.Vector (i, w)) ->
+  -- | Capacity of the heap, often the number of edges \(m\).
+  Int ->
+  -- | Distance assignment for unreachable vertices.
+  w ->
+  -- | Source vertices with initial weights.
+  VU.Vector (i, w) ->
+  -- | Distance array in one-dimensional index. Unreachable vertices are given distance of @undefW@.
+  VU.Vector w
+dijkstra !bnd0 !gr !capacity !undefW !sources
+  | VU.null sources = VU.replicate nVerts undefW
+  | otherwise = VU.create $ do
+      !dist <- VUM.replicate @_ @w nVerts undefW
+      -- REMARK: (w, i) for sort by width
+      !heap <- MH.new @_ @(w, i) capacity
+      -- !prev <- VUM.replicate @_ @Int nVerts (-1)
+
+      VU.forM_ sources $ \(!v, !w) -> do
+        VGM.write dist (index0 bnd0 v) w
+        MH.push heap (w, v)
+
+      fix $ \loop -> do
+        MH.pop heap >>= \case
+          Nothing -> pure ()
+          Just (!w1, !v1) -> do
+            !wReserved <- VGM.read dist $! index0 bnd0 v1
+            when (wReserved == w1) $ do
+              VU.forM_ (gr v1 w1) $ \(!v2, !dw2) -> do
+                let !i2 = index0 bnd0 v2
+                !w2 <- VGM.read dist i2
+                let !w2' = w1 + dw2
+                when (w2 == undefW || w2' < w2) $ do
+                  VGM.write dist i2 w2'
+                  -- VGM.write prev i2 i1
+                  MH.push heap (w2', v2)
+            loop
+
+      pure dist
+  where
+    !nVerts = rangeSize0 bnd0
+
+-- | \(O((n + m) \log n)\) Dijkstra's algorithm.
+{-# INLINEABLE trackingDijkstra #-}
+trackingDijkstra ::
+  forall i w.
+  (HasCallStack, Ix0 i, Ord i, VU.Unbox i, Num w, Ord w, VU.Unbox w) =>
+  -- | Bounds
+  Bounds0 i ->
+  -- | Graph function
+  (i -> w -> VU.Vector (i, w)) ->
+  -- | Capacity of the heap, often the number of edges \(m\).
+  Int ->
+  -- | Distance assignment for unreachable vertices.
+  w ->
+  -- | Source vertices with weights.
+  VU.Vector (i, w) ->
+  -- | Distance array in one-dimensional index. Unreachable vertices are given distance of @undefW@.
+  (VU.Vector w, VU.Vector Int)
+trackingDijkstra !bnd0 !gr !capacity !undefW !sources
+  | VU.null sources = (VU.replicate nVerts undefW, VU.replicate nVerts (-1))
+  | otherwise = runST $ do
+      !dist <- VUM.replicate @_ @w nVerts undefW
+      -- REMARK: (w, i) for sort by width
+      !heap <- MH.new @_ @(w, i) capacity
+      !prev <- VUM.replicate @_ @Int nVerts (-1)
+
+      VU.forM_ sources $ \(!v, !w) -> do
+        let !i = index0 bnd0 v
+        VGM.write dist i w
+        MH.push heap (w, v)
+
+      fix $ \loop -> do
+        MH.pop heap >>= \case
+          Nothing -> pure ()
+          Just (!w1, !v1) -> do
+            let !i1 = index0 bnd0 v1
+            !wReserved <- VGM.read dist i1
+            when (wReserved == w1) $ do
+              VU.forM_ (gr v1 w1) $ \(!v2, !dw2) -> do
+                let !i2 = index0 bnd0 v2
+                !w2 <- VGM.read dist i2
+                let !w2' = w1 + dw2
+                when (w2 == undefW || w2' < w2) $ do
+                  VGM.write dist i2 w2'
+                  VGM.write prev i2 i1
+                  MH.push heap (w2', v2)
+            loop
+
+      (,) <$> VU.unsafeFreeze dist <*> VU.unsafeFreeze prev
+  where
     !nVerts = rangeSize0 bnd0
 
 -- | \(O(n)\) Given a predecessor array, retrieves a path from the root to a vertex.

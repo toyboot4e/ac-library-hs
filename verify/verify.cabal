@@ -215,6 +215,11 @@ executable yosupo-biconnected-components-util
   main-is:       yosupo-biconnected-components-util.hs
   build-depends: verify
 
+executable yosupo-dynamic-point-set-rectangle-affine-rectangle-sum
+  import:        app-local
+  main-is:       yosupo-dynamic-point-set-rectangle-affine-rectangle-sum.hs
+  build-depends: verify
+
 executable yosupo-dynamic-sequence-range-affine-range-sum
   import:        app-local
   main-is:       yosupo-dynamic-sequence-range-affine-range-sum.hs
@@ -340,9 +345,9 @@ executable yosupo-point-set-range-composite-large-array-lazy-persistent
   main-is:       yosupo-point-set-range-composite-large-array-lazy-persistent.hs
   build-depends: verify
 
-executable yosupo-dynamic-point-set-rectangle-affine-rectangle-sum
+executable yosupo-shortest-path
   import:        app-local
-  main-is:       yosupo-dynamic-point-set-rectangle-affine-rectangle-sum.hs
+  main-is:       yosupo-shortest-path.hs
   build-depends: verify
 
 executable yosupo-pow-of-matrix
