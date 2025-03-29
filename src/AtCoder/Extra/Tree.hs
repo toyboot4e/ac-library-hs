@@ -50,7 +50,7 @@ diameterPath gr !undefW =
       !w = bfs2 VG.! to
    in (Gr.constructPathFromRoot parents to, w)
 
-{-# INLINE foldImpl #-}
+{-# INLINEABLE foldImpl #-}
 foldImpl ::
   forall m w f a.
   (HasCallStack, Monad m, VU.Unbox w) =>
@@ -166,6 +166,9 @@ scan n tree acc0At toF act root = VG.create $ do
 
 -- | \(O(n)\) Folds a tree from every vertex, using the rerooting technique.
 --
+-- ==== Constraints
+-- - The action monoid \(f\) must be commutative.
+--
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import AtCoder.Extra.Tree qualified as Tree
@@ -190,8 +193,7 @@ scan n tree acc0At toF act root = VG.create $ do
 -- [4,4,4,4,4]
 --
 -- @since 1.1.0.0
-{-# INLINE foldReroot #-}
--- TODO: change it to `INLINEABLE` instead
+{-# INLINEABLE foldReroot #-}
 foldReroot ::
   forall w f a.
   (HasCallStack, VU.Unbox w, VU.Unbox a, VU.Unbox f, Monoid f) =>
@@ -211,7 +213,6 @@ foldReroot n tree valAt toF act = VU.create $ do
   -- Calculate tree DP for every vertex as a root:
   !dp <- VUM.unsafeNew n
   let reroot parent parentF v1 = do
-        -- TODO: when the operator is not commutative?
         let !children = VU.filter ((/= parent) . fst) $ tree v1
         let !fL = VU.scanl' (\ !f (!v2, !w) -> (f <>) . (`toF` (v1, w)) $ treeDp VG.! v2) f0 children
         let !fR = VU.scanr' (\(!v2, !w) !f -> (<> f) . (`toF` (v1, w)) $ treeDp VG.! v2) f0 children

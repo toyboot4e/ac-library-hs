@@ -78,6 +78,7 @@ import GHC.Stack (HasCallStack)
 --
 -- @since 1.1.0.0
 {-# INLINE swapDupe #-}
+-- NOTE: concatMap does not fuse anyways, as the vector's code says
 swapDupe :: (VU.Unbox w) => VU.Vector (Int, Int, w) -> VU.Vector (Int, Int, w)
 swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 
@@ -106,6 +107,7 @@ swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 --
 -- @since 1.1.0.0
 {-# INLINE swapDupe' #-}
+-- NOTE: concatMap does not fuse anyways, as the vector's code says
 swapDupe' :: VU.Vector (Int, Int) -> VU.Vector (Int, Int)
 swapDupe' = VU.concatMap (\(!u, !v) -> VU.fromListN 2 [(u, v), (v, u)])
 

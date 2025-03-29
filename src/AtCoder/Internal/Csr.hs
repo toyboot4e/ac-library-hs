@@ -90,7 +90,7 @@ data Csr w = Csr
 -- | \(O(n + m)\) Creates a `Csr`.
 --
 -- @since 1.0.0.0
-{-# INLINE build #-}
+{-# INLINEABLE build #-}
 build :: (HasCallStack, VU.Unbox w) => Int -> VU.Vector (Int, Int, w) -> Csr w
 build nCsr edges = runST $ do
   let mCsr = VU.length edges
