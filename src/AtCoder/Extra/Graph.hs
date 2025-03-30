@@ -32,6 +32,10 @@ module AtCoder.Extra.Graph
     dijkstra,
     trackingDijkstra,
 
+    -- ** Bellman-ford
+    bellmanFord,
+    trackingBellmanFord,
+
     -- ** Path reconstruction
     constructPathFromRoot,
     constructPathToRoot,
@@ -599,6 +603,114 @@ trackingDijkstra !bnd0 !gr !capacity !undefW !sources
       (,) <$> VU.unsafeFreeze dist <*> VU.unsafeFreeze prev
   where
     !nVerts = rangeSize0 bnd0
+
+-- -- | Option for `bellmanFord`.
+-- data BellmanFordPolicy = QuitOnNegaitveLoop | ContinueOnNegaitveLoop
+
+-- | \(O(nm)\) Bellman–ford algorithm that instantly returns on negaive loop detection. Vertices
+-- are one-dimensional.
+{-# INLINEABLE bellmanFord #-}
+bellmanFord ::
+  forall w.
+  (HasCallStack, Num w, Ord w, VU.Unbox w) =>
+  -- | The number of vertices.
+  Int ->
+  -- | Graph function. The weight can be negative.
+  (Int -> w -> VU.Vector (Int, w)) ->
+  -- | Distance assignment for unreachable vertices.
+  w ->
+  -- | Source vertex
+  Int ->
+  -- | Distance array in one-dimensional index.
+  Maybe (VU.Vector w)
+bellmanFord {- !policy -} !nVerts !gr !undefW source = runST $ do
+  !dist <- VUM.replicate @_ @w nVerts undefW
+  -- !prev <- VUM.replicate @_ @Int nVerts (-1)
+  VGM.write dist source (0 :: w)
+  updated <- VUM.replicate 1 False
+
+  -- look around adjaenct vertices
+  let update v1 = do
+        d1 <- VGM.read dist v1
+        when (d1 /= undefW) $ do
+          VU.forM_ (gr v1 d1) $ \(!v2, !dw) -> do
+            d2 <- VGM.read dist v2
+            let !d2' = d1 + dw
+            when (d2 == undefW || d2' < d2) $ do
+              VGM.write dist v2 d2'
+              -- VGM.write prev v2 v1
+              -- NOTE: we should actually instantly stop if nLoop == nVerts + 1, but
+              -- here we're preferring simple code. Be warned that we're not correctly handling
+              -- the distance array on negative loop.
+              VGM.write updated 0 True
+
+  let runLoop nLoop
+        | nLoop >= nVerts + 1 = do
+            -- It means we detected update in (n + 1)-th loop, so we found negative loop
+            pure Nothing
+        -- \| nLoop == nVerts = do
+        -- The (n + 1)-th loop should just make sure we don't need update
+        | otherwise = do
+            for_ [0 .. nVerts - 1] update
+            b <- VGM.exchange updated 0 False
+            if b
+              then runLoop (nLoop + 1)
+              else Just <$> VU.unsafeFreeze dist
+
+  runLoop 0
+
+-- | \(O(nm)\) Bellman–ford algorithm that instantly returns on negaive loop detection. Vertices
+-- are one-dimensional.
+{-# INLINEABLE trackingBellmanFord #-}
+trackingBellmanFord ::
+  forall w.
+  (HasCallStack, Num w, Ord w, VU.Unbox w) =>
+  -- | The number of vertices.
+  Int ->
+  -- | Graph function. The weight can be negative.
+  (Int -> w -> VU.Vector (Int, w)) ->
+  -- | Distance assignment for unreachable vertices.
+  w ->
+  -- | Source vertex
+  Int ->
+  -- | Distance array in one-dimensional index. Unreachable vertices are given distance of @undefW@.
+  -- TODO: wriet about predecessor aray
+  Maybe (VU.Vector w, VU.Vector Int)
+trackingBellmanFord {- !policy -} !nVerts !gr !undefW source = runST $ do
+  !dist <- VUM.replicate @_ @w nVerts undefW
+  !prev <- VUM.replicate @_ @Int nVerts (-1)
+  VGM.write dist source (0 :: w)
+  updated <- VUM.replicate 1 False
+
+  -- look around adjaenct vertices
+  let update v1 = do
+        d1 <- VGM.read dist v1
+        when (d1 /= undefW) $ do
+          VU.forM_ (gr v1 d1) $ \(!v2, !dw) -> do
+            d2 <- VGM.read dist v2
+            let !d2' = d1 + dw
+            when (d2 == undefW || d2' < d2) $ do
+              VGM.write dist v2 d2'
+              VGM.write prev v2 v1
+              -- NOTE: we should actually instantly stop if nLoop == nVerts + 1, but
+              -- here we're preferring simple code. Be warned that we're not correctly handling
+              -- the distance array on negative loop.
+              VGM.write updated 0 True
+
+  let runLoop nLoop
+        | nLoop >= nVerts + 1 = do
+            -- It means we detected update in (n + 1)-th loop, so we found negative loop
+            pure Nothing
+        -- \| nLoop == nVerts = do
+        -- The (n + 1)-th loop should just make sure we don't need update
+        | otherwise = do
+            for_ [0 .. nVerts - 1] update
+            b <- VGM.exchange updated 0 False
+            if b
+              then runLoop (nLoop + 1)
+              else Just <$> ((,) <$> VU.unsafeFreeze dist <*> VU.unsafeFreeze prev)
+
+  runLoop 0
 
 -- | \(O(n)\) Given a predecessor array, retrieves a path from the root to a vertex.
 --
