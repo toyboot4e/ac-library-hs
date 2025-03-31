@@ -2,9 +2,9 @@
 
 -- | Two-dimensional segment tree for commutative monoids at fixed points.
 --
--- ==== SegTree2d vs WaveletMatrix2d
--- They basically the same functionalities and performance, however, in @ac-library-hs@, `SegTree2d`
--- has better API and even outperforms @WaveletMatrix2d@.
+-- ==== `SegTree2d` vs `WaveletMatrix2d`
+-- They basically have the same functionalities and performance, however, `SegTree2d` performs better in
+-- @ac-library-hs@.
 --
 -- ==== __Examples__
 -- Create a two-dimensional segment tree for points \((0, 0)\) with weight \(10\) and \((1, 1)\)

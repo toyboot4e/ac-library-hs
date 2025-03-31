@@ -27,7 +27,7 @@ import Data.Vector.Unboxed qualified as VU
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> argsort $ VU.fromList [0, 1, 0, 1, 0]
 -- [0,2,4,1,3]
-{-# INLINE argsort #-}
+{-# INLINEABLE argsort #-}
 argsort :: (Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
 argsort xs =
   VU.modify

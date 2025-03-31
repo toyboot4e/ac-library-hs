@@ -4,9 +4,9 @@
 -- queries. Points cannot be added after construction, but monoid values in each point can be
 -- modified later.
 --
--- ==== SegTree2d vs WaveletMatrix2d
--- They basically the same functionalities and performance, however, in @ac-library-hs@, `SegTree2d`
--- has better API and even outperforms @WaveletMatrix2d@.
+-- ==== `SegTree2d` vs `WaveletMatrix2d`
+-- They basically have the same functionalities and performance, however, `SegTree2d` performs better in
+-- @ac-library-hs@.
 --
 -- ==== __Example__
 -- Create a `WaveletMatrix2d` with initial vertex values:

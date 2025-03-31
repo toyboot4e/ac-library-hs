@@ -3,8 +3,7 @@
 
 -- | Monoid action \(f: x \rightarrow ax + b\).
 --
--- - Use @Mat2x2@ if inverse operations are required, or if it's necessary to store the monoid
--- length in the acted monoid (@V2@).
+-- - Use @Mat2x2@ if inverse operations are required.
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Monoid.Affine1
