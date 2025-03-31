@@ -11,7 +11,7 @@ main = do
 
   let !gr = Gr.build n uvws
   let !inf = maxBound `div` 2
-  case Gr.bellmanFord n (const . Gr.adjW gr) (-inf) src of
+  case Gr.bellmanFord n (Gr.adjW gr) (-inf) src of
     Nothing -> do
       putStrLn "NEGATIVE CYCLE"
     Just dist -> do

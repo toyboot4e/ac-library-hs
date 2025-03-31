@@ -3,6 +3,8 @@ import AtCoder.Internal.Csr qualified as Csr
 import Data.Vector.Unboxed qualified as VU
 import Util
 
+-- not deterministic
+
 -- verification-helper: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_4_B
 main :: IO ()
 main = do

@@ -162,12 +162,7 @@ executable aoj-GRL_1_B
 
 executable aoj-GRL_1_C
   import:        app-local
-  main-is:       aoj-GRL_1_C.hs.hs
-  build-depends: verify
-
-executable aoj-GRL_4_B
-  import:        app-local
-  main-is:       aoj-GRL_4_B.hs
+  main-is:       aoj-GRL_1_C.hs
   build-depends: verify
 
 executable aoj-GRL_6_A
@@ -541,3 +536,9 @@ executable alpc-h
   import:        app-online
   main-is:       alpc-h.hs
   build-depends: verify
+
+executable aoj-GRL_4_B
+  import:        app-local
+  main-is:       aoj-GRL_4_B.hs
+  build-depends: verify
+

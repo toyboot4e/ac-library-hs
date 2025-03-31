@@ -1,7 +1,8 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- | Re-export of the @Csr@ module and generic graph search functions.
+-- | Re-export of the @Csr@ module and additional graph search functions.
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Graph
@@ -21,24 +22,62 @@ module AtCoder.Extra.Graph
     blockCut,
     blockCutComponents,
 
-    -- * Shortest path search functions (opinionated)
+    -- * Shortest path search
 
-    -- ** BFS
+    -- | Most of the functions are opinionated as the followings:
+    --
+    -- - Indices are abstracted with `Ix0` (n-dimensional `Int`).
+    -- - A graph is represented by a function \(f\) of type @i -> w -> Vector (i, w)@, which takes
+    -- a vertex, their distance and returns a vector of adjacent vertices with edge weights.
+    -- - Functions that return a predecessor array are named as @tracking*@.
+
+    -- ** BFS (breadth-first search)
+
+    -- *** Constraints
+
+    -- | - Edge weight \(w > 0\)
     bfs,
     trackingBfs,
+
+    -- ** 01-BFS
+
+    -- *** Constraints
+
+    -- | - Edge weight \(w\) is either \(0\) or \(1\) of type `Int`.
     bfs01,
+    trackingBfs01,
 
     -- ** Dijkstra
+
+    -- *** Constraints
+
+    -- | - Edge weight \(w > 0\)
     dijkstra,
     trackingDijkstra,
 
-    -- ** Bellman-ford
+    -- ** Bellman–ford
+
+    -- | - Vertex type is restricted to one-dimensional `Int`.
     bellmanFord,
     trackingBellmanFord,
 
+    -- ** Floyd–Warshall
+    floydWarshall,
+    trackingFloydWarshall,
+
+    -- *** Incremental Floyd–Warshall
+    newFloydWarshall,
+    updateEdgeFloydWarshall,
+    updateEdgeTrackingFloydWarshall,
+
     -- ** Path reconstruction
+
+    -- | Functions for retrieve a path from a predecessor array where @-1@ represents none.
     constructPathFromRoot,
     constructPathToRoot,
+    -- | Functions for retrieve a path from a predecessor array where @-1@ represents none.
+    constructPathFromRootNN,
+    constructPathToRootNN,
   )
 where
 
@@ -51,7 +90,8 @@ import AtCoder.Internal.Queue qualified as Q
 import AtCoder.Internal.Scc qualified as ACISCC
 import Control.Monad (when)
 import Control.Monad.Fix (fix)
-import Control.Monad.ST (runST)
+import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
+import Control.Monad.ST (ST, runST)
 import Data.Bit (Bit (..))
 import Data.Foldable (for_)
 import Data.Maybe (fromJust)
@@ -62,8 +102,9 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | \(O(n)\) Converts directed edges into non-directed edges. This is a convenient function for
--- making an input to `build`.
+-- | \(O(n)\) Converts directed edges into non-directed edges; each edge \((u, v, w)\) is duplicated
+-- to be \((u, v, w)\) and \((v, u, w)\). This is a convenient function for making an input to
+-- `build`.
 --
 -- ==== __Example__
 -- `swapDupe` duplicates each edge reversing the direction:
@@ -91,8 +132,8 @@ import GHC.Stack (HasCallStack)
 swapDupe :: (VU.Unbox w) => VU.Vector (Int, Int, w) -> VU.Vector (Int, Int, w)
 swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 
--- | \(O(n)\) Converts directed edges into non-directed edges. This is a convenient function for
--- making an input to `build'`.
+-- | \(O(n)\) Converts directed edges into non-directed edges; each edge \((u, v)\) is duplicated
+-- to be \((u, v)\) and \((v, u)\). This is a convenient function for making an input to `build'`.
 --
 -- ==== __Example__
 -- `swapDupe'` duplicates each edge reversing the direction:
@@ -120,7 +161,7 @@ swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 swapDupe' :: VU.Vector (Int, Int) -> VU.Vector (Int, Int)
 swapDupe' = VU.concatMap (\(!u, !v) -> VU.fromListN 2 [(u, v), (v, u)])
 
--- | \(O(n + m)\) Returns the strongly connected components.
+-- | \(O(n + m)\) Returns the strongly connected components of a `Csr`.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -213,7 +254,7 @@ topSort n gr = runST $ do
   B.unsafeFreeze buf
 
 -- | \(O(n + m)\) Returns a [block cut tree](https://en.wikipedia.org/wiki/Biconnected_component)
--- where super vertices represent each biconnected component.
+-- where super vertices \((v \ge n)\) represent each biconnected component.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -315,7 +356,7 @@ blockCut n gr = runST $ do
 -- [[3,2],[0,3,1]]
 --
 -- @since 1.1.1.0
-{-# INLINE blockCutComponents #-}
+{-# INLINEABLE blockCutComponents #-}
 blockCutComponents :: Int -> (Int -> VU.Vector Int) -> V.Vector (VU.Vector Int)
 blockCutComponents n gr =
   let bct = blockCut n gr
@@ -331,80 +372,66 @@ blockCutComponents n gr =
 -- | \(O(n + m)\) Opinionated breadth-first search that returns a distance array.
 --
 -- @since 1.2.4.0
-{-# INLINEABLE bfs #-}
+{-# INLINE bfs #-}
 bfs ::
   forall i w.
   (HasCallStack, Ix0 i, VU.Unbox i, VU.Unbox w, Num w, Eq w) =>
-  -- | Boundary
+  -- | Zero-based vertex boundary.
   Bounds0 i ->
-  -- | Graph function that takes a vertex and their distance and returns adjacent vertices with
-  -- edge weights, where \(w > 0\)
+  -- | Graph function that takes a vertex and their distance, and returns adjacent vertices with
+  -- edge weights, where \(w > 0\).
   (i -> w -> VU.Vector (i, w)) ->
   -- | Distance assignment for unreachable vertices.
   w ->
-  -- | Weighted source vertices
+  -- | Weighted source vertices.
   VU.Vector (i, w) ->
-  -- | Distance array in one-dimensional index. Unreachable vertices are given distance of @undefW@.
+  -- | Distance array in one-dimensional index.
   VU.Vector w
-bfs bnd0 gr undefW sources
-  | VU.null sources = VU.replicate nVerts (-1)
-  | otherwise = VU.create $ do
-      dist <- VUM.replicate @_ @w nVerts undefW
-      -- NOTE: We only need capacity of `n`, as first appearance of vertex is with minimum distance.
-      queue <- Q.new nVerts
-
-      -- set source values
-      VU.forM_ sources $ \(!src, !w0) -> do
-        -- TODO: assert w1 <= w2
-        let !i = index0 bnd0 src
-        !lastD <- VGM.read dist i
-        -- Note that duplicate inputs are pruned here:
-        when (lastD == undefW) $ do
-          VGM.write dist i w0
-          Q.pushBack queue src
-
-      -- run BFS
-      fix $ \loop -> do
-        Q.popFront queue >>= \case
-          Nothing -> pure ()
-          Just v1 -> do
-            !d1 <- VGM.read dist $! index0 bnd0 v1
-            VU.forM_ (gr v1 d1) $ \(!v2, !dw) -> do
-              let !i2 = index0 bnd0 v2
-              !lastD <- VGM.read dist i2
-              when (lastD == undefW) $ do
-                VGM.write dist i2 $! d1 + dw
-                Q.pushBack queue v2
-            loop
-
-      pure dist
-  where
-    !nVerts = rangeSize0 bnd0
+bfs !bnd0 !gr !undefW !sources =
+  let (!dist, !_) = bfsImpl False bnd0 gr undefW sources
+   in dist
 
 -- | \(O(n + m)\) Opinionated breadth-first search that returns a distance array and a predecessor
 -- array.
 --
 -- @since 1.2.4.0
-{-# INLINEABLE trackingBfs #-}
+{-# INLINE trackingBfs #-}
 trackingBfs ::
   forall i w.
   (HasCallStack, Ix0 i, VU.Unbox i, VU.Unbox w, Num w, Eq w) =>
-  -- | Boundary
+  -- | Zero-based vertex boundary.
   Bounds0 i ->
-  -- | Graph function that takes a vertex and their distance and returns adjacent vertices with
-  -- edge weights, where \(w > 0\)
+  -- | Graph function that takes a vertex and their distance, and returns adjacent vertices with
+  -- edge weights, where \(w > 0\).
   (i -> w -> VU.Vector (i, w)) ->
   -- | Distance assignment for unreachable vertices.
   w ->
-  -- | Weighted source vertices
+  -- | Weighted source vertices.
   VU.Vector (i, w) ->
-  -- | (Distance vector in one-dimensional index, Predecessor array (@-1@ represents none))
+  -- | A tuple of (Distance vector in one-dimensional index, Predecessor array (@-1@ represents none)).
   (VU.Vector w, VU.Vector Int)
-trackingBfs bnd0 gr undefW sources
-  | VU.null sources = (VU.replicate nVerts undefW, VU.replicate nVerts (-1))
+trackingBfs = bfsImpl True
+
+{-# INLINEABLE bfsImpl #-}
+bfsImpl ::
+  forall i w.
+  (HasCallStack, Ix0 i, VU.Unbox i, VU.Unbox w, Num w, Eq w) =>
+  Bool ->
+  Bounds0 i ->
+  (i -> w -> VU.Vector (i, w)) ->
+  w ->
+  VU.Vector (i, w) ->
+  (VU.Vector w, VU.Vector Int)
+bfsImpl !trackPrev !bnd0 !gr !undefW !sources
+  | VU.null sources && trackPrev = (VU.replicate nVerts undefW, VU.replicate nVerts (-1))
+  | VU.null sources = (VU.replicate nVerts undefW, VU.replicate 0 (-1))
   | otherwise = runST $ do
       dist <- VUM.replicate @_ @w nVerts undefW
-      prev <- VUM.replicate @_ @Int nVerts (-1)
+      prev <-
+        if trackPrev
+          then VUM.replicate @_ @Int nVerts (-1)
+          else VUM.replicate @_ @Int 0 (-1)
+
       -- NOTE: We only need capacity of `n`, as first appearance of vertex is always with the
       -- minimum distance.
       queue <- Q.new nVerts
@@ -417,7 +444,6 @@ trackingBfs bnd0 gr undefW sources
         -- Note that duplicate inputs are pruned here:
         when (lastD == undefW) $ do
           VGM.write dist i w0
-          -- VGM.write prev i (-1)
           Q.pushBack queue src
 
       -- run BFS
@@ -432,7 +458,8 @@ trackingBfs bnd0 gr undefW sources
               !lastD <- VGM.read dist i2
               when (lastD == undefW) $ do
                 VGM.write dist i2 $! d1 + dw
-                VGM.write prev i2 i1
+                when trackPrev $ do
+                  VGM.write prev i2 i1
                 Q.pushBack queue v2
             loop
 
@@ -443,28 +470,68 @@ trackingBfs bnd0 gr undefW sources
 -- | \(O(n + m)\) Opinionated 01-BFS that returns a distance array.
 --
 -- @since 1.2.4.0
-{-# INLINEABLE bfs01 #-}
+{-# INLINE bfs01 #-}
 bfs01 ::
   forall i.
   (HasCallStack, Ix0 i, VU.Unbox i) =>
   -- | Zero-based index boundary.
   Bounds0 i ->
-  -- | Graph function that takes the vertex, current distance and returns adjacent vertices with
-  -- edge weights, where \(w > 0\)
-  (i -> Int -> VU.Vector (i, Int)) ->
-  -- | Capacity of deque, often the number of edges.
+  -- | Graph function that takes the vertexand returns adjacent vertices with edge weights, where
+  -- \(w > 0\).
+  (i -> VU.Vector (i, Int)) ->
+  -- | Capacity of deque, often the number of edges \(m\).
   Int ->
-  -- | Distance assignment for unreachable vertices.
+  -- | Weighted source vertices.
   VU.Vector (i, Int) ->
-  -- | Distance array in one-dimensional index. Unreachable vertices are given distance of `-1`.
+  -- | Distance array in one-dimensional index. Unreachable vertices are assigned distance of @-1@.
   VU.Vector Int
-bfs01 !bnd0 !gr !capactiy !sources
-  | VU.null sources = VU.replicate nVerts (-1)
-  | otherwise = VU.create $ do
-      dist <- VUM.replicate nVerts undef
+bfs01 !bnd0 !gr !capacity !sources =
+  let (!dist, !_) = bfs01Impl False bnd0 gr capacity sources
+   in dist
+
+-- | \(O(n + m)\) Opinionated 01-BFS that returns a distance array and a predecessor array.
+--
+-- @since 1.2.4.0
+{-# INLINE trackingBfs01 #-}
+trackingBfs01 ::
+  forall i.
+  (HasCallStack, Ix0 i, VU.Unbox i) =>
+  -- | Zero-based index boundary.
+  Bounds0 i ->
+  -- | Graph function that takes the vertex and returns adjacent vertices with edge weights, where
+  -- \(w > 0\).
+  (i -> VU.Vector (i, Int)) ->
+  -- | Capacity of deque, often the number of edges \(m\).
+  Int ->
+  -- | Weighted source vertices.
+  VU.Vector (i, Int) ->
+  -- | A tuple of (distance array in one-dimensional index, predecessor array). Unreachable vertices
+  -- are assigned distance of @-1@.
+  (VU.Vector Int, VU.Vector Int)
+trackingBfs01 = bfs01Impl True
+
+{-# INLINEABLE bfs01Impl #-}
+bfs01Impl ::
+  forall i.
+  (HasCallStack, Ix0 i, VU.Unbox i) =>
+  Bool ->
+  Bounds0 i ->
+  (i -> VU.Vector (i, Int)) ->
+  Int ->
+  VU.Vector (i, Int) ->
+  (VU.Vector Int, VU.Vector Int)
+bfs01Impl !trackPrev !bnd0 !gr !capacity !sources
+  | VU.null sources && trackPrev = (VU.replicate nVerts (-1), VU.replicate nVerts (-1))
+  | VU.null sources = (VU.replicate nVerts (-1), VU.replicate 0 (-1))
+  | otherwise = runST $ do
+      dist <- VUM.replicate @_ @Int nVerts undef
+      prev <-
+        if trackPrev
+          then VUM.replicate @_ @Int nVerts (-1)
+          else VUM.replicate @_ @Int 0 (-1)
       -- NOTE: Just like Dijkstra, we need capacity of `m`, as the first appearance of a vertex is not
       -- always with minimum distance.
-      deque <- Q.newDeque @_ @(i, Int) (capactiy + 1)
+      deque <- Q.newDeque @_ @(i, Int) capacity
 
       -- set source values
       VU.forM_ sources $ \(!src, !w0) -> do
@@ -480,13 +547,15 @@ bfs01 !bnd0 !gr !capactiy !sources
             let !i0 = index0 bnd0 vExt0
             !wReserved0 <- VGM.read dist i0
             when (w0 == wReserved0) $ do
-              VU.forM_ (gr vExt0 w0) $ \(!vExt, !dw) -> do
+              VU.forM_ (gr vExt0) $ \(!vExt, !dw) -> do
                 let !w = w0 + dw
                 let !i = index0 bnd0 vExt
                 !wReserved <- VGM.read dist i
                 -- NOTE: Do pruning just like Dijkstra:
                 when (wReserved == undef || w < wReserved) $ do
                   VGM.write dist i w
+                  when trackPrev $ do
+                    VGM.write prev i i0
                   if dw == 0
                     then Q.pushFront deque (vExt, w)
                     else Q.pushBack deque (vExt, w)
@@ -498,85 +567,76 @@ bfs01 !bnd0 !gr !capactiy !sources
             step vExt0 w0
             popLoop
 
-      pure dist
+      (,) <$> VU.unsafeFreeze dist <*> VU.unsafeFreeze prev
   where
     !undef = -1 :: Int
     !nVerts = rangeSize0 bnd0
 
--- | \(O((n + m) \log n)\) Dijkstra's algorithm.
-{-# INLINEABLE dijkstra #-}
+-- | \(O((n + m) \log n)\) Dijkstra's algorithm that returns a distance array.
+{-# INLINE dijkstra #-}
 dijkstra ::
   forall i w.
   (HasCallStack, Ix0 i, Ord i, VU.Unbox i, Num w, Ord w, VU.Unbox w) =>
-  -- | Bounds
+  -- | Zero-based vertex boundary.
   Bounds0 i ->
-  -- | Graph function that takes a vertex and their distance and returns adjacent vertices with
-  -- edge weights, where \(w \ge 0\)
-  (i -> w -> VU.Vector (i, w)) ->
+  -- | Graph function that takes a vertex and returns adjacent vertices with edge weights, where
+  -- \(w \ge 0\).
+  (i -> VU.Vector (i, w)) ->
   -- | Capacity of the heap, often the number of edges \(m\).
   Int ->
   -- | Distance assignment for unreachable vertices.
   w ->
   -- | Source vertices with initial weights.
   VU.Vector (i, w) ->
-  -- | Distance array in one-dimensional index. Unreachable vertices are given distance of @undefW@.
+  -- | Distance array in one-dimensional index.
   VU.Vector w
-dijkstra !bnd0 !gr !capacity !undefW !sources
-  | VU.null sources = VU.replicate nVerts undefW
-  | otherwise = VU.create $ do
-      !dist <- VUM.replicate @_ @w nVerts undefW
-      -- REMARK: (w, i) for sort by width
-      !heap <- MH.new @_ @(w, i) capacity
-      -- !prev <- VUM.replicate @_ @Int nVerts (-1)
+dijkstra !bnd0 !gr !capacity !undefW !sources =
+  let (!dist, !_) = dijkstraImpl False bnd0 gr capacity undefW sources
+   in dist
 
-      VU.forM_ sources $ \(!v, !w) -> do
-        VGM.write dist (index0 bnd0 v) w
-        MH.push heap (w, v)
-
-      fix $ \loop -> do
-        MH.pop heap >>= \case
-          Nothing -> pure ()
-          Just (!w1, !v1) -> do
-            !wReserved <- VGM.read dist $! index0 bnd0 v1
-            when (wReserved == w1) $ do
-              VU.forM_ (gr v1 w1) $ \(!v2, !dw2) -> do
-                let !i2 = index0 bnd0 v2
-                !w2 <- VGM.read dist i2
-                let !w2' = w1 + dw2
-                when (w2 == undefW || w2' < w2) $ do
-                  VGM.write dist i2 w2'
-                  -- VGM.write prev i2 i1
-                  MH.push heap (w2', v2)
-            loop
-
-      pure dist
-  where
-    !nVerts = rangeSize0 bnd0
-
--- | \(O((n + m) \log n)\) Dijkstra's algorithm.
-{-# INLINEABLE trackingDijkstra #-}
+-- | \(O((n + m) \log n)\) Dijkstra's algorithm that returns a distance array and a predecessor
+-- array.
+{-# INLINE trackingDijkstra #-}
 trackingDijkstra ::
   forall i w.
   (HasCallStack, Ix0 i, Ord i, VU.Unbox i, Num w, Ord w, VU.Unbox w) =>
-  -- | Bounds
+  -- | Zero-based vertex boundary.
   Bounds0 i ->
-  -- | Graph function
-  (i -> w -> VU.Vector (i, w)) ->
+  -- | Graph function that takes a vertex and returns adjacent vertices with edge weights, where
+  -- \(w \ge 0\).
+  (i -> VU.Vector (i, w)) ->
   -- | Capacity of the heap, often the number of edges \(m\).
   Int ->
   -- | Distance assignment for unreachable vertices.
   w ->
   -- | Source vertices with weights.
   VU.Vector (i, w) ->
-  -- | Distance array in one-dimensional index. Unreachable vertices are given distance of @undefW@.
+  -- | A tuple of (distance array in one-dimensional index, predecessor array).
   (VU.Vector w, VU.Vector Int)
-trackingDijkstra !bnd0 !gr !capacity !undefW !sources
-  | VU.null sources = (VU.replicate nVerts undefW, VU.replicate nVerts (-1))
+trackingDijkstra = dijkstraImpl True
+
+{-# INLINEABLE dijkstraImpl #-}
+dijkstraImpl ::
+  forall i w.
+  (HasCallStack, Ix0 i, Ord i, VU.Unbox i, Num w, Ord w, VU.Unbox w) =>
+  Bool ->
+  Bounds0 i ->
+  (i -> VU.Vector (i, w)) ->
+  Int ->
+  w ->
+  VU.Vector (i, w) ->
+  (VU.Vector w, VU.Vector Int)
+dijkstraImpl !trackPrev !bnd0 !gr !capacity !undefW !sources
+  | VU.null sources && trackPrev = (VU.replicate nVerts undefW, VU.replicate nVerts (-1))
+  | VU.null sources = (VU.replicate nVerts undefW, VU.replicate 0 (-1))
   | otherwise = runST $ do
       !dist <- VUM.replicate @_ @w nVerts undefW
       -- REMARK: (w, i) for sort by width
       !heap <- MH.new @_ @(w, i) capacity
-      !prev <- VUM.replicate @_ @Int nVerts (-1)
+      !prev <-
+        if trackPrev
+          then VUM.replicate @_ @Int nVerts (-1)
+          else VUM.replicate @_ @Int 0 (-1)
 
       VU.forM_ sources $ \(!v, !w) -> do
         let !i = index0 bnd0 v
@@ -590,13 +650,14 @@ trackingDijkstra !bnd0 !gr !capacity !undefW !sources
             let !i1 = index0 bnd0 v1
             !wReserved <- VGM.read dist i1
             when (wReserved == w1) $ do
-              VU.forM_ (gr v1 w1) $ \(!v2, !dw2) -> do
+              VU.forM_ (gr v1) $ \(!v2, !dw2) -> do
                 let !i2 = index0 bnd0 v2
                 !w2 <- VGM.read dist i2
                 let !w2' = w1 + dw2
                 when (w2 == undefW || w2' < w2) $ do
                   VGM.write dist i2 w2'
-                  VGM.write prev i2 i1
+                  when trackPrev $ do
+                    VGM.write prev i2 i1
                   MH.push heap (w2', v2)
             loop
 
@@ -607,78 +668,60 @@ trackingDijkstra !bnd0 !gr !capacity !undefW !sources
 -- -- | Option for `bellmanFord`.
 -- data BellmanFordPolicy = QuitOnNegaitveLoop | ContinueOnNegaitveLoop
 
--- | \(O(nm)\) Bellman–ford algorithm that instantly returns on negaive loop detection. Vertices
+-- | \(O(nm)\) Bellman–ford algorithm that returns `Nothing` on negative loop detection. Vertices
 -- are one-dimensional.
-{-# INLINEABLE bellmanFord #-}
+{-# INLINE bellmanFord #-}
 bellmanFord ::
   forall w.
   (HasCallStack, Num w, Ord w, VU.Unbox w) =>
   -- | The number of vertices.
   Int ->
-  -- | Graph function. The weight can be negative.
-  (Int -> w -> VU.Vector (Int, w)) ->
+  -- | Graph function. Edges weights can be negative.
+  (Int -> VU.Vector (Int, w)) ->
   -- | Distance assignment for unreachable vertices.
   w ->
-  -- | Source vertex
+  -- | Source vertex.
   Int ->
   -- | Distance array in one-dimensional index.
   Maybe (VU.Vector w)
-bellmanFord {- !policy -} !nVerts !gr !undefW source = runST $ do
-  !dist <- VUM.replicate @_ @w nVerts undefW
-  -- !prev <- VUM.replicate @_ @Int nVerts (-1)
-  VGM.write dist source (0 :: w)
-  updated <- VUM.replicate 1 False
+bellmanFord {- !policy -} !nVerts !gr !undefW source = do
+  (!dist, !_) <- bellmanFordImpl False nVerts gr undefW source
+  pure dist
 
-  -- look around adjaenct vertices
-  let update v1 = do
-        d1 <- VGM.read dist v1
-        when (d1 /= undefW) $ do
-          VU.forM_ (gr v1 d1) $ \(!v2, !dw) -> do
-            d2 <- VGM.read dist v2
-            let !d2' = d1 + dw
-            when (d2 == undefW || d2' < d2) $ do
-              VGM.write dist v2 d2'
-              -- VGM.write prev v2 v1
-              -- NOTE: we should actually instantly stop if nLoop == nVerts + 1, but
-              -- here we're preferring simple code. Be warned that we're not correctly handling
-              -- the distance array on negative loop.
-              VGM.write updated 0 True
-
-  let runLoop nLoop
-        | nLoop >= nVerts + 1 = do
-            -- It means we detected update in (n + 1)-th loop, so we found negative loop
-            pure Nothing
-        -- \| nLoop == nVerts = do
-        -- The (n + 1)-th loop should just make sure we don't need update
-        | otherwise = do
-            for_ [0 .. nVerts - 1] update
-            b <- VGM.exchange updated 0 False
-            if b
-              then runLoop (nLoop + 1)
-              else Just <$> VU.unsafeFreeze dist
-
-  runLoop 0
-
--- | \(O(nm)\) Bellman–ford algorithm that instantly returns on negaive loop detection. Vertices
+-- | \(O(nm)\) Bellman–ford algorithm that returns `Nothing` on negative loop detection. Vertices
 -- are one-dimensional.
-{-# INLINEABLE trackingBellmanFord #-}
+{-# INLINE trackingBellmanFord #-}
 trackingBellmanFord ::
   forall w.
   (HasCallStack, Num w, Ord w, VU.Unbox w) =>
   -- | The number of vertices.
   Int ->
   -- | Graph function. The weight can be negative.
-  (Int -> w -> VU.Vector (Int, w)) ->
+  (Int -> VU.Vector (Int, w)) ->
   -- | Distance assignment for unreachable vertices.
   w ->
-  -- | Source vertex
+  -- | Source vertex.
   Int ->
-  -- | Distance array in one-dimensional index. Unreachable vertices are given distance of @undefW@.
-  -- TODO: wriet about predecessor aray
+  -- | A tuple of (distance array, predecessor array).
   Maybe (VU.Vector w, VU.Vector Int)
-trackingBellmanFord {- !policy -} !nVerts !gr !undefW source = runST $ do
+trackingBellmanFord {- !policy -} = bellmanFordImpl True
+
+{-# INLINEABLE bellmanFordImpl #-}
+bellmanFordImpl ::
+  forall w.
+  (HasCallStack, Num w, Ord w, VU.Unbox w) =>
+  Bool ->
+  Int ->
+  (Int -> VU.Vector (Int, w)) ->
+  w ->
+  Int ->
+  Maybe (VU.Vector w, VU.Vector Int)
+bellmanFordImpl {- !policy -} !trackPrev !nVerts !gr !undefW source = runST $ do
   !dist <- VUM.replicate @_ @w nVerts undefW
-  !prev <- VUM.replicate @_ @Int nVerts (-1)
+  !prev <-
+    if trackPrev
+      then VUM.replicate @_ @Int nVerts (-1)
+      else VUM.replicate @_ @Int 0 (-1)
   VGM.write dist source (0 :: w)
   updated <- VUM.replicate 1 False
 
@@ -686,12 +729,13 @@ trackingBellmanFord {- !policy -} !nVerts !gr !undefW source = runST $ do
   let update v1 = do
         d1 <- VGM.read dist v1
         when (d1 /= undefW) $ do
-          VU.forM_ (gr v1 d1) $ \(!v2, !dw) -> do
+          VU.forM_ (gr v1) $ \(!v2, !dw) -> do
             d2 <- VGM.read dist v2
             let !d2' = d1 + dw
             when (d2 == undefW || d2' < d2) $ do
               VGM.write dist v2 d2'
-              VGM.write prev v2 v1
+              when trackPrev $ do
+                VGM.write prev v2 v1
               -- NOTE: we should actually instantly stop if nLoop == nVerts + 1, but
               -- here we're preferring simple code. Be warned that we're not correctly handling
               -- the distance array on negative loop.
@@ -699,10 +743,8 @@ trackingBellmanFord {- !policy -} !nVerts !gr !undefW source = runST $ do
 
   let runLoop nLoop
         | nLoop >= nVerts + 1 = do
-            -- It means we detected update in (n + 1)-th loop, so we found negative loop
+            -- We detected update in the (n + 1)-th loop, so we found negative loop
             pure Nothing
-        -- \| nLoop == nVerts = do
-        -- The (n + 1)-th loop should just make sure we don't need update
         | otherwise = do
             for_ [0 .. nVerts - 1] update
             b <- VGM.exchange updated 0 False
@@ -712,17 +754,267 @@ trackingBellmanFord {- !policy -} !nVerts !gr !undefW source = runST $ do
 
   runLoop 0
 
--- | \(O(n)\) Given a predecessor array, retrieves a path from the root to a vertex.
+-- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\), which should be
+-- accessed as @m VU.! (`index0` (n, n) (from, to))@. Negative loop can detected by testing if
+-- there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@.
+{-# INLINE floydWarshall #-}
+floydWarshall ::
+  forall w.
+  (HasCallStack, Num w, Ord w, VU.Unbox w) =>
+  -- | The number of vertices.
+  Int ->
+  -- | Weighted edges.
+  VU.Vector (Int, Int, w) ->
+  -- | Distance assignment \(d_0 \gt 0\) for unreachable vertices. It should be @maxBound `div` 2@
+  -- for `Int`.
+  w ->
+  -- | Distance array in one-dimensional index.
+  VU.Vector w
+floydWarshall !nVerts !edges !undefW = VU.create $ do
+  (!dist, !_) <- newFloydWarshallST False nVerts edges undefW
+  pure dist
+
+-- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\) and predecessor
+-- matrix \(p\). The distance matrix should be accessed as @m VU.! (`index0` (n, n) (from, to))@,
+-- and the predecessor matrix should be accessed as @m VU.! (`index0` (n, n) (root, v))@. There's a
+-- negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@.
+{-# INLINE trackingFloydWarshall #-}
+trackingFloydWarshall ::
+  forall w.
+  (HasCallStack, Num w, Ord w, VU.Unbox w) =>
+  -- | The number of vertices.
+  Int ->
+  -- | Weighted edges.
+  VU.Vector (Int, Int, w) ->
+  -- | Distance assignment \(d_0 \gt 0\) for unreachable vertices. It should be @maxBound `div` 2@
+  -- for `Int`.
+  w ->
+  -- | Distance array in one-dimensional index.
+  (VU.Vector w, VU.Vector Int)
+trackingFloydWarshall !nVerts !edges !undefW = runST $ do
+  (!dist, !prev) <- newFloydWarshallST True nVerts edges undefW
+  (,) <$> VU.unsafeFreeze dist <*> VU.unsafeFreeze prev
+
+-- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\), which should be
+-- accessed as @m VU.! (n * from + to)@. There's a negative cycle if any @m VU.! (n * i + i)@ is
+-- negative.
+--
+-- - TODO: write about negative loops
+{-# INLINE newFloydWarshall #-}
+newFloydWarshall ::
+  forall m w.
+  (HasCallStack, PrimMonad m, Num w, Ord w, VU.Unbox w) =>
+  -- | The number of vertices.
+  Int ->
+  -- | Weighted edges.
+  VU.Vector (Int, Int, w) ->
+  -- | Distance assignment for unreachable vertices.
+  w ->
+  -- | Distance array in one-dimensional index.
+  m (VUM.MVector (PrimState m) w)
+newFloydWarshall !nVerts !edges !undefW = stToPrim $ do
+  (!dist, !_) <- newFloydWarshallST False nVerts edges undefW
+  pure dist
+
+{-# INLINEABLE newFloydWarshallST #-}
+newFloydWarshallST ::
+  forall s w.
+  (HasCallStack, Num w, Ord w, VU.Unbox w) =>
+  Bool ->
+  Int ->
+  VU.Vector (Int, Int, w) ->
+  w ->
+  ST s (VUM.MVector s w, VUM.MVector s Int)
+newFloydWarshallST !trackPrev !nVerts !edges !undefW = do
+  !dist <- VUM.replicate @_ @w (nVerts * nVerts) undefW
+  !prev <-
+    if trackPrev
+      then VUM.replicate @_ @Int (nVerts * nVerts) (-1)
+      else VUM.replicate @_ @Int 0 (-1)
+
+  -- diagonals (self to self)
+  for_ [0 .. nVerts - 1] $ \v -> do
+    VGM.write dist (idx v v) 0
+
+  -- initial walks
+  VU.forM_ edges $ \(!v1, !v2, !dw) -> do
+    let !i = idx v1 v2
+    wOld <- VGM.read dist i
+    -- REMARK: We're handling multiple edges here:
+    when (wOld == undefW || dw < wOld) $ do
+      VGM.write dist i dw
+      when trackPrev $ do
+        VGM.write prev i v1
+
+  -- N times update
+  for_ [0 .. nVerts - 1] $ \via -> do
+    -- update
+    for_ [0 .. nVerts - 1] $ \from -> do
+      for_ [0 .. nVerts - 1] $ \to -> do
+        let !iFromTo = idx from to
+        !w1 <- VGM.read dist iFromTo
+        !w2 <- do
+          !d1 <- VGM.read dist $! idx from via
+          !d2 <- VGM.read dist $! idx via to
+          pure $! if d1 == undefW || d2 == undefW then undefW else d1 + d2
+        when (w2 /= undefW && (w1 == undefW || w2 < w1)) $ do
+          VGM.write dist iFromTo w2
+          when trackPrev $ do
+            VGM.write prev iFromTo =<< VGM.read prev (idx via to)
+
+  pure (dist, prev)
+  where
+    idx !from !to = nVerts * from + to
+
+-- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight decreasement or edge
+-- addition.
+--
+-- ==== Constraints
+-- - Either the edge is a new edge or the edge weight is smaller than or equal to the existing one.
+{-# INLINE updateEdgeFloydWarshall #-}
+updateEdgeFloydWarshall ::
+  forall m w.
+  (HasCallStack, PrimMonad m, Num w, Ord w, VU.Unbox w) =>
+  -- | Distance matrix.
+  VUM.MVector (PrimState m) w ->
+  -- | The number of vertices.
+  Int ->
+  -- | Distance assignment \(d_0 \gt 0\) for unreachable vertices. It should be @maxBound `div` 2@
+  -- for `Int`.
+  w ->
+  -- | Edge information: @from@ vertex.
+  Int ->
+  -- | Edge information: @to@ vertex.
+  Int ->
+  -- | Edge information: @weight@ vertex.
+  w ->
+  -- | Distance array in one-dimensional index.
+  m ()
+updateEdgeFloydWarshall mat nVerts undefW a b w = do
+  prev <- VUM.replicate @_ @Int 0 (-1 :: Int)
+  stToPrim $ updateEdgeFloydWarshallST False mat prev nVerts undefW a b w
+
+-- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight decreasement or edge
+-- addition.
+--
+-- ==== Constraints
+-- - Either the edge is a new edge or the edge weight is smaller than or equal to the existing one.
+{-# INLINE updateEdgeTrackingFloydWarshall #-}
+updateEdgeTrackingFloydWarshall ::
+  forall m w.
+  (HasCallStack, PrimMonad m, Num w, Ord w, VU.Unbox w) =>
+  -- | Distance matrix.
+  VUM.MVector (PrimState m) w ->
+  -- | Predecessor matrix.
+  VUM.MVector (PrimState m) Int ->
+  -- | The number of vertices.
+  Int ->
+  -- | Distance assignment \(d_0 \gt 0\) for unreachable vertices. It should be @maxBound `div` 2@
+  -- for `Int`.
+  w ->
+  -- | Edge information: @from@ vertex.
+  Int ->
+  -- | Edge information: @to@ vertex.
+  Int ->
+  -- | Edge information: @weight@ vertex.
+  w ->
+  -- | Distance array in one-dimensional index.
+  m ()
+updateEdgeTrackingFloydWarshall mat prev nVerts undefW a b w = do
+  stToPrim $ updateEdgeFloydWarshallST True mat prev nVerts undefW a b w
+
+-- O(2) update floyd warshall on edge weight decreasement or edge addition
+-- https://www.slideshare.net/chokudai/arc035 - C
+{-# INLINEABLE updateEdgeFloydWarshallST #-}
+updateEdgeFloydWarshallST ::
+  forall s w.
+  (HasCallStack, Num w, Ord w, VU.Unbox w) =>
+  Bool ->
+  VUM.MVector s w ->
+  VUM.MVector s Int ->
+  Int ->
+  w ->
+  Int ->
+  Int ->
+  w ->
+  ST s ()
+updateEdgeFloydWarshallST trackPrev mat prev nVerts undefW a b dw = do
+  wOld <- VGM.read mat (idx a b)
+  case (wOld /= undefW, compare wOld dw) of
+    (True, GT) -> error "AtCoder.Extra.Graph.updateEdgeFloydWarshallST: given new edge with bigger weight than existing one"
+    -- no update
+    (True, EQ) -> pure ()
+    _ -> do
+      for_ [0 .. nVerts - 1] $ \from -> do
+        for_ [0 .. nVerts - 1] $ \to -> do
+          wOld <- VGM.read mat $ idx from to
+
+          w' <- do
+            ia <- VGM.read mat $ idx from a
+            bj <- VGM.read mat $ idx b to
+            let w1
+                  | ia == undefW || bj == undefW = undefW
+                  | otherwise = ia + dw + bj
+
+            ib <- VGM.read mat $ idx from b
+            aj <- VGM.read mat $ idx a to
+            let w2
+                  | ib == undefW || aj == undefW = undefW
+                  | otherwise = ib + dw + aj
+
+            pure $!
+              if
+                | w1 == undefW -> w2
+                | w2 == undefW -> w1
+                | otherwise -> min w1 w2
+
+          when (wOld /= undefW && w' < wOld) $ do
+            VGM.write mat (idx from to) w'
+            when trackPrev $ do
+              VGM.write prev (idx from to) b
+              VGM.write prev (idx from b) a
+  where
+    idx !from !to = nVerts * from + to
+
+-- | \(O(n)\) Given a predecessor array, retrieves a path from the root to a vertex. It always
+-- stops at @end@ vertex even if it's a loop.
 --
 -- @since 1.2.4.0
+{-# INLINE constructPathFromRoot #-}
 constructPathFromRoot :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
 constructPathFromRoot parents = VU.reverse . constructPathToRoot parents
 
--- | \(O(n)\) Given a predecessor array, retrieves a path from a vertex to the root.
+-- | \(O(n)\) Given a predecessor array, retrieves a path from a vertex to the root. It always
+-- stops at @root@ vertex even if it's a loop.
 --
 -- @since 1.2.4.0
+{-# INLINEABLE constructPathToRoot #-}
 constructPathToRoot :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
-constructPathToRoot parents = VU.unfoldr f
+constructPathToRoot parents end = VU.unfoldr f end
   where
     f (-1) = Nothing
-    f v = Just (v, parents VG.! v)
+    f v
+      | v == end = Just (v, -1)
+      | otherwise = Just (v, parents VG.! v)
+
+-- | \(O(n)\) Given a NxN predecessor matrix, retrieves a path from the root to an end vertex. It
+-- always stops at @end@ vertex even if it's a loop.
+--
+-- @since 1.2.4.0
+{-# INLINE constructPathFromRootNN #-}
+constructPathFromRootNN :: (HasCallStack) => VU.Vector Int -> Int -> Int -> VU.Vector Int
+constructPathFromRootNN parents from = VU.reverse . constructPathToRootNN parents from
+
+-- | \(O(n)\) Given a NxN predecessor matrix, retrieves a path from a vertex to the root. It always
+-- stops at @root@ vertex even if it's a loop.
+--
+-- @since 1.2.4.0
+{-# INLINEABLE constructPathToRootNN #-}
+constructPathToRootNN :: (HasCallStack) => VU.Vector Int -> Int -> Int -> VU.Vector Int
+constructPathToRootNN parents start end =
+  let parents' = VU.take n $ VU.drop (n * start) parents
+   in constructPathToRoot parents' end
+  where
+    -- Assuming `n < 2^32`, it should always be correct:
+    -- https://zenn.dev/mod_poppo/articles/atcoder-beginner-contest-284-d#%E8%A7%A3%E6%B3%953%EF%BC%9Asqrt%E3%81%A8round%E3%82%92%E4%BD%BF%E3%81%86
+    n :: Int = round . sqrt $ (fromIntegral (VU.length parents) :: Double)
