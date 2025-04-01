@@ -517,6 +517,11 @@ executable yosupo-zalgorithm
 
 -- online judges
 
+executable abc282_d
+  import:        app-online
+  main-is:       abc282_d.hs
+  build-depends: verify
+
 executable alpc-d
   import:        app-online
   main-is:       alpc-d.hs

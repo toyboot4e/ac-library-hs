@@ -9,6 +9,7 @@ module AtCoder.Extra.Graph
   ( -- * Re-export of CSR
 
     -- | The `Csr.Csr` data type and all the functions such as `build` or `adj` are re-exported.
+    -- See the @Csr@ module for details.
     module Csr,
 
     -- * CSR helpers
@@ -19,6 +20,8 @@ module AtCoder.Extra.Graph
 
     -- * Generic graph functions
     topSort,
+    connectedComponents,
+    bipartiteVertexColors,
     blockCut,
     blockCutComponents,
 
@@ -72,15 +75,16 @@ module AtCoder.Extra.Graph
 
     -- ** Path reconstruction
 
-    -- | Functions for retrieve a path from a predecessor array where @-1@ represents none.
+    -- | Functions for retrieving a path from a predecessor array where @-1@ represents none.
     constructPathFromRoot,
     constructPathToRoot,
-    -- | Functions for retrieve a path from a predecessor array where @-1@ represents none.
+    -- | Functions for retrieving a path from a predecessor array where @-1@ represents none.
     constructPathFromRootNN,
     constructPathToRootNN,
   )
 where
 
+import AtCoder.Dsu qualified as Dsu
 import AtCoder.Extra.IntSet qualified as IS
 import AtCoder.Extra.Ix0 (Bounds0, Ix0 (..))
 import AtCoder.Internal.Buffer qualified as B
@@ -212,7 +216,7 @@ rev Csr {..} = Csr.build nCsr revEdges
 -- graph.
 --
 -- ==== Constraints
--- - The graph must be a DAG.
+-- - The graph must be a DAG; no cycle can exist.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -252,6 +256,118 @@ topSort n gr = runST $ do
         loop
 
   B.unsafeFreeze buf
+
+-- | \(O(n)\) Returns connected components for a non-directed graph.
+--
+-- ==== Constraints
+-- - The graph must be non-directed.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1), (1, 2)]
+-- >>> let gr = Gr.build' 4 $ Gr.swapDupe' es
+-- >>> Gr.connectedComponents 4 (Gr.adj gr)
+-- [[0,1,2],[3]]
+--
+-- >>> Gr.connectedComponents 0 (const VU.empty)
+-- []
+{-# INLINEABLE connectedComponents #-}
+connectedComponents :: Int -> (Int -> VU.Vector Int) -> V.Vector (VU.Vector Int)
+connectedComponents n gr = runST $ do
+  buf <- B.new @_ @Int n
+  len <- B.new @_ @Int n
+  vis <- VUM.replicate @_ @Bit n (Bit False)
+
+  let dfs !acc u = do
+        Bit b <- VGM.exchange vis u $ Bit True
+        if b
+          then pure acc
+          else do
+            B.pushBack buf u
+            VU.foldM' dfs (acc + 1) (gr u)
+
+  for_ [0 .. n - 1] $ \u -> do
+    l :: Int <- dfs 0 u
+    when (l > 0) $ do
+      B.pushBack len l
+
+  vs0 <- B.unsafeFreeze buf
+  lens0 <- B.unsafeFreeze len
+
+  pure
+    . V.unfoldrExactN
+      (VU.length lens0)
+      ( \(!vs, !ls) ->
+          let (!l, !lsR) = fromJust $ VU.uncons ls
+              (!vsL, !vsR) = VU.splitAt l vs
+           in (vsL, (vsR, lsR))
+      )
+    $ (vs0, lens0)
+
+-- | \(O((n + m) \alpha)\) Returns a bipartite vertex coloring for a bipartite graph.
+-- Returns `Nothing` for a non-bipartite graph.
+--
+-- ==== Constraints
+-- - The graph must not be directed.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1), (1, 2)]
+-- >>> let gr = Gr.build' 4 es
+-- >>> Gr.bipartiteVertexColors 4 (Gr.adj gr)
+-- Just [0,1,0,0]
+--
+-- @since 1.2.4.0
+{-# INLINEABLE bipartiteVertexColors #-}
+bipartiteVertexColors :: Int -> (Int -> VU.Vector Int) -> Maybe (VU.Vector Bit)
+bipartiteVertexColors n gr = runST $ do
+  (!isBipartite, !color, !_) <- bipartiteVertexColorsImpl n gr
+  if isBipartite
+    then pure $ Just color
+    else pure Nothing
+
+{-# INLINEABLE bipartiteVertexColorsImpl #-}
+bipartiteVertexColorsImpl :: Int -> (Int -> VU.Vector Int) -> ST s (Bool, VU.Vector Bit, Dsu.Dsu s)
+bipartiteVertexColorsImpl n gr
+  | n == 0 = do
+      dsu <- Dsu.new 0
+      pure (True, VU.empty, dsu)
+  | otherwise = do
+      -- 0 <= v < n: red, n <= v: green
+      dsu <- Dsu.new (2 * n)
+      for_ [0 .. n - 1] $ \u -> do
+        VU.forM_ (gr u) $ \v -> do
+          -- try both (red, green) and (green, red) colorings:
+          Dsu.merge_ dsu (u + n) v
+          Dsu.merge_ dsu u (v + n)
+
+      color <- VUM.replicate (2 * n) $ Bit False
+
+      -- for each leader vertices, paint their colors:
+      for_ [0 .. n - 1] $ \v -> do
+        l <- Dsu.leader dsu v
+        when (l == v) $ do
+          VGM.write color (v + n) $ Bit True
+
+      -- paint other vertices:
+      for_ [0 .. n - 1] $ \v -> do
+        VGM.write color v =<< VGM.read color =<< Dsu.leader dsu v
+        VGM.write color (v + n) =<< VGM.read color =<< Dsu.leader dsu (v + n)
+
+      color' <- VU.unsafeFreeze $ VGM.take n color
+      let isCompatible v
+            | v >= n = pure True
+            | otherwise = do
+                c1 <- VGM.read color =<< Dsu.leader dsu v
+                c2 <- VGM.read color =<< Dsu.leader dsu (v + n)
+                if c1 == c2
+                  then pure False
+                  else isCompatible $ v + 1
+
+      b <- isCompatible 0
+      pure (b, color', dsu)
 
 -- | \(O(n + m)\) Returns a [block cut tree](https://en.wikipedia.org/wiki/Biconnected_component)
 -- where super vertices \((v \ge n)\) represent each biconnected component.
