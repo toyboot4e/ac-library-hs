@@ -17,11 +17,22 @@ module AtCoder.Extra.Tree
     fold,
     scan,
     foldReroot,
+
+    -- * Minimum spanning tree
+    mst,
+    mstBy,
   )
 where
 
+import AtCoder.Dsu qualified as Dsu
 import AtCoder.Extra.Graph qualified as Gr
+import Control.Monad (when)
+import Control.Monad.ST (runST)
+import Data.Bit (Bit (..))
 import Data.Functor.Identity (runIdentity)
+import Data.Maybe (isJust)
+import Data.Ord (comparing)
+import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -234,3 +245,37 @@ foldReroot n tree valAt toF act = VU.create $ do
     !root0 = 0 :: Int
     !f0 = mempty @f
     !treeDp = scan n tree valAt toF act root0 :: VU.Vector a
+
+-- | \(O(m \log m)\) Kruscal's algorithm. Returns edge indices for building a minimum spanning tree.
+--
+-- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u w)\) is required
+-- for each edge.
+{-# INLINE mst #-}
+mst :: (Num w, Ord w, VU.Unbox w) => Int -> VU.Vector (Int, Int, w) -> (w, VU.Vector Bit, Gr.Csr w)
+mst = mstBy (comparing id)
+
+-- | \(O(m \log m)\) Kruscal's algorithm. Returns edge indices for building a minimum spanning tree.
+--
+-- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u w)\) is required
+-- for each edge.
+{-# INLINEABLE mstBy #-}
+mstBy :: (Num w, Ord w, VU.Unbox w) => (w -> w -> Ordering) -> Int -> VU.Vector (Int, Int, w) -> (w, VU.Vector Bit, Gr.Csr w)
+mstBy !f nVerts edges = runST $ do
+  dsu <- Dsu.new nVerts
+  wSum <- VUM.replicate 1 0
+  use <-
+    VU.mapM
+      ( \(i :: Int) -> do
+          let !u = us VG.! i
+          let !v = vs VG.! i
+          b <- isJust <$> Dsu.mergeMaybe dsu u v
+          when b $ do
+            VGM.modify wSum (+ ws VG.! i) 0
+          pure $ Bit b
+      )
+      . VU.modify (VAI.sortBy (\(i :: Int) (j :: Int) -> f (ws VG.! i) (ws VG.! j)))
+      $ VU.generate (VU.length edges) id
+  let !gr = Gr.build nVerts $ Gr.swapDupe $ VU.ifilter (\i _ -> unBit (use VG.! i)) edges
+  (,use,gr) <$> VGM.read wSum 0
+  where
+    (!us, !vs, !ws) = VU.unzip3 edges

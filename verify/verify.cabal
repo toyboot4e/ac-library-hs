@@ -310,6 +310,11 @@ executable yosupo-matrix-rank
   main-is:       yosupo-matrix-rank.hs
   build-depends: verify
 
+executable yosupo-minimum-spanning-tree
+  import:        app-local
+  main-is:       yosupo-minimum-spanning-tree.hs
+  build-depends: verify
+
 executable yosupo-point-add-range-sum
   import:        app-local
   main-is:       yosupo-point-add-range-sum.hs
