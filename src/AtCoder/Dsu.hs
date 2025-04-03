@@ -24,6 +24,8 @@
 -- 0
 --
 -- >>> Dsu.merge_ dsu 1 2 -- 0=1=2 3
+-- >>> Dsu.mergeMaybe dsu 1 2
+-- Nothing
 --
 -- `leader` returns the internal representative vertex of the connected components:
 --
@@ -51,6 +53,7 @@ module AtCoder.Dsu
 
     -- * Merging
     merge,
+    mergeMaybe,
     merge_,
 
     -- * Leader
@@ -115,6 +118,21 @@ new = stToPrim . newST
 {-# INLINE merge #-}
 merge :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m Int
 merge dsu a b = stToPrim $ mergeST dsu a b
+
+-- | Adds an edge \((a, b)\). It returns the representative of the new connected component, or
+-- `Nothing` if the two vertices are in the same connected component.
+--
+-- ==== Constraints
+-- - \(0 \leq a < n\)
+-- - \(0 \leq b < n\)
+--
+-- ==== Complexity
+-- - \(O(\alpha(n))\) amortized
+--
+-- @since 1.2.4.0
+{-# INLINE mergeMaybe #-}
+mergeMaybe :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> Int -> m (Maybe Int)
+mergeMaybe dsu a b = stToPrim $ mergeMaybeST dsu a b
 
 -- | `merge` with the return value discarded.
 --
@@ -215,6 +233,25 @@ mergeST dsu@Dsu {..} a b = do
       sizeY <- VGM.exchange parentOrSizeDsu y x
       VGM.modify parentOrSizeDsu (+ sizeY) x
       pure x
+
+{-# INLINEABLE mergeMaybeST #-}
+mergeMaybeST :: (HasCallStack) => Dsu s -> Int -> Int -> ST s (Maybe Int)
+mergeMaybeST dsu@Dsu {..} a b = do
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.mergeMaybeST" a nDsu
+  let !_ = ACIA.checkVertex "AtCoder.Dsu.mergeMaybeST" b nDsu
+  x <- leaderST dsu a
+  y <- leaderST dsu b
+  if x == y
+    then do
+      pure Nothing
+    else do
+      px <- VGM.read parentOrSizeDsu x
+      py <- VGM.read parentOrSizeDsu y
+      when (-px < -py) $ do
+        VGM.swap parentOrSizeDsu x y
+      sizeY <- VGM.exchange parentOrSizeDsu y x
+      VGM.modify parentOrSizeDsu (+ sizeY) x
+      Just <$> leaderST dsu a
 
 {-# INLINEABLE sameST #-}
 sameST :: (HasCallStack) => Dsu s -> Int -> Int -> ST s Bool
