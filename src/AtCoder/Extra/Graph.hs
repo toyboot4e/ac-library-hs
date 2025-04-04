@@ -138,10 +138,14 @@ import GHC.Stack (HasCallStack)
 -- [1]
 --
 -- @since 1.1.0.0
-{-# INLINE swapDupe #-}
--- NOTE: concatMap does not fuse anyways, as the vector's code says
+{-# INLINEABLE swapDupe #-}
 swapDupe :: (VU.Unbox w) => VU.Vector (Int, Int, w) -> VU.Vector (Int, Int, w)
-swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
+swapDupe uvws = VU.create $ do
+  vec <- VUM.unsafeNew (2 * VU.length uvws)
+  VU.iforM_ uvws $ \i (!u, !v, !w) -> do
+    VGM.unsafeWrite vec (2 * i + 0) (u, v, w)
+    VGM.unsafeWrite vec (2 * i + 1) (v, u, w)
+  pure vec
 
 -- | \(O(n)\) Converts directed edges into non-directed edges; each edge \((u, v)\) is duplicated
 -- to be \((u, v)\) and \((v, u)\). This is a convenient function for making an input to `build'`.
@@ -167,10 +171,15 @@ swapDupe = VU.concatMap (\(!u, !v, !w) -> VU.fromListN 2 [(u, v, w), (v, u, w)])
 -- [1]
 --
 -- @since 1.1.0.0
-{-# INLINE swapDupe' #-}
+{-# INLINEABLE swapDupe' #-}
 -- NOTE: concatMap does not fuse anyways, as the vector's code says
 swapDupe' :: VU.Vector (Int, Int) -> VU.Vector (Int, Int)
-swapDupe' = VU.concatMap (\(!u, !v) -> VU.fromListN 2 [(u, v), (v, u)])
+swapDupe' uvs = VU.create $ do
+  vec <- VUM.unsafeNew (2 * VU.length uvs)
+  VU.iforM_ uvs $ \i (!u, !v) -> do
+    VGM.unsafeWrite vec (2 * i + 0) (u, v)
+    VGM.unsafeWrite vec (2 * i + 1) (v, u)
+  pure vec
 
 -- | \(O(n + m)\) Returns the strongly connected components of a `Csr`.
 --
