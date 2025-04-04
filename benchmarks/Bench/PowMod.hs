@@ -1,3 +1,4 @@
+{-# LANGUAGE DataKinds #-}
 module Bench.PowMod (benches) where
 
 import AtCoder.ModInt qualified as M
