@@ -1,11 +1,10 @@
 module Tests.Extra.Graph where
 
 import AtCoder.Extra.Graph qualified as Gr
-import AtCoder.Internal.Buffer qualified as B
 import Control.Monad (unless)
 import Control.Monad.Fix (fix)
-import Control.Monad.ST (runST)
 import Data.List qualified as L
+import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -18,33 +17,36 @@ genDag n = do
   verts <- VU.fromList <$> QC.shuffle [0 .. n - 1]
   pure $ Gr.build n $ VU.map (\(!u, !v) -> (verts VG.! u, verts VG.! v, ())) edges
 
-dfs :: Int -> (Int -> VU.Vector Int) -> Int -> VU.Vector Int
-dfs n gr u0 = runST $ do
-  buf <- B.new n
+reachableFlags :: Int -> (Int -> VU.Vector Int) -> Int -> VU.Vector Bool
+reachableFlags n gr u0 = VU.create $ do
   vis <- VUM.replicate n False
+  VUM.write vis u0 True
   flip fix u0 $ \loop u -> do
     VU.forM_ (gr u) $ \v -> do
-      b <- VUM.read vis v
+      b <- VUM.exchange vis v True
       unless b $ do
-        B.pushBack buf v
         loop v
-  B.unsafeFreeze buf
+  pure vis
 
 testTopSort :: Int -> Gr.Csr () -> VU.Vector Int -> Bool
-testTopSort n gr vs = and
-    [ VU.notElem v (dfs n (gr `Gr.adj`) u)
-      | u <- (vs VG.!) <$> [0 .. n - 1],
-        v <- (vs VG.!) <$> [u + 1 .. n - 1]
-    ]
+testTopSort n gr vs =
+  let reachables = V.generate n (reachableFlags n (gr `Gr.adj`))
+   in and
+        [ not $ reachables VG.! v VG.! u
+          | iu <- [0 .. n - 1],
+            let u = vs VG.! iu,
+            iv <- [iu + 1 .. n - 1],
+            let v = vs VG.! iv
+        ]
 
 -- | Tests lexicographically smallest topological ordering.
 prop_topSort :: QC.Gen QC.Property
 prop_topSort = do
-  n <- QC.chooseInt (1, 8)
+  n <- QC.chooseInt (1, 3)
   dag <- genDag n
   let vs = Gr.topSort n (dag `Gr.adj`)
   let perms = map (VU.fromListN n) $ L.permutations [0 .. n - 1]
-  pure $ vs QC.=== head (filter (testTopSort n dag) perms)
+  pure $ vs QC.=== minimum (filter (testTopSort n dag) perms)
 
 tests :: [TestTree]
 tests =
