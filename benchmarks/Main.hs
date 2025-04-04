@@ -7,6 +7,7 @@ import Bench.Matrix qualified
 import Bench.ModInt qualified
 import Bench.MulMod qualified
 import Bench.PowMod qualified
+import Bench.SwapDupe qualified
 import Criterion.Main
 
 -- TODO: try tasty-bench
@@ -20,5 +21,6 @@ main =
       Bench.ModInt.benches,
       Bench.AddMod.benches,
       Bench.PowMod.benches,
-      Bench.Matrix.benches
+      Bench.Matrix.benches,
+      Bench.SwapDupe.benches
     ]
