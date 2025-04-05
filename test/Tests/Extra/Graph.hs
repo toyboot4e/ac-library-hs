@@ -9,6 +9,7 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import Test.Tasty
+import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
 
 genDag :: Int -> QC.Gen (Gr.Csr ())
@@ -48,7 +49,49 @@ prop_topSort = do
   let perms = map (VU.fromListN n) $ L.permutations [0 .. n - 1]
   pure $ vs QC.=== minimum (filter (testTopSort n dag) perms)
 
+genComplexEdges :: Int -> QC.Gen (VU.Vector (Int, Int, Int))
+genComplexEdges n = do
+  m <- QC.chooseInt (1, 2 * n * n)
+  (VU.fromList <$>) . QC.vectorOf m $ do
+    u <- QC.chooseInt (0, n - 1)
+    v <- QC.chooseInt (0, n - 1)
+    w <- QC.arbitrary @Int
+    pure (u, v, w)
+
+prop_floydWarshall :: QC.Gen QC.Property
+prop_floydWarshall = do
+  -- n <- QC.chooseInt (1, 16)
+  let n = 4
+  es <- genComplexEdges n
+  let !undefW = maxBound `div` 2 :: Int
+  let (!distFw, !_prevFw) = Gr.trackingFloydWarshall n es undefW
+  let gr = Gr.build n es
+  let !bell = V.generate n $ Gr.trackingBellmanFord n (Gr.adjW gr) undefW . VU.singleton . (,0)
+  pure $
+    QC.counterexample (show (n, es)) $
+      QC.conjoin
+        [ case bell VG.! u of
+            -- TODO: assertion function?
+            Nothing -> any (\vtx -> distFw VG.! (n * vtx + vtx) < 0) [0 .. n - 1] QC.=== True
+            Just (!distB, !_prevB) ->
+              QC.conjoin
+                [ distFw VG.! (n * u + v) QC.=== distB VG.! v
+                -- TODO: Shortest paths cannot be uniqueified, so other test would be suitable
+                -- , Gr.constructPathFromRootNN prevFw u v QC.=== Gr.constructPathFromRoot prevB v
+                ]
+          | u <- [0 .. n - 1],
+            v <- [0 .. n - 1]
+        ]
+
+unit_loopPathConstruction :: TestTree
+unit_loopPathConstruction = testCase "loop path reconstruction" $ do
+  let parents = VU.fromList [3, 0, 1, 2]
+  let path = Gr.constructPathFromRoot parents 3
+  path @?= VU.fromList [0, 1, 2, 3]
+
 tests :: [TestTree]
 tests =
-  [ QC.testProperty "topSort" prop_topSort
+  [ QC.testProperty "topSort" prop_topSort,
+    -- not writing much tests, as we have verification problems
+    QC.testProperty "floydWarshall" prop_floydWarshall
   ]
