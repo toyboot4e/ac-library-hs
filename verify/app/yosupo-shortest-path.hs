@@ -9,7 +9,7 @@ main = do
   es <- VU.replicateM m ints3
 
   let !gr = Gr.build n es
-  let (!dists, !parents) = Gr.trackingDijkstra n (const . Gr.adjW gr) m (-1) $ VU.singleton (src, 0)
+  let (!dists, !parents) = Gr.trackingDijkstra n (Gr.adjW gr) m (-1) $ VU.singleton (src, 0)
 
   case dists VU.! sink of
     (-1) -> putStrLn "-1"

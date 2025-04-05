@@ -6,6 +6,10 @@ module AtCoder.Extra.Tree
     diameter,
     diameterPath,
 
+    -- * Minimum spanning tree
+    mst,
+    mstBy,
+
     -- * Tree folding
 
     -- | These function are built around the three type parameters: \(w\), \(f\) and \(a\).
@@ -17,10 +21,6 @@ module AtCoder.Extra.Tree
     fold,
     scan,
     foldReroot,
-
-    -- * Minimum spanning tree
-    mst,
-    mstBy,
   )
 where
 
@@ -40,26 +40,143 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
 -- | \(O(n + m)\) Returns the endpoints of the diameter of a tree and their distance: \(((u, v), w)\).
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import AtCoder.Extra.Tree qualified as Tree
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 1 :: Int), (1, 2, 10), (1, 3, 10)]
+-- >>> let gr = Gr.build 4 $ Gr.swapDupe es
+-- >>> Tree.diameter 4 (Gr.adjW gr) (-1)
+-- ((2,3),20)
+--
+-- @since 1.2.4.0
 {-# INLINEABLE diameter #-}
-diameter :: (HasCallStack, VU.Unbox w, Num w, Ord w) => Gr.Csr w -> w -> ((Int, Int), w)
-diameter gr !undefW =
-  let !bfs1 = Gr.bfs (Gr.nCsr gr) (const . Gr.adjW gr) undefW $ VU.singleton (0, 0)
+diameter ::
+  (HasCallStack, VU.Unbox w, Num w, Ord w) =>
+  -- | The number of vertices.
+  Int ->
+  -- | Graph given as a function.
+  (Int -> VU.Vector (Int, w)) ->
+  -- | Distances assigned to unreachable vertices.
+  w ->
+  -- | Tuple of (endpoints of the longest path in a tree, distance of it).
+  ((Int, Int), w)
+diameter n gr !undefW =
+  let !bfs1 = Gr.bfs n gr undefW $ VU.singleton (0, 0)
       !from = VU.maxIndex bfs1
-      !bfs2 = Gr.bfs (Gr.nCsr gr) (const . Gr.adjW gr) undefW $ VU.singleton (from, 0)
+      !bfs2 = Gr.bfs n gr undefW $ VU.singleton (from, 0)
       !to = VU.maxIndex bfs2
       !w = VU.maximum bfs2
    in ((from, to), w)
 
--- | \(O(n + m)\) Returns the weight of the tree diameter and the path of it.
+-- | \(O(n + m)\) Returns the path longest path in a tree and the distance of it.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import AtCoder.Extra.Tree qualified as Tree
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 1 :: Int), (1, 2, 10), (1, 3, 10)]
+-- >>> let gr = Gr.build 4 $ Gr.swapDupe es
+-- >>> Tree.diameterPath 4 (Gr.adjW gr) (-1)
+-- ([2,1,3],20)
+--
+-- @since 1.2.4.0
 {-# INLINEABLE diameterPath #-}
-diameterPath :: (HasCallStack, Show w, VU.Unbox w, Num w, Ord w) => Gr.Csr w -> w -> (VU.Vector Int, w)
-diameterPath gr !undefW =
-  let !bfs1 = Gr.bfs (Gr.nCsr gr) (const . Gr.adjW gr) undefW $ VU.singleton (0, 0)
+diameterPath ::
+  (HasCallStack, Show w, VU.Unbox w, Num w, Ord w) =>
+  -- | The number of vertices.
+  Int ->
+  -- | Graph given as a function.
+  (Int -> VU.Vector (Int, w)) ->
+  -- | Distances assigned to unreachable vertices.
+  w ->
+  -- | Tuple of (the longest path, distance of it).
+  (VU.Vector Int, w)
+diameterPath n gr !undefW =
+  let !bfs1 = Gr.bfs n gr undefW $ VU.singleton (0, 0)
       !from = VU.maxIndex bfs1
-      (!bfs2, !parents) = Gr.trackingBfs (Gr.nCsr gr) (const . Gr.adjW gr) undefW $ VU.singleton (from, 0)
+      (!bfs2, !parents) = Gr.trackingBfs n gr undefW $ VU.singleton (from, 0)
       !to = VU.maxIndex bfs2
       !w = bfs2 VG.! to
    in (Gr.constructPathFromRoot parents to, w)
+
+-- | \(O(m \log m)\) Kruscal's algorithm. Returns edge indices for building a minimum spanning tree.
+--
+-- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u w)\) is required
+-- for each edge.
+--
+-- ==== __Example__
+-- Create a minimum spanning tree:
+--
+-- >>> import AtCoder.Extra.Tree qualified as Tree
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 1 :: Int), (1, 2, 10), (0, 2, 2)]
+-- >>> let (!wSum, !edgeUse, !gr) = Tree.mst 3 es
+-- >>> wSum
+-- 3
+--
+-- >>> edgeUse
+-- [1,0,1]
+--
+-- >>> Gr.adj gr 0
+-- [1,2]
+--
+-- @since 1.2.4.0
+{-# INLINE mst #-}
+mst :: (Num w, Ord w, VU.Unbox w) => Int -> VU.Vector (Int, Int, w) -> (w, VU.Vector Bit, Gr.Csr w)
+mst = mstBy (comparing id)
+
+-- | \(O(m \log m)\) Kruscal's algorithm. Returns edge indices for building a minimum/maximum
+-- spanning tree.
+--
+-- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u, w)\) is required
+-- for each edge.
+--
+-- ==== __Example__
+-- Create a maximum spanning tree:
+--
+-- >>> import AtCoder.Extra.Tree qualified as Tree
+-- >>> import Data.Ord (Down (..))
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 1 :: Int), (1, 2, 10), (0, 2, 2)]
+-- >>> let (!wSum, !edgeUse, !gr) = Tree.mstBy (comparing Down) 3 es
+-- >>> wSum
+-- 12
+--
+-- >>> edgeUse
+-- [0,1,1]
+--
+-- >>> Gr.adj gr 0
+-- [2]
+--
+-- @since 1.2.4.0
+{-# INLINEABLE mstBy #-}
+mstBy :: (Num w, Ord w, VU.Unbox w) => (w -> w -> Ordering) -> Int -> VU.Vector (Int, Int, w) -> (w, VU.Vector Bit, Gr.Csr w)
+mstBy !f nVerts edges = runST $ do
+  dsu <- Dsu.new nVerts
+  wSum <- VUM.replicate 1 0
+  use <-
+    ( VU.accumulate
+        (const id)
+        (VU.replicate (VU.length edges) (Bit False))
+        <$>
+      )
+      . VU.mapM
+        ( \(i :: Int) -> do
+            let !u = us VG.! i
+            let !v = vs VG.! i
+            b <- isJust <$> Dsu.mergeMaybe dsu u v
+            when b $ do
+              VGM.modify wSum (+ ws VG.! i) 0
+            pure (i, Bit b)
+        )
+      . VU.modify (VAI.sortBy (\(i :: Int) (j :: Int) -> f (ws VG.! i) (ws VG.! j)))
+      $ VU.generate (VU.length edges) id
+  let !gr = Gr.build nVerts $ Gr.swapDupe $ VU.ifilter (\i _ -> unBit (use VG.! i)) edges
+  (,use,gr) <$> VGM.read wSum 0
+  where
+    (!us, !vs, !ws) = VU.unzip3 edges
 
 {-# INLINEABLE foldImpl #-}
 foldImpl ::
@@ -245,37 +362,3 @@ foldReroot n tree valAt toF act = VU.create $ do
     !root0 = 0 :: Int
     !f0 = mempty @f
     !treeDp = scan n tree valAt toF act root0 :: VU.Vector a
-
--- | \(O(m \log m)\) Kruscal's algorithm. Returns edge indices for building a minimum spanning tree.
---
--- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u w)\) is required
--- for each edge.
-{-# INLINE mst #-}
-mst :: (Num w, Ord w, VU.Unbox w) => Int -> VU.Vector (Int, Int, w) -> (w, VU.Vector Bit, Gr.Csr w)
-mst = mstBy (comparing id)
-
--- | \(O(m \log m)\) Kruscal's algorithm. Returns edge indices for building a minimum spanning tree.
---
--- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u w)\) is required
--- for each edge.
-{-# INLINEABLE mstBy #-}
-mstBy :: (Num w, Ord w, VU.Unbox w) => (w -> w -> Ordering) -> Int -> VU.Vector (Int, Int, w) -> (w, VU.Vector Bit, Gr.Csr w)
-mstBy !f nVerts edges = runST $ do
-  dsu <- Dsu.new nVerts
-  wSum <- VUM.replicate 1 0
-  use <-
-    VU.mapM
-      ( \(i :: Int) -> do
-          let !u = us VG.! i
-          let !v = vs VG.! i
-          b <- isJust <$> Dsu.mergeMaybe dsu u v
-          when b $ do
-            VGM.modify wSum (+ ws VG.! i) 0
-          pure $ Bit b
-      )
-      . VU.modify (VAI.sortBy (\(i :: Int) (j :: Int) -> f (ws VG.! i) (ws VG.! j)))
-      $ VU.generate (VU.length edges) id
-  let !gr = Gr.build nVerts $ Gr.swapDupe $ VU.ifilter (\i _ -> unBit (use VG.! i)) edges
-  (,use,gr) <$> VGM.read wSum 0
-  where
-    (!us, !vs, !ws) = VU.unzip3 edges

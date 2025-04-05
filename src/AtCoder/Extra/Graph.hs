@@ -30,8 +30,6 @@ module AtCoder.Extra.Graph
     -- | Most of the functions are opinionated as the followings:
     --
     -- - Indices are abstracted with `Ix0` (n-dimensional `Int`).
-    -- - A graph is represented by a function \(f\) of type @i -> w -> Vector (i, w)@, which takes
-    -- a vertex, their distance and returns a vector of adjacent vertices with edge weights.
     -- - Functions that return a predecessor array are named as @tracking*@.
 
     -- ** BFS (breadth-first search)
@@ -50,7 +48,7 @@ module AtCoder.Extra.Graph
     bfs01,
     trackingBfs01,
 
-    -- ** Dijkstra
+    -- ** Dijkstra's algorithm
 
     -- *** Constraints
 
@@ -58,29 +56,38 @@ module AtCoder.Extra.Graph
     dijkstra,
     trackingDijkstra,
 
-    -- ** Bellman–ford
+    -- ** Bellman–ford algorithm
 
     -- | - Vertex type is restricted to one-dimensional `Int`.
     bellmanFord,
     trackingBellmanFord,
 
-    -- ** Floyd–Warshall
+    -- ** Floyd–Warshall algorithm (all-pair shortest path)
     floydWarshall,
     trackingFloydWarshall,
 
-    -- *** Incremental Floyd–Warshall
+    -- *** Incremental Floyd–Warshall algorithm
     newFloydWarshall,
+    newTrackingFloydWarshall,
     updateEdgeFloydWarshall,
     updateEdgeTrackingFloydWarshall,
 
     -- ** Path reconstruction
 
+    -- *** Single start point (root)
+
     -- | Functions for retrieving a path from a predecessor array where @-1@ represents none.
     constructPathFromRoot,
     constructPathToRoot,
-    -- | Functions for retrieving a path from a predecessor array where @-1@ represents none.
-    constructPathFromRootNN,
-    constructPathToRootNN,
+
+    -- *** All-pair
+
+    -- | Functions for retrieving a path from a predecessor matrix \(m\), which is accessed as
+    -- @m VG.! (n * from + to)@, where @-1@ represents none.
+    constructPathFromRootMat,
+    constructPathToRootMat,
+    constructPathFromRootMatM,
+    constructPathToRootMatM,
   )
 where
 
@@ -181,7 +188,8 @@ scc :: Csr w -> V.Vector (VU.Vector Int)
 scc = ACISCC.sccCsr
 
 -- | \(O(n + m)\) Returns a reverse graph, where original edges \((u, v, w)\) are transposed to be
--- \((v, u, w)\).
+-- \((v, u, w)\). Reverse graphs are useful for, for example, getting distance to a specific vertex
+-- from every other vertex with `dijkstra`.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -272,6 +280,8 @@ topSort n gr = runST $ do
 --
 -- >>> Gr.connectedComponents 0 (const VU.empty)
 -- []
+--
+-- @since 1.2.4.0
 {-# INLINEABLE connectedComponents #-}
 connectedComponents :: Int -> (Int -> VU.Vector Int) -> V.Vector (VU.Vector Int)
 connectedComponents n gr = runST $ do
@@ -487,6 +497,14 @@ blockCutComponents n gr =
 
 -- | \(O(n + m)\) Opinionated breadth-first search that returns a distance array.
 --
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 1 :: Int), (1, 2, 10)]
+-- >>> let gr = Gr.build 4 es
+-- >>> Gr.bfs 4 (Gr.adjW gr) (-1) (VU.singleton (0, 0))
+-- [0,1,11,-1]
+--
 -- @since 1.2.4.0
 {-# INLINE bfs #-}
 bfs ::
@@ -494,9 +512,9 @@ bfs ::
   (HasCallStack, Ix0 i, VU.Unbox i, VU.Unbox w, Num w, Eq w) =>
   -- | Zero-based vertex boundary.
   Bounds0 i ->
-  -- | Graph function that takes a vertex and their distance, and returns adjacent vertices with
-  -- edge weights, where \(w > 0\).
-  (i -> w -> VU.Vector (i, w)) ->
+  -- | Graph function that takes a vertex and returns adjacent vertices with edge weights, where
+  -- \(w > 0\).
+  (i -> VU.Vector (i, w)) ->
   -- | Distance assignment for unreachable vertices.
   w ->
   -- | Weighted source vertices.
@@ -510,6 +528,18 @@ bfs !bnd0 !gr !undefW !sources =
 -- | \(O(n + m)\) Opinionated breadth-first search that returns a distance array and a predecessor
 -- array.
 --
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 1 :: Int), (1, 2, 10)]
+-- >>> let gr = Gr.build 4 es
+-- >>> let (!dist, !prev) = Gr.trackingBfs 4 (Gr.adjW gr) (-1) (VU.singleton (0, 0))
+-- >>> dist
+-- [0,1,11,-1]
+--
+-- >>> Gr.constructPathFromRoot prev 2
+-- [0,1,2]
+--
 -- @since 1.2.4.0
 {-# INLINE trackingBfs #-}
 trackingBfs ::
@@ -517,9 +547,9 @@ trackingBfs ::
   (HasCallStack, Ix0 i, VU.Unbox i, VU.Unbox w, Num w, Eq w) =>
   -- | Zero-based vertex boundary.
   Bounds0 i ->
-  -- | Graph function that takes a vertex and their distance, and returns adjacent vertices with
-  -- edge weights, where \(w > 0\).
-  (i -> w -> VU.Vector (i, w)) ->
+  -- | Graph function that takes a vertex and returns adjacent vertices with edge weights, where
+  -- \(w > 0\).
+  (i -> VU.Vector (i, w)) ->
   -- | Distance assignment for unreachable vertices.
   w ->
   -- | Weighted source vertices.
@@ -534,7 +564,7 @@ bfsImpl ::
   (HasCallStack, Ix0 i, VU.Unbox i, VU.Unbox w, Num w, Eq w) =>
   Bool ->
   Bounds0 i ->
-  (i -> w -> VU.Vector (i, w)) ->
+  (i -> VU.Vector (i, w)) ->
   w ->
   VU.Vector (i, w) ->
   (VU.Vector w, VU.Vector Int)
@@ -569,7 +599,7 @@ bfsImpl !trackPrev !bnd0 !gr !undefW !sources
           Just v1 -> do
             let !i1 = index0 bnd0 v1
             !d1 <- VGM.read dist i1
-            VU.forM_ (gr v1 d1) $ \(!v2, !dw) -> do
+            VU.forM_ (gr v1) $ \(!v2, !dw) -> do
               let !i2 = index0 bnd0 v2
               !lastD <- VGM.read dist i2
               when (lastD == undefW) $ do
@@ -584,6 +614,15 @@ bfsImpl !trackPrev !bnd0 !gr !undefW !sources
     !nVerts = rangeSize0 bnd0
 
 -- | \(O(n + m)\) Opinionated 01-BFS that returns a distance array.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 10 :: Int), (0, 2, 0), (2, 1, 1)]
+-- >>> let gr = Gr.build 4 es
+-- >>> let capacity = 10
+-- >>> Gr.bfs01 4 (Gr.adjW gr) capacity (VU.singleton (0, 0))
+-- [0,1,0,-1]
 --
 -- @since 1.2.4.0
 {-# INLINE bfs01 #-}
@@ -606,6 +645,19 @@ bfs01 !bnd0 !gr !capacity !sources =
    in dist
 
 -- | \(O(n + m)\) Opinionated 01-BFS that returns a distance array and a predecessor array.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 10 :: Int), (0, 2, 0), (2, 1, 1)]
+-- >>> let gr = Gr.build 4 es
+-- >>> let capacity = 10
+-- >>> let (!dist, !prev) = Gr.trackingBfs01 4 (Gr.adjW gr) capacity (VU.singleton (0, 0))
+-- >>> dist
+-- [0,1,0,-1]
+--
+-- >>> Gr.constructPathFromRoot prev 1
+-- [0,2,1]
 --
 -- @since 1.2.4.0
 {-# INLINE trackingBfs01 #-}
@@ -689,6 +741,17 @@ bfs01Impl !trackPrev !bnd0 !gr !capacity !sources
     !nVerts = rangeSize0 bnd0
 
 -- | \(O((n + m) \log n)\) Dijkstra's algorithm that returns a distance array.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 10 :: Int), (1, 2, 20), (2, 3, 1), (1, 3, 40), (4, 3, 0)]
+-- >>> let gr = Gr.build 5 es
+-- >>> let capacity = 10
+-- >>> Gr.dijkstra 5 (Gr.adjW gr) capacity (-1) (VU.singleton (0, 0))
+-- [0,10,30,31,-1]
+--
+-- @since 1.2.4.0
 {-# INLINE dijkstra #-}
 dijkstra ::
   forall i w.
@@ -712,6 +775,21 @@ dijkstra !bnd0 !gr !capacity !undefW !sources =
 
 -- | \(O((n + m) \log n)\) Dijkstra's algorithm that returns a distance array and a predecessor
 -- array.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 10 :: Int), (1, 2, 20), (2, 3, 1), (1, 3, 40), (4, 3, 0)]
+-- >>> let gr = Gr.build 5 es
+-- >>> let capacity = 10
+-- >>> let (!dist, !prev) = Gr.trackingDijkstra 5 (Gr.adjW gr) capacity (-1) (VU.singleton (0, 0))
+-- >>> dist
+-- [0,10,30,31,-1]
+--
+-- >>> Gr.constructPathFromRoot prev 3
+-- [0,1,2,3]
+--
+-- @since 1.2.4.0
 {-# INLINE trackingDijkstra #-}
 trackingDijkstra ::
   forall i w.
@@ -784,8 +862,24 @@ dijkstraImpl !trackPrev !bnd0 !gr !capacity !undefW !sources
 -- -- | Option for `bellmanFord`.
 -- data BellmanFordPolicy = QuitOnNegaitveLoop | ContinueOnNegaitveLoop
 
--- | \(O(nm)\) Bellman–ford algorithm that returns `Nothing` on negative loop detection. Vertices
--- are one-dimensional.
+-- | \(O(nm)\) Bellman–ford algorithm that returns a distance array, or `Nothing` on negative loop
+-- detection. Vertices are one-dimensional.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let gr = Gr.build @Int 5 $ VU.fromList [(0, 1, 10), (1, 2, -20), (2, 3, 1), (1, 3, 40), (4, 3, 0)]
+-- >>> let undefW = maxBound `div` 2
+-- >>> Gr.bellmanFord 5 (Gr.adjW gr) undefW (VU.singleton (0, 0))
+-- Just [0,10,-10,-9,4611686018427387903]
+--
+-- It returns `Nothing` on negative loop detection:
+--
+-- >>> let gr = Gr.build @Int 2 $ VU.fromList [(0, 1, -1), (1, 0, -1)]
+-- >>> Gr.bellmanFord 5 (Gr.adjW gr) undefW (VU.singleton (0, 0))
+-- Nothing
+--
+-- @since 1.2.4.0
 {-# INLINE bellmanFord #-}
 bellmanFord ::
   forall w.
@@ -796,16 +890,36 @@ bellmanFord ::
   (Int -> VU.Vector (Int, w)) ->
   -- | Distance assignment for unreachable vertices.
   w ->
-  -- | Source vertex.
-  Int ->
+  -- | Source vertex with initial distances.
+  VU.Vector (Int, w) ->
   -- | Distance array in one-dimensional index.
   Maybe (VU.Vector w)
 bellmanFord {- !policy -} !nVerts !gr !undefW source = do
   (!dist, !_) <- bellmanFordImpl False nVerts gr undefW source
   pure dist
 
--- | \(O(nm)\) Bellman–ford algorithm that returns `Nothing` on negative loop detection. Vertices
--- are one-dimensional.
+-- | \(O(nm)\) Bellman–ford algorithm that returns a distance array and a predecessor array, or
+-- `Nothing` on negative loop detection. Vertices are one-dimensional.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let gr = Gr.build @Int 5 $ VU.fromList [(0, 1, 10), (1, 2, -20), (2, 3, 1), (1, 3, 40), (4, 3, 0)]
+-- >>> let undefW = maxBound `div` 2
+-- >>> let Just (!dist, !prev) = Gr.trackingBellmanFord 5 (Gr.adjW gr) undefW (VU.singleton (0, 0))
+-- >>> dist
+-- [0,10,-10,-9,4611686018427387903]
+--
+-- >>> Gr.constructPathFromRoot prev 3
+-- [0,1,2,3]
+--
+-- It returns `Nothing` on negative loop detection:
+--
+-- >>> let gr = Gr.build @Int 2 $ VU.fromList [(0, 1, -1), (1, 0, -1)]
+-- >>> Gr.trackingBellmanFord 5 (Gr.adjW gr) undefW (VU.singleton (0, 0))
+-- Nothing
+--
+-- @since 1.2.4.0
 {-# INLINE trackingBellmanFord #-}
 trackingBellmanFord ::
   forall w.
@@ -816,8 +930,8 @@ trackingBellmanFord ::
   (Int -> VU.Vector (Int, w)) ->
   -- | Distance assignment for unreachable vertices.
   w ->
-  -- | Source vertex.
-  Int ->
+  -- | Source vertex with initial distances.
+  VU.Vector (Int, w) ->
   -- | A tuple of (distance array, predecessor array).
   Maybe (VU.Vector w, VU.Vector Int)
 trackingBellmanFord {- !policy -} = bellmanFordImpl True
@@ -830,15 +944,20 @@ bellmanFordImpl ::
   Int ->
   (Int -> VU.Vector (Int, w)) ->
   w ->
-  Int ->
+  VU.Vector (Int, w) ->
   Maybe (VU.Vector w, VU.Vector Int)
-bellmanFordImpl {- !policy -} !trackPrev !nVerts !gr !undefW source = runST $ do
+bellmanFordImpl {- !policy -} !trackPrev !nVerts !gr !undefW !sources = runST $ do
   !dist <- VUM.replicate @_ @w nVerts undefW
   !prev <-
     if trackPrev
       then VUM.replicate @_ @Int nVerts (-1)
       else VUM.replicate @_ @Int 0 (-1)
-  VGM.write dist source (0 :: w)
+
+  VU.forM_ sources $ \(!v, !w) -> do
+    !lastD <- VGM.read dist v
+    -- Note that duplicate inputs are pruned here:
+    when (lastD == undefW) $ do
+      VGM.write dist v w
   updated <- VUM.replicate 1 False
 
   -- look around adjaenct vertices
@@ -871,8 +990,33 @@ bellmanFordImpl {- !policy -} !trackPrev !nVerts !gr !undefW source = runST $ do
   runLoop 0
 
 -- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\), which should be
--- accessed as @m VU.! (`index0` (n, n) (from, to))@. Negative loop can detected by testing if
+-- accessed as @m VU.! (`index0` (n, n) (from, to))@. Negative loop can be detected by testing if
 -- there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 10 :: Int), (1, 2, -20), (2, 3, 1), (1, 3, 40), (4, 3, 0)]
+-- >>> let undefW = maxBound `div` 2
+-- >>> let dist = Gr.floydWarshall 5 es undefW
+-- >>> dist VG.! (5 * 0 + 3) -- from `0` to `3`
+-- -9
+--
+-- >>> dist VG.! (5 * 1 + 3) -- from `0` to `3`
+-- -19
+--
+-- Negative loop can be detected by testing if there's any vertex \(v\) where
+-- @m VU.! (`index0` (n, n) (v, v))@:
+--
+-- >>> any (\v -> dist VG.! (5 * v + v) < 0) [0 .. 5 - 1]
+-- False
+--
+-- >>> let es = VU.fromList [(0, 1, -1 :: Int), (1, 0, -1)]
+-- >>> let dist = Gr.floydWarshall 3 es undefW
+-- >>> any (\v -> dist VG.! (3 * v + v) < 0) [0 .. 3 - 1]
+-- True
+--
+-- @since 1.2.4.0
 {-# INLINE floydWarshall #-}
 floydWarshall ::
   forall w.
@@ -894,6 +1038,37 @@ floydWarshall !nVerts !edges !undefW = VU.create $ do
 -- matrix \(p\). The distance matrix should be accessed as @m VU.! (`index0` (n, n) (from, to))@,
 -- and the predecessor matrix should be accessed as @m VU.! (`index0` (n, n) (root, v))@. There's a
 -- negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 10 :: Int), (1, 2, -20), (2, 3, 1), (1, 3, 40), (4, 3, 0)]
+-- >>> let undefW = maxBound `div` 2
+-- >>> let (!dist, !prev) = Gr.trackingFloydWarshall 5 es undefW
+-- >>> dist VG.! (5 * 0 + 3) -- from `0` to `3`
+-- -9
+--
+-- >>> Gr.constructPathFromRootMat prev 0 3 -- from `0` to `3`
+-- [0,1,2,3]
+--
+-- >>> dist VG.! (5 * 1 + 3) -- from `0` to `3`
+-- -19
+--
+-- >>> Gr.constructPathFromRootMat prev 1 3 -- from `1` to `3`
+-- [1,2,3]
+--
+-- Negative loop can be detected by testing if there's any vertex \(v\) where
+-- @m VU.! (`index0` (n, n) (v, v))@:
+--
+-- >>> any (\v -> dist VG.! (5 * v + v) < 0) [0 .. 5 - 1]
+-- False
+--
+-- >>> let es = VU.fromList [(0, 1, -1 :: Int), (1, 0, -1)]
+-- >>> let (!dist, !_) = Gr.trackingFloydWarshall 3 es undefW
+-- >>> any (\v -> dist VG.! (3 * v + v) < 0) [0 .. 3 - 1]
+-- True
+--
+-- @since 1.2.4.0
 {-# INLINE trackingFloydWarshall #-}
 trackingFloydWarshall ::
   forall w.
@@ -915,7 +1090,20 @@ trackingFloydWarshall !nVerts !edges !undefW = runST $ do
 -- accessed as @m VU.! (n * from + to)@. There's a negative cycle if any @m VU.! (n * i + i)@ is
 -- negative.
 --
--- - TODO: write about negative loops
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 1 :: Int), (1, 2, 1), (2, 3, 1), (1, 3, 4)]
+-- >>> let undefW = -1
+-- >>> dist <- Gr.newFloydWarshall 4 es undefW
+-- >>> VGM.read dist (4 * 0 + 3)
+-- 3
+--
+-- >>> updateEdgeFloydWarshall dist 4 undefW 1 3 (-2)
+-- >>> VGM.read dist (4 * 0 + 3)
+-- -1
+--
+-- @since 1.2.4.0
 {-# INLINE newFloydWarshall #-}
 newFloydWarshall ::
   forall m w.
@@ -931,6 +1119,44 @@ newFloydWarshall ::
 newFloydWarshall !nVerts !edges !undefW = stToPrim $ do
   (!dist, !_) <- newFloydWarshallST False nVerts edges undefW
   pure dist
+
+-- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\) and predecessor
+-- matrix. There's a negative cycle if any @m VU.! (n * i + i)@ is negative.
+--
+-- ==== __Example__
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let es = VU.fromList [(0, 1, 1 :: Int), (1, 2, 1), (2, 3, 1), (1, 3, 4)]
+-- >>> let undefW = -1
+-- >>> (!dist, !prev) <- Gr.newTrackingFloydWarshall 4 es undefW
+-- >>> VGM.read dist (4 * 0 + 3)
+-- 3
+--
+-- >>> constructPathFromRootMatM prev 0 3
+-- [0,1,2,3]
+--
+-- >>> updateEdgeTrackingFloydWarshall dist prev 4 undefW 1 3 (-2)
+-- >>> VGM.read dist (4 * 0 + 3)
+-- -1
+--
+-- >>> constructPathFromRootMatM prev 0 3
+-- [0,1,3]
+--
+-- @since 1.2.4.0
+{-# INLINE newTrackingFloydWarshall #-}
+newTrackingFloydWarshall ::
+  forall m w.
+  (HasCallStack, PrimMonad m, Num w, Ord w, VU.Unbox w) =>
+  -- | The number of vertices.
+  Int ->
+  -- | Weighted edges.
+  VU.Vector (Int, Int, w) ->
+  -- | Distance assignment for unreachable vertices.
+  w ->
+  -- | Distance array in one-dimensional index.
+  m (VUM.MVector (PrimState m) w, VUM.MVector (PrimState m) Int)
+newTrackingFloydWarshall !nVerts !edges !undefW = stToPrim $ do
+  newFloydWarshallST True nVerts edges undefW
 
 {-# INLINEABLE newFloydWarshallST #-}
 newFloydWarshallST ::
@@ -982,11 +1208,10 @@ newFloydWarshallST !trackPrev !nVerts !edges !undefW = do
   where
     idx !from !to = nVerts * from + to
 
--- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight decreasement or edge
+-- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight decreasement or new edge
 -- addition.
 --
--- ==== Constraints
--- - Either the edge is a new edge or the edge weight is smaller than or equal to the existing one.
+-- @since 1.2.4.0
 {-# INLINE updateEdgeFloydWarshall #-}
 updateEdgeFloydWarshall ::
   forall m w.
@@ -1010,11 +1235,10 @@ updateEdgeFloydWarshall mat nVerts undefW a b w = do
   prev <- VUM.replicate @_ @Int 0 (-1 :: Int)
   stToPrim $ updateEdgeFloydWarshallST False mat prev nVerts undefW a b w
 
--- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight decreasement or edge
+-- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight decreasement or new edge
 -- addition.
 --
--- ==== Constraints
--- - Either the edge is a new edge or the edge weight is smaller than or equal to the existing one.
+-- @since 1.2.4.0
 {-# INLINE updateEdgeTrackingFloydWarshall #-}
 updateEdgeTrackingFloydWarshall ::
   forall m w.
@@ -1055,82 +1279,161 @@ updateEdgeFloydWarshallST ::
   w ->
   ST s ()
 updateEdgeFloydWarshallST trackPrev mat prev nVerts undefW a b dw = do
-  wOld <- VGM.read mat (idx a b)
-  case (wOld /= undefW, compare wOld dw) of
-    (True, GT) -> error "AtCoder.Extra.Graph.updateEdgeFloydWarshallST: given new edge with bigger weight than existing one"
-    -- no update
-    (True, EQ) -> pure ()
-    _ -> do
-      for_ [0 .. nVerts - 1] $ \from -> do
-        for_ [0 .. nVerts - 1] $ \to -> do
-          wOld <- VGM.read mat $ idx from to
+  wOld0 <- VGM.read mat $! idx a b
+  when (wOld0 == undefW || dw < wOld0) $ do
+    VGM.write mat (idx a b) dw
+    when trackPrev $ do
+      VGM.write prev (idx a b) a
+    for_ [0 .. nVerts - 1] $ \from -> do
+      for_ [0 .. nVerts - 1] $ \to -> do
+        wOld <- VGM.read mat $! idx from to
 
-          w' <- do
-            ia <- VGM.read mat $ idx from a
-            bj <- VGM.read mat $ idx b to
-            let w1
-                  | ia == undefW || bj == undefW = undefW
-                  | otherwise = ia + dw + bj
+        w' <- do
+          ia <- VGM.read mat $! idx from a
+          bj <- VGM.read mat $! idx b to
+          let w1
+                | ia == undefW || bj == undefW = undefW
+                | otherwise = ia + dw + bj
 
-            ib <- VGM.read mat $ idx from b
-            aj <- VGM.read mat $ idx a to
-            let w2
-                  | ib == undefW || aj == undefW = undefW
-                  | otherwise = ib + dw + aj
+          ib <- VGM.read mat $! idx from b
+          aj <- VGM.read mat $! idx a to
+          let w2
+                | ib == undefW || aj == undefW = undefW
+                | otherwise = ib + dw + aj
 
-            pure $!
-              if
-                | w1 == undefW -> w2
-                | w2 == undefW -> w1
-                | otherwise -> min w1 w2
+          pure $!
+            if
+              | w1 == undefW -> w2
+              | w2 == undefW -> w1
+              | otherwise -> min w1 w2
 
-          when (wOld /= undefW && w' < wOld) $ do
-            VGM.write mat (idx from to) w'
-            when trackPrev $ do
-              VGM.write prev (idx from to) b
-              VGM.write prev (idx from b) a
+        when (wOld /= undefW && w' < wOld) $ do
+          VGM.write mat (idx from to) w'
+          when trackPrev $ do
+            VGM.write prev (idx from to) =<< VGM.read prev (idx b to)
+            VGM.write prev (idx from b) a
   where
     idx !from !to = nVerts * from + to
 
--- | \(O(n)\) Given a predecessor array, retrieves a path from the root to a vertex. It always
--- stops at @end@ vertex even if it's a loop.
+-- | \(O(n)\) Given a predecessor array, retrieves a path from the root to a vertex.
+--
+-- ==== Constraints
+-- - The path must not make a cycle, otherwise this function loops forever.
+-- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- connected to the root.
 --
 -- @since 1.2.4.0
 {-# INLINE constructPathFromRoot #-}
 constructPathFromRoot :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
 constructPathFromRoot parents = VU.reverse . constructPathToRoot parents
 
--- | \(O(n)\) Given a predecessor array, retrieves a path from a vertex to the root. It always
--- stops at @root@ vertex even if it's a loop.
+-- | \(O(n)\) Given a predecessor array, retrieves a path from a vertex to the root.
+--
+-- ==== Constraints
+-- - The path must not make a cycle, otherwise this function loops forever.
+-- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- connected to the root.
 --
 -- @since 1.2.4.0
 {-# INLINEABLE constructPathToRoot #-}
 constructPathToRoot :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
-constructPathToRoot parents end = VU.unfoldr f end
+constructPathToRoot parents = VU.unfoldr f
   where
     f (-1) = Nothing
-    f v
-      | v == end = Just (v, -1)
-      | otherwise = Just (v, parents VG.! v)
+    f v = Just (v, parents VG.! v)
 
--- | \(O(n)\) Given a NxN predecessor matrix, retrieves a path from the root to an end vertex. It
--- always stops at @end@ vertex even if it's a loop.
+-- | \(O(n)\) Given a NxN predecessor matrix (created with `trackingFloydWarshall`), retrieves a
+-- path from the root to an end vertex.
+--
+-- ==== Constraints
+-- - The path must not make a cycle, otherwise this function loops forever.
+-- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- connected to the root.
 --
 -- @since 1.2.4.0
-{-# INLINE constructPathFromRootNN #-}
-constructPathFromRootNN :: (HasCallStack) => VU.Vector Int -> Int -> Int -> VU.Vector Int
-constructPathFromRootNN parents from = VU.reverse . constructPathToRootNN parents from
+{-# INLINE constructPathFromRootMat #-}
+constructPathFromRootMat ::
+  (HasCallStack) =>
+  -- | Predecessor matrix.
+  VU.Vector Int ->
+  -- | Start vertex.
+  Int ->
+  -- | End vertex.
+  Int ->
+  -- | Path.
+  VU.Vector Int
+constructPathFromRootMat parents start = VU.reverse . constructPathToRootMat parents start
 
--- | \(O(n)\) Given a NxN predecessor matrix, retrieves a path from a vertex to the root. It always
--- stops at @root@ vertex even if it's a loop.
+-- | \(O(n)\) Given a NxN predecessor matrix(created with `trackingFloydWarshall`), retrieves a
+-- path from a vertex to the root.
+--
+-- ==== Constraints
+-- - The path must not make a cycle, otherwise this function loops forever.
+-- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- connected to the root.
 --
 -- @since 1.2.4.0
-{-# INLINEABLE constructPathToRootNN #-}
-constructPathToRootNN :: (HasCallStack) => VU.Vector Int -> Int -> Int -> VU.Vector Int
-constructPathToRootNN parents start end =
+{-# INLINEABLE constructPathToRootMat #-}
+constructPathToRootMat ::
+  (HasCallStack) =>
+  -- | Predecessor matrix.
+  VU.Vector Int ->
+  -- | Start vertex.
+  Int ->
+  -- | End vertex.
+  Int ->
+  -- | Path.
+  VU.Vector Int
+constructPathToRootMat parents start end =
   let parents' = VU.take n $ VU.drop (n * start) parents
    in constructPathToRoot parents' end
   where
     -- Assuming `n < 2^32`, it should always be correct:
     -- https://zenn.dev/mod_poppo/articles/atcoder-beginner-contest-284-d#%E8%A7%A3%E6%B3%953%EF%BC%9Asqrt%E3%81%A8round%E3%82%92%E4%BD%BF%E3%81%86
     n :: Int = round . sqrt $ (fromIntegral (VU.length parents) :: Double)
+
+-- | \(O(n)\) Given a NxN predecessor matrix (created with `newTrackingFloydWarshall`), retrieves a
+-- path from the root to an end vertex.
+--
+-- ==== Constraints
+-- - The path must not make a cycle, otherwise this function loops forever.
+-- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- connected to the root.
+--
+-- @since 1.2.4.0
+{-# INLINE constructPathFromRootMatM #-}
+constructPathFromRootMatM ::
+  (HasCallStack, PrimMonad m) =>
+  -- | Predecessor matrix.
+  VUM.MVector (PrimState m) Int ->
+  -- | Start vertex.
+  Int ->
+  -- | End vertex.
+  Int ->
+  -- | Path.
+  m (VU.Vector Int)
+constructPathFromRootMatM parents start = (VU.reverse <$>) . constructPathToRootMatM parents start
+
+-- | \(O(n)\) Given a NxN predecessor matrix (created with `newTrackingFloydWarshall`), retrieves a
+-- path from a vertex to the root.
+--
+-- ==== Constraints
+-- - The path must not make a cycle, otherwise this function loops forever.
+-- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- connected to the root.
+--
+-- @since 1.2.4.0
+{-# INLINEABLE constructPathToRootMatM #-}
+constructPathToRootMatM ::
+  (HasCallStack, PrimMonad m) =>
+  -- | Predecessor matrix.
+  VUM.MVector (PrimState m) Int ->
+  -- | Start vertex.
+  Int ->
+  -- | End vertex.
+  Int ->
+  -- | Path.
+  m (VU.Vector Int)
+constructPathToRootMatM parents start end = stToPrim $ do
+  parents' <- VU.unsafeFreeze parents
+  pure $ constructPathToRootMat parents' start end

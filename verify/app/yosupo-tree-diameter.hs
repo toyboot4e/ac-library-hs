@@ -9,6 +9,6 @@ main = do
   n <- int
   uvws <- VU.replicateM (n - 1) ints3
   let gr = Gr.build n $ Gr.swapDupe uvws
-  let (!path, !dist) = Tr.diameterPath gr (-1)
+  let (!path, !dist) = Tr.diameterPath n (gr `Gr.adjW`) (-1)
   printBSB $ unwordsBSB $ VU.fromList [dist, VU.length path]
   printBSB $ unwordsBSB path

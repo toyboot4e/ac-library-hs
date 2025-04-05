@@ -1,6 +1,7 @@
 import AtCoder.Extra.Graph qualified as Gr
 import Data.ByteString.Builder qualified as BSB
 import Data.Vector qualified as V
+import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
 import Util
 
@@ -12,7 +13,7 @@ main = do
 
   let !undefW = maxBound `div` 2 :: Int
   let mat = Gr.floydWarshall n uvws undefW
-  if VU.any (\i -> mat VG.! (n * i + i)) $ VU.generate n id
+  if VU.any (\i -> mat VG.! (n * i + i) < 0) $ VU.generate n id
     then putStrLn "NEGATIVE CYCLE"
     else do
       printBSB

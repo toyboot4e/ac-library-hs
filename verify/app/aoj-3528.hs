@@ -5,7 +5,6 @@ import Data.ByteString.Char8 qualified as BS
 import Data.Maybe (fromJust)
 import Data.Vector.Unboxed qualified as VU
 import Util
-import Debug.Trace
 
 ortho4 :: VU.Vector (Int, Int)
 ortho4 = VU.fromList [(0, 1), (0, -1), (1, 0), (-1, 0)]
@@ -26,7 +25,7 @@ main = do
   let ti = fromJust $ BS.elemIndex 'G' gr
   let res = Gr.bfs01 bnd0 grF (4 * h * w) $ VU.singleton (s, 0)
         where
-          grF (!y, !x) _ = case c of
+          grF (!y, !x) = case c of
             'G' -> VU.empty
             'L' -> filter1 $ VU.singleton ((y, x - 1), 0)
             'R' -> filter1 $ VU.singleton ((y, x + 1), 0)

@@ -548,7 +548,7 @@ executable alpc-h
   build-depends: verify
 
 executable aoj-GRL_4_B
-  import:        app-local
+  import:        app-online
   main-is:       aoj-GRL_4_B.hs
   build-depends: verify
 
