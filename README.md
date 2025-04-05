@@ -5,7 +5,7 @@ Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library f
 ## Notes
 
 - The library is mainly for AtCoder and only GHC 9.8.4 is guaranteed to be supported.
-- Functions primarily use half-open interval [l, r).
+- Functions primarily use half-open interval `[l, r)`.
 - The `Extra` module contains additional utilities beyond the original C++ library.
 
 ## Usage

@@ -1,5 +1,19 @@
 # Revision history for acl-hs
 
+## 1.2.4.0 -- April 2025
+
+- Added `Dsu.mergeMaybe`
+- Added `AtCoder.Extra.Graph` functions
+  - `rev`
+  - `connectedComponents`
+  - `bipartiteVertexColors`
+  - BFS, Dijkstra, Bellman–ford, Floyd–Warshall
+  - path reconstruction functions
+- Added `AtCoder.Extra.Tree` functions
+  - `diameter`, `diameterPath`
+  - `mst`, `mstBy`
+- Added `AtCoder.Internal.Queue.newDeque`
+
 ## 1.2.3.0 -- March 2025
 
 - Added `Extra.SegTree2d` and `Extra.SegTree2d.Dense`.
