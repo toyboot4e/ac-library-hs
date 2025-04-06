@@ -2,18 +2,25 @@
 
 -- | Minimum parse/print with @bytestring@.
 module Util
-  ( Parser,
+  ( -- * Parser
+    Parser,
+
+    -- * Parse functions
     intP,
     mintP,
     intS1P,
     int2P,
     int3P,
     int4P,
+
+    -- * Get stdin
     int,
     ints2,
     ints3,
     ints4,
     ints,
+
+    -- * Show with
     withLine,
     wsBSB,
     endlBSB,
@@ -21,10 +28,14 @@ module Util
     unlinesWithBSB,
     unwordsBSB,
     unwordsWithBSB,
-    putBSB,
-    printBSB,
+
+    -- * Show
     show2,
     showMat,
+
+    -- Print
+    putBSB,
+    printBSB,
   )
 where
 
@@ -149,14 +160,6 @@ unlinesBSB = intersperseWithBSB BSB.intDec endlBSB
 unlinesWithBSB :: (VG.Vector v a) => (a -> BSB.Builder) -> v a -> BSB.Builder
 unlinesWithBSB showF = intersperseWithBSB showF endlBSB
 
-{-# INLINE putBSB #-}
-putBSB :: BSB.Builder -> IO ()
-putBSB = BSB.hPutBuilder stdout
-
-{-# INLINE printBSB #-}
-printBSB :: BSB.Builder -> IO ()
-printBSB = putBSB . (<> endlBSB)
-
 {-# INLINE show2 #-}
 show2 :: (Int, Int) -> BSB.Builder
 show2 (!a, !b) = BSB.intDec a <> wsBSB <> BSB.intDec b
@@ -167,3 +170,11 @@ showMat Mat.Matrix {..} = unlinesWithBSB id $ V.map showF rows
   where
     rows = V.unfoldrExactN hM (VU.splitAt wM) vecM
     showF = unwordsWithBSB (BSB.string8 . show)
+
+{-# INLINE putBSB #-}
+putBSB :: BSB.Builder -> IO ()
+putBSB = BSB.hPutBuilder stdout
+
+{-# INLINE printBSB #-}
+printBSB :: BSB.Builder -> IO ()
+printBSB = putBSB . (<> endlBSB)
