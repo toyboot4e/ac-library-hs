@@ -149,6 +149,7 @@ test-suite ac-library-hs-test
     Tests.Extra.IntervalMap
     Tests.Extra.IntMap
     Tests.Extra.IntSet
+    Tests.Extra.Ix0
     Tests.Extra.KdTree
     Tests.Extra.LazyKdTree
     Tests.Extra.Math

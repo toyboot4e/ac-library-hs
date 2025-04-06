@@ -16,6 +16,7 @@ import Tests.Extra.HashMap qualified
 import Tests.Extra.IntMap qualified
 import Tests.Extra.IntSet qualified
 import Tests.Extra.IntervalMap qualified
+import Tests.Extra.Ix0 qualified
 import Tests.Extra.KdTree qualified
 import Tests.Extra.LazyKdTree qualified
 import Tests.Extra.Math qualified
@@ -68,6 +69,7 @@ main =
             testGroup "Graph" Tests.Extra.Graph.tests,
             testGroup "HashMap" Tests.Extra.HashMap.tests,
             testGroup "IntervalMap" Tests.Extra.IntervalMap.tests,
+            testGroup "Ix0" Tests.Extra.Ix0.tests,
             testGroup "IntMap" Tests.Extra.IntMap.tests,
             testGroup "IntSet" Tests.Extra.IntSet.tests,
             testGroup "KdTree" Tests.Extra.KdTree.tests,
