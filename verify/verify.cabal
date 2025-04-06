@@ -90,7 +90,11 @@ common app-online
 
 library
   import:          dependencies
-  exposed-modules: Util
+  exposed-modules:
+    Iota.Prelude
+    Iota.PrimParser
+    Util
+
   hs-source-dirs:  src
 
 -- local judges
@@ -278,6 +282,21 @@ executable yosupo-lca-lct
 executable yosupo-inverse-matrix
   import:        app-local
   main-is:       yosupo-inverse-matrix.hs
+  build-depends: verify
+
+executable yosupo-many-aplusb-bs
+  import:        app-local
+  main-is:       yosupo-many-aplusb-bs.hs
+  build-depends: verify
+
+executable yosupo-many-aplusb-iota
+  import:        app-local
+  main-is:       yosupo-many-aplusb-iota.hs
+  build-depends: verify
+
+executable yosupo-many-aplusb-state
+  import:        app-local
+  main-is:       yosupo-many-aplusb-state.hs
   build-depends: verify
 
 executable yosupo-matrix-det
@@ -551,4 +570,3 @@ executable aoj-GRL_4_B
   import:        app-online
   main-is:       aoj-GRL_4_B.hs
   build-depends: verify
-
