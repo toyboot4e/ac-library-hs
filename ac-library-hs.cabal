@@ -219,6 +219,8 @@ benchmark ac-library-hs-benchmark
     Bench.Matrix
     Bench.ModInt
     Bench.PowMod
+    Bench.RepeatWithIndex
+    Bench.RepeatWithoutIndex
     Bench.SwapDupe
     BenchLib.AddMod
     BenchLib.Matrix
