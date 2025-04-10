@@ -99,7 +99,7 @@ import AtCoder.Internal.Csr as Csr
 import AtCoder.Internal.MinHeap qualified as MH
 import AtCoder.Internal.Queue qualified as Q
 import AtCoder.Internal.Scc qualified as ACISCC
-import Control.Monad (when)
+import Control.Monad (replicateM_, when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Control.Monad.ST (ST, runST)
@@ -443,7 +443,7 @@ blockCut n gr = runST $ do
                           VGM.unsafeWrite next 0 (nxt + 1)
                           B.pushBack edges (nxt, v)
                           len <- B.length st
-                          for_ [1 .. len - s] $ \_ -> do
+                          replicateM_ (len - s) $ do
                             back <- fromJust <$> B.popBack st
                             B.pushBack edges (nxt, back)
                         pure (child', k')

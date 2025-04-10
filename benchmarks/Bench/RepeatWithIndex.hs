@@ -54,7 +54,7 @@ recursion x = runST $ do
   run 0
   VGM.read res 0
 
--- The result is suspecious.. the stream version is slower than vector, recursive or replicateM_ is
+-- The result is suspicious.. the stream version is slower than vector, recursive or replicateM_ is
 -- faster by 10 times?
 benches :: Benchmark
 benches =
