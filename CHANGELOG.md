@@ -1,5 +1,10 @@
 # Revision history for acl-hs
 
+## 1.2.6.0 -- April 2025
+
+- Added AtCoder.`Extra.Math` functions
+  - `primes`
+
 ## 1.2.5.0 -- April 2025
 
 - Added AtCoder.`Extra.Mo`

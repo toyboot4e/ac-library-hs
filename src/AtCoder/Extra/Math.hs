@@ -23,12 +23,21 @@ module AtCoder.Extra.Math
     power,
     stimes',
     mtimes',
+
+    -- * Prime numbers
+    primes,
   )
 where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Math qualified as ACIM
+import Control.Monad (unless, when)
+import Data.Bit (Bit (..))
 import Data.Bits ((.>>.))
+import Data.Foldable (for_)
+import Data.Vector.Generic.Mutable qualified as VGM
+import Data.Vector.Unboxed qualified as VU
+import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
 -- | \(O(k \log^3 n) (k = 3)\). Returns whether the given `Int` value is a prime number.
@@ -114,3 +123,102 @@ mtimes' n x = case compare n 0 of
   LT -> errorWithoutStackTrace "AtCoder.Extra.Math.mtimes': non-negative multiplier expected"
   EQ -> mempty
   GT -> power (<>) n x
+
+-- | \(O(n \log \log n)\) Creates an array of prime numbers up to the given limit, using Sieve of
+-- Eratosthenes.
+--
+-- The minimum computational complexity is \(\Omega(B \log \log B)\), where \(B = 2^{15}\) is the
+-- length of segment. This constraint comes from the use of segmented sieve.
+--
+-- ==== Constraints
+-- - The upper limit must be less than or equal to \(2^{30} (\gt 10^9)\), otherwise the returned
+-- prime table is incorrect.
+--
+-- @since 1.2.6.0
+{-# INLINEABLE primes #-}
+primes :: Int -> VU.Vector Int
+primes upperLimit
+  | upperLimit <= 1 = VU.empty
+  | otherwise = VU.create $ do
+      -- segment length (TODO: isn't it 32767?)
+      let !s = 32768 :: Int -- 2 ^ 15
+
+      -- sieve length (TODO: use \sqrt limit? do benchmark)
+      let !sieveMax = s
+
+      -- Is it like LT bound??
+      let !limit = upperLimit + 1
+
+      -- base primes with index
+      (!ps, !is) <- do
+        sieve <- VUM.replicate (sieveMax + 1) $ Bit False
+        ps <- VUM.unsafeNew (sieveMax `div` 2)
+        is <- VUM.unsafeNew (sieveMax `div` 2)
+        -- FIXME: carry index?
+        iNext <- VUM.replicate 1 (0 :: Int)
+        for_ [3, 5 .. s] $ \p1 -> do
+          Bit b <- VGM.read sieve p1
+          unless b $ do
+            at <- VGM.read iNext 0
+            VGM.write iNext 0 $ at + 1
+            -- (base prime, next index (odd numbers only, so `div` 2)
+            VGM.write ps at p1
+            VGM.write is at $ p1 * p1 `div` 2
+            -- NOTE: if `j` is a composite number, it's already enumerated by a smaller prime
+            -- number than `p0`, so skip to `p1 * p1` and iterate through odd numbers only:
+            for_ [p1 * p1, p1 * p1 + 2 * p1 .. sieveMax] $ \np1 -> do
+              VGM.write sieve np1 $ Bit True
+        len <- VGM.read iNext 0
+        (,VGM.take len is) <$> VU.unsafeFreeze (VGM.take len ps)
+
+      -- https://en.wikipedia.org/wiki/Prime-counting_function
+      let !maxPrimeCount :: Int
+            -- NOTE: 1,700 is a point where the next function estimates better as far as I tested:
+            | limit < 1700 = round (1.25506 * fromIntegral limit / log (fromIntegral limit) :: Double)
+            -- Rosser and Schoenfeld Boundsh (1962): holds for x > e^{3/2}:
+            | limit < 60184 = round (fromIntegral limit / (log (fromIntegral limit) - 1.5) :: Double)
+            -- Pierre Dusart (2010): holds for x >= 60184:
+            | otherwise = ceiling (fromIntegral limit / (log (fromIntegral limit) - 1.1) :: Double)
+
+      -- let f x = round (1.25506 * fromIntegral x / log (fromIntegral x) :: Double)
+      -- let g x = round (fromIntegral x / (log (fromIntegral x) - 1.5) :: Double)
+      -- let h x = ceiling (fromIntegral x / (log (fromIntegral x) - 1.1) :: Double)
+      -- let p x = (f x, g x, h x)
+
+      result <- VUM.replicate maxPrimeCount (-1)
+      VGM.write result 0 2
+      -- FIXME: carry index?
+      nPrimes <- VUM.replicate 1 (1 :: Int)
+
+      -- Sieve of Eratosthenes by block of size `s`, ignoring even numers
+      -- FIXME: block length of size `s/2` should make more sense?
+      block <- VUM.unsafeNew s
+      let !r = limit `div` 2
+      for_ [1, 1 + s .. r] $ \l -> do
+        VGM.set block $ Bit False
+
+        VU.iforM_ ps $ \idx p -> do
+          -- FIXME: cut out the ps beforehand
+          when (p <= limit) $ do
+            i0 <- VGM.read is idx
+            let run i = do
+                  if i < l + s
+                    then do
+                      -- within the block
+                      VGM.write block (i - l) $ Bit True
+                      run $ i + p
+                    else do
+                      -- went out of the block
+                      VGM.write is idx i
+            run i0
+
+        block' <- VU.take (min s (r - l)) <$> VU.unsafeFreeze block
+        VU.iforM_ block' $ \i (Bit b) -> do
+          unless b $ do
+            at <- VGM.read nPrimes 0
+            when (at < maxPrimeCount) $ do
+              VGM.write nPrimes 0 $ at + 1
+              VGM.write result at $ (l + i) * 2 + 1
+
+      len <- VGM.read nPrimes 0
+      pure $ VGM.take len result
