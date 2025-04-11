@@ -424,6 +424,11 @@ executable yosupo-persistent-range-affine-range-sum
   main-is:       yosupo-persistent-range-affine-range-sum.hs
   build-depends: verify
 
+executable yosupo-primarity-test
+  import:        app-local
+  main-is:       yosupo-primarity-test.hs
+  build-depends: verify
+
 executable yosupo-range-affine-range-sum
   import:        app-local
   main-is:       yosupo-range-affine-range-sum.hs

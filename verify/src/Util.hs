@@ -24,6 +24,7 @@ module Util
     withLine,
     wsBSB,
     endlBSB,
+    ynBSB,
     unlinesBSB,
     unlinesWithBSB,
     unwordsBSB,
@@ -137,6 +138,11 @@ wsBSB = BSB.char7 ' '
 {-# INLINE endlBSB #-}
 endlBSB :: BSB.Builder
 endlBSB = BSB.char7 '\n'
+
+{-# INLINE ynBSB #-}
+ynBSB :: Bool -> BSB.Builder
+ynBSB True = BSB.string7 "Yes"
+ynBSB False = BSB.string7 "No"
 
 {-# INLINE intersperseWithBSB #-}
 intersperseWithBSB :: (VG.Vector v a) => (a -> BSB.Builder) -> BSB.Builder -> v a -> BSB.Builder
