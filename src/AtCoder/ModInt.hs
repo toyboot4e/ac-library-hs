@@ -244,7 +244,7 @@ newtype ModInt a = ModInt
 modulus :: forall a. (KnownNat a) => ModInt a -> Int
 modulus _ = fromIntegral (natVal' (proxy# @a))
 
--- | Returns the internal value converted to `Int`.
+-- | Returns the internal value in `Int`.
 --
 -- ==== Complecity
 -- - \(O(1)\)
@@ -265,7 +265,7 @@ val = fromIntegral . unModInt
 val32 :: (KnownNat a) => ModInt a -> Word32
 val32 = unModInt
 
--- | Returns the internal value converted to `Word32`.
+-- | Returns the internal value in `Word32`.
 --
 -- ==== Complecity
 -- - \(O(1)\)
