@@ -79,7 +79,7 @@ import GHC.Exts (Proxy#, proxy#)
 import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, natVal, natVal')
 
--- | `KnownNat` with meta information used for modulus.
+-- | `KnownNat` with meta information as a modulus value for convolution.
 --
 -- @since 1.0.0.0
 class (KnownNat a) => Modulus a where
