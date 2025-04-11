@@ -1,10 +1,15 @@
 module Tests.Extra.Math (tests) where
 
 import AtCoder.Extra.Math qualified as ACEM
+import Control.Monad (when)
+import Data.Foldable (for_)
 import Data.Proxy (Proxy (..))
 import Data.Semigroup (Max (..), Min (..), Sum (..), mtimesDefault, stimes)
+import Data.Vector.Unboxed qualified as VU
+import Debug.Trace
 import Test.QuickCheck.Property qualified as QC
 import Test.Tasty
+import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck qualified as QC
 import Tests.Util (myForAllShrink)
 
@@ -36,6 +41,40 @@ prop_mtimes' _ = myForAllShrink True (const True) desc lhsS lhs rhsS rhs
     rhsS = "mtimes n s"
     rhs (QC.NonNegative !n, !m) = mtimesDefault n m
 
+-- | This is a solid, fast implementation of prime number enumeration.
+truePrimes :: [Int]
+truePrimes = 2 : 3 : minus [5, 7 ..] (unionAll [[p * p, p * p + 2 * p ..] | p <- tail truePrimes])
+  where
+    minus (x : xs) (y : ys) = case compare x y of
+      LT -> x : minus xs (y : ys)
+      EQ -> minus xs ys
+      GT -> minus (x : xs) ys
+    minus xs _ = xs
+
+    union (x : xs) (y : ys) = case compare x y of
+      LT -> x : union xs (y : ys)
+      EQ -> x : union xs ys
+      GT -> y : union (x : xs) ys
+    union xs [] = xs
+    union [] ys = ys
+
+    unionAll :: (Ord a) => [[a]] -> [a]
+    unionAll ((x : xs) : t) = x : union xs (unionAll $ pairs t)
+      where
+        pairs ((x : xs) : ys : t) = (x : union xs ys) : pairs t
+        pairs _ = error "unionAll _ pairs: unreachable"
+    unionAll _ = error "unionAll: unreachable"
+
+-- unit_primes :: TestTree
+-- unit_primes = testCase "primes" $ do
+--   for_ [0 .. 10 ^ 9] $ \upper -> do
+--     when (upper `mod` 10000 == 0) $ do
+--       let !_ = traceShow upper ()
+--       pure ()
+--     let expected = VU.fromList $ takeWhile (<= upper) truePrimes
+--     let result = ACEM.primes upper
+--     result @?= expected
+
 tests :: [TestTree]
 tests =
   [ testGroup
@@ -51,5 +90,9 @@ tests =
         QC.testProperty "Product" (prop_mtimes' (Proxy @(Sum Int))),
         QC.testProperty "Max" (prop_mtimes' (Proxy @(Max Int))),
         QC.testProperty "Min" (prop_mtimes' (Proxy @(Min Int)))
+      ],
+    testGroup
+      "primes"
+      [ -- unit_primes
       ]
   ]

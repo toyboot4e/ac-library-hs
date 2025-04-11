@@ -379,6 +379,11 @@ executable yosupo-point-set-range-composite-large-array-lazy-persistent
 
   build-depends: verify
 
+executable yosupo-enumerate-primes
+  import:        app-local
+  main-is:       yosupo-enumerate-primes.hs
+  build-depends: verify
+
 executable yosupo-shortest-path
   import:        app-local
   main-is:       yosupo-shortest-path.hs
