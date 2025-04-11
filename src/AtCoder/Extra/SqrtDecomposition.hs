@@ -30,7 +30,7 @@ import Control.Monad (when)
 import Data.Foldable (for_)
 import Data.Vector.Unboxed qualified as VU
 
--- INLINE all the functions, even if the performance gain is just a little bit.
+-- INLINE all the functions, even if the performance gain is just a little bit, in case it matters.
 
 -- | \(O(\sqrt n)\) Runs user function for each block.
 {-# INLINE forM_ #-}
@@ -67,10 +67,14 @@ forM_ !blockLen !actFull !actPart !l !r = do
 
 -- | \(O(\sqrt n)\) Runs user function for each block and concatanate their monoid output.
 --
+-- ==== Constraints
+-- - \(l \le r\)
+-- - If an empty interval is queried, the @readPart@ function must return a valid value.
+--
 -- @since 1.2.5.0
 {-# INLINE foldMapM #-}
 foldMapM ::
-  (Monad m, Monoid a) =>
+  (Monad m, Semigroup a) =>
   -- | Context: block length.
   Int ->
   -- | Function: @readFull@ function that takes target block index and returns monoid value of it.
@@ -88,6 +92,10 @@ foldMapM blockLen = foldMapWithM blockLen (<>)
 
 -- | \(O(\sqrt n)\) Runs user function for each block and concatanates their output with user
 -- function.
+--
+-- ==== Constraints
+-- - \(l \le r\)
+-- - If an empty interval is queried, the @readPart@ function must return a valid value.
 --
 -- @since 1.2.5.0
 {-# INLINE foldMapWithM #-}
@@ -133,6 +141,9 @@ foldMapWithM !blockLen !merge !readFull !readPart !l !r = do
 
 -- | \(O(\sqrt n)\) Runs user function for each block, performing left folding.
 --
+-- ==== Constraints
+-- - \(l \le r\)
+--
 -- @since 1.2.5.0
 {-# INLINE foldM #-}
 foldM ::
@@ -158,7 +169,9 @@ foldM !blockLen !foldFull !foldPart !s0 !l !r = do
   let (!ir, !remR) = r `divMod` blockLen
   if il == ir
     then do
-      foldPart s0 il l r
+      if remL == remR
+        then pure s0
+        else foldPart s0 il l r
     else do
       !sx <-
         if remL == 0
@@ -174,6 +187,9 @@ foldM !blockLen !foldFull !foldPart !s0 !l !r = do
         else foldPart sm ir (r - remR) r
 
 -- | \(O(\sqrt n)\) `foldM` with return value discarded.
+--
+-- ==== Constraints
+-- - \(l \le r\)
 --
 -- @since 1.2.5.0
 {-# INLINE foldM_ #-}
