@@ -59,7 +59,7 @@ recursion x = runST $ do
 benches :: Benchmark
 benches =
   bgroup
-    "repeat-without-index"
+    "repeat-with-index"
     [ bench "list" $ nf list 0,
       bench "stream" $ nf stream 0,
       bench "vector" $ nf vector 0,

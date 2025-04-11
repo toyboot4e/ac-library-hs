@@ -2,13 +2,17 @@
 
 ## 1.2.6.0 -- April 2025
 
-- Added AtCoder.`Extra.Math` functions
+- Added `AtCoder.Extra.Math` functions
+  - `isPrime`
   - `primes`
+  - `primeFactors`
+- Added `AtCoderExtra.Math.Montgomery64`
+- Added `AtCoderExtra.ModInt64`
 
 ## 1.2.5.0 -- April 2025
 
-- Added AtCoder.`Extra.Mo`
-- Added AtCoder.`Extra.SqrtDecomposition`
+- Added `AtCoder.Extra.Mo`
+- Added `AtCoder.Extra.SqrtDecomposition`
 
 ## 1.2.4.0 -- April 2025
 
@@ -34,9 +38,9 @@
 
 ## 1.2.2.0 -- Feb 2025
 
-- Added `AtCoder.Extra.KdTree` and `Extra.LazyKdTree`.
+- Added `AtCoder.Extra.KdTree` and `AtCoder.Extra.LazyKdTree`.
 - Added `clear` function to the dynamic segment tree family.
-- Fixed AtCoder.`Extra.Hld.new` for a tree with a single vertex.
+- Fixed `AtCoder.Extra.Hld.new` for a tree with a single vertex.
 
 ## 1.2.1.0 -- Feb 2025
 

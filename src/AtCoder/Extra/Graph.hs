@@ -477,7 +477,7 @@ blockCut n gr = runST $ do
   n' <- VGM.unsafeRead next 0
   Csr.build' n' <$> B.unsafeFreeze edges
 
--- | \(O(n + m)\) Returns a [blocks (biconnected comopnents)](https://en.wikipedia.org/wiki/Biconnected_component)
+-- | \(O(n + m)\) Returns [blocks (biconnected comopnents)](https://en.wikipedia.org/wiki/Biconnected_component)
 -- of the graph.
 --
 -- ==== __Example__
