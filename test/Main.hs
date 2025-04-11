@@ -21,6 +21,7 @@ import Tests.Extra.KdTree qualified
 import Tests.Extra.LazyKdTree qualified
 import Tests.Extra.Math qualified
 import Tests.Extra.Math.Montgomery64 qualified
+import Tests.Extra.ModInt64 qualified
 import Tests.Extra.Monoid qualified
 import Tests.Extra.MultiSet qualified
 import Tests.Extra.SegTree2d qualified
@@ -77,6 +78,7 @@ main =
             testGroup "LazyKdTree" Tests.Extra.LazyKdTree.tests,
             testGroup "Math" Tests.Extra.Math.tests,
             testGroup "Math.Montgomery64" Tests.Extra.Math.Montgomery64.tests,
+            testGroup "ModInt64" Tests.Extra.ModInt64.tests,
             testGroup "Monoid" Tests.Extra.Monoid.tests,
             testGroup "MultiSet" Tests.Extra.MultiSet.tests,
             testGroup "SegTree2d" Tests.Extra.SegTree2d.tests,

@@ -429,6 +429,11 @@ executable yosupo-range-affine-range-sum
   main-is:       yosupo-range-affine-range-sum.hs
   build-depends: verify
 
+executable yosupo-range-affine-range-sum-64
+  import:        app-local
+  main-is:       yosupo-range-affine-range-sum-64.hs
+  build-depends: verify
+
 executable yosupo-range-affine-range-sum-Mat2x2
   import:        app-local
   main-is:       yosupo-range-affine-range-sum-Mat2x2.hs
