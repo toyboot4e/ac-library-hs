@@ -39,6 +39,7 @@ common dependencies
     , bitvec             <1.2
     , bytestring         <0.14
     , primitive          >=0.6.4.0 && <0.10
+    , random             >=1.2.0
     , vector             >=0.13.0  && <0.14
     , vector-algorithms  <0.10
     , wide-word          <0.2

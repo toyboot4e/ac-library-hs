@@ -10,6 +10,8 @@ module AtCoder.Extra.Math
     -- * Prime numbers
     primes,
     isPrime,
+    primeFactors,
+    primeFactorsUnsorted,
 
     -- * Binary exponentiation
 
@@ -37,11 +39,15 @@ import Control.Monad (unless, when)
 import Data.Bit (Bit (..))
 import Data.Bits (bit, countTrailingZeros, (.<<.), (.>>.))
 import Data.Foldable (for_)
+import Data.Maybe (fromJust)
+import Data.Vector.Algorithms.Intro qualified as VAI
+import Data.Vector.Algorithms.Radix qualified as VAR
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import Data.Word (Word64)
 import GHC.Stack (HasCallStack)
+import System.Random
 
 -- | \(O(k \log^3 n) (k = 3)\). Returns whether the given `Int` value is a prime number.
 --
@@ -200,6 +206,131 @@ isPrime x
           | not (M64.eq x64 y one) && not (M64.eq x64 y minusOne) && t /= x64 - 1 = inner (M64.mulMod mont y y) (t .<<. 1)
           | not (M64.eq x64 y minusOne) && even t = False
           | otherwise = True
+
+-- | Pollard's Rho algorithm.
+{-# INLINEABLE rho #-}
+rho :: (HasCallStack) => Word64 -> Int -> Int -> Int
+rho modVal n c
+  | n < 1 = error $ "AtCoder.Extra.Math.rho: given value less than or equal to `1`: `" ++ show n ++ show "`"
+  | otherwise = fromIntegral $! inner 1 (M64.encode mont 1) (M64.encode mont 2) (M64.encode mont 1) (M64.encode mont 1) 1
+  where
+    -- what a mess!!
+    !mont = M64.fromVal modVal
+    !n64 :: Word64 = fromIntegral n
+    !cc = M64.encode mont $ fromIntegral c
+    f !x = M64.addMod modVal (M64.mulMod mont x x) cc
+    fn 0 !x = x
+    fn n_ !x = fn (n_ - 1) $! f x
+    !m2 :: Int = bit $ floor (logBase (2.0 :: Double) (fromIntegral n)) `div` 5
+    inner r _lastY0 y0 z0 q0 g0
+      | g0 == 1 =
+          let !y = fn r y0
+              (!y', !z', !q', !g') = inner2 0 y z0 q0 g0
+           in inner (r .<<. 1) y0 y' z' q' g'
+      -- FIXME: It can sometimes slow, depending on the seed value
+      -- \| g0 == n64 = inner3 z0
+      | otherwise = g0
+      where
+        inner2 !k !y !z !q !g
+          | k >= r || g /= 1 = (y, z, q, g)
+          | otherwise =
+              let (!y', !q') = fn2 (min m2 (r - k)) y q
+                  !g' = gcd (M64.decode mont q) n64
+               in inner2 (k + m2) y' y q' g'
+          where
+            fn2 0 !y_ !q_ = (y_, q_)
+            fn2 n_ !y_ !q_ =
+              let !y' = f y_
+                  !q' = M64.mulMod mont q_ (M64.subMod modVal y0 y')
+               in fn2 (n_ - 1) y' q'
+
+-- FIXME: it can sometimes slow, depending on the seed value
+-- inner3 !z
+--   | g == 1 = inner3 z'
+--   | otherwise = g
+--   where
+--     !z' = f z
+--     !g = gcd (M64.decode mont (M64.subMod modVal lastY0 z')) n64
+
+-- | Tries to find a prime factor for the given value, running Pollard's Rho algorithm.
+--
+-- ==== Constrants
+-- - \(x \gt 1\)
+{-# INLINEABLE findPrimeFactor #-}
+findPrimeFactor :: (HasCallStack) => StdGen -> Int -> (Maybe Int, StdGen)
+findPrimeFactor gen0 n
+  | n <= 1 = error $ "AtCoder.Extra.Math.findPrimeFactor: given value less than or equal to `1`: " ++ show n ++ show "`"
+  | isPrime n = (Just n, gen0)
+  | otherwise = tryN 200 gen0
+  where
+    tryN :: Int -> StdGen -> (Maybe Int, StdGen)
+    tryN 0 gen = (Nothing, gen)
+    tryN i gen
+      | isPrime m = (Just m, gen')
+      | otherwise = tryN (i - 1) gen'
+      where
+        (!rnd, !gen') = uniformR (0, n - 1) gen
+        !m = rho (fromIntegral n) n rnd
+
+-- | Returns prime factors in run-length encoding \((p_i, n_i)\), sorted by \(p_i\).
+--
+-- ==== Constraints
+-- - \(x \ge 1\)
+--
+-- @since 1.2.6.0
+{-# INLINE primeFactors #-}
+primeFactors :: (HasCallStack) => Int -> VU.Vector (Int, Int)
+primeFactors = VU.modify VAI.sort . primeFactorsUnsorted
+
+-- | Returns prime factors in run-length encoding \((p_i, n_i)\) in arbitrary order.
+--
+-- It internally uses probabilistic method (Pollard's rho algorithm) and it can actually result in
+-- runtime error, however, the probability is very low and the API does not return `Maybe`.
+--
+-- @since 1.2.6.0
+{-# INLINEABLE primeFactorsUnsorted #-}
+primeFactorsUnsorted :: (HasCallStack) => Int -> VU.Vector (Int, Int)
+primeFactorsUnsorted n
+  | n < 1 = error $ "AtCoder.Extra.Math.primeFactorsUnsorted: given non-positive value `" ++ show n ++ "`"
+  | otherwise = VU.create $ do
+      buf <- VUM.unsafeNew (ceiling (logBase (2 :: Double) (fromIntegral n)))
+
+      -- for small prime factors, try them all:
+      let runDiv cur iWrite [] = pure (cur, iWrite)
+          runDiv cur iWrite (d : rest)
+            | d * d > cur = pure (cur, iWrite)
+            | otherwise = case tryDiv 0 cur d of
+                Just (!cur', !nd) -> do
+                  VGM.write buf iWrite (d, nd)
+                  runDiv cur' (iWrite + 1) rest
+                Nothing -> runDiv cur iWrite rest
+
+      (!n', !iWrite0) <- runDiv n 0 (2 : [3, 5 .. 97])
+
+      -- for bigger prime numbers, use Polland's rho algorithm:
+      let runRho !gen !cur !iWrite
+            | cur > 1 = case findPrimeFactor gen cur of
+                (Just p, !gen') -> do
+                  let (!cur', !np) = fromJust $ tryDiv 0 cur p
+                  VGM.write buf iWrite (p, np)
+                  runRho gen' cur' (iWrite + 1)
+                (Nothing, !_gen') -> do
+                  -- we could return `Nothing` instead
+                  error $ "unable to find prime factor for " ++ show cur
+            | otherwise = pure iWrite
+
+      -- NOTE: The seed value ifs fixed here. We could decide it at runtime for possibly faster
+      -- submissions on TLE redjuge, however, 're rather preferring deterministic result:
+      len <- runRho (mkStdGen 123456789) n' iWrite0
+      pure $ VUM.take len buf
+  where
+    tryDiv :: Int -> Int -> Int -> Maybe (Int, Int)
+    tryDiv !nDiv x d
+      | r == 0 = tryDiv (nDiv + 1) q d
+      | nDiv > 0 = Just (x, nDiv)
+      | otherwise = Nothing
+      where
+        (!q, !r) = x `quotRem` d
 
 -- | Calculates \(x^n\) with custom multiplication operator using the binary exponentiation
 -- technique.

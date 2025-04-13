@@ -260,6 +260,11 @@ executable yosupo-enumerate-palindromes
   main-is:       yosupo-enumerate-palindromes.hs
   build-depends: verify
 
+executable yosupo-factorize
+  import:        app-local
+  main-is:       yosupo-factorize.hs
+  build-depends: verify
+
 executable yosupo-jump-on-tree
   import:        app-local
   main-is:       yosupo-jump-on-tree.hs

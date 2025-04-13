@@ -1,12 +1,11 @@
 module Tests.Extra.Math (tests) where
 
 import AtCoder.Extra.Math qualified as ACEM
-import Control.Monad (when)
 import Data.Foldable (for_)
+import Data.List qualified as L
 import Data.Proxy (Proxy (..))
 import Data.Semigroup (Max (..), Min (..), Sum (..), mtimesDefault, stimes)
 import Data.Vector.Unboxed qualified as VU
-import Debug.Trace
 import Test.QuickCheck.Property qualified as QC
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -41,7 +40,7 @@ prop_mtimes' _ = myForAllShrink True (const True) desc lhsS lhs rhsS rhs
     rhsS = "mtimes n s"
     rhs (QC.NonNegative !n, !m) = mtimesDefault n m
 
--- | This is a solid, fast implementation of prime number enumeration.
+-- | This is a solid, fast implementation of prime number enumeration for lists.
 truePrimes :: [Int]
 truePrimes = 2 : 3 : minus [5, 7 ..] (unionAll [[p * p, p * p + 2 * p ..] | p <- tail truePrimes])
   where
@@ -65,6 +64,21 @@ truePrimes = 2 : 3 : minus [5, 7 ..] (unionAll [[p * p, p * p + 2 * p ..] | p <-
         pairs _ = error "unionAll _ pairs: unreachable"
     unionAll _ = error "unionAll: unreachable"
 
+-- | This is a solid, fast implementation of prime number enumeration for lists.
+truePrimeFactors :: Int -> [(Int, Int)]
+truePrimeFactors !n_ = map (\ !xs -> (head xs, length xs)) . L.group $ inner n_ input
+  where
+    -- TODO: reuse `primes`?
+    input = 2 : 3 : [y | x <- [5, 11 ..], y <- [x, x + 2]]
+    inner n pps@(p : ps)
+      | n == 1 = []
+      | n < p * p = [n]
+      | r == 0 = p : inner q pps
+      | otherwise = inner n ps
+      where
+        (q, r) = divMod n p
+    inner _ _ = error "unreachable"
+
 -- unit_primes :: TestTree
 -- unit_primes = testCase "primes" $ do
 --   for_ [0 .. 10 ^ 9] $ \upper -> do
@@ -74,6 +88,12 @@ truePrimes = 2 : 3 : minus [5, 7 ..] (unionAll [[p * p, p * p + 2 * p ..] | p <-
 --     let expected = VU.fromList $ takeWhile (<= upper) truePrimes
 --     let result = ACEM.primes upper
 --     result @?= expected
+
+prop_primeFactors :: QC.Positive Int -> QC.Property
+prop_primeFactors (QC.Positive x) =
+  let expected = VU.fromList $ truePrimeFactors x
+      result = ACEM.primeFactors x
+   in result QC.=== expected
 
 tests :: [TestTree]
 tests =
@@ -94,5 +114,8 @@ tests =
     testGroup
       "primes"
       [ -- unit_primes
+        QC.testProperty "primeFactors" prop_primeFactors
       ]
   ]
+
+-- unit_primes
