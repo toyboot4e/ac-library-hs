@@ -1,14 +1,12 @@
 module Tests.Extra.Math (tests) where
 
 import AtCoder.Extra.Math qualified as ACEM
-import Data.Foldable (for_)
 import Data.List qualified as L
 import Data.Proxy (Proxy (..))
 import Data.Semigroup (Max (..), Min (..), Sum (..), mtimesDefault, stimes)
 import Data.Vector.Unboxed qualified as VU
 import Test.QuickCheck.Property qualified as QC
 import Test.Tasty
-import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck qualified as QC
 import Tests.Util (myForAllShrink)
 
