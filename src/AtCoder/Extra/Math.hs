@@ -7,11 +7,13 @@ module AtCoder.Extra.Math
     ACIM.invGcd,
     primitiveRoot32,
 
-    -- * Prime numbers
+    -- * Prime numbers and divisors
     primes,
     isPrime,
     primeFactors,
     primeFactorsUnsorted,
+    divisors,
+    divisorsUnsorted,
 
     -- * Binary exponentiation
 
@@ -331,6 +333,51 @@ primeFactorsUnsorted n
       | otherwise = Nothing
       where
         (!q, !r) = x `quotRem` d
+
+-- | Enumerates divisors of the input value.
+--
+-- ==== Constraints
+-- - \(x \ge 1\)
+--
+-- @since 1.2.6.0
+{-# INLINE divisors #-}
+divisors :: Int -> VU.Vector Int
+-- TODO: use intro sort?
+divisors = VU.modify VAR.sort . divisorsUnsorted
+
+-- | Enumerates divisors of the input value.
+--
+-- ==== Constraints
+-- - \(x \ge 1\)
+--
+-- @since 1.2.6.0
+{-# INLINEABLE divisorsUnsorted #-}
+divisorsUnsorted :: Int -> VU.Vector Int
+divisorsUnsorted x = VU.create $ do
+  vec <- VUM.unsafeNew nDivisors
+  VGM.write vec 0 1
+  VU.foldM'_
+    ( \lenSofar (!p, !np) -> do
+        (fst <$>)
+          $ VU.foldM'
+            ( \(!offset, !pp) _ -> do
+                let !pp' = pp * p
+                -- multiply to all the values sofar:
+                VGM.iforM_ (VGM.take lenSofar vec) $ \i vx -> do
+                  VGM.write vec (offset + i) $! vx * pp'
+                  pure pp'
+                pure (offset + lenSofar, pp')
+            )
+            (lenSofar, 1 :: Int)
+          $ VU.generate np (+ 1)
+    )
+    (1 :: Int)
+    pns
+  pure vec
+  where
+    pns = primeFactors x
+    (!_, !ns) = VU.unzip pns
+    nDivisors = VU.foldl' (\ !acc n -> acc * (n + 1)) (1 :: Int) ns
 
 -- | Calculates \(x^n\) with custom multiplication operator using the binary exponentiation
 -- technique.

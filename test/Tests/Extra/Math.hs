@@ -79,6 +79,23 @@ truePrimeFactors !n_ = map (\ !xs -> (head xs, length xs)) . L.group $ inner n_ 
         (q, r) = divMod n p
     inner _ _ = error "unreachable"
 
+trueDivisors :: Int -> [Int]
+trueDivisors n = L.sort $ inner 1
+  where
+    inner k
+      -- no dependency to `Int` square root function
+      | k * k > n = []
+      -- no divisor duplication
+      | k * k == n = [k]
+      -- not sorted yet
+      | r == 0 = k : d : inner (succ k)
+      -- ignore non divisors
+      | otherwise = inner (succ k)
+      where
+        -- This strict evaluation and unboxing takes some effect, even though they're not always
+        -- used.
+        (!d, !r) = n `divMod` k
+
 -- unit_primes :: TestTree
 -- unit_primes = testCase "primes" $ do
 --   for_ [0 .. 10 ^ 9] $ \upper -> do
@@ -93,6 +110,12 @@ prop_primeFactors :: QC.Positive Int -> QC.Property
 prop_primeFactors (QC.Positive x) =
   let expected = VU.fromList $ truePrimeFactors x
       result = ACEM.primeFactors x
+   in result QC.=== expected
+
+prop_divisors :: QC.Positive Int -> QC.Property
+prop_divisors (QC.Positive x) =
+  let expected = VU.fromList $ trueDivisors x
+      result = ACEM.divisors x
    in result QC.=== expected
 
 tests :: [TestTree]
@@ -114,7 +137,8 @@ tests =
     testGroup
       "primes"
       [ -- unit_primes
-        QC.testProperty "primeFactors" prop_primeFactors
+        QC.testProperty "primeFactors" prop_primeFactors,
+        QC.testProperty "divisors" prop_divisors
       ]
   ]
 
