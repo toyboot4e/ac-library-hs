@@ -3,7 +3,10 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 
--- | @ModInt@ for 64 bit modulus values.
+-- | @ModInt@ for 64 bit modulus values with Montgomery modular multiplication.
+--
+-- ==== Constraints
+-- - The modulus value should be an odd number, otherwise it would be too slow.
 --
 -- @since 1.2.6.0
 module AtCoder.Extra.ModInt64
@@ -48,6 +51,9 @@ import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, natVal')
 
 -- | `Word64` value that treats the modular arithmetic.
+--
+-- ==== Constraints
+-- - The modulus value should be an odd number, otherwise it would be too slow.
 --
 -- @since 1.2.6.0
 newtype ModInt64 a = ModInt64
@@ -225,13 +231,7 @@ instance (KnownNat p) => Enum (ModInt64 p) where
 
 -- | @since 1.2.6.0
 instance (KnownNat p) => Integral (ModInt64 p) where
-  -- FIXME: THIS IS COMPLETELY WRONG. Compare with `ModInt`.
   {-# INLINE quotRem #-}
-  -- quotRem x y =
-  --   let !x' = val x
-  --       !y' = val y
-  --       (!q, !r) = x' `quotRem` y'
-  --    in (new q, new r)
   quotRem x y = (x / y, x - x / y * y)
   {-# INLINE toInteger #-}
   toInteger = toInteger . val

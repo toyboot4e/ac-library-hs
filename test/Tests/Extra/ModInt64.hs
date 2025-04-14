@@ -117,6 +117,14 @@ prop_quotRem _ x (QC.NonZero y) =
   where
     !m = fromIntegral $ natVal' (proxy# @a)
 
+prop_quotRem2 :: forall a. (KnownNat a) => Proxy# a -> Int -> QC.NonZero Int -> QC.Property
+prop_quotRem2 _ x (QC.NonZero y) =
+  let !a = M.new @a x
+      !d = M.new @a y
+   in d /= 0 QC.==>
+        let (!q, !r) = a `quotRem` d
+         in (d * q + r) QC.=== a
+
 prop_eq :: forall a. (KnownNat a) => Proxy# a -> Word64 -> Word64 -> QC.Property
 prop_eq _ x y = lhs QC.=== rhs
   where
@@ -160,6 +168,14 @@ tests =
         QC.testProperty "4" (prop_quotRem (proxy# @M4))
         -- 64 bit
         -- QC.testProperty "5" (prop_quotRem (proxy# @M5))
+      ],
+    testGroup
+      "quotRem2"
+      [ QC.testProperty "1" (prop_quotRem2 (proxy# @M1)),
+        QC.testProperty "2" (prop_quotRem2 (proxy# @M2)),
+        QC.testProperty "3" (prop_quotRem2 (proxy# @M3)),
+        QC.testProperty "4" (prop_quotRem2 (proxy# @M4)),
+        QC.testProperty "5" (prop_quotRem2 (proxy# @M5))
       ],
     testGroup
       "eq"

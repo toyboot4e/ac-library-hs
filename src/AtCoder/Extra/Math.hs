@@ -91,9 +91,13 @@ primitiveRoot32 x = ACIM.primitiveRoot x
 -- - The upper limit must be less than or equal to \(2^{30} (\gt 10^9)\), otherwise the returned
 -- prime table is incorrect.
 --
+-- ==== __Example__
+-- >>> primes 100
+-- [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97]
+--
 -- @since 1.2.6.0
 {-# INLINEABLE primes #-}
-primes :: Int -> VU.Vector Int
+primes :: (HasCallStack) => Int -> VU.Vector Int
 primes upperLimit
   | upperLimit <= 1 = VU.empty
   | otherwise = VU.create $ do
@@ -183,9 +187,13 @@ primes upperLimit
 -- | \(O(w \log^3 n)\) Miller–Rabin primality test, where \(w = 3\) for \(x \lt 2^{32}\) and
 -- \(w = 7\) for \(x \ge 3^{32}\).
 --
+-- ==== __Example__
+-- >>> isPrime 100055128505716009
+-- True
+--
 -- @since 1.2.6.0
 {-# INLINEABLE isPrime #-}
-isPrime :: Int -> Bool
+isPrime :: (HasCallStack) => Int -> Bool
 isPrime x
   | x <= 1 = False
   -- Up to 11^2:
@@ -282,6 +290,13 @@ findPrimeFactor gen0 n
 -- ==== Constraints
 -- - \(x \ge 1\)
 --
+-- ==== __Example__
+-- >>> primeFactors 180
+-- [(2,2),(3,2),(5,1)]
+--
+-- >>> primeFactors 123123123123123123
+-- [(3,2),(7,1),(11,1),(13,1),(19,1),(41,1),(52579,1),(333667,1)]
+--
 -- @since 1.2.6.0
 {-# INLINE primeFactors #-}
 primeFactors :: (HasCallStack) => Int -> VU.Vector (Int, Int)
@@ -342,9 +357,13 @@ primeFactorsUnsorted n
 -- ==== Constraints
 -- - \(x \ge 1\)
 --
+-- ==== __Example__
+-- >>> divisors 180
+-- [1,2,3,4,5,6,9,10,12,15,18,20,30,36,45,60,90,180]
+--
 -- @since 1.2.6.0
 {-# INLINE divisors #-}
-divisors :: Int -> VU.Vector Int
+divisors :: (HasCallStack) => Int -> VU.Vector Int
 -- TODO: use intro sort?
 divisors = VU.modify VAR.sort . divisorsUnsorted
 
@@ -355,7 +374,7 @@ divisors = VU.modify VAR.sort . divisorsUnsorted
 --
 -- @since 1.2.6.0
 {-# INLINEABLE divisorsUnsorted #-}
-divisorsUnsorted :: Int -> VU.Vector Int
+divisorsUnsorted :: (HasCallStack) => Int -> VU.Vector Int
 divisorsUnsorted x = VU.create $ do
   vec <- VUM.unsafeNew nDivisors
   VGM.write vec 0 1
@@ -435,7 +454,7 @@ primitiveRoot x = tryRandom $ mkStdGen 123456789
 --
 -- @since 1.0.0.0
 {-# INLINE power #-}
-power :: (a -> a -> a) -> Int -> a -> a
+power :: (HasCallStack) => (a -> a -> a) -> Int -> a -> a
 power op n0 x1
   | n0 <= 0 = errorWithoutStackTrace "AtCoder.Extra.Math.power: positive multiplier expected"
   | otherwise = f x1 n0
@@ -459,7 +478,7 @@ power op n0 x1
 --
 -- @since 1.0.0.0
 {-# INLINE stimes' #-}
-stimes' :: (Semigroup a) => Int -> a -> a
+stimes' :: (HasCallStack) => (Semigroup a) => Int -> a -> a
 stimes' = power (<>)
 
 -- | Strict variant of @Data.Monoid.mtimes@.
@@ -472,8 +491,8 @@ stimes' = power (<>)
 --
 -- @since 1.0.0.0
 {-# INLINE mtimes' #-}
-mtimes' :: (Monoid a) => Int -> a -> a
+mtimes' :: (HasCallStack) => (Monoid a) => Int -> a -> a
 mtimes' n x = case compare n 0 of
-  LT -> errorWithoutStackTrace "AtCoder.Extra.Math.mtimes': non-negative multiplier expected"
+  LT -> error "AtCoder.Extra.Math.mtimes': non-negative multiplier expected"
   EQ -> mempty
   GT -> power (<>) n x

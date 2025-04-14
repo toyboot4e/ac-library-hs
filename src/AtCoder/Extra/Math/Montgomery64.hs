@@ -66,7 +66,7 @@ data Montgomery64 = Montgomery64
 --
 -- @since 1.2.6.0
 {-# NOINLINE new #-}
-new :: forall a. (KnownNat a) => Proxy# a -> Montgomery64
+new :: forall a. (HasCallStack, KnownNat a) => Proxy# a -> Montgomery64
 -- FIXME: test allocated once
 new p = fromVal . fromIntegral $! natVal' p
 
@@ -78,7 +78,7 @@ new p = fromVal . fromIntegral $! natVal' p
 --
 -- @since 1.2.6.0
 {-# INLINE fromVal #-}
-fromVal :: Word64 -> Montgomery64
+fromVal :: (HasCallStack) => Word64 -> Montgomery64
 fromVal m =
   let !m128 :: Word128 = fromIntegral m
       !n2 = word128Lo64 $ (-m128) `mod` m128

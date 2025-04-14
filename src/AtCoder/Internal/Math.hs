@@ -107,7 +107,7 @@ isPrime n
   | otherwise =
       let d = innerD $ n - 1
           test a = inner d $ powMod a d n
-       in all test [2, 7, 61 :: Int]
+       in test 2 && test 7 && test 61
   where
     innerD d
       | even d = innerD $ d `div` 2
