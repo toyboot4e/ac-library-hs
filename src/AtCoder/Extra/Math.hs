@@ -15,6 +15,9 @@ module AtCoder.Extra.Math
     divisors,
     divisorsUnsorted,
 
+    -- * PrimitiveRoot
+    primitiveRoot,
+
     -- * Binary exponentiation
 
     -- | ==== __Examples__
@@ -378,6 +381,45 @@ divisorsUnsorted x = VU.create $ do
     pns = primeFactors x
     (!_, !ns) = VU.unzip pns
     nDivisors = VU.foldl' (\ !acc n -> acc * (n + 1)) (1 :: Int) ns
+
+-- | Returns a primitive root of module \(p\), where \(p\) is a prime number.
+--
+-- ==== Constraints
+-- - \(p\) must be a prime number.
+--
+-- ==== __Example__
+-- >>> primitiveRoot 999999999999999989
+-- 833278905416200545
+--
+-- >>> primitiveRoot 100055128505716009
+-- 40765942246299710
+--
+-- @since 1.2.7.0
+{-# INLINEABLE primitiveRoot #-}
+primitiveRoot :: (HasCallStack) => Int -> Int
+primitiveRoot x
+  | not (isPrime x) = error $ "AtCoder.Extra.Math.primitiveRoot: give non-prime value `" ++ show x ++ "`"
+  | x == 2 = 1
+primitiveRoot x = tryRandom $ mkStdGen 123456789
+  where
+    !x64 :: Word64 = fromIntegral x
+    !mont = M64.fromVal x64
+    (!ps, !_) = VU.unzip $ primeFactorsUnsorted (x - 1)
+    -- g s.t. for all p_i. g^n mod p_i /= 1
+    test :: (HasCallStack) => Word64 -> Int -> Bool
+    test g p =
+      let !n = (x - 1) `div` p
+       in (/= 1)
+            . M64.decode mont
+            . power (M64.mulMod mont) n
+            . M64.encode mont
+            $ fromIntegral g
+    tryRandom :: (HasCallStack) => StdGen -> Int
+    tryRandom !gen
+      | VU.all (test rnd) ps = fromIntegral rnd
+      | otherwise = tryRandom gen'
+      where
+        (!rnd, !gen') = uniformR (1, x64 - 1) gen
 
 -- | Calculates \(x^n\) with custom multiplication operator using the binary exponentiation
 -- technique.

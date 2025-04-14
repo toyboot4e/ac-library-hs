@@ -434,6 +434,11 @@ executable yosupo-primarity-test
   main-is:       yosupo-primarity-test.hs
   build-depends: verify
 
+executable yosupo-primitive-root
+  import:        app-local
+  main-is:       yosupo-primitive-root.hs
+  build-depends: verify
+
 executable yosupo-range-affine-range-sum
   import:        app-local
   main-is:       yosupo-range-affine-range-sum.hs
