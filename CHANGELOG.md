@@ -21,7 +21,7 @@
   - `rev`
   - `connectedComponents`
   - `bipartiteVertexColors`
-  - BFS, Dijkstra, Bellman–ford, Floyd–Warshall
+  - BFS, Dijkstra, Bellman–Ford, Floyd–Warshall
   - path reconstruction functions
 - Added `AtCoder.Extra.Tree` functions
   - `diameter`, `diameterPath`

@@ -56,7 +56,7 @@ module AtCoder.Extra.Graph
     dijkstra,
     trackingDijkstra,
 
-    -- ** Bellman–ford algorithm
+    -- ** Bellman–Ford algorithm
 
     -- | - Vertex type is restricted to one-dimensional `Int`.
     bellmanFord,
@@ -74,7 +74,7 @@ module AtCoder.Extra.Graph
 
     -- ** Path reconstruction
 
-    -- *** Single start point (root)
+    -- *** Single source point (root)
 
     -- | Functions for retrieving a path from a predecessor array where @-1@ represents none.
     constructPathFromRoot,
@@ -871,7 +871,7 @@ dijkstraImpl !trackPrev !bnd0 !gr !capacity !undefW !sources
 -- -- | Option for `bellmanFord`.
 -- data BellmanFordPolicy = QuitOnNegaitveLoop | ContinueOnNegaitveLoop
 
--- | \(O(nm)\) Bellman–ford algorithm that returns a distance array, or `Nothing` on negative loop
+-- | \(O(nm)\) Bellman–Ford algorithm that returns a distance array, or `Nothing` on negative loop
 -- detection. Vertices are one-dimensional.
 --
 -- ==== __Example__
@@ -907,7 +907,7 @@ bellmanFord {- !policy -} !nVerts !gr !undefW source = do
   (!dist, !_) <- bellmanFordImpl False nVerts gr undefW source
   pure dist
 
--- | \(O(nm)\) Bellman–ford algorithm that returns a distance array and a predecessor array, or
+-- | \(O(nm)\) Bellman–Ford algorithm that returns a distance array and a predecessor array, or
 -- `Nothing` on negative loop detection. Vertices are one-dimensional.
 --
 -- ==== __Example__
@@ -1328,7 +1328,7 @@ updateEdgeFloydWarshallST trackPrev mat prev nVerts undefW a b dw = do
 --
 -- ==== Constraints
 -- - The path must not make a cycle, otherwise this function loops forever.
--- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- - There must be a path from the root to the @sink@ vertex, otherwise the returned path is not
 -- connected to the root.
 --
 -- @since 1.2.4.0
@@ -1340,7 +1340,7 @@ constructPathFromRoot parents = VU.reverse . constructPathToRoot parents
 --
 -- ==== Constraints
 -- - The path must not make a cycle, otherwise this function loops forever.
--- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- - There must be a path from the root to the @sink@ vertex, otherwise the returned path is not
 -- connected to the root.
 --
 -- @since 1.2.4.0
@@ -1352,11 +1352,11 @@ constructPathToRoot parents = VU.unfoldr f
     f v = Just (v, parents VG.! v)
 
 -- | \(O(n)\) Given a NxN predecessor matrix (created with `trackingFloydWarshall`), retrieves a
--- path from the root to an end vertex.
+-- path from the root to a sink vertex.
 --
 -- ==== Constraints
 -- - The path must not make a cycle, otherwise this function loops forever.
--- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- - There must be a path from the root to the @sink@ vertex, otherwise the returned path is not
 -- connected to the root.
 --
 -- @since 1.2.4.0
@@ -1365,20 +1365,20 @@ constructPathFromRootMat ::
   (HasCallStack) =>
   -- | Predecessor matrix.
   VU.Vector Int ->
-  -- | Start vertex.
+  -- | Source vertex.
   Int ->
-  -- | End vertex.
+  -- | Sink vertex.
   Int ->
   -- | Path.
   VU.Vector Int
-constructPathFromRootMat parents start = VU.reverse . constructPathToRootMat parents start
+constructPathFromRootMat parents source = VU.reverse . constructPathToRootMat parents source
 
 -- | \(O(n)\) Given a NxN predecessor matrix(created with `trackingFloydWarshall`), retrieves a
 -- path from a vertex to the root.
 --
 -- ==== Constraints
 -- - The path must not make a cycle, otherwise this function loops forever.
--- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- - There must be a path from the root to the @sink@ vertex, otherwise the returned path is not
 -- connected to the root.
 --
 -- @since 1.2.4.0
@@ -1387,26 +1387,26 @@ constructPathToRootMat ::
   (HasCallStack) =>
   -- | Predecessor matrix.
   VU.Vector Int ->
-  -- | Start vertex.
+  -- | Source vertex.
   Int ->
-  -- | End vertex.
+  -- | Sink vertex.
   Int ->
   -- | Path.
   VU.Vector Int
-constructPathToRootMat parents start end =
-  let parents' = VU.take n $ VU.drop (n * start) parents
-   in constructPathToRoot parents' end
+constructPathToRootMat parents source sink =
+  let parents' = VU.take n $ VU.drop (n * source) parents
+   in constructPathToRoot parents' sink
   where
     -- Assuming `n < 2^32`, it should always be correct:
     -- https://zenn.dev/mod_poppo/articles/atcoder-beginner-contest-284-d#%E8%A7%A3%E6%B3%953%EF%BC%9Asqrt%E3%81%A8round%E3%82%92%E4%BD%BF%E3%81%86
     n :: Int = round . sqrt $ (fromIntegral (VU.length parents) :: Double)
 
 -- | \(O(n)\) Given a NxN predecessor matrix (created with `newTrackingFloydWarshall`), retrieves a
--- path from the root to an end vertex.
+-- path from the root to a sink vertex.
 --
 -- ==== Constraints
 -- - The path must not make a cycle, otherwise this function loops forever.
--- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- - There must be a path from the root to the @nd@ vertex, otherwise the returned path is not
 -- connected to the root.
 --
 -- @since 1.2.4.0
@@ -1415,20 +1415,20 @@ constructPathFromRootMatM ::
   (HasCallStack, PrimMonad m) =>
   -- | Predecessor matrix.
   VUM.MVector (PrimState m) Int ->
-  -- | Start vertex.
+  -- | Source vertex.
   Int ->
-  -- | End vertex.
+  -- | Sink vertex.
   Int ->
   -- | Path.
   m (VU.Vector Int)
-constructPathFromRootMatM parents start = (VU.reverse <$>) . constructPathToRootMatM parents start
+constructPathFromRootMatM parents source = (VU.reverse <$>) . constructPathToRootMatM parents source
 
 -- | \(O(n)\) Given a NxN predecessor matrix (created with `newTrackingFloydWarshall`), retrieves a
 -- path from a vertex to the root.
 --
 -- ==== Constraints
 -- - The path must not make a cycle, otherwise this function loops forever.
--- - There must be a path from the root to the @end@ vertex, otherwise the returned path is not
+-- - There must be a path from the root to the @sink@ vertex, otherwise the returned path is not
 -- connected to the root.
 --
 -- @since 1.2.4.0
@@ -1437,12 +1437,12 @@ constructPathToRootMatM ::
   (HasCallStack, PrimMonad m) =>
   -- | Predecessor matrix.
   VUM.MVector (PrimState m) Int ->
-  -- | Start vertex.
+  -- | Source vertex.
   Int ->
-  -- | End vertex.
+  -- | Sink vertex.
   Int ->
   -- | Path.
   m (VU.Vector Int)
-constructPathToRootMatM parents start end = stToPrim $ do
+constructPathToRootMatM parents source sink = stToPrim $ do
   parents' <- VU.unsafeFreeze parents
-  pure $ constructPathToRootMat parents' start end
+  pure $ constructPathToRootMat parents' source sink
