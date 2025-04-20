@@ -3,13 +3,13 @@
 -- interval query block by block, typically in \(O(\sqrt n)\) time, where a whole block processing
 -- take \(O(1)\) time and partial block processing take \(O(\sqrt n)\) time.
 --
--- For simplicity, in this document, we assume that highder order functions applided to an entier
+-- For simplicity, in this document, we assume that higher order functions applied to an entire
 -- block (@readFull@ and @actFull@) work in \(O(1)\) time, and those applied to a part of block work
 -- in \(O(\sqrt n)\) time. In total, \(q\) query processing takes \(O(q \sqrt n)\) time. Note that
 -- it's a rather large number and often requires performance tuning.
 --
 -- ==== Lazy propagation
--- Typiaclly, an action to a whole block can be delayed; store the aggregation value for the block,
+-- Typically, an action to a whole block can be delayed; store the aggregation value for the block,
 -- delay the internal sequence update, and restore them when part of the block is accessed. Such
 -- lazy propagation should be handled on the user side on partial block access functions
 -- (@foldPart@ or @actPart@) are called.
@@ -65,7 +65,7 @@ forM_ !blockLen !actFull !actPart !l !r = do
       when (remR > 0) $ do
         actPart ir (r - remR) r
 
--- | \(O(\sqrt n)\) Runs user function for each block and concatanates their monoid output.
+-- | \(O(\sqrt n)\) Runs user function for each block and concatenates their monoid output.
 --
 -- ==== Constraints
 -- - \(l \le r\)
@@ -90,7 +90,7 @@ foldMapM ::
   m a
 foldMapM blockLen = foldMapWithM blockLen (<>)
 
--- | \(O(\sqrt n)\) Runs user function for each block and concatanates their output with user
+-- | \(O(\sqrt n)\) Runs user function for each block and concatenates their output with user
 -- function.
 --
 -- ==== Constraints
