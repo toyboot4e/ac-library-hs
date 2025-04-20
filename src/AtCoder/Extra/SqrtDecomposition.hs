@@ -65,7 +65,7 @@ forM_ !blockLen !actFull !actPart !l !r = do
       when (remR > 0) $ do
         actPart ir (r - remR) r
 
--- | \(O(\sqrt n)\) Runs user function for each block and concatanate their monoid output.
+-- | \(O(\sqrt n)\) Runs user function for each block and concatanates their monoid output.
 --
 -- ==== Constraints
 -- - \(l \le r\)
