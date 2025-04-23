@@ -656,6 +656,8 @@ maxRightM self@LazySegTree {..} l0 g = do
             else inner2 l' sm
       | otherwise = pure $ l - sizeLst
 
+-- TODO: add minLeft
+
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --
 -- @since 1.0.0.0

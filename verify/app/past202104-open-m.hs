@@ -2,7 +2,6 @@ import AtCoder.Extra.Bisect (lowerBound)
 import AtCoder.Extra.IntervalMap qualified as ITM
 import Data.ByteString.Char8 qualified as BS
 import Data.ByteString.Builder qualified as BSB
-import Data.Maybe (fromJust)
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -24,14 +23,14 @@ main = do
   cnt <- VUM.replicate (VG.length dict) (0 :: Int)
 
   let onAdd l r x = do
-        let !i = fromJust $ lowerBound dict x
+        let !i = lowerBound dict x
         let !len = r - l
         VGM.read cnt i >>= \n' -> VGM.modify res (subtract (n' * (n' - 1) `div` 2)) 0
         VGM.modify cnt (+ len) i
         VGM.read cnt i >>= \n' -> VGM.modify res (+ (n' * pred n' `div` 2)) 0
 
   let onDel l r x = do
-        let !i = fromJust $ lowerBound dict x
+        let !i = lowerBound dict x
         let !len = r - l
         VGM.read cnt i >>= \n' -> VGM.modify res (subtract (n' * (n' - 1) `div` 2)) 0
         VGM.modify cnt (subtract len) i

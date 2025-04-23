@@ -65,23 +65,23 @@ where
 import AtCoder.Extra.Bisect
 import AtCoder.Extra.WaveletMatrix.Raw qualified as Rwm
 import Control.Monad
-import Data.Maybe (fromJust, fromMaybe)
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
+import GHC.Stack (HasCallStack)
 
 -- | A static Wavelet Matrix.
 --
--- @since 1.1.0.0
+-- @since 1.3.0.0
 data WaveletMatrix = WaveletMatrix
   { -- | The internal wavelet matrix, where index compression is not automatically performed.
     --
-    -- @since 1.1.0.0
-    rawWM :: !Rwm.RawWaveletMatrix,
+    -- @since 1.3.0.0
+    rawWm :: !Rwm.RawWaveletMatrix,
     -- | Index compression dictionary.
     --
-    -- @since 1.1.0.0
-    xDictWM :: !(VU.Vector Int)
+    -- @since 1.3.0.0
+    yDictWm :: !(VU.Vector Int)
   }
 
 -- | \(O(n \log n)\) Creates a `WaveletMatrix` from an array \(a\).
@@ -90,9 +90,9 @@ data WaveletMatrix = WaveletMatrix
 {-# INLINE build #-}
 build :: VU.Vector Int -> WaveletMatrix
 build ys =
-  let !xDictWM = VU.uniq $ VU.modify (VAI.sortBy compare) ys
-      !ys' = VU.map (fromJust . lowerBound xDictWM) ys
-      !rawWM = Rwm.build (VG.length ys) ys'
+  let !yDictWm = VU.uniq $ VU.modify (VAI.sortBy compare) ys
+      !ys' = VU.map (lowerBound yDictWm) ys
+      !rawWm = Rwm.build (VG.length ys) ys'
    in WaveletMatrix {..}
 
 -- | \(O(\log |S|)\) Returns \(a[k]\) or `Nothing` if the index is out of the bounds. Try to use the
@@ -100,8 +100,8 @@ build ys =
 --
 -- @since 1.1.0.0
 {-# INLINE access #-}
-access :: WaveletMatrix -> Int -> Maybe Int
-access WaveletMatrix {..} i = (xDictWM VG.!) <$> Rwm.access rawWM i
+access ::  WaveletMatrix -> Int -> Maybe Int
+access WaveletMatrix {..} i = (yDictWm VG.!) <$> Rwm.access rawWm i
 
 -- | \(O(\log |S|)\) Returns the number of \(y\) in \([l, r)\).
 --
@@ -140,12 +140,12 @@ rankBetween ::
 rankBetween WaveletMatrix {..} l r y1 y2
   | not $ 0 <= l && l < r && r <= n = 0
   | y1' >= y2' = 0
-  | otherwise = Rwm.rankBetween rawWM l r y1' y2'
+  | otherwise = Rwm.rankBetween rawWm l r y1' y2'
   where
     -- Handles the case @yl@ or  @yr@ is not in the dict
-    n = Rwm.lengthRwm rawWM
-    y1' = fromMaybe n (bisectR 0 (VG.length xDictWM) ((< y1) . VG.unsafeIndex xDictWM))
-    y2' = maybe (-1) (+ 1) (bisectL 0 (VG.length xDictWM) ((< y2) . VG.unsafeIndex xDictWM))
+    n = Rwm.lengthRwm rawWm
+    y1' = lowerBound yDictWm y1
+    y2' = lowerBound yDictWm y2
 
 -- | \(O(\log |S|)\) Returns the index of the first \(y\) in \(a\), or `Nothing` if \(y\) is
 -- not found.
@@ -170,11 +170,12 @@ selectKth ::
   -- | The index of \(k\)-th \(y\)
   Maybe Int
 selectKth WaveletMatrix {..} k y = do
-  i <- lowerBound xDictWM y
+  let !i = lowerBound yDictWm y
+  guard $ i < VG.length yDictWm
   -- TODO: we don't need such an explicit branch?
-  let !y' = xDictWM VG.! i
+  let !y' = yDictWm VG.! i
   guard $ y' == y
-  Rwm.selectKth rawWM k i
+  Rwm.selectKth rawWm k i
 
 -- | \(O(\log |S|)\) Given an interval \([l, r)\), it returns the index of the first occurrence
 -- (0-based) of \(y\) in the sequence, or `Nothing` if no such occurrence exists.
@@ -200,6 +201,7 @@ selectIn wm l r = selectKthIn wm l r 0
 -- @since 1.1.0.0
 {-# INLINEABLE selectKthIn #-}
 selectKthIn ::
+  (HasCallStack) =>
   -- | A wavelet matrix
   WaveletMatrix ->
   -- | \(l\)
@@ -213,11 +215,12 @@ selectKthIn ::
   -- | The index of the \(k\)-th \(y\) in \([l, r)\).
   Maybe Int
 selectKthIn WaveletMatrix {..} l r k y = do
-  i <- lowerBound xDictWM y
+  let !i = lowerBound yDictWm y
+  guard $ i < VG.length yDictWm
   -- TODO: we don't need such an explicit branch?
-  let !y' = xDictWM VG.! i
+  let !y' = yDictWm VG.! i
   guard $ y' == y
-  Rwm.selectKthIn rawWM l r k i
+  Rwm.selectKthIn rawWm l r k i
 
 -- | \(O(\log |S|)\) Given the interval \([l, r)\), returns the index of the \(k\)-th (0-based)
 -- largest value. Note that duplicated values are treated as distinct occurrences.
@@ -225,6 +228,7 @@ selectKthIn WaveletMatrix {..} l r k y = do
 -- @since 1.1.0.0
 {-# INLINEABLE kthLargestIn #-}
 kthLargestIn ::
+  (HasCallStack) =>
   -- | A wavelet matrix
   WaveletMatrix ->
   -- | \(l\)
@@ -236,7 +240,7 @@ kthLargestIn ::
   -- | \(k\)-th largest \(y\) in \([l, r)\)
   Maybe Int
 kthLargestIn WaveletMatrix {..} l r k
-  | Just !y <- Rwm.kthLargestIn rawWM l r k = Just $ xDictWM VG.! y
+  | Just !y <- Rwm.kthLargestIn rawWm l r k = Just $ yDictWm VG.! y
   | otherwise = Nothing
 
 -- | \(O(\log |S|)\) Given the interval \([l, r)\), returns both the index and the value of the
@@ -256,7 +260,7 @@ ikthLargestIn ::
   -- | \((i, y)\) for \(k\)-th largest \(y\) in \([l, r)\)
   Maybe (Int, Int)
 ikthLargestIn WaveletMatrix {..} l r k
-  | Just (!i, !y) <- Rwm.ikthLargestIn rawWM l r k = Just (i, xDictWM VG.! y)
+  | Just (!i, !y) <- Rwm.ikthLargestIn rawWm l r k = Just (i, yDictWm VG.! y)
   | otherwise = Nothing
 
 -- | \(O(\log |S|)\) Given the interval \([l, r)\), returns the index of the \(k\)-th (0-based)
@@ -276,7 +280,7 @@ kthSmallestIn ::
   -- | \(k\)-th largest \(y\) in \([l, r)\)
   Maybe Int
 kthSmallestIn WaveletMatrix {..} l r k
-  | Just !y <- Rwm.kthSmallestIn rawWM l r k = Just $ xDictWM VG.! y
+  | Just !y <- Rwm.kthSmallestIn rawWm l r k = Just $ yDictWm VG.! y
   | otherwise = Nothing
 
 -- | \(O(\log |S|)\) Given the interval \([l, r)\), returns both the index and the value of the
@@ -295,7 +299,7 @@ ikthSmallestIn ::
   -- | \((i, y)\) for \(k\)-th largest \(y\) in \([l, r)\)
   Maybe (Int, Int)
 ikthSmallestIn WaveletMatrix {..} l r k
-  | Just (!i, !y) <- Rwm.ikthSmallestIn rawWM l r k = Just (i, xDictWM VG.! y)
+  | Just (!i, !y) <- Rwm.ikthSmallestIn rawWm l r k = Just (i, yDictWm VG.! y)
   | otherwise = Nothing
 
 -- | \(O(\log |S|)\)
@@ -304,7 +308,7 @@ ikthSmallestIn WaveletMatrix {..} l r k
 {-# INLINE unsafeKthSmallestIn #-}
 unsafeKthSmallestIn :: WaveletMatrix -> Int -> Int -> Int -> Int
 unsafeKthSmallestIn WaveletMatrix {..} l r k =
-  xDictWM VG.! Rwm.unsafeKthSmallestIn rawWM l r k
+  yDictWm VG.! Rwm.unsafeKthSmallestIn rawWm l r k
 
 -- | \(O(\log |S|)\) Looks up the maximum \(y\) in \([l, r) \times (-\infty, y_0]\).
 --
@@ -328,7 +332,7 @@ lookupLE wm l r y0
   where
     -- clamp
     l' = max 0 l
-    r' = min (Rwm.lengthRwm (rawWM wm)) r
+    r' = min (Rwm.lengthRwm (rawWm wm)) r
     rank_ = rankBetween wm l' r' minBound (y0 + 1)
 
 -- | \(O(\log |S|)\) Looks up the maximum \(y\) in \([l, r) \times (-\infty, y_0)\).
@@ -370,7 +374,7 @@ lookupGE wm l r y0
   where
     -- clamp
     l' = max 0 l
-    r' = min (Rwm.lengthRwm (rawWM wm)) r
+    r' = min (Rwm.lengthRwm (rawWm wm)) r
     rank_ = rankBetween wm l' r' minBound y0
 
 -- | \(O(\log |S|)\) Looks up the minimum \(y\) in \([l, r) \times (y_0, \infty)\).
@@ -396,7 +400,7 @@ lookupGT wm l r y0 = lookupGE wm l r (y0 + 1)
 -- @since 1.1.0.0
 {-# INLINE assocsIn #-}
 assocsIn :: WaveletMatrix -> Int -> Int -> [(Int, Int)]
-assocsIn WaveletMatrix {..} l r = Rwm.assocsWith rawWM l r (xDictWM VG.!)
+assocsIn WaveletMatrix {..} l r = Rwm.assocsWith rawWm l r (yDictWm VG.!)
 
 -- | \(O(\min(|S|, L) \log |S|)\) Collects \((y, \mathrm{rank}(y))\) in range \([l, r)\) in
 -- descending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
@@ -404,4 +408,4 @@ assocsIn WaveletMatrix {..} l r = Rwm.assocsWith rawWM l r (xDictWM VG.!)
 -- @since 1.1.0.0
 {-# INLINE descAssocsIn #-}
 descAssocsIn :: WaveletMatrix -> Int -> Int -> [(Int, Int)]
-descAssocsIn WaveletMatrix {..} l r = Rwm.descAssocsInWith rawWM l r (xDictWM VG.!)
+descAssocsIn WaveletMatrix {..} l r = Rwm.descAssocsInWith rawWm l r (yDictWm VG.!)

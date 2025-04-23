@@ -68,7 +68,7 @@ import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Control.Monad.ST (ST)
 import Data.Bits
 import Data.Foldable (for_)
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromMaybe)
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -317,7 +317,7 @@ buildST xs ys ws = do
   let nxSt = VU.length dictXSt
   let logSt = countTrailingZeros $ ACIB.bitCeil (nxSt + 1)
   let sizeSt = bit logSt
-  let compressedXs = VU.map (fromJust . lowerBound dictXSt) xs
+  let compressedXs = VU.map (lowerBound dictXSt) xs
 
   -- TODO: what is this?
   let indptrSt = VU.create $ do
@@ -398,13 +398,13 @@ modifyIST SegTree2d {..} f i j0 = do
 {-# INLINEABLE prodST #-}
 prodST :: forall s a. (HasCallStack, Monoid a, VU.Unbox a) => SegTree2d s a -> Int -> Int -> Int -> Int -> ST s a
 prodST seg@SegTree2d {..} lx rx ly ry = do
-  let a0 = fromMaybe (VU.length allYSt) $ lowerBound allYSt ly
-  let b0 = fromMaybe (VU.length allYSt) $ lowerBound allYSt ry
+  let a0 = lowerBound allYSt ly
+  let b0 = lowerBound allYSt ry
   dfs mempty 1 0 sizeSt a0 b0
   where
     !_ = ACIA.runtimeAssert (lx <= rx && ly <= ry) "AtCoder.Extra.SegTree2d.prodST: given invalid rectangle"
-    !l0 = fromMaybe (VU.length dictXSt) $ lowerBound dictXSt lx
-    !r0 = fromMaybe (VU.length dictXSt) $ lowerBound dictXSt rx
+    !l0 = lowerBound dictXSt lx
+    !r0 = lowerBound dictXSt rx
     dfs :: a -> Int -> Int -> Int -> Int -> Int -> ST s a
     dfs !res i l r a b
       -- empty rect
@@ -450,13 +450,13 @@ prodIST SegTree2d {..} i a b = inner mempty (n + a) (n + b - 1)
 {-# INLINEABLE countST #-}
 countST :: forall s a. (HasCallStack, Monoid a, VU.Unbox a) => SegTree2d s a -> Int -> Int -> Int -> Int -> ST s Int
 countST SegTree2d {..} lx rx ly ry = do
-  let a0 = fromMaybe (VU.length allYSt) $ lowerBound allYSt ly
-  let b0 = fromMaybe (VU.length allYSt) $ lowerBound allYSt ry
+  let a0 = lowerBound allYSt ly
+  let b0 = lowerBound allYSt ry
   dfs 0 1 0 sizeSt a0 b0
   where
     !_ = ACIA.runtimeAssert (lx <= rx && ly <= ry) "AtCoder.Extra.SegTree2d.countST: given invalid rectangle"
-    !l0 = fromMaybe (VU.length dictXSt) $ lowerBound dictXSt lx
-    !r0 = fromMaybe (VU.length dictXSt) $ lowerBound dictXSt rx
+    !l0 = lowerBound dictXSt lx
+    !r0 = lowerBound dictXSt rx
     dfs :: Int -> Int -> Int -> Int -> Int -> Int -> ST s Int
     dfs (res :: Int) i l r a b
       -- empty rect

@@ -449,6 +449,8 @@ maxRightM SegTree {..} l0 f = do
             else inner2 l' sm
       | otherwise = pure $ l - sizeSt
 
+-- TODO: add `minLeft`
+
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --
 -- @since 1.0.0.0

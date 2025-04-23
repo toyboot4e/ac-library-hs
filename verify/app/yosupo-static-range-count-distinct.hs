@@ -33,7 +33,7 @@ main = do
             vec <- VUM.replicate n (-1 :: Int)
             let !dict = VU.uniq $ VU.modify (VAI.sortBy compare) xs
             lastIndex <- VUM.replicate (VG.length dict) (-1 :: Int)
-            VU.iforM_ (VU.map (fromJust . lowerBound dict) xs) $ \i x -> do
+            VU.iforM_ (VU.map (lowerBound dict) xs) $ \i x -> do
               iLast <- VGM.exchange lastIndex x i
               unless (iLast == -1) $ do
                 VGM.write vec i iLast

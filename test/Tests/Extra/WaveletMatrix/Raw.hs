@@ -6,7 +6,6 @@ import AtCoder.Extra.Bisect (lowerBound)
 import AtCoder.Extra.WaveletMatrix.Raw qualified as WM
 import Control.Exception (evaluate)
 import Data.IntMap qualified as IM
-import Data.Maybe (fromJust)
 import Data.Ord (comparing)
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Unboxed qualified as VU
@@ -21,7 +20,7 @@ import Tests.Util (intervalGen)
 compress :: VU.Vector Int -> VU.Vector Int
 compress xs =
   let dict = VU.uniq $ VU.modify VAI.sort xs
-   in VU.map (fromJust . lowerBound dict) xs
+   in VU.map (lowerBound dict) xs
 
 data Init = Init
   { capacity :: {-# UNPACK #-} !Int,

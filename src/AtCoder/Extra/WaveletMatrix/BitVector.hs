@@ -27,7 +27,7 @@ module AtCoder.Extra.WaveletMatrix.BitVector
   )
 where
 
-import AtCoder.Extra.Bisect (bisectL)
+import AtCoder.Extra.Bisect (maxRight)
 import Control.Monad.Primitive (PrimMonad (PrimState))
 import Data.Bit (Bit (..))
 import Data.Bits (popCount)
@@ -150,7 +150,8 @@ selectKthIn0 ::
   Maybe Int
 selectKthIn0 bv l r k
   | k < 0 || nZeros <= k = Nothing
-  | otherwise = bisectL l r $ \i -> rank0 bv i - rankL0 < k + 1
+  -- note that `rank0` takes exclusive index
+  | otherwise = Just . maxRight l r $ \i -> rank0 bv (i + 1) - rankL0 < k + 1
   where
     nZeros = rank0 bv r - rankL0
     rankL0 = rank0 bv l
@@ -173,7 +174,8 @@ selectKthIn1 ::
   Maybe Int
 selectKthIn1 bv l r k
   | k < 0 || nOnes <= k = Nothing
-  | otherwise = bisectL l r $ \i -> rank1 bv i - rankL1 < k + 1
+  -- note that `rank1` takes exclusive index
+  | otherwise = Just . maxRight l r $ \i -> rank1 bv (i + 1) - rankL1 < k + 1
   where
     nOnes = rank1 bv r - rankL1
     rankL1 = rank1 bv l

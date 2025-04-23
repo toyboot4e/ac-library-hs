@@ -11,7 +11,6 @@ import Test.Tasty
 import Test.Tasty.QuickCheck as QC
 import Tests.Util
 import Test.Tasty.HUnit
-import Debug.Trace
 
 data Init = Init
   { n :: {-# UNPACK #-} !Int,
@@ -39,7 +38,6 @@ instance QC.Arbitrary Init where
       x <- QC.chooseInt rng
       y <- QC.chooseInt rng
       pure (x, y)
-    let !_ = traceShow refVec ()
     let kt = Kt.build2 refVec
     pure Init {..}
 

@@ -1,9 +1,8 @@
-import AtCoder.Extra.Bisect
+import AtCoder.Extra.Bisect (maxRightM)
 import AtCoder.Extra.Monoid.RollingHash qualified as RH
 import AtCoder.SegTree qualified as ST
 import Data.ByteString.Char8 qualified as BS
 import Data.Char (ord)
-import Data.Maybe (fromMaybe)
 import Data.Semigroup (Dual (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
@@ -24,13 +23,13 @@ main = do
             -- | . . .
             let i = i0 `div` 2
             let maxLen = min i (n - 1 - i)
-            d <- fromMaybe 0 <$> bisectLM 0 (maxLen + 1) (testAt i)
+            d <- max 0 . subtract 1 <$> maxRightM 0 (maxLen + 1) (testAt i)
             pure $ 2 * d + 1
         | otherwise = do
             -- .|. . .
             let i = i0 `div` 2
             let maxLen = min (i + 1) (n - (i + 1))
-            d <- fromMaybe 0 <$> bisectLM 0 (maxLen + 1) (testMid i)
+            d <- max 0 . subtract 1 <$> maxRightM 0 (maxLen + 1) (testMid i)
             pure $ 2 * d
         where
           -- | . j.

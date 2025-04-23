@@ -5,7 +5,6 @@ import AtCoder.Extra.Mo qualified as Mo
 import AtCoder.FenwickTree qualified as Ft
 import Control.Monad.State.Class
 import Control.Monad.Trans.State.Strict (evalStateT)
-import Data.Maybe (fromJust)
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
@@ -19,7 +18,7 @@ main = do
   lrs <- VU.replicateM q ints2
 
   let !dict = VU.uniq $ VU.modify VAI.sort xs0
-  let !xs = VU.map (fromJust . lowerBound dict) xs0
+  let !xs = VU.map (lowerBound dict) xs0
 
   let !len = VU.length dict
   ft <- Ft.new len

@@ -60,7 +60,7 @@ module AtCoder.Extra.WaveletMatrix2d
   )
 where
 
-import AtCoder.Extra.Bisect (bisectR, lowerBound)
+import AtCoder.Extra.Bisect (lowerBound)
 import AtCoder.Extra.WaveletMatrix.BitVector qualified as BV
 import AtCoder.Extra.WaveletMatrix.Raw qualified as Rwm
 import AtCoder.Internal.Assert qualified as ACIA
@@ -69,7 +69,6 @@ import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Control.Monad.ST (ST)
 import Data.Bit (Bit (..))
 import Data.Bits (Bits (testBit))
-import Data.Maybe (fromJust, fromMaybe)
 import Data.Vector qualified as V
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic qualified as VG
@@ -85,12 +84,12 @@ import Prelude hiding (read)
 
 -- | Segment Tree on Wavelet Matrix: points on a 2D plane and rectangle products.
 --
--- @since 1.1.0.0
+-- @since 1.3.0.0
 data WaveletMatrix2d s a = WaveletMatrix2d
   { -- | The wavelet matrix that represents points on a 2D plane.
     --
-    -- @since 1.1.0.0
-    rawWmWm2d :: !Rwm.RawWaveletMatrix,
+    -- @since 1.3.0.0
+    rawWm2d :: !Rwm.RawWaveletMatrix,
     -- | (x, y) index compression dictionary.
     --
     -- @since 1.1.0.0
@@ -115,7 +114,7 @@ data WaveletMatrix2d s a = WaveletMatrix2d
 -- @since 1.1.0.0
 {-# INLINEABLE new #-}
 new ::
-  (PrimMonad m, Monoid a, VU.Unbox a) =>
+  (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | Inverse operator of the monoid
   (a -> a) ->
   -- | Input points
@@ -130,8 +129,8 @@ new invWm2d xys = stToPrim $ do
   -- REMARK: Be sure to use `n + 1` because the product function cannot handle the case
   --         `yUpper` is `2^{height}`.
   let (!_, !ysInput) = VU.unzip xyDictWm2d
-  let rawWmWm2d = Rwm.build (n + 1) $ VU.map (fromJust . lowerBound yDictWm2d) ysInput
-  segTreesWm2d <- V.replicateM (Rwm.heightRwm rawWmWm2d) (ST.new n)
+  let rawWm2d = Rwm.build (n + 1) $ VU.map (lowerBound yDictWm2d) ysInput
+  segTreesWm2d <- V.replicateM (Rwm.heightRwm rawWm2d) (ST.new n)
   pure WaveletMatrix2d {..}
 
 -- | \(O(n \log n)\) Creates a `WaveletMatrix2d` with wavelet matrix with segment tree
@@ -140,7 +139,7 @@ new invWm2d xys = stToPrim $ do
 -- @since 1.1.0.0
 {-# INLINEABLE build #-}
 build ::
-  (PrimMonad m, Monoid a, VU.Unbox a) =>
+  (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | Inverse operator of the monoid
   (a -> a) ->
   -- | Input points with initial values
@@ -161,7 +160,7 @@ build invWm2d xysw = stToPrim $ do
 {-# INLINEABLE read #-}
 read :: (HasCallStack, PrimMonad m, VU.Unbox a, Monoid a) => WaveletMatrix2d (PrimState m) a -> (Int, Int) -> m a
 read WaveletMatrix2d {..} (!x, !y) = do
-  ST.read (V.head segTreesWm2d) . fromJust $ lowerBound xyDictWm2d (x, y)
+  ST.read (V.head segTreesWm2d) $ lowerBound xyDictWm2d (x, y)
 
 -- | \(O(\log^2 n)\) Writes the monoid value at \((x, y)\). Access to unknown points are undefined.
 --
@@ -169,19 +168,19 @@ read WaveletMatrix2d {..} (!x, !y) = do
 {-# INLINEABLE write #-}
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => WaveletMatrix2d (PrimState m) a -> (Int, Int) -> a -> m ()
 write WaveletMatrix2d {..} (!x, !y) v = stToPrim $ do
-  let !i_ = fromJust $ lowerBound xyDictWm2d (x, y)
+  let !i_ = lowerBound xyDictWm2d (x, y)
   V.ifoldM'_
     ( \i iRow (!bits, !seg) -> do
         let !i0 = BV.rank0 bits i
         let !i'
               | unBit $ VG.unsafeIndex (BV.bitsBv bits) i =
-                  i + Rwm.nZerosRwm rawWmWm2d VG.! iRow - i0
+                  i + Rwm.nZerosRwm rawWm2d VG.! iRow - i0
               | otherwise = i0
         ST.write seg i' v
         pure i'
     )
     i_
-    $ V.zip (Rwm.bitsRwm rawWmWm2d) segTreesWm2d
+    $ V.zip (Rwm.bitsRwm rawWm2d) segTreesWm2d
 
 -- | \(O(\log^2 n)\) Modifies the monoid value at \((x, y)\). Access to unknown points are
 -- undefined.
@@ -190,19 +189,19 @@ write WaveletMatrix2d {..} (!x, !y) v = stToPrim $ do
 {-# INLINEABLE modify #-}
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => WaveletMatrix2d (PrimState m) a -> (a -> a) -> (Int, Int) -> m ()
 modify WaveletMatrix2d {..} f (!x, !y) = stToPrim $ do
-  let !i_ = fromJust $ lowerBound xyDictWm2d (x, y)
+  let !i_ = lowerBound xyDictWm2d (x, y)
   V.ifoldM'_
     ( \i iRow (!bits, !seg) -> do
         let !i0 = BV.rank0 bits i
         let !i'
               | unBit $ VG.unsafeIndex (BV.bitsBv bits) i =
-                  i + Rwm.nZerosRwm rawWmWm2d VG.! iRow - i0
+                  i + Rwm.nZerosRwm rawWm2d VG.! iRow - i0
               | otherwise = i0
         ST.modify seg f i'
         pure i'
     )
     i_
-    $ V.zip (Rwm.bitsRwm rawWmWm2d) segTreesWm2d
+    $ V.zip (Rwm.bitsRwm rawWm2d) segTreesWm2d
 
 -- | \(O(\log^2 n)\) Returns monoid product \(\Pi_{p \in [x_1, x_2) \times [y_1, y_2)} a_p\).
 --
@@ -215,10 +214,10 @@ prod wm@WaveletMatrix2d {..} !xl !xr !yl !yr
   where
     (!xDict, !_) = VU.unzip xyDictWm2d
     -- NOTE: clamping here!
-    xl' = fromMaybe 0 $ bisectR 0 (VG.length xDict) $ (< xl) . VG.unsafeIndex xDict
-    xr' = fromMaybe (VG.length xDict) $ bisectR 0 (VG.length xDict) $ (< xr) . VG.unsafeIndex xDict
-    yl' = fromMaybe 0 $ bisectR 0 (VG.length yDictWm2d) $ (< yl) . VG.unsafeIndex yDictWm2d
-    yr' = fromMaybe (VG.length yDictWm2d) $ bisectR 0 (VG.length yDictWm2d) $ (< yr) . VG.unsafeIndex yDictWm2d
+    xl' = lowerBound xDict xl
+    xr' = lowerBound xDict xr
+    yl' = lowerBound yDictWm2d yl
+    yr' = lowerBound yDictWm2d yr
     !_ = ACIA.checkInterval "AtCoder.Extra.WaveletMatrix.SegTree.prod (compressed x)" xl' xr' (VG.length xDict)
     !_ = ACIA.checkInterval "AtCoder.Extra.WaveletMatrix.SegTree.prod (compressed y)" yl' yr' (VG.length yDictWm2d)
 
@@ -236,10 +235,10 @@ prodMaybe wm@WaveletMatrix2d {..} !xl !xr !yl !yr
   where
     (!xDict, !_) = VU.unzip xyDictWm2d
     -- NOTE: clamping here!
-    xl' = fromMaybe 0 $ bisectR 0 (VG.length xDict) $ (< xl) . VG.unsafeIndex xDict
-    xr' = fromMaybe (VG.length xDict) $ bisectR 0 (VG.length xDict) $ (< xr) . VG.unsafeIndex xDict
-    yl' = fromMaybe 0 $ bisectR 0 (VG.length yDictWm2d) $ (< yl) . VG.unsafeIndex yDictWm2d
-    yr' = fromMaybe (VG.length yDictWm2d) $ bisectR 0 (VG.length yDictWm2d) $ (< yr) . VG.unsafeIndex yDictWm2d
+    xl' = lowerBound xDict xl
+    xr' = lowerBound xDict xr
+    yl' = lowerBound yDictWm2d yl
+    yr' = lowerBound yDictWm2d yr
 
 -- | \(O(\log^2 n)\) Return the monoid product in \([-\infty, \infty) \times [-\infty, \infty)\).
 --
@@ -271,15 +270,15 @@ prodLT WaveletMatrix2d {..} !l_ !r_ yUpper = do
               !r0 = BV.rank0 bits r
           -- REMARK: The function cannot handle the case yUpper = N = 2^i. See the constructor for
           -- how it's handled and note that l_ and r_ are compressed indices.
-          if testBit yUpper (Rwm.heightRwm rawWmWm2d - 1 - iRow)
+          if testBit yUpper (Rwm.heightRwm rawWm2d - 1 - iRow)
             then do
               !acc' <- (acc <>) <$> ST.prod seg l0 r0
-              let !l' = l + Rwm.nZerosRwm rawWmWm2d VG.! iRow - l0
-              let !r' = r + Rwm.nZerosRwm rawWmWm2d VG.! iRow - r0
+              let !l' = l + Rwm.nZerosRwm rawWm2d VG.! iRow - l0
+              let !r' = r + Rwm.nZerosRwm rawWm2d VG.! iRow - r0
               pure (acc', l', r')
             else do
               pure (acc, l0, r0)
       )
       (mempty, l_, r_)
-      $ V.zip (Rwm.bitsRwm rawWmWm2d) segTreesWm2d
+      $ V.zip (Rwm.bitsRwm rawWm2d) segTreesWm2d
   pure res
