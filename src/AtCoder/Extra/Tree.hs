@@ -268,10 +268,10 @@ fold tree valAt toF act root = runIdentity $ do
 -- :}
 -- [0,1,4,1,0]
 --
--- @since 1.1.0.0
+-- @since 1.3.0.0
 {-# INLINE scan #-}
 scan ::
-  (VU.Unbox w, VG.Vector v a) =>
+  (VU.Unbox w, VU.Unbox a) =>
   -- | The number of vertices.
   Int ->
   -- | Graph as a function.
@@ -285,9 +285,9 @@ scan ::
   -- | Root vertex.
   Int ->
   -- | Tree scanning result from a root vertex.
-  v a
-scan n tree acc0At toF act root = VG.create $ do
-  dp <- VGM.unsafeNew n
+  VU.Vector a
+scan n tree acc0At toF act root = VU.create $ do
+  dp <- VUM.unsafeNew n
   !_ <- foldImpl tree acc0At toF act root $ \v a -> do
     VGM.unsafeWrite dp v a
   pure dp
