@@ -46,7 +46,7 @@ import GHC.Stack (HasCallStack)
 -- @
 -- Y Y Y Y Y N N N N N      Y: (< x0)
 -- --------- *---------> X  N: (>= x0)
---           R              R: returning point
+--           R              R: the right boundary point returned
 -- @
 --
 -- ==== __Example__
@@ -116,7 +116,7 @@ lowerBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i < target
 -- @
 -- Y Y Y Y Y N N N N N      Y: (<= x0)
 -- --------- *---------> X  N: (> x0)
---           R              R: returning point
+--           R              R: the right boundary point returned
 -- @
 --
 -- ==== __Example__
@@ -131,16 +131,16 @@ lowerBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i < target
 -- >>> upperBound xs 30
 -- 4
 --
--- >>> upperBound xs 40
--- Nothing
+-- >>> upperBound xs 39
+-- 4
 --
 -- Out of range values:
 --
 -- >>> upperBound xs 0
 -- 0
 --
--- >>> upperBound xs 50
--- 5
+-- >>> upperBound xs 40
+-- 6
 --
 -- @since 1.3.0.0
 {-# INLINE upperBound #-}
@@ -157,22 +157,22 @@ upperBound vec = upperBoundIn 0 (VG.length vec) vec
 -- >>> let xs = VU.fromList [10, 10, 20, 20, 40, 40]
 -- >>> --                            *---*---*
 -- >>> upperBoundIn 2 5 xs 0
--- Just 2
+-- 2
 --
 -- >>> upperBoundIn 2 5 xs 10
--- Just 2
+-- 2
 --
 -- >>> upperBoundIn 2 5 xs 20
--- Just 4
+-- 4
 --
 -- >>> upperBoundIn 2 5 xs 30
--- Just 4
+-- 4
 --
 -- >>> upperBoundIn 2 5 xs 40
--- Nothing
+-- 5
 --
 -- >>> upperBoundIn 2 5 xs 50
--- Nothing
+-- 5
 --
 -- @since 1.3.0.0
 {-# INLINE upperBoundIn #-}
@@ -195,27 +195,28 @@ upperBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i <= target
 -- >>> let xs = VU.fromList [10, 10, 20, 20, 30, 30]
 -- >>> let n = VU.length xs
 -- >>> maxRight 0 n ((<= 20) . (xs VU.!))
--- Just 3
+-- 4
 --
 -- >>> maxRight 0 n ((<= 0) . (xs VU.!))
--- Nothing
+-- 0
 --
 -- >>> maxRight 0 n ((<= 100) . (xs VU.!))
--- Just 5
+-- 6
 --
 -- >>> maxRight 0 3 ((<= 20) . (xs VU.!))
--- Just 2
+-- 3
 --
 -- @since 1.3.0.0
 {-# INLINE maxRight #-}
 maxRight ::
   (HasCallStack) =>
-  -- | (\l\)
+  -- | \(l\)
   Int ->
-  -- | (\r\)
+  -- | \(r\)
   Int ->
-  -- | (\p\)
+  -- | \(p\)
   (Int -> Bool) ->
+  -- | Maximum \(r'\) where \(p\) holds for \([l, r')\).
   Int
 maxRight l r p = runIdentity $ maxRightM l r (pure . p)
 
@@ -242,16 +243,13 @@ maxRightM l0 r0 p = bisectImpl (l0 - 1) r0 p
 -- >>> let xs = VU.fromList [10, 10, 20, 20, 30, 30]
 -- >>> let n = VU.length xs
 -- >>> minLeft 0 n ((>= 20) . (xs VU.!))
--- 1
+-- 2
 --
 -- >>> minLeft 0 n ((>= 0) . (xs VU.!))
--- (-1)
+-- 0
 --
 -- >>> minLeft 0 n ((>= 100) . (xs VU.!))
--- Just 5
---
--- >>> minLeft 0 3 ((>= 20) . (xs VU.!))
--- Just 2
+-- 6
 --
 -- @since 1.3.0.0
 {-# INLINE minLeft #-}
@@ -263,7 +261,7 @@ minLeft ::
   Int ->
   -- | \(p\)
   (Int -> Bool) ->
-  -- | Minimum \(l\) where \(p\) holds for \((l, r]\)
+  -- | Minimum \(l'\) where \(p\) holds for \([l', r)\)
   Int
 minLeft l r p = runIdentity $ minLeftM l r (pure . p)
 
