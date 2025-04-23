@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Fixed-sized queue. Internally it has an \([l, r)\) pair of valid element bounds.
+-- | Fixed-sized double-ended queue. Internally it has an \([l, r)\) pair of valid element bounds.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Internal.Queue qualified as Q
@@ -177,7 +177,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (length, null)
 
--- | Fixed-sized queue. Internally it has an \([l, r)\) pair of valid element bounds.
+-- | Fixed-sized double-ended queue. Internally it has an \([l, r)\) pair of valid element bounds.
 --
 -- @since 1.0.0.0
 data Queue s a = Queue
@@ -193,7 +193,7 @@ data Queue s a = Queue
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (Queue (PrimState m) a)
 new n = stToPrim $ newST n
 
--- | \(O(n)\) Creates a `Queue` with capacity \(2n + 1\) where the internal front/back position is
+-- | \(O(n)\) Creates a `Queue` with capacity \(2n + 1\), where the internal front/back position is
 -- initialzed at \(n\).
 --
 -- @since 1.2.4.0
