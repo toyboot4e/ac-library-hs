@@ -2,12 +2,7 @@
 --
 -- @since 1.0.0.0
 module AtCoder.Extra.Math
-  ( -- * Re-exports from the internal math module
-    isPrime32,
-    ACIM.invGcd,
-    primitiveRoot32,
-
-    -- * Prime numbers and divisors
+  ( -- * Prime numbers and divisors
     primes,
     isPrime,
     primeFactors,
@@ -38,8 +33,6 @@ module AtCoder.Extra.Math
 where
 
 import AtCoder.Extra.Math.Montgomery64 qualified as M64
-import AtCoder.Internal.Assert qualified as ACIA
-import AtCoder.Internal.Math qualified as ACIM
 import Control.Monad (unless, when)
 import Data.Bit (Bit (..))
 import Data.Bits (bit, countTrailingZeros, (.<<.), (.>>.))
@@ -53,33 +46,6 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import Data.Word (Word64)
 import GHC.Stack (HasCallStack)
 import System.Random
-
--- | \(O(k \log^3 n) (k = 3)\). Returns whether the given `Int` value is a prime number.
---
--- ==== Constraints
--- - \(n < 4759123141 (2^{32} < 4759123141)\), otherwise the return value can lie
---   (see [Wikipedia](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test#Testing_against_small_sets_of_bases)).
---
---
--- @since 1.1.0.0
-{-# INLINE isPrime32 #-}
-isPrime32 :: (HasCallStack) => Int -> Bool
-isPrime32 x = ACIM.isPrime x
-  where
-    !_ = ACIA.runtimeAssert (x < 4759123141) $ "AtCoder.Extra.Math.isPrime32: given too large number `" ++ show x ++ "`"
-
--- | Returns the primitive root of the given `Int`.
---
--- ==== Constraints
--- - The input must be a prime number.
--- - The input must be less than \(2^32\).
---
--- @since 1.2.0.0
-{-# INLINE primitiveRoot32 #-}
-primitiveRoot32 :: (HasCallStack) => Int -> Int
-primitiveRoot32 x = ACIM.primitiveRoot x
-  where
-    !_ = ACIA.runtimeAssert (x < (1 .>>. 32)) $ "AtCoder.Extra.Math.primitiveRoot32: given too large number `" ++ show x ++ "`"
 
 -- | \(O(n \log \log n)\) Creates an array of prime numbers up to the given limit, using Sieve of
 -- Eratosthenes.
@@ -440,7 +406,7 @@ primitiveRoot x = tryRandom $ mkStdGen 123456789
       where
         (!rnd, !gen') = uniformR (1, x64 - 1) gen
 
--- | Calculates \(x^n\) with custom multiplication operator using the binary exponentiation
+-- | Calculates \(f^n(x)\) with custom multiplication operator using the binary exponentiation
 -- technique.
 --
 -- The internal implementation is taken from @Data.Semigroup.stimes@, but `power` uses strict
@@ -467,6 +433,22 @@ power op n0 x1
       | even n = g (x `op` x) (n .>>. 1) z
       | n == 1 = x `op` z
       | otherwise = g (x `op` x) (n .>>. 1) (x `op` z)
+
+-- TODO: powMod for arbitrary modulus value (needs Barrett64)
+
+-- -- | \(O(\log n)\) One-shot \(x^n \bmod m\) calculation.
+-- --
+-- -- @since 1.2.7.0
+-- {-# INLINE powMod #-}
+-- powMod :: (HasCallStack) => Int -> Int -> Int -> Int
+-- powMod x n m =
+--   fromIntegral
+--     . M64.decode mont
+--     . power (M64.mulMod mont) n
+--     . M64.encode mont
+--     $ fromIntegral x
+--   where
+--     !mont = M64.fromVal $! fromIntegral m
 
 -- | Strict variant of @Data.Semigroup.stimes@.
 --
