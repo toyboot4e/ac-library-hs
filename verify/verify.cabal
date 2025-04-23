@@ -190,26 +190,6 @@ executable aoj-3528
   main-is:       aoj-3528.hs
   build-depends: verify
 
-executable past202109-k
-  import:        app-local
-  main-is:       past202109-k.hs
-  build-depends: verify
-
-executable past202104-open-m
-  import:        app-local
-  main-is:       past202104-open-m.hs
-  build-depends: verify
-
-executable past202303-open-n
-  import:        app-local
-  main-is:       past202303-open-n.hs
-  build-depends: verify
-
-executable typical90_ac
-  import:        app-local
-  main-is:       typical90_ac.hs
-  build-depends: verify
-
 executable yosupo-associative-array
   import:        app-local
   main-is:       yosupo-associative-array.hs
@@ -606,8 +586,28 @@ executable aoj-GRL_4_B
   main-is:       aoj-GRL_4_B.hs
   build-depends: verify
 
+executable past202109-k
+  import:        app-online
+  main-is:       past202109-k.hs
+  build-depends: verify
+
+executable past202104-open-m
+  import:        app-online
+  main-is:       past202104-open-m.hs
+  build-depends: verify
+
+executable past202303-open-n
+  import:        app-online
+  main-is:       past202303-open-n.hs
+  build-depends: verify
+
 executable past202303-open-o
   import:        app-online
   main-is:       past202303-open-o.hs
+  build-depends: verify
+
+executable typical90_ac
+  import:        app-online
+  main-is:       typical90_ac.hs
   build-depends: verify
 
