@@ -229,7 +229,7 @@ handleAcl :: (HasCallStack, PrimMonad m) => Seq.Seq (PrimState m) (Affine1 Int) 
 handleAcl seq handle q = case q of
   Reset -> do
     Seq.reset seq
-    Seq.invalidateHandle handle
+    P.invalidateHandle handle
     pure None
   Read k -> S <$> Seq.read seq handle k
   ReadMaybe k -> MS <$> Seq.readMaybe seq handle k

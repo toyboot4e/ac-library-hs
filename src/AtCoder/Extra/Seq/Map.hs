@@ -144,7 +144,7 @@ new :: (PrimMonad m, Monoid f, VU.Unbox f, VU.Unbox k, VU.Unbox v, Monoid v) => 
 new n = stToPrim $ do
   seqMap <- Seq.new n
   kMap <- VUM.unsafeNew n
-  rootMap <- Seq.newHandle P.undefIndex
+  rootMap <- P.newHandle P.undefIndex
   pure Map {..}
 
 -- | \(O(n \log n)\) Creates a new `Map` of capacity \(n\) with initial values. Always prefer `build` to
