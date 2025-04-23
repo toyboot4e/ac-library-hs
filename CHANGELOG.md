@@ -1,32 +1,41 @@
 # Revision history for acl-hs
 
+## 1.3.0.0 -- April 2025
+
+- Added `AtCoder.Extra.Math.isPrimitiveRoot`.
+- Re-created `AtCoder.Extra.Bisect` module.
+- Removed re-exports of `AtCoder.Internal.Math` functions from `AtCoder.Extra.Math`.
+- Removed `Extra.Vector.unsafePermuteInPlace`.
+- Removed some `Handle` function re-exports from `AtCoder.Extra.Seq` module.
+- Changed `AtCoder.Extra.Tree.scan` to non-generic, `Unbox` vector.
+
 ## 1.2.6.0 -- April 2025
 
-- Added `AtCoder.Extra.Math` functions
+- Added `AtCoder.Extra.Math` functions:
   - `isPrime`
   - `primes`
   - `primeFactors`
-- Added `AtCoderExtra.Math.Montgomery64`
-- Added `AtCoderExtra.ModInt64`
+- Added `AtCoderExtra.Math.Montgomery64`.
+- Added `AtCoderExtra.ModInt64`.
 
 ## 1.2.5.0 -- April 2025
 
-- Added `AtCoder.Extra.Mo`
-- Added `AtCoder.Extra.SqrtDecomposition`
+- Added `AtCoder.Extra.Mo`.
+- Added `AtCoder.Extra.SqrtDecomposition`.
 
 ## 1.2.4.0 -- April 2025
 
-- Added `AtCoder.Dsu.mergeMaybe`
-- Added `AtCoder.Extra.Graph` functions
+- Added `AtCoder.Dsu.mergeMaybe`.
+- Added `AtCoder.Extra.Graph` functions:
   - `rev`
   - `connectedComponents`
   - `bipartiteVertexColors`
   - BFS, Dijkstra, Bellman–Ford, Floyd–Warshall
   - path reconstruction functions
-- Added `AtCoder.Extra.Tree` functions
+- Added `AtCoder.Extra.Tree` functions:
   - `diameter`, `diameterPath`
   - `mst`, `mstBy`
-- Added `AtCoder.Internal.Queue.newDeque`
+- Added `AtCoder.Internal.Queue.newDeque`.
 
 ## 1.2.3.0 -- March 2025
 
