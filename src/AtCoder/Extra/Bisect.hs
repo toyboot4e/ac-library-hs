@@ -4,8 +4,8 @@
 -- into two and return either the left or the right point of the boundary.
 --
 -- @
--- Y Y Y Y Y N N N N N      Y: user predicate holds
--- --------* *---------> X  N: user predicate does not hold
+-- Y Y Y Y Y N N N N N      Y: user predicate holds,
+-- --------* *---------> x  N: user predicate does not hold,
 --         L R              L, R: left, right point of the boundary
 -- @
 --
@@ -41,11 +41,11 @@ import Data.Functor.Identity
 import Data.Vector.Generic qualified as VG
 import GHC.Stack (HasCallStack)
 
--- | \(O(\log n)\) Returns the maximum \(r\) where \(x \lt x_i\) holds for \(i \in [0, r)\).
+-- | \(O(\log n)\) Returns the maximum \(r\) where \(x_i \lt x_0\) holds for \(i \in [0, r)\).
 --
 -- @
--- Y Y Y Y Y N N N N N      Y: (< x0)
--- --------- *---------> X  N: (>= x0)
+-- Y Y Y Y Y N N N N N      Y: x_i < x_0
+-- --------- *---------> x  N: x_i >= x_0
 --           R              R: the right boundary point returned
 -- @
 --
@@ -64,10 +64,6 @@ import GHC.Stack (HasCallStack)
 -- >>> lowerBound xs 4
 -- 4
 --
--- Out of range values also return some index:
---
--- >>> lowerBound xs 0
--- 0
 --
 -- >>> lowerBound xs 5
 -- 6
@@ -79,11 +75,8 @@ lowerBound vec = lowerBoundIn 0 (VG.length vec) vec
 
 -- | \(O(\log n)\) Computes the `lowerBound` for a slice of a vector within the interval \([l, r)\).
 --
--- - The user predicate evaluates indices in \([l, r)\).
---
 -- ==== Constraints
--- - \(0 \le l \lt n)
--- - \(-1 \le r \le n)
+-- - \(0 \le l \le r \le n\)
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -111,17 +104,20 @@ lowerBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i < target
   where
     !_ = ACIA.checkIntervalBounded "AtCoder.Extra.Bisect.lowerBoundIn" l r $ VG.length vec
 
--- | \(O(\log n)\) Returns the maximum \(r\) where \(x \le x_i\) holds for \(i \in [0, r)\).
+-- | \(O(\log n)\) Returns the maximum \(r\) where \(x_i \le x_0\) holds for \(i \in [0, r)\).
 --
 -- @
--- Y Y Y Y Y N N N N N      Y: (<= x0)
--- --------- *---------> X  N: (> x0)
+-- Y Y Y Y Y N N N N N      Y: x_i <= x_0,
+-- --------- *---------> x  N: x_i > x_0,
 --           R              R: the right boundary point returned
 -- @
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let xs = VU.fromList [10, 10, 20, 20, 40, 40]
+-- >>> upperBound xs 0
+-- 0
+--
 -- >>> upperBound xs 10
 -- 2
 --
@@ -134,11 +130,6 @@ lowerBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i < target
 -- >>> upperBound xs 39
 -- 4
 --
--- Out of range values:
---
--- >>> upperBound xs 0
--- 0
---
 -- >>> upperBound xs 40
 -- 6
 --
@@ -149,8 +140,8 @@ upperBound vec = upperBoundIn 0 (VG.length vec) vec
 
 -- | \(O(\log n)\) Computes the `upperBound` for a slice of a vector within the interval \([l, r)\).
 --
--- - The user predicate evaluates indices in \([l, r)\).
--- - The interval \([l, r)\) is silently clamped to ensure it remains within the bounds \([0, n)\).
+-- ==== Constraints
+-- - \(0 \le l \le r \le n\)
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -185,8 +176,8 @@ upperBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i <= target
 -- right boundary point.
 --
 -- @
--- Y Y Y Y Y N N N N N      Y: user predicate holds
--- --------- *---------> X  N: user predicate does not hold
+-- Y Y Y Y Y N N N N N      Y: p(i) returns `true`,
+-- --------- *---------> x  N: p(i) returns `false`,
 --           R              R: the right boundary point returned
 -- @
 --
@@ -216,7 +207,7 @@ maxRight ::
   Int ->
   -- | \(p\)
   (Int -> Bool) ->
-  -- | Maximum \(r'\) where \(p\) holds for \([l, r')\).
+  -- | Maximum \(r' (r' \le r)\) where \(p(i)\) holds for \(i \in [l, r')\).
   Int
 maxRight l r p = runIdentity $ maxRightM l r (pure . p)
 
@@ -233,8 +224,8 @@ maxRightM l0 r0 p = bisectImpl (l0 - 1) r0 p
 -- left boundary point.
 --
 -- @
--- N N N N N Y Y Y Y Y      Y: user predicate holds
--- --------* ----------> X  N: user predicate does not hold
+-- N N N N N Y Y Y Y Y      Y: p(i) returns `true`,
+-- --------* ----------> x  N: p(i) returns `false`,
 --         L                L: the left boundary point returned
 -- @
 --
@@ -261,7 +252,7 @@ minLeft ::
   Int ->
   -- | \(p\)
   (Int -> Bool) ->
-  -- | Minimum \(l'\) where \(p\) holds for \([l', r)\)
+  -- | Minimum \(l' (l' \ge l)\) where \(p(i)\) holds for \(i \in [l', r)\)
   Int
 minLeft l r p = runIdentity $ minLeftM l r (pure . p)
 

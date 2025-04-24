@@ -19,6 +19,8 @@ module AtCoder.Extra.Graph
     rev,
 
     -- * Generic graph functions
+
+    -- TODO: generalize vertex dimensions?
     topSort,
     connectedComponents,
     bipartiteVertexColors,
@@ -34,25 +36,25 @@ module AtCoder.Extra.Graph
 
     -- ** BFS (breadth-first search)
 
-    -- *** Constraints
-
-    -- | - Edge weight \(w > 0\)
+    -- | Constraints:
+    --
+    -- - Edge weight \(w > 0\)
     bfs,
     trackingBfs,
 
     -- ** 01-BFS
 
-    -- *** Constraints
-
-    -- | - Edge weight \(w\) is either \(0\) or \(1\) of type `Int`.
+    -- | Constraints:
+    --
+    -- - Edge weight \(w\) is either \(0\) or \(1\) of type `Int`.
     bfs01,
     trackingBfs01,
 
     -- ** Dijkstra's algorithm
 
-    -- *** Constraints
-
-    -- | - Edge weight \(w > 0\)
+    -- | Constraints:
+    --
+    -- - Edge weight \(w > 0\)
     dijkstra,
     trackingDijkstra,
 
@@ -62,7 +64,11 @@ module AtCoder.Extra.Graph
     bellmanFord,
     trackingBellmanFord,
 
-    -- ** Floyd–Warshall algorithm (all-pair shortest path)
+    -- ** Floyd–Warshall algorithm
+
+    --
+
+    -- | All-pair shortest path.
     floydWarshall,
     trackingFloydWarshall,
 
@@ -74,9 +80,11 @@ module AtCoder.Extra.Graph
 
     -- ** Path reconstruction
 
+    -- TODO: panic instead of infinite loop?
+
     -- *** Single source point (root)
 
-    -- | Functions for retrieving a path from a predecessor array where @-1@ represents none.
+    -- | Functions for retrieving a path from a predecessor array, where @-1@ represents none.
     constructPathFromRoot,
     constructPathToRoot,
 
@@ -233,7 +241,7 @@ rev Csr {..} = Csr.build nCsr revEdges
 -- graph.
 --
 -- ==== Constraints
--- - The graph must be a DAG; no cycle can exist.
+-- - The graph must be a DAG; there must be no cycle.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -245,7 +253,13 @@ rev Csr {..} = Csr.build nCsr revEdges
 --
 -- @since 1.1.0.0
 {-# INLINEABLE topSort #-}
-topSort :: Int -> (Int -> VU.Vector Int) -> VU.Vector Int
+topSort ::
+  -- | \(n\): The number of vertices.
+  Int ->
+  -- | \(g\): Graph function, typically @'adj' gr@.
+  (Int -> VU.Vector Int) ->
+  -- | Vertices in topological ordering: upstream vertices come first.
+  VU.Vector Int
 topSort n gr = runST $ do
   inDeg <- VUM.replicate n (0 :: Int)
   for_ [0 .. n - 1] $ \u -> do
@@ -277,7 +291,7 @@ topSort n gr = runST $ do
 -- | \(O(n)\) Returns connected components for a non-directed graph.
 --
 -- ==== Constraints
--- - The graph must be non-directed.
+-- - The graph must be non-directed: both \((u, v)\) and \((v, u)\) edges must exist.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -292,7 +306,13 @@ topSort n gr = runST $ do
 --
 -- @since 1.2.4.0
 {-# INLINEABLE connectedComponents #-}
-connectedComponents :: Int -> (Int -> VU.Vector Int) -> V.Vector (VU.Vector Int)
+connectedComponents ::
+  -- | \(n\): The number of vertices.
+  Int ->
+  -- | \(g\): Graph function, typically @'adj' gr@.
+  (Int -> VU.Vector Int) ->
+  -- | Connected components.
+  V.Vector (VU.Vector Int)
 connectedComponents n gr = runST $ do
   buf <- B.new @_ @Int n
   len <- B.new @_ @Int n
@@ -340,7 +360,13 @@ connectedComponents n gr = runST $ do
 --
 -- @since 1.2.4.0
 {-# INLINEABLE bipartiteVertexColors #-}
-bipartiteVertexColors :: Int -> (Int -> VU.Vector Int) -> Maybe (VU.Vector Bit)
+bipartiteVertexColors ::
+  -- | \(n\): The number of vertices.
+  Int ->
+  -- | \(g\): Graph function, typically @'adj' gr@.
+  (Int -> VU.Vector Int) ->
+  -- | Bipartite vertex coloring.
+  Maybe (VU.Vector Bit)
 bipartiteVertexColors n gr = runST $ do
   (!isBipartite, !color, !_) <- bipartiteVertexColorsImpl n gr
   if isBipartite
@@ -388,7 +414,7 @@ bipartiteVertexColorsImpl n gr
       b <- isCompatible 0
       pure (b, color', dsu)
 
--- | \(O(n + m)\) Returns a [block cut tree](https://en.wikipedia.org/wiki/Biconnected_component)
+-- | \(O(n + m)\) Returns a [block-cut tree](https://en.wikipedia.org/wiki/Biconnected_component)
 -- where super vertices \((v \ge n)\) represent each biconnected component.
 --
 -- ==== __Example__
@@ -407,7 +433,14 @@ bipartiteVertexColorsImpl n gr
 --
 -- @since 1.1.1.0
 {-# INLINEABLE blockCut #-}
-blockCut :: Int -> (Int -> VU.Vector Int) -> Csr ()
+blockCut ::
+  -- | \(n\): The number of vertices.
+  Int ->
+  -- | \(g\): Graph function, typically @'adj' gr@.
+  (Int -> VU.Vector Int) ->
+  -- | Graph that represents a block-cut tree, where super vertices \((n \ge n)\) represent each
+  -- biconnected component.
+  Csr ()
 blockCut n gr = runST $ do
   low <- VUM.replicate n (0 :: Int)
   ord <- VUM.replicate n (0 :: Int)
@@ -492,7 +525,13 @@ blockCut n gr = runST $ do
 --
 -- @since 1.1.1.0
 {-# INLINEABLE blockCutComponents #-}
-blockCutComponents :: Int -> (Int -> VU.Vector Int) -> V.Vector (VU.Vector Int)
+blockCutComponents ::
+  -- | \(n\): The number of vertices.
+  Int ->
+  -- | \(g\): Graph function, typically @'adj' gr@.
+  (Int -> VU.Vector Int) ->
+  -- | Block-cut components
+  V.Vector (VU.Vector Int)
 blockCutComponents n gr =
   let bct = blockCut n gr
       d = nCsr bct - n
@@ -504,7 +543,7 @@ blockCutComponents n gr =
 
 -- The implementations can be a bit simpler with `whenJustM`
 
--- | \(O(n + m)\) Opinionated breadth-first search that returns a distance array.
+-- | \(O(n + m)\) Opinionated breadth-first search function that returns a distance array.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -534,8 +573,8 @@ bfs !bnd0 !gr !undefW !sources =
   let (!dist, !_) = bfsImpl False bnd0 gr undefW sources
    in dist
 
--- | \(O(n + m)\) Opinionated breadth-first search that returns a distance array and a predecessor
--- array.
+-- | \(O(n + m)\) Opinionated breadth-first search function that returns a distance array and a
+-- predecessor array.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -812,7 +851,7 @@ trackingDijkstra ::
   Int ->
   -- | Distance assignment for unreachable vertices.
   w ->
-  -- | Source vertices with weights.
+  -- | Source vertices with initial weights.
   VU.Vector (i, w) ->
   -- | A tuple of (distance array in one-dimensional index, predecessor array).
   (VU.Vector w, VU.Vector Int)
@@ -998,9 +1037,11 @@ bellmanFordImpl {- !policy -} !trackPrev !nVerts !gr !undefW !sources = runST $ 
 
   runLoop 0
 
--- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\), which should be
--- accessed as @m VU.! (`index0` (n, n) (from, to))@. Negative loop can be detected by testing if
--- there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@.
+-- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\).
+--
+-- - The distance matrix should be accessed as @m VG.! (`index0` (n, n) (from, to))@,
+-- - There's a negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@
+-- is negative.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -1034,7 +1075,7 @@ floydWarshall ::
   Int ->
   -- | Weighted edges.
   VU.Vector (Int, Int, w) ->
-  -- | Distance assignment \(d_0 \gt 0\) for unreachable vertices. It should be @maxBound `div` 2@
+  -- | Distance assignment \(d_0 \gt 0\) for unreachable vertices. It should be @maxBound \`div` 2@
   -- for `Int`.
   w ->
   -- | Distance array in one-dimensional index.
@@ -1044,9 +1085,12 @@ floydWarshall !nVerts !edges !undefW = VU.create $ do
   pure dist
 
 -- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\) and predecessor
--- matrix \(p\). The distance matrix should be accessed as @m VU.! (`index0` (n, n) (from, to))@,
--- and the predecessor matrix should be accessed as @m VU.! (`index0` (n, n) (root, v))@. There's a
--- negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@.
+-- matrix \(p\).
+--
+-- - The distance matrix should be accessed as @m VG.! (`index0` (n, n) (from, to))@,
+-- - The predecessor matrix should be accessed as @m VG.! (`index0` (n, n) (root, v))@
+-- - There's a negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@
+-- is negative.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -1086,7 +1130,7 @@ trackingFloydWarshall ::
   Int ->
   -- | Weighted edges.
   VU.Vector (Int, Int, w) ->
-  -- | Distance assignment \(d_0 \gt 0\) for unreachable vertices. It should be @maxBound `div` 2@
+  -- | Distance assignment \(d_0 \gt 0\) for unreachable vertices. It should be @maxBound \`div` 2@
   -- for `Int`.
   w ->
   -- | Distance array in one-dimensional index.
@@ -1095,9 +1139,11 @@ trackingFloydWarshall !nVerts !edges !undefW = runST $ do
   (!dist, !prev) <- newFloydWarshallST True nVerts edges undefW
   (,) <$> VU.unsafeFreeze dist <*> VU.unsafeFreeze prev
 
--- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\), which should be
--- accessed as @m VU.! (n * from + to)@. There's a negative cycle if any @m VU.! (n * i + i)@ is
--- negative.
+-- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\).
+--
+-- - The distance matrix should be accessed as @m VG.! (`index0` (n, n) (from, to))@,
+-- - There's a negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@
+-- is negative.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -1130,7 +1176,12 @@ newFloydWarshall !nVerts !edges !undefW = stToPrim $ do
   pure dist
 
 -- | \(O(n^3)\) Floyd–Warshall algorithm that returns a distance matrix \(m\) and predecessor
--- matrix. There's a negative cycle if any @m VU.! (n * i + i)@ is negative.
+-- matrix.
+--
+-- - The distance matrix should be accessed as @m VG.! (`index0` (n, n) (from, to))@,
+-- - The predecessor matrix should be accessed as @m VG.! (`index0` (n, n) (root, v))@
+-- - There's a negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@
+-- is negative.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -1217,8 +1268,7 @@ newFloydWarshallST !trackPrev !nVerts !edges !undefW = do
   where
     idx !from !to = nVerts * from + to
 
--- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight decreasement or new edge
--- addition.
+-- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight change or new edge addition.
 --
 -- @since 1.2.4.0
 {-# INLINE updateEdgeFloydWarshall #-}
@@ -1244,8 +1294,7 @@ updateEdgeFloydWarshall mat nVerts undefW a b w = do
   prev <- VUM.replicate @_ @Int 0 (-1 :: Int)
   stToPrim $ updateEdgeFloydWarshallST False mat prev nVerts undefW a b w
 
--- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight decreasement or new edge
--- addition.
+-- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight chaneg or new edge addition.
 --
 -- @since 1.2.4.0
 {-# INLINE updateEdgeTrackingFloydWarshall #-}
