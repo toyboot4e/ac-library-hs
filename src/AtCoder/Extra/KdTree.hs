@@ -2,7 +2,7 @@
 
 -- | Static, \(k\)-dimensional tree \((k = 2)\).
 --
--- - Points are fixed on `build`.
+-- - Points are fixed on `build` and cannot be moved or added later.
 -- - Multiple points can exist at the same coordinate.
 --
 -- ==== __Examples__
@@ -137,9 +137,6 @@ build xs0 ys0 =
 
 -- | \(O(n \log n)\) Creates `KdTree` from a \((x, y)\) vector.
 --
--- ==== Constraints
--- - \(|\mathrm{xs}| = |\mathrm{ys}|\).
---
 -- @since 1.2.2.0
 {-# INLINE build2 #-}
 build2 ::
@@ -209,7 +206,7 @@ findNearestPoint ::
   Int ->
   -- | \(y\)
   Int ->
-  -- | The nearest point index
+  -- | The nearest point index.
   Maybe Int
 findNearestPoint KdTree {..} x y
   | nKt == 0 = Nothing

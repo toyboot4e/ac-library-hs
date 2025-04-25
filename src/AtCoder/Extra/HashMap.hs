@@ -4,11 +4,12 @@
 -- <https://github.com/maspypy/library/blob/main/ds/hashmap.hpp>
 
 -- | A dense, fast `Int` hash map with a fixed-sized `capacity` of \(n\). Most operations are
--- performed in \(O(1)\) time, but in average.
+-- performed in \(O(1)\) average.
 --
 -- ==== Capacity limitation
 -- Access to each key creates a new entry. Note that entries cannot be invalidated due to the
--- internal implementation (called /open addressing/).
+-- internal implementation (called /open addressing/). Be sure to specify large enough capacity
+-- on `new`.
 --
 -- ==== __Example__
 -- Create a `HashMap` with `capacity` \(10\):
@@ -16,7 +17,7 @@
 -- >>> import AtCoder.Extra.HashMap qualified as HM
 -- >>> hm <- HM.new @_ @Int 10
 --
--- `insert`, `lookup` and other functions are available in \(O(1)\) averaged time:
+-- `insert`, `lookup` and other functions are available in \(O(1)\) in averaged:
 --
 -- >>> HM.insert hm 0 100
 -- >>> HM.insert hm 10 101

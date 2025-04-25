@@ -21,7 +21,7 @@ module AtCoder.Extra.WaveletMatrix
     rank,
     rankBetween,
 
-    -- * Selection
+    -- * Selection (finding index)
 
     -- | ==== __Example__
     -- >>> import AtCoder.Extra.WaveletMatrix qualified as WM
@@ -223,7 +223,7 @@ selectKthIn WaveletMatrix {..} l r k y = do
   Rwm.selectKthIn rawWm l r k i
 
 -- | \(O(\log |S|)\) Given the interval \([l, r)\), returns the index of the \(k\)-th (0-based)
--- largest value. Note that duplicated values are treated as distinct occurrences.
+-- largest value in it. Note that duplicated values are treated as distinct occurrences.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE kthLargestIn #-}
@@ -244,7 +244,8 @@ kthLargestIn WaveletMatrix {..} l r k
   | otherwise = Nothing
 
 -- | \(O(\log |S|)\) Given the interval \([l, r)\), returns both the index and the value of the
--- \(k\)-th (0-based) largest value. Note that duplicated values are treated as distinct occurrences.
+-- \(k\)-th (0-based) largest value in it. Note that duplicated values are treated as distinct
+-- occurrences.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE ikthLargestIn #-}
@@ -264,7 +265,7 @@ ikthLargestIn WaveletMatrix {..} l r k
   | otherwise = Nothing
 
 -- | \(O(\log |S|)\) Given the interval \([l, r)\), returns the index of the \(k\)-th (0-based)
--- smallest value. Note that duplicated values are treated as distinct occurrences.
+-- smallest value in it. Note that duplicated values are treated as distinct occurrences.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE kthSmallestIn #-}
@@ -284,7 +285,8 @@ kthSmallestIn WaveletMatrix {..} l r k
   | otherwise = Nothing
 
 -- | \(O(\log |S|)\) Given the interval \([l, r)\), returns both the index and the value of the
--- \(k\)-th (0-based) smallest value. Note that duplicated values are treated as distinct occurrences.
+-- \(k\)-th (0-based) smallest value in it. Note that duplicated values are treated as distinct
+-- occurrences.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE ikthSmallestIn #-}
@@ -394,7 +396,7 @@ lookupGT ::
   Maybe Int
 lookupGT wm l r y0 = lookupGE wm l r (y0 + 1)
 
--- | \(O(\min(|S|, L) \log |S|)\) Collects \((y, \mathrm{rank}(y))\) in range \([l, r)\) in
+-- | \(O(\min(|S|, L) \log |S|)\) Collects \((y, \mathrm{rank}(y))\) in an interval \([l, r)\) in
 -- ascending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
 --
 -- @since 1.1.0.0
@@ -402,7 +404,7 @@ lookupGT wm l r y0 = lookupGE wm l r (y0 + 1)
 assocsIn :: WaveletMatrix -> Int -> Int -> [(Int, Int)]
 assocsIn WaveletMatrix {..} l r = Rwm.assocsWith rawWm l r (yDictWm VG.!)
 
--- | \(O(\min(|S|, L) \log |S|)\) Collects \((y, \mathrm{rank}(y))\) in range \([l, r)\) in
+-- | \(O(\min(|S|, L) \log |S|)\) Collects \((y, \mathrm{rank}(y))\) in an interval \([l, r)\) in
 -- descending order of \(y\). Note that it's only fast when the \(|S|\) is very small.
 --
 -- @since 1.1.0.0

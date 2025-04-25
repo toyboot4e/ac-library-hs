@@ -51,6 +51,8 @@ import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
 -- | Fixed-sized array for \(O(1)\) allocation and \(O(1)\) clearing after \(O(n)\) construction.
+--
+-- @since 1.2.0.0
 data Pool s a = Pool
   { -- | Data array.
     dataPool :: !(VUM.MVector s a),
@@ -61,46 +63,70 @@ data Pool s a = Pool
   }
 
 -- | Strongly typed index of pool items. User has to explicitly @corece@ on raw index use.
+--
+-- @since 1.2.0.0
 newtype Index = Index {unIndex :: Int}
-  deriving (Eq, VP.Prim)
+  deriving
+    ( -- | @since 1.2.0.0
+      Eq,
+      -- | @since 1.2.0.0
+      VP.Prim
+    )
   deriving newtype (Ord, Show)
 
+-- | @since 1.2.0.0
 newtype instance VU.MVector s Index = MV_Index (VP.MVector s Index)
 
+-- | @since 1.2.0.0
 newtype instance VU.Vector Index = V_Index (VP.Vector Index)
 
+-- | @since 1.2.0.0
 deriving via (VU.UnboxViaPrim Index) instance VGM.MVector VUM.MVector Index
 
+-- | @since 1.2.0.0
 deriving via (VU.UnboxViaPrim Index) instance VG.Vector VU.Vector Index
 
+-- | @since 1.2.0.0
 instance VU.Unbox Index
 
 -- | Invalid, null `Index`.
+--
+-- @since 1.2.0.0
 {-# INLINE undefIndex #-}
 undefIndex :: Index
 undefIndex = Index (-1)
 
 -- | Returns `True` for `undefIndex`.
+--
+-- @since 1.2.0.0
 {-# INLINE nullIndex #-}
 nullIndex :: Index -> Bool
 nullIndex = (== undefIndex)
 
 -- | \(O(n)\) Creates a pool with the specified @capacity@.
+--
+-- @since 1.2.0.0
 {-# INLINE new #-}
 new :: (VU.Unbox a, PrimMonad m) => Int -> m (Pool (PrimState m) a)
 new cap = stToPrim $ newST cap
 
 -- | \(O(1)\) Resets the pool to the initial state.
+--
+-- @since 1.2.0.0
 {-# INLINE clear #-}
 clear :: (PrimMonad m) => Pool (PrimState m) a -> m ()
 clear pool = stToPrim $ clearST pool
 
 -- | \(O(1)\) Returns the maximum number of elements the pool can store.
+--
+-- @since 1.2.0.0
 {-# INLINE capacity #-}
 capacity :: (VU.Unbox a) => Pool s a -> Int
 capacity = VGM.length . dataPool
 
 -- | \(O(1)\) Returns the number of elements in the pool.
+--
+-- @since 1.2.0.0
 {-# INLINE size #-}
 size :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> m Int
 size pool = stToPrim $ sizeST pool
@@ -109,6 +135,8 @@ size pool = stToPrim $ sizeST pool
 --
 -- ==== Constraints
 -- - The number of elements must not exceed the `capacity`.
+--
+-- @since 1.2.0.0
 {-# INLINE alloc #-}
 alloc :: (HasCallStack, PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> a -> m Index
 alloc pool x = stToPrim $ allocST pool x
@@ -117,6 +145,8 @@ alloc pool x = stToPrim $ allocST pool x
 --
 -- ==== Constraints
 -- - \(0 \le i \lt n\)
+--
+-- @since 1.2.0.0
 {-# INLINE free #-}
 free :: (PrimMonad m) => Pool (PrimState m) a -> Index -> m ()
 free Pool {..} i = do
@@ -126,6 +156,8 @@ free Pool {..} i = do
 --
 -- ==== Constraints
 -- - \(0 \le i \lt n\)
+--
+-- @since 1.2.0.0
 {-# INLINE read #-}
 read :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> Index -> m a
 read Pool {dataPool} !i = do
@@ -134,16 +166,20 @@ read Pool {dataPool} !i = do
 -- | \(O(1)\) Writes to the \(k\)-th value.
 --
 -- ==== Constraints
+--
+-- @since 1.2.0.0
 -- - \(0 \le i \lt n\)
 {-# INLINE write #-}
 write :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> Index -> a -> m ()
 write Pool {dataPool} !i !x = do
   VGM.write dataPool (coerce i) x
 
--- | \(O(1)\) Modifies the \(k\)-th value.
+-- | \(O(1)\) Given a user function \(f\), modifies the \(k\)-th value with it.
 --
 -- ==== Constraints
 -- - \(0 \le i \lt n\)
+--
+-- @since 1.2.0.0
 {-# INLINE modify #-}
 modify :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> (a -> a) -> Index -> m ()
 modify Pool {dataPool} !f !i = do
@@ -153,6 +189,8 @@ modify Pool {dataPool} !f !i = do
 --
 -- ==== Constraints
 -- - \(0 \le i \lt n\)
+--
+-- @since 1.2.0.0
 {-# INLINE exchange #-}
 exchange :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> Index -> a -> m a
 exchange Pool {dataPool} !i !x = do
@@ -166,21 +204,21 @@ newtype Handle s = Handle
     unHandle :: VUM.MVector s Index
   }
 
--- | \(O(1)\) Creates a new sequence `Handle` from a root node index.
+-- | \(O(1)\) Creates a new `Handle` from a root node index.
 --
 -- @since 1.2.0.0
 {-# INLINE newHandle #-}
 newHandle :: (PrimMonad m) => Index -> m (Handle (PrimState m))
 newHandle x = Handle <$> VUM.replicate 1 x
 
--- | \(O(1)\) Returns whether the sequence is empty.
+-- | \(O(1)\) Returns whether the handle represents null.
 --
 -- @since 1.2.0.0
 {-# INLINE nullHandle #-}
 nullHandle :: (PrimMonad m) => Handle (PrimState m) -> m Bool
 nullHandle (Handle h) = nullIndex <$> VGM.unsafeRead h 0
 
--- | \(O(1)\) Invalidates a sequence handle. Note that it does not change or `free` the sequence.
+-- | \(O(1)\) Invalidates a handle. Note that it does not change or `free` the pool item.
 --
 -- @since 1.2.0.0
 {-# INLINE invalidateHandle #-}

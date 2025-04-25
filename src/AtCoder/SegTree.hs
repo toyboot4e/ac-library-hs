@@ -171,7 +171,7 @@ build vs = stToPrim $ buildST vs
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> Int -> a -> m ()
 write self p x = stToPrim $ writeST self p x
 
--- | (Extra API) Modifies \(p\)-th value with a function \(f\).
+-- | (Extra API) Given a user function \(f\), modifies \(p\)-th value with it.
 --
 -- ==== Constraints
 -- - \(0 \leq p \lt n\)
@@ -184,7 +184,7 @@ write self p x = stToPrim $ writeST self p x
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => SegTree (PrimState m) a -> (a -> a) -> Int -> m ()
 modify self f p = stToPrim $ modifyST self f p
 
--- | (Extra API) Modifies \(p\)-th value with a monadic function \(f\).
+-- | (Extra API) Given a user function \(f\), modifies \(p\)-th value with it.
 --
 -- ==== Constraints
 -- - \(0 \leq p \lt n\)

@@ -167,15 +167,14 @@ capacity = IM.capacity . unITM
 size :: (PrimMonad m) => IntervalMap (PrimState m) a -> m Int
 size = IM.size . unITM
 
--- | \(O(\log n)\) Returns whether a point \(x\) is contained within any of the intervals.
+-- | \(O(\log n)\) Returns whether any of the intervals contain a point \(x\).
 --
 -- @since 1.1.0.0
 {-# INLINE contains #-}
 contains :: (PrimMonad m, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> m Bool
 contains itm i = stToPrim $ containsIntervalST itm i (i + 1)
 
--- | \(O(\log n)\) Returns whether an interval \([l, r)\) is fully contained within any of the
--- intervals.
+-- | \(O(\log n)\) Returns whether any of the intervals fully contain an interval \([l, r)\).
 --
 -- @since 1.1.0.0
 {-# INLINE containsInterval #-}
@@ -425,14 +424,14 @@ deleteM (IntervalMap dim) l0 r0 onAdd onDel
               -- IM.delete_ dim l'
               stToPrim $ IM.insert dim l' (l, x')
 
--- | \(O(\log n)\) Shorthand for overwriting the value of an interval that contains \([l, r)\).
+-- | \(O(\log n)\) Shorthand for overwriting the value of an interval that fully contains \([l, r)\).
 --
 -- @since 1.1.0.0
 {-# INLINE overwrite #-}
 overwrite :: (PrimMonad m, Eq a, VU.Unbox a) => IntervalMap (PrimState m) a -> Int -> Int -> a -> m ()
 overwrite itm l r x = stToPrim $ overwriteST itm l r x
 
--- | \(O(\log n)\). Shorthand for overwriting the value of an interval that contains \([l, r)\).
+-- | \(O(\log n)\). Shorthand for overwriting the value of an interval that fully contains \([l, r)\).
 -- Tracks interval state changes via @onAdd@ and @onDel@ hooks.
 --
 -- @since 1.1.0.0
@@ -458,8 +457,8 @@ overwriteM itm l r x onAdd onDel = do
     Just (!l', !r', !_) -> insertM itm l' r' x onAdd onDel
     Nothing -> pure ()
 
--- | \(O(n \log n)\) Enumerates the intervals and the associated values as \((l, (r, x))\) tuples,
--- where \([l, r)\) is the interval and \(x\) is the associated value.
+-- | \(O(n \log n)\) Enumerates the intervals and the associated values as \((l, (r, v))\) tuples,
+-- where \([l, r)\) is the interval and \(v\) is the associated value.
 --
 -- @since 1.1.0.0
 {-# INLINE freeze #-}

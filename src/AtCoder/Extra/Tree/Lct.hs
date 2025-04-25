@@ -185,7 +185,8 @@ data Lct s a = Lct
     invOpLct :: !(a -> a)
   }
 
--- | \(O(n)\) Creates a link/cut tree with \(n\) vertices and no edges.
+-- | \(O(n)\) Creates a link/cut tree with \(n\) vertices and no edges. This setup disables subtree
+-- queries (`prodSubtree`).
 --
 -- @since 1.1.1.0
 {-# INLINE new #-}
@@ -200,7 +201,8 @@ new = newInv id
 newInv :: (PrimMonad m, Monoid a, VU.Unbox a) => (a -> a) -> Int -> m (Lct (PrimState m) a)
 newInv !invOpLct nLct = buildInv invOpLct (VU.replicate nLct mempty) VU.empty
 
--- | \(O(n + m \log n)\) Creates a link/cut tree of initial monoid values and initial edges.
+-- | \(O(n + m \log n)\) Creates a link/cut tree of initial monoid values and initial edges. This
+-- setup disables subtree queries (`prodSubtree`).
 --
 -- @since 1.1.1.0
 {-# INLINE build #-}
@@ -247,7 +249,8 @@ write lct v x = stToPrim $ do
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.Lct.write" v (nLct lct)
 
--- | Amortized \(O(\log n)\). Modifies the monoid value of a vertex with a pure function.
+-- | Amortized \(O(\log n)\). Given a user function \(f\), modifies the monoid value of a vertex
+-- \(v\).
 --
 -- @since 1.1.1.0
 {-# INLINE modify #-}
@@ -259,7 +262,8 @@ modify lct f v = stToPrim $ do
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.Lct.modify" v (nLct lct)
 
--- | Amortized \(O(\log n)\). Modifies the monoid value of a vertex with a monadic function.
+-- | Amortized \(O(\log n)\). Given a user function \(f\), modifies the monoid value of a vertex
+-- \(v\).
 --
 -- @since 1.1.1.0
 {-# INLINE modifyM #-}
@@ -276,7 +280,7 @@ modifyM lct f v = do
 -- -------------------------------------------------------------------------------------------------
 
 -- | Amortized \(O(\log n)\). Creates an edge between \(c\) and \(p\). In the represented tree, the
--- parent of \(c\) will be \(p\) after this operation.
+-- \(p\) will be the parent of \(c\).
 --
 -- @since 1.1.1.0
 {-# INLINE link #-}
@@ -286,7 +290,7 @@ link lct c p = stToPrim $ linkST lct c p
     !_ = ACIA.checkIndex "AtCoder.Extra.Lct.link" c (nLct lct)
     !_ = ACIA.checkIndex "AtCoder.Extra.Lct.link" p (nLct lct)
 
--- | Amortized \(O(\log N)\). Deletes an edge between \(u\) and \(v\).
+-- | Amortized \(O(\log n)\). Deletes an edge between \(u\) and \(v\).
 --
 -- @since 1.1.1.0
 {-# INLINE cut #-}

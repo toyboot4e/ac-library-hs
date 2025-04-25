@@ -11,8 +11,8 @@
 -- ==== Lazy propagation
 -- Typically, an action to a whole block can be delayed; store the aggregation value for the block,
 -- delay the internal sequence update, and restore them when part of the block is accessed. Such
--- lazy propagation should be handled on the user side on partial block access functions
--- (@foldPart@ or @actPart@) are called.
+-- lazy propagation should be handled on the user side in partial block access functions (@foldPart@
+-- or @actPart@).
 --
 -- @since 1.2.5.0
 module AtCoder.Extra.SqrtDecomposition
@@ -33,14 +33,19 @@ import Data.Vector.Unboxed qualified as VU
 -- INLINE all the functions, even if the performance gain is just a little bit, in case it matters.
 
 -- | \(O(\sqrt n)\) Runs user function for each block.
+--
+-- ==== Constraints
+-- - \(l \le r\)
+--
+-- @since 1.2.5.0
 {-# INLINE forM_ #-}
 forM_ ::
   (Monad m) =>
   -- | Context: block length.
   Int ->
-  -- | Function: @actFull@ function that takes target block index.
+  -- | Function: @actFull@ function that takes a target block index.
   (Int -> m ()) ->
-  -- | Function: @actPart@ function that takes target block index, left index and right index.
+  -- | Function: @actPart@ function that takes a target block index and a half-open interval in it.
   (Int -> Int -> Int -> m ()) ->
   -- | Input: \(l\).
   Int ->
@@ -69,7 +74,7 @@ forM_ !blockLen !actFull !actPart !l !r = do
 --
 -- ==== Constraints
 -- - \(l \le r\)
--- - If an empty interval is queried, the @readPart@ function must return a valid value.
+-- - The @readPart@ function must return a valid value for an empty interval.
 --
 -- @since 1.2.5.0
 {-# INLINE foldMapM #-}
@@ -77,10 +82,11 @@ foldMapM ::
   (Monad m, Semigroup a) =>
   -- | Context: block length.
   Int ->
-  -- | Function: @readFull@ function that takes target block index and returns monoid value of it.
+  -- | Function: @readFull@ function that takes a target block index and returns a monoid value for
+  -- it.
   (Int -> m a) ->
-  -- | Function: @readPart@ function that takes target block index, left index and right index, and
-  -- returns monoid value for it.
+  -- | Function: @readPart@ function that takes a target block index and a half-open interval in it
+  -- and returns the monoid value for it.
   (Int -> Int -> Int -> m a) ->
   -- | Input: \(l\).
   Int ->
@@ -95,7 +101,7 @@ foldMapM blockLen = foldMapWithM blockLen (<>)
 --
 -- ==== Constraints
 -- - \(l \le r\)
--- - If an empty interval is queried, the @readPart@ function must return a valid value.
+-- - The @readPart@ function must return a valid value for an empty interval.
 --
 -- @since 1.2.5.0
 {-# INLINE foldMapWithM #-}
@@ -105,10 +111,11 @@ foldMapWithM ::
   Int ->
   -- | Merges function for output values.
   (a -> a -> a) ->
-  -- | Function: @readFull@ function that takes target block index and returns monoid value of it.
+  -- | Function: @readFull@ function that a takes target block index and returns a monoid value for
+  -- it.
   (Int -> m a) ->
-  -- | Function: @readPart@ function that takes target block index, left index and right index, and
-  -- returns output value of it.
+  -- | Function: @readPart@ function that a takes target block index, a half-open interval in it,
+  -- and returns the output value for it.
   (Int -> Int -> Int -> m a) ->
   -- | Input: \(l\).
   Int ->
@@ -150,10 +157,11 @@ foldM ::
   (Monad m) =>
   -- | Context: block length.
   Int ->
-  -- | Function: @foldFull@ function that takes target block index and returns monoid value of it.
+  -- | Function: @foldFull@ function that a takes target block index and returns a monoid value for
+  -- it.
   (a -> Int -> m a) ->
-  -- | Function: @foldPart@ function that takes target block index, left and right local index and returns monoid
-  -- value of it.
+  -- | Function: @foldPart@ function that a takes target block index, a half-open interval in it
+  -- and returns a monoid value for it.
   (a -> Int -> Int -> Int -> m a) ->
   -- | Initial folding value.
   a ->
@@ -197,10 +205,10 @@ foldM_ ::
   (Monad m) =>
   -- | Context: Block length.
   Int ->
-  -- | @readFull@ function that takes target block index and returns monoid value of it.
+  -- | @readFull@ function that takes a target block index and returns  amonoid value for it.
   (a -> Int -> m a) ->
-  -- | @readPart@ function that takes target block index, left and right local index and returns monoid
-  -- value of it.
+  -- | @readPart@ function that takes a target block index, a half-open interval and returns a
+  -- monoid value for it.
   (a -> Int -> Int -> Int -> m a) ->
   -- | Initial folding value.
   a ->

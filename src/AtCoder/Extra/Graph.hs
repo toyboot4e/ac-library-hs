@@ -90,8 +90,7 @@ module AtCoder.Extra.Graph
 
     -- *** All-pair
 
-    -- | Functions for retrieving a path from a predecessor matrix \(m\), which is accessed as
-    -- @m VG.! (n * from + to)@, where @-1@ represents none.
+    -- | Functions for retrieving a path from a predecessor matrix \(m\).
     constructPathFromRootMat,
     constructPathToRootMat,
     constructPathFromRootMatM,

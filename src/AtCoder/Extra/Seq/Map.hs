@@ -15,10 +15,14 @@
 -- >>> import Data.Semigroup (Sum (..))
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> m <- M.new @_ @(RangeAdd.RangeAdd (Sum Int)) @Int @(Sum Int) 10
--- >>> M.insert m 1 10
--- >>> M.insert m 3 30
+-- >>> M.insert m 1 10 -- [- 10 - - -]
+-- >>> M.insert m 3 30 -- [- 10 - 30 -]
 -- >>> M.prod m 1 2
 -- Sum {getSum = 10}
+--
+-- >>> M.applyIn m 1 4 $ RangeAdd.new 7 -- [-  17 - 37 -]
+-- >>> M.prod m 1 4
+-- Sum {getSum = 54}
 --
 -- @since 1.2.1.0
 module AtCoder.Extra.Seq.Map
@@ -115,11 +119,11 @@ import Prelude hiding (lookup, read, reverse, seq)
 --
 -- @since 1.2.1.0
 data Map s f k v = Map
-  { -- | The sequence storage
+  { -- | The sequence storage.
     --
     -- @since 1.2.1.0
     seqMap :: !(Seq.Seq s f v),
-    -- | Keys
+    -- | Keys.
     --
     -- @since 1.2.1.0
     kMap :: !(VUM.MVector s k),
@@ -136,7 +140,8 @@ assertRootST Seq.Seq {pSeq} i = do
   let !_ = ACIA.runtimeAssert (P.nullIndex p) $ "AtCoder.Extra.Seq.Map.assertRootST: not a root (node `" ++ show i ++ "`, parent `" ++ show p ++ "`)"
   pure ()
 
--- | \(O(n)\) Creates a new `Map` of capacity \(n\). Always prefer `build` to `new` for performance.
+-- | \(O(n)\) Creates a new `Map` of capacity \(n\). Always prefer `build` to `new` for better
+-- performance.
 --
 -- @since 1.2.1.0
 {-# INLINEABLE new #-}
@@ -148,7 +153,7 @@ new n = stToPrim $ do
   pure Map {..}
 
 -- | \(O(n \log n)\) Creates a new `Map` of capacity \(n\) with initial values. Always prefer `build` to
--- `new` for performance.
+-- `new` for better performance.
 --
 -- @since 1.2.1.0
 {-# INLINEABLE build #-}
@@ -265,13 +270,13 @@ insert m k v = stToPrim $ do
 {-# INLINE insertWith #-}
 insertWith ::
   (HasCallStack, PrimMonad m, Eq f, Monoid f, VU.Unbox f, Ord k, VU.Unbox k, Monoid v, VU.Unbox v, SegAct f v) =>
-  -- | Map
+  -- | Map.
   Map (PrimState m) f k v ->
-  -- | new -> old -> combined
+  -- | new -> old -> combined.
   (v -> v -> v) ->
-  -- | Key
+  -- | Key.
   k ->
-  -- | Value
+  -- | Value.
   v ->
   m ()
 insertWith m f k v = stToPrim $ do
@@ -281,13 +286,13 @@ insertWith m f k v = stToPrim $ do
 {-# INLINEABLE insertWithST #-}
 insertWithST ::
   (HasCallStack, Eq f, Monoid f, VU.Unbox f, Ord k, VU.Unbox k, Monoid v, VU.Unbox v, SegAct f v) =>
-  -- | Map
+  -- | Map.
   Map s f k v ->
-  -- | new -> old -> combined
+  -- | new -> old -> combined.
   (v -> v -> v) ->
-  -- | Key
+  -- | Key.
   k ->
-  -- | Value
+  -- | Value.
   v ->
   ST s ()
 insertWithST Map {..} f k v = stToPrim $ do
@@ -472,7 +477,7 @@ unsafeProdST m@Map {..} l r = do
 --
 -- ==== Constraints
 -- - \(0 \le l \le r \le n\)
--- - The root must point to a non-empty sequence.
+-- - The root must point a non-empty sequence.
 --
 -- @since 1.2.1.0
 {-# INLINEABLE applyIn #-}
@@ -486,7 +491,7 @@ applyIn m@Map {..} l r act = stToPrim $ do
       Raw.splayST seqMap target True
       VGM.write (Seq.unHandle rootMap) 0 target
 
--- | Amortized \(O(\log n)\).
+-- | Amortized \(O(\log n)\). Applies a monoid action \(f\) to every element.
 --
 -- @since 1.2.1.0
 {-# INLINE applyAll #-}
@@ -596,7 +601,7 @@ lookupImplR Map {..} k o = do
 -- Index-based operations
 -- -------------------------------------------------------------------------------------------
 
--- | Amortized \(O(\log n)\).
+-- | Amortized \(O(\log n)\). Reads the \(k\)-th node's monoid value.
 --
 -- @since 1.2.1.0
 {-# INLINE readAt #-}
@@ -604,7 +609,7 @@ readAt :: (HasCallStack, PrimMonad m, Eq f, Monoid f, VU.Unbox f, Monoid v, VU.U
 readAt Map {..} i = stToPrim $ do
   Seq.read seqMap rootMap i
 
--- | Amortized \(O(\log n)\).
+-- | Amortized \(O(\log n)\). Reads the \(k\)-th node's monoid value.
 --
 -- @since 1.2.1.0
 {-# INLINE readMaybeAt #-}
@@ -612,7 +617,7 @@ readMaybeAt :: (HasCallStack, PrimMonad m, Eq f, Monoid f, VU.Unbox f, Monoid v,
 readMaybeAt Map {..} i = stToPrim $ do
   Seq.readMaybe seqMap rootMap i
 
--- | Amortized \(O(\log n)\).
+-- | Amortized \(O(\log n)\). Writes to the \(k\)-th node's monoid value.
 --
 -- @since 1.2.1.0
 {-# INLINE writeAt #-}
@@ -620,7 +625,8 @@ writeAt :: (HasCallStack, PrimMonad m, Eq f, Monoid f, VU.Unbox f, Monoid v, VU.
 writeAt Map {..} i v = stToPrim $ do
   Seq.write seqMap rootMap i v
 
--- | Amortized \(O(\log n)\).
+-- | Amortized \(O(\log n)\). Given a user function \(f\), modifies the \(k\)-th node's monoid value
+-- with it.
 --
 -- @since 1.2.1.0
 {-# INLINE modifyAt #-}
@@ -628,7 +634,7 @@ modifyAt :: (HasCallStack, PrimMonad m, Eq f, Monoid f, VU.Unbox f, Monoid v, VU
 modifyAt Map {..} f i = stToPrim $ do
   Seq.modify seqMap rootMap f i
 
--- | Amortized \(O(\log n)\).
+-- | Amortized \(O(\log n)\). Exchanges the \(k\)-th node's monoid value.
 --
 -- @since 1.2.1.0
 {-# INLINE exchangeAt #-}
@@ -636,7 +642,7 @@ exchangeAt :: (HasCallStack, PrimMonad m, Eq f, Monoid f, VU.Unbox f, Monoid v, 
 exchangeAt Map {..} i v = stToPrim $ do
   Seq.exchange seqMap rootMap i v
 
--- | Amortized \(O(\log n)\).
+-- | Amortized \(O(\log n)\). Returns the monoid product in an interval \([l, r)\).
 --
 -- @since 1.2.1.0
 {-# INLINE prodInInterval #-}
@@ -644,7 +650,7 @@ prodInInterval :: (HasCallStack, PrimMonad m, Eq f, Monoid f, VU.Unbox f, Monoid
 prodInInterval Map {..} l r = stToPrim $ do
   Seq.prod seqMap rootMap l r
 
--- | Amortized \(O(\log n)\).
+-- | Amortized \(O(\log n)\). Given an interval \([l, r)\), applies a monoid action \(f\) to it.
 --
 -- @since 1.2.1.0
 {-# INLINE applyInInterval #-}
@@ -658,11 +664,11 @@ applyInInterval Map {..} l r f = stToPrim $ do
 {-# INLINE ilowerBound #-}
 ilowerBound ::
   (HasCallStack, PrimMonad m, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) =>
-  -- | Map
+  -- | Map.
   Map (PrimState m) f k a ->
-  -- | User predicate \(f(i, v_i)\) that takes the index and the monoid value
+  -- | User predicate \(f(i, v_i)\) that takes the index and the monoid value.
   (Int -> a -> Bool) ->
-  -- | Maximum \(r\), where \(f(i, v_i)\) holds for \(i \in [0, r)\)
+  -- | Maximum \(r\), where \(f(i, v_i)\) holds for \(i \in [0, r)\).
   m Int
 ilowerBound Map {..} f = stToPrim $ do
   Seq.ilowerBound seqMap rootMap f
@@ -673,11 +679,11 @@ ilowerBound Map {..} f = stToPrim $ do
 {-# INLINE ilowerBoundM #-}
 ilowerBoundM ::
   (HasCallStack, PrimMonad m, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) =>
-  -- | Map
+  -- | Map.
   Map (PrimState m) f k a ->
-  -- | User predicate \(f(i, v_i)\) that takes the index and the monoid value
+  -- | User predicate \(f(i, v_i)\) that takes the index and the monoid value.
   (Int -> a -> m Bool) ->
-  -- | Maximum \(r\), where \(f(i, v_i)\) holds for \(i \in [0, r)\)
+  -- | Maximum \(r\), where \(f(i, v_i)\) holds for \(i \in [0, r)\).
   m Int
 ilowerBoundM Map {..} f = do
   Seq.ilowerBoundM seqMap rootMap f
@@ -688,11 +694,11 @@ ilowerBoundM Map {..} f = do
 {-# INLINE ilowerBoundProd #-}
 ilowerBoundProd ::
   (HasCallStack, PrimMonad m, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) =>
-  -- | Map
+  -- | Map.
   Map (PrimState m) f k a ->
-  -- | User predicate \(f(i, v_0 \dots v_i)\) that takes the index and the monoid product
+  -- | User predicate \(f(i, \Pi_{0 \le j \le i} v_j)\) that takes the index and the monoid product.
   (Int -> a -> Bool) ->
-  -- | Maximum \(r\), where \(f(i, v_0 \dots v_i)\) holds for \(i \in [0, r)\)
+  -- | Maximum \(r\), where \(f(i, \Pi_{0 \le j \le i} v_j)\) holds for \(i \in [0, r)\).
   m Int
 ilowerBoundProd Map {..} f = stToPrim $ do
   Seq.ilowerBoundProd seqMap rootMap f
@@ -703,11 +709,11 @@ ilowerBoundProd Map {..} f = stToPrim $ do
 {-# INLINE ilowerBoundProdM #-}
 ilowerBoundProdM ::
   (HasCallStack, PrimMonad m, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) =>
-  -- | Map
+  -- | Map.
   Map (PrimState m) f k a ->
-  -- | User predicate \(f(i, v_0 \dots v_i)\) that takes the index and the monoid product
+  -- | User predicate \(f(i, \Pi_{0 \le j \le i} v_j)\) that takes the index and the monoid product.
   (Int -> a -> m Bool) ->
-  -- | Maximum \(r\), where \(f(i, v_0 \dots v_i)\) holds for \(i \in [0, r)\)
+  -- | Maximum \(r\), where \(f(i, \Pi_{0 \le j \le i} v_j)\) holds for \(i \in [0, r)\).
   m Int
 ilowerBoundProdM Map {..} f = do
   Seq.ilowerBoundProdM seqMap rootMap f
@@ -716,7 +722,7 @@ ilowerBoundProdM Map {..} f = do
 -- Conversions
 -- -------------------------------------------------------------------------------------------
 
--- | \(O(n)\) Returns the \(k, v\) pairs in the map
+-- | \(O(n)\) Returns the \(k, v\) pairs in the map.
 --
 -- @since 1.2.1.0
 {-# INLINEABLE freeze #-}

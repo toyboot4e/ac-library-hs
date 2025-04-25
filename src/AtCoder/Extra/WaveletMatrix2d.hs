@@ -82,7 +82,7 @@ import Prelude hiding (read)
 -- - Wavelet matrix methods such as `rank` can be implemented
 -- - `maxRight` can be implemented.
 
--- | Segment Tree on Wavelet Matrix: points on a 2D plane and rectangle products.
+-- | Segment Tree on Wavelet Matrix: points on a 2D plane and rectangle products of them.
 --
 -- @since 1.3.0.0
 data WaveletMatrix2d s a = WaveletMatrix2d
@@ -182,8 +182,8 @@ write WaveletMatrix2d {..} (!x, !y) v = stToPrim $ do
     i_
     $ V.zip (Rwm.bitsRwm rawWm2d) segTreesWm2d
 
--- | \(O(\log^2 n)\) Modifies the monoid value at \((x, y)\). Access to unknown points are
--- undefined.
+-- | \(O(\log^2 n)\) Given a user function \(f\), odifies the monoid value at \((x, y)\). Access to
+-- unknown points are undefined.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE modify #-}

@@ -131,7 +131,8 @@ type Vertex = Int
 -- @since 1.1.0.0
 type VertexHld = Vertex
 
--- | A wrapper for `Hld` getting product on paths on a tree using `Hld` and segment tree(s).
+-- | A wrapper of `Hld` for getting monoid product on paths on a tree using `Hld` and segment
+-- tree(s).
 --
 -- @since 1.1.0.0
 data TreeMonoid a s = TreeMonoid
@@ -175,7 +176,7 @@ fromVerts ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | `Hld.Hld`.
   Hld.Hld ->
-  -- | Whether the monoid is commutative or not.
+  -- | `Commutativity` of the monoid.
   Commutativity ->
   -- | The vertex weights.
   VU.Vector a ->
@@ -183,8 +184,8 @@ fromVerts ::
   m (TreeMonoid a (PrimState m))
 fromVerts hld commuteTM xs_ = stToPrim $ fromVertsST hld commuteTM xs_
 
--- | \(O(n)\) Creates a `TreeMonoid` with weignts on edges. The edges are not required to be
--- duplicated: only one of \((u, v, w)\) or \((v, u, w)\) is needed.
+-- | \(O(n)\) Creates a `TreeMonoid` with weignts on edges. The don't have to be bi-directed: only
+-- one of \((u, v, w)\) or \((v, u, w)\) is needed.
 --
 -- @since 1.1.0.0
 {-# INLINE fromEdges #-}
@@ -192,7 +193,7 @@ fromEdges ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | `Hld.Hld`.
   Hld.Hld ->
-  -- | Whether the monoid is commutative or not.
+  -- | `Commutativity` of the monoid.
   Commutativity ->
   -- | Input edges.
   VU.Vector (Vertex, Vertex, a) ->
@@ -200,7 +201,8 @@ fromEdges ::
   m (TreeMonoid a (PrimState m))
 fromEdges hld commuteTM edges = stToPrim $ fromEdgesST hld commuteTM edges
 
--- | \(O(\log^2 n)\) Returns the product of the path between two vertices \(u\), \(v\) (invlusive).
+-- | \(O(\log^2 n)\) Returns the monoid product of the path between two vertices \(u\) and \(v\)
+-- (invlusive).
 --
 -- @since 1.1.0.0
 {-# INLINE prod #-}
@@ -235,14 +237,14 @@ write tm i_ x = stToPrim $ writeST tm i_ x
 exchange :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> Vertex -> a -> m a
 exchange tm i_ x = stToPrim $ exchangeST tm i_ x
 
--- | \(O(\log n)\) Modifies the monoid value of a vertex with a pure function.
+-- | \(O(\log n)\) Given a user function \(f\), modifies the monoid value at \(v\).
 --
 -- @since 1.1.0.0
 {-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => TreeMonoid a (PrimState m) -> (a -> a) -> Int -> m ()
 modify tm f i_ = stToPrim $ modifyST tm f i_
 
--- | \(O(\log n)\) Modifies the monoid value of a vertex with a monadic function.
+-- | \(O(\log n)\) Given a user function \(f\), modifies the monoid value at \(v\).
 --
 -- @since 1.1.0.0
 {-# INLINE modifyM #-}

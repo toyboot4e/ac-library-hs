@@ -138,7 +138,7 @@ diag xs = Matrix n n $ VU.create $ do
   where
     n = VU.length xs
 
--- | \(O(n^2)\) Maps the `Matrix`.
+-- | \(O(n^2)\) Maps the `Matrix` elements.
 --
 -- @since 1.1.0.0
 {-# INLINE map #-}

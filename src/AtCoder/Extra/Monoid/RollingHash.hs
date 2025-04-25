@@ -56,8 +56,12 @@ import GHC.TypeNats (KnownNat, natVal')
 -- @since 1.1.0.0
 data RollingHash b p = RollingHash
   { -- | The hash value.
+    --
+    -- @since 1.1.0.0
     hashRH :: {-# UNPACK #-} !Int,
     -- | \(b^{\mathrm{length}} \bmod p\).
+    --
+    -- @since 1.1.0.0
     nextDigitRH :: {-# UNPACK #-} !Int
   }
   deriving

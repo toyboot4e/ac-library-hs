@@ -49,7 +49,8 @@ import Prelude hiding (length)
 --
 -- @since 1.1.0.0
 newtype Permutation = Permutation
-  { unPermutation :: VU.Vector Int
+  { -- | @since 1.1.0.0
+    unPermutation :: VU.Vector Int
   }
   deriving newtype
     ( -- | @since 1.1.0.0

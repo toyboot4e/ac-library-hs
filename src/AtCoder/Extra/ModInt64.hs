@@ -6,7 +6,7 @@
 -- | @ModInt@ for 64 bit modulus values with Montgomery modular multiplication.
 --
 -- ==== Constraints
--- - The modulus value should be an odd number, otherwise it would be too slow.
+-- - The modulus value must be an odd number.
 --
 -- @since 1.2.6.0
 module AtCoder.Extra.ModInt64
@@ -53,7 +53,7 @@ import GHC.TypeNats (KnownNat, natVal')
 -- | `Word64` value that treats the modular arithmetic.
 --
 -- ==== Constraints
--- - The modulus value should be an odd number, otherwise it would be too slow.
+-- - The modulus value must be an odd number.
 --
 -- @since 1.2.6.0
 newtype ModInt64 a = ModInt64
@@ -140,7 +140,7 @@ val = fromIntegral . val64
 val64 :: forall a. (KnownNat a) => ModInt64 a -> Word64
 val64 (ModInt64 x) = M64.decode (M64.new (proxy# @a)) x
 
--- | \(O(\log n\) Returns \(x^n\). The implementation is a bit more efficient than `^`.
+-- | \(O(\log n)\) Returns \(x^n\). The implementation is a bit more efficient than `^`.
 --
 -- ==== Constraints
 -- - \(0 \le n\)
@@ -153,7 +153,7 @@ pow (ModInt64 x) n = ModInt64 $! M64.powMod (M64.new (proxy# @a)) x n
 -- TODO: move invMod to Montgomery64
 -- TODO: time complexity of `inv`?
 
--- | Returns \(y\) such that \(xy \equiv 1\) holds.
+-- | Returns \(y\) such that \(xy \equiv 1 \bmod m\) holds.
 --
 -- ==== Constraints
 -- - The value must not be zero.

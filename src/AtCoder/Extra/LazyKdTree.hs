@@ -1,9 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | Static, \(k\)-dimensional tree \((k = 2)\) with lazily propagated monoid actions and
--- commutative monoids.
+-- commutative acted monoids.
 --
--- - Point coordinates are fixed on `build`.
+-- - Point coordinates are fixed on `build` and cannot be moved or added later.
 -- - Multiple points can exist at the same coordinate.
 --
 -- ==== __Examples__
@@ -110,17 +110,17 @@ data LazyKdTree s f a = LazyKdTree
 -- | \(O(n \log n)\) Creates a `LazyKdTree` from @xs@ and @ys@.
 --
 -- ==== Constraints
--- - \(|\mathrm{xs}| = |\mathrm{ys}|
+-- - \(|\mathrm{xs}| = |\mathrm{ys}|\)
 --
 -- @since 1.2.3.0
 {-# INLINE new #-}
 new ::
   (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) =>
-  -- | \(x\) coordnates
+  -- | \(x\) coordnates.
   VU.Vector Int ->
-  -- | \(y\) coordnates
+  -- | \(y\) coordnates.
   VU.Vector Int ->
-  -- | `LazyKdTree`
+  -- | `LazyKdTree`.
   m (LazyKdTree (PrimState m) f a)
 new xs ys = stToPrim $ buildST xs ys (VU.replicate (VU.length xs) mempty)
 
@@ -133,13 +133,13 @@ new xs ys = stToPrim $ buildST xs ys (VU.replicate (VU.length xs) mempty)
 {-# INLINE build #-}
 build ::
   (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Semigroup a, VU.Unbox a) =>
-  -- | \(x\) coordnates
+  -- | \(x\) coordnates.
   VU.Vector Int ->
-  -- | \(y\) coordnates
+  -- | \(y\) coordnates.
   VU.Vector Int ->
-  -- | monoid \(v\)alues
+  -- | monoid \(v\)alues.
   VU.Vector a ->
-  -- | `LazyKdTree`
+  -- | `LazyKdTree`.
   m (LazyKdTree (PrimState m) f a)
 build xs ys vs = stToPrim $ buildST xs ys vs
 
@@ -152,11 +152,11 @@ build xs ys vs = stToPrim $ buildST xs ys vs
 {-# INLINE build2 #-}
 build2 ::
   (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Semigroup a, VU.Unbox a) =>
-  -- | \((x, y)\) coordinates
+  -- | \((x, y)\) coordinates.
   VU.Vector (Int, Int) ->
-  -- | Monoid \(v\)alues
+  -- | Monoid \(v\)alues.
   VU.Vector a ->
-  -- | `LazyKdTree`
+  -- | `LazyKdTree`.
   m (LazyKdTree (PrimState m) f a)
 build2 xys ws = stToPrim $ buildST xs ys ws
   where
@@ -168,9 +168,9 @@ build2 xys ws = stToPrim $ buildST xs ys ws
 {-# INLINE build3 #-}
 build3 ::
   (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Semigroup a, VU.Unbox a) =>
-  -- | \((x, y, v)\) tuples
+  -- | \((x, y, v)\) tuples.
   VU.Vector (Int, Int, a) ->
-  -- | `LazyKdTree`
+  -- | `LazyKdTree`.
   m (LazyKdTree (PrimState m) f a)
 build3 xyws = stToPrim $ buildST xs ys ws
   where
@@ -182,45 +182,45 @@ build3 xyws = stToPrim $ buildST xs ys ws
 {-# INLINE write #-}
 write ::
   (HasCallStack, PrimMonad m, SegAct f a, Eq f, VU.Unbox f, Semigroup a, VU.Unbox a) =>
-  -- | `LazyKdTree`
+  -- | `LazyKdTree`.
   LazyKdTree (PrimState m) f a ->
   -- | Original vertex index.
   Int ->
-  -- | Monoid value
+  -- | Monoid value.
   a ->
-  -- | Monadic tuple
+  -- | Monadic tuple.
   m ()
 write kt i x = stToPrim $ modifyM kt (pure . const x) i
 
--- | \(O(\log n)\) Modifies the \(k\)-th point's monoid value.
+-- | \(O(\log n)\) Given a user function \(f\), modifies the \(k\)-th point's monoid value with it.
 --
 -- @since 1.2.2.0
 {-# INLINE modify #-}
 modify ::
   (HasCallStack, PrimMonad m, SegAct f a, Eq f, VU.Unbox f, Semigroup a, VU.Unbox a) =>
-  -- | `LazyKdTree`
+  -- | `LazyKdTree`.
   LazyKdTree (PrimState m) f a ->
-  -- | Creates a new monoid value from the old one.
+  -- | \(f\): Creates a new monoid value from the old one.
   (a -> a) ->
-  -- | Original vertex index.
+  -- | \(k\): Original vertex index.
   Int ->
-  -- | Monadic tuple
+  -- | Monadic tuple.
   m ()
 modify kt f i = stToPrim $ modifyM kt (pure . f) i
 
--- | \(O(\log n)\) Modifies the \(k\)-th point's monoid value.
+-- | \(O(\log n)\) Given a user function \(f\), modifies the \(k\)-th point's monoid value with it.
 --
 -- @since 1.2.2.0
 {-# INLINEABLE modifyM #-}
 modifyM ::
   (HasCallStack, PrimMonad m, SegAct f a, Eq f, VU.Unbox f, Semigroup a, VU.Unbox a) =>
-  -- | `LazyKdTree`
+  -- | `LazyKdTree`.
   LazyKdTree (PrimState m) f a ->
-  -- | Creates a new monoid value from the old one.
+  -- | \(f\): Creates a new monoid value from the old one.
   (a -> m a) ->
-  -- | Original vertex index.
+  -- | \(k\): Original vertex index.
   Int ->
-  -- | Monadic tuple
+  -- | Monadic tuple.
   m ()
 modifyM kt@LazyKdTree {..} f i0 = do
   let !_ = ACIA.checkIndex "AtCoder.Extra.LazyKdTree.modifyM" i0 nLkt
@@ -274,7 +274,8 @@ allProd kt = do
   -- In case of zero vertices, use `Maybe`:
   fromMaybe mempty <$> VGM.readMaybe (dataLkt kt) 1
 
--- | \(O(\log n)\) Applies a monoid action to points in \([x_1, x_2) \times [y_1, y_2)\).
+-- | \(O(\log n)\) Given a rectangle \([x_1, x_2) \times [y_1, y_2)\), applies a monoid action to
+-- it.
 --
 -- @since 1.2.2.0
 {-# INLINE applyIn #-}
@@ -292,7 +293,7 @@ applyIn ::
   Int ->
   -- | \(f\)
   f ->
-  -- | Monadic tuple
+  -- | Monadic tuple.
   m ()
 applyIn kt x1 x2 y1 y2 f = stToPrim $ applyInST kt 1 x1 x2 y1 y2 f
 

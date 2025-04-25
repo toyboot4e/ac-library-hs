@@ -195,43 +195,45 @@ build3 xyws = stToPrim $ do
 {-# INLINE write #-}
 write ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
-  -- | Two-dimensional segment tree
+  -- | Two-dimensional segment tree.
   SegTree2d (PrimState m) a ->
-  -- | Original point index
+  -- | Original point index.
   Int ->
-  -- | New monoid value
+  -- | New monoid value.
   a ->
   m ()
 write seg i x = stToPrim $ do
   modifyM seg (pure . const x) i
 
--- | \(O(\log n)\) Given \(f\), modofies the \(k\)-th original point's monoid value.
+-- | \(O(\log n)\) Given a user function \(f\), modifies the \(k\)-th original point's monoid value
+-- with it.
 --
 -- @since 1.2.3.0
 {-# INLINE modify #-}
 modify ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
-  -- | Two-dimensional segment tree
+  -- | Two-dimensional segment tree.
   SegTree2d (PrimState m) a ->
-  -- | Function that alters the monoid value
+  -- | Function that alters the monoid value.
   (a -> a) ->
-  -- | Original point index
+  -- | Original point index.
   Int ->
   m ()
 modify seg f i = stToPrim $ do
   modifyM seg (pure . f) i
 
--- | \(O(\log n)\) Given \(f\), modofies the \(k\)-th original point's monoid value.
+-- | \(O(\log n)\) Given a user function \(f\), modifies the \(k\)-th original point's monoid value
+-- with it.
 --
 -- @since 1.2.3.0
 {-# INLINEABLE modifyM #-}
 modifyM ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
-  -- | Two-dimensional segment tree
+  -- | Two-dimensional segment tree.
   SegTree2d (PrimState m) a ->
-  -- | Function that alters the monoid value
+  -- | Function that alters the monoid value.
   (a -> m a) ->
-  -- | Original point index
+  -- | Original point index.
   Int ->
   m ()
 modifyM seg@SegTree2d {..} f rawIdx = do
@@ -260,7 +262,7 @@ modifyM seg@SegTree2d {..} f rawIdx = do
 {-# INLINE prod #-}
 prod ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
-  -- | Two-dimensional segment tree
+  -- | Two-dimensional segment tree.
   SegTree2d (PrimState m) a ->
   -- | \(x_1\)
   Int ->
@@ -287,7 +289,7 @@ allProd seg = fromMaybe mempty <$> VGM.readMaybe (dataSt seg) 1
 {-# INLINE count #-}
 count ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
-  -- | Two-dimensional segment tree
+  -- | Two-dimensional segment tree.
   SegTree2d (PrimState m) a ->
   -- | \(x_1\)
   Int ->
@@ -297,7 +299,7 @@ count ::
   Int ->
   -- | \(y_2\)
   Int ->
-  -- | The number of points in \([x_1, x_2) \times [y_1, y_2)\)
+  -- | The number of points in \([x_1, x_2) \times [y_1, y_2)\).
   m Int
 count seg lx rx ly ry = stToPrim $ countST seg lx rx ly ry
 

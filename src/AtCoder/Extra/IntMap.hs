@@ -9,7 +9,7 @@
 -- >>> import AtCoder.Extra.IntMap qualified as IM
 -- >>> im <- IM.new @_ @Int 10
 --
--- `insert`, `delete`, `lookup` and other functions are available:
+-- `insert`, `delete`, `lookup`, `lookupGT` and other functions are available:
 --
 -- >>> IM.insert im 0 100
 -- >>> IM.insert im 9 101
@@ -106,7 +106,7 @@ data IntMap s a = IntMap
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (IntMap (PrimState m) a)
 new cap = stToPrim $ newST cap
 
--- | \(O(n + m \log n)\) Creates an `IntMap` for an interval \([0, n)\) with initial values.
+-- | \(O(n + m \log n)\) Creates an `IntMap` for an interval \([0, n)\) with initial entries.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE build #-}
@@ -120,7 +120,7 @@ build cap xs = stToPrim $ buildST cap xs
 capacity :: IntMap s a -> Int
 capacity = IS.capacity . setIM
 
--- | \(O(1)\) Returns the number of elements in the map.
+-- | \(O(1)\) Returns the number of entries in the map.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE size #-}
@@ -134,7 +134,7 @@ size = IS.size . setIM
 null :: (PrimMonad m) => IntMap (PrimState m) a -> m Bool
 null = IS.null . setIM
 
--- | \(O(\log n)\) Looks up the value for a key.
+-- | \(O(\log n)\) Looks up the value associated with a key.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE lookup #-}
@@ -214,7 +214,7 @@ insertWith :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a 
 insertWith im f k v = stToPrim $ insertWithST im f k v
 
 -- | \(O(\log n)\) Modifies the value associated with a key. If an entry with the same key already
--- does not exist, nothing is performed.
+-- does not exist, it does nothing.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE modify #-}
@@ -222,7 +222,7 @@ modify :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> (
 modify im f k = stToPrim $ modifyST im f k
 
 -- | \(O(\log n)\) Modifies the value associated with a key. If an entry with the same key already
--- does not exist, nothing is performed.
+-- does not exist, it does nothing.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE modifyM #-}

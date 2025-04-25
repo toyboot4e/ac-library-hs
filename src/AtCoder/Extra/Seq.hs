@@ -397,7 +397,8 @@ write seq (Handle hRoot) k v = stToPrim $ do
     )
     0
 
--- | Amortized \(O(\log n)\). Modifies the \(k\)-th node's monoid value.
+-- | Amortized \(O(\log n)\). Given a user function \(f\), modifies the \(k\)-th node's monoid value
+-- with it.
 --
 -- ==== Constraints
 -- - \(0 \le k \lt n\)

@@ -169,7 +169,7 @@ import GHC.Stack (HasCallStack)
 -- @since 1.1.0.0
 type Vertex = Int
 
--- | Vertex reindexed by `indexHld`.
+-- | Vertex reindexed by `indexHld`. It's contiguous for each segment.
 --
 -- @since 1.1.0.0
 type VertexHld = Vertex
@@ -376,7 +376,7 @@ ancestor Hld {..} parent k0 = inner parent k0
         ihv = indexHld VG.! hv
 
 -- | \(O(\log n)\) Returns the \(k\)-th vertex of the path between \(u\) and \(v\) from \(u\).
--- Throws an error if `k` is out
+-- Returns `Nothing` if \(k\) is bigger than the path length.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE jump #-}
@@ -459,7 +459,7 @@ pathSegmentsInclusive weightPolicy Hld {..} x0 y0 = done $ inner x0 [] y0 []
         phy = parentHld VG.! hy
 
 -- | \(O(1)\) Returns a half-open interval of `VertexHld` \([\mathrm{start}, \mathrm{end})\) that
--- corresponds to the subtree segments rooted at the given @subtreeRoot@.
+-- corresponds to the subtree vertices rooted at the given vertex.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE subtreeSegmentInclusive #-}
@@ -469,7 +469,7 @@ subtreeSegmentInclusive Hld {..} subtreeRoot = (ir, ir + sr - 1)
     ir = indexHld VG.! subtreeRoot
     sr = subtreeSizeHld VG.! subtreeRoot
 
--- | \(O(1)\) Returns `True` if \(u\) is in a subtree of \(r\).
+-- | \(O(1)\) Returns `True` if \(u\) is a vertex of subtree rooted at \(r\).
 --
 -- @since 1.1.0.0
 {-# INLINEABLE isInSubtree #-}

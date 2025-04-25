@@ -1,8 +1,10 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
--- | Fast modular multiplication for `Word64` using Montgomery multiplication. If the modulus value
--- is known to fit in 32 bits, use the @AtCoder.Internal.Barrett@ module instead.
+-- | Fast modular multiplication for `Word64` using Montgomery multiplication.
+--
+-- - The modulus value must be odd.
+-- - If the modulus value is known to fit in 32 bits, @AtCoder.Internal.Barrett@ can be faster.
 --
 -- @since 1.2.6.0
 module AtCoder.Extra.Math.Montgomery64
@@ -61,7 +63,7 @@ data Montgomery64 = Montgomery64
 -- | \(O(1)\) Static, shared storage of `Montgomery64`.
 --
 -- ==== Constraints
--- - \(m \le 2^{62})
+-- - \(m \le 2^{62}\)
 -- - \(m\) is odd
 --
 -- @since 1.2.6.0
@@ -73,7 +75,7 @@ new p = fromVal . fromIntegral $! natVal' p
 -- | \(O(1)\) Creates a `Montgomery64` for a modulus value \(m\) of type `Word64` value.
 --
 -- ==== Constraints
--- - \(m \le 2^{62})
+-- - \(m \le 2^{62}\)
 -- - \(m\) is odd
 --
 -- @since 1.2.6.0

@@ -36,8 +36,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 
 -- | Monoid action \(f: x \rightarrow ax + b\).
 --
--- - Use @Mat2x2@ if inverse operations are required, or if it's necessary to store the monoid
--- length in the acted monoid (@V2@).
+-- - Use @Mat2x2@ if inverse operations are required.
 --
 -- ==== Composition and dual
 -- The affine transformation acts as a left monoid action: \(f_2 (f_1 v) = (f_2 \circ f_1) v\). To

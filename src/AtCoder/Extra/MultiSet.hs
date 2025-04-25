@@ -1,13 +1,13 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- | A fast, mutable multiset for `Int` keys backed by a @HashMap@.  Most operations are performed
--- in \(O(1)\) time, but in average.
+-- | A fast, mutable multiset for `Int` keys backed by a @HashMap@. Most operations are performed
+-- in \(O(1)\) in average.
 --
 -- ==== Capacity limitation
 -- Access to each key creates a new entry. Note that entries cannot be invalidated due to the
 -- internal implementation (called /open addressing/). If the hash map is full,
--- __access to a new key causes infinite loop__ .
+-- __access to a new key causes infinite loop__.
 --
 -- ==== Invariant
 -- The count for each key must be non-negative. An exception is thrown if this invariant is

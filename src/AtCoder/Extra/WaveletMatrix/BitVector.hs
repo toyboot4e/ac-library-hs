@@ -132,8 +132,8 @@ select0 bv = selectKthIn0 bv 0 (VG.length (bitsBv bv))
 select1 :: BitVector -> Int -> Maybe Int
 select1 bv = selectKthIn1 bv 0 (VG.length (bitsBv bv))
 
--- | \(O(\log n)\) Returns the index of \(k\)-th \(0\) (0-based) in \([l, r)\), or `Nothing` if no
--- such bit exists.
+-- | \(O(\log n)\) Given an interval \([l, r)\), it returns the index of the first occurrence
+-- (0-based) of \(0\) in the sequence, or `Nothing` if no such occurrence exists.
 --
 -- @since 1.1.0.0
 {-# INLINE selectKthIn0 #-}
@@ -156,8 +156,8 @@ selectKthIn0 bv l r k
     nZeros = rank0 bv r - rankL0
     rankL0 = rank0 bv l
 
--- | \(O(\log n)\) Returns the index of \(k\)-th \(1\) (0-based) in \([l, r)\), or `Nothing` if no
--- such bit exists.
+-- | \(O(\log n)\) Given an interval \([l, r)\), it returns the index of the first occurrence
+-- (0-based) of \(1\) in the sequence, or `Nothing` if no such occurrence exists.
 --
 -- @since 1.1.0.0
 {-# INLINE selectKthIn1 #-}

@@ -333,10 +333,14 @@ divisors :: (HasCallStack) => Int -> VU.Vector Int
 -- TODO: use intro sort?
 divisors = VU.modify VAR.sort . divisorsUnsorted
 
--- | Enumerates divisors of the input value.
+-- | Enumerates divisors of the input value, not sorted.
 --
 -- ==== Constraints
 -- - \(x \ge 1\)
+--
+-- ==== __Example__
+-- >>> divisorsUnsorted 180
+-- [1,2,4,3,6,12,9,18,36,5,10,20,15,30,60,45,90,180]
 --
 -- @since 1.2.6.0
 {-# INLINEABLE divisorsUnsorted #-}
@@ -367,7 +371,7 @@ divisorsUnsorted x = VU.create $ do
     (!_, !ns) = VU.unzip pns
     nDivisors = VU.foldl' (\ !acc n -> acc * (n + 1)) (1 :: Int) ns
 
--- | Returns a primitive root of module \(p\), where \(p\) is a prime number.
+-- | Returns a primitive root modulo \(p\), where \(p\) is a prime number.
 --
 -- ==== Constraints
 -- - \(p\) must be a prime number.

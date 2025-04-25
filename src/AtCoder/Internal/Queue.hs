@@ -329,7 +329,7 @@ writeBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a ->
 writeBack que i x = stToPrim $ do
   modifyBackM que (pure . const x) i
 
--- | \(O(1)\) Given user function \(f\), returns the \(k\)-th value from the first element.
+-- | \(O(1)\) Given user function \(f\), modifies the \(k\)-th value from the first element with it.
 --
 -- @since 1.2.3.0
 {-# INLINE modifyFront #-}
@@ -337,7 +337,7 @@ modifyFront :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a 
 modifyFront que f i = stToPrim $ do
   modifyFrontM que (pure . f) i
 
--- | \(O(1)\) Given user function \(f\), returns the \(k\)-th value from the last element.
+-- | \(O(1)\) Given user function \(f\), modifies the \(k\)-th value from the last element with it.
 --
 -- @since 1.2.3.0
 {-# INLINE modifyBack #-}
@@ -345,7 +345,7 @@ modifyBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -
 modifyBack que f i = stToPrim $ do
   modifyBackM que (pure . f) i
 
--- | \(O(1)\) Given user function \(f\), returns the \(k\)-th value from the first element.
+-- | \(O(1)\) Given user function \(f\), modifies the \(k\)-th value from the first element with it.
 --
 -- @since 1.2.3.0
 {-# INLINE modifyFrontM #-}
@@ -356,7 +356,7 @@ modifyFrontM Queue {..} f i = do
   let !_ = ACIA.runtimeAssert (0 <= i && i < r - l) "AtCoder.Internal.Queue.modifyFrontM: index out of bounds"
   VGM.modifyM vecQ f (l + i)
 
--- | \(O(1)\) Given user function \(f\), returns the \(k\)-th value from the last element.
+-- | \(O(1)\) Given user function \(f\), modifies the \(k\)-th value from the last element with it.
 --
 -- @since 1.2.3.0
 {-# INLINE modifyBackM #-}

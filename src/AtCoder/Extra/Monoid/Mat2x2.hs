@@ -1,8 +1,8 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeFamilies #-}
 
--- | Monoid action \(f: x \rightarrow ax + b\). Less efficient than @Affine1@, but compatible with
--- inverse opereations.
+-- | Monoid action \(f: x \rightarrow ax + b\). Less efficient than @Affine1@, but is compatible
+-- with inverse opereations.
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Monoid.Mat2x2
@@ -37,8 +37,8 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (map)
 
--- | Monoid action \(f: x \rightarrow ax + b\). Less efficient than @Affine1@, but compatible with
--- inverse opereations.
+-- | Monoid action \(f: x \rightarrow ax + b\). Less efficient than @Affine1@, but is compatible
+-- with inverse opereations.
 --
 -- ==== Composition and dual
 -- The affine transformation acts as a left monoid action: \(f_2 (f_1 v) = (f_2 \circ f_1) v\). To
@@ -71,7 +71,7 @@ newtype Mat2x2 a = Mat2x2 (Mat2x2Repr a)
 -- @since 1.1.0.0
 type Mat2x2Repr a = (a, a, a, a)
 
--- | \(O(1)\) Creates a one-dimensional affine transformation: \(f: x \rightarrow a \times x + b\).
+-- | \(O(1)\) Creates a one-dimensional affine transformation \(f: x \rightarrow a \times x + b\).
 --
 -- @since 1.1.0.0
 {-# INLINE new #-}
@@ -124,7 +124,7 @@ mulMM (Mat2x2 (!a11, !a12, !a21, !a22)) (Mat2x2 (!b11, !b12, !b21, !b22)) = Mat2
 act :: (Num a) => Mat2x2 a -> V2 a -> V2 a
 act = mulMV
 
--- | \(O(1)\) Maps the every component of `Mat2x2`.
+-- | \(O(1)\) Maps every component of `Mat2x2`.
 --
 -- @since 1.1.0.0
 {-# INLINE map #-}

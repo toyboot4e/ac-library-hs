@@ -5,8 +5,8 @@
 
 -- | A potentialized disjoint set union on a [group](https://en.wikipedia.org/wiki/Group_(mathematics\))
 -- under a differential constraint system. Each vertex \(v\) is assigned a potential value \(p(v)\),
--- where representatives (`leader`) of each group have a potential of `mempty`, and other vertices have
--- potentials relative to their representative.
+-- where representatives (`leader`) of each group have a potential value of `mempty`, and other
+-- vertices have potentials relative to their representative.
 --
 -- The group type is represented as a `Monoid` with a inverse operator, passed on `new`. This
 -- approach avoids defining a separate typeclass for groups.
@@ -117,11 +117,11 @@ data Pdsu s a = Pdsu
 new ::
   forall m a.
   (PrimMonad m, Monoid a, VU.Unbox a) =>
-  -- | The number of vertices
+  -- | The number of vertices.
   Int ->
-  -- | The inverse operator of the monoid
+  -- | The inverse operator of the monoid.
   (a -> a) ->
-  -- | A DSU
+  -- | A potencialized DSU.
   m (Pdsu (PrimState m) a)
 new n f = Pdsu n <$> VUM.replicate n (-1 {- size 1 -}) <*> VUM.replicate n (mempty :: a) <*> pure f
 
@@ -168,6 +168,8 @@ diff dsu v1 v2 = stToPrim $ diffST dsu v1 v2
 {-# INLINE unsafeDiff #-}
 unsafeDiff :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> m a
 unsafeDiff dsu v1 v2 = stToPrim $ unsafeDiffST dsu v1 v2
+
+-- TODO: use merge and mergeMaybe
 
 -- | \(O(\alpha(n))\) Merges \(v_1\) to \(v_2\) with differential (relative) potential
 -- \(\mathrm{dp}\): \(p(v1) := \mathrm{dp} \cdot p(v2)\). Returns `True` if they're newly merged.

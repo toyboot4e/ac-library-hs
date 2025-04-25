@@ -102,46 +102,108 @@ runtimeAssert p s
   | p = ()
   | otherwise = error s
 
--- | \(O(1)\) Tests \(i \in [0, n)\).
+-- | \(O(1)\) Tests \(0 \le i \lt n\).
 --
 -- @since 1.0.0.0
 {-# INLINE testIndex #-}
-testIndex :: (HasCallStack) => Int -> Int -> Bool
+testIndex ::
+  (HasCallStack) =>
+  -- | \(i\)
+  Int ->
+  -- | \(n\)
+  Int ->
+  -- | \(0 \le i \lt n\)
+  Bool
 testIndex i n = 0 <= i && i < n
 
--- | \(O(1)\) Tests whether \([l, r)\) is a valid interval in \([0, n)\).
+-- | \(O(1)\) Tests \(0 \le l \le r \le n\).
 --
 -- @since 1.0.0.0
 {-# INLINE testInterval #-}
-testInterval :: Int -> Int -> Int -> Bool
+testInterval ::
+  -- | \(l\)
+  Int ->
+  -- | \(r\)
+  Int ->
+  -- | \(n\)
+  Int ->
+  -- | \(0 \le l \le r \le n\).
+  Bool
 testInterval l r n = 0 <= l && l <= r && r <= n
 
--- | \(O(1)\) Tests whether \([l, r)\) is a valid interval in \([l_0, r_0)\).
+-- | \(O(1)\) Tests \(l_0 \le l \le r \le r_0\).
 --
 -- @since 1.2.1.0
 {-# INLINE testIntervalBounded #-}
-testIntervalBounded :: Int -> Int -> Int -> Int -> Bool
+testIntervalBounded ::
+  -- | \(l\)
+  Int ->
+  -- | \(r\)
+  Int ->
+  -- | \(l_0\)
+  Int ->
+  -- | \(r_0\)
+  Int ->
+  -- | \(l_0 \le l \le r \le r_0\)
+  Bool
 testIntervalBounded l r l0 r0 = l0 <= l && l <= r && r <= r0
 
 -- | \(O(1)\) Tests \((x, y) \in [0, w) \times [0, h)\).
 --
 -- @since 1.2.3.0
 {-# INLINE testPoint2d #-}
-testPoint2d :: (HasCallStack) => Int -> Int -> Int -> Int -> Bool
+testPoint2d ::
+  (HasCallStack) =>
+  -- | \(x\)
+  Int ->
+  -- | \(y\)
+  Int ->
+  -- | \(w\)
+  Int ->
+  -- | \(h\)
+  Int ->
+  -- | \((x, y) \in [0, w) \times [0, h)\)
+  Bool
 testPoint2d x y w h = 0 <= x && x < w && 0 <= y && y < h
 
 -- | \(O(1)\) Tests \([x_1, x_2) \times [y_1 y_2) \in [0, w) \times [0, h)\).
 --
 -- @since 1.2.3.0
 {-# INLINE testRect #-}
-testRect :: (HasCallStack) => Int -> Int -> Int -> Int -> Int -> Int -> Bool
+testRect ::
+  (HasCallStack) =>
+  -- | \(x_1\)
+  Int ->
+  -- | \(x_2\)
+  Int ->
+  -- | \(y_1\)
+  Int ->
+  -- | \(y_2\)
+  Int ->
+  -- | \(w\)
+  Int ->
+  -- | \(h\)
+  Int ->
+  -- | \([x_1, x_2) \times [y_1 y_2) \in [0, w) \times [0, h)\).
+  Bool
 testRect x1 x2 y1 y2 w h = 0 <= x1 && x1 <= x2 && x2 <= w && 0 <= y1 && y1 <= y2 && y2 <= h
 
--- | \(O(1)\) Tests \(x_1 \le x_2\) and \(y_1 \le \y_2\).
+-- | \(O(1)\) Tests \(x_1 \le x_2 \land y_1 \le \y_2\).
 --
 -- @since 1.2.3.0
 {-# INLINE testRectShape #-}
-testRectShape :: (HasCallStack) => Int -> Int -> Int -> Int -> Bool
+testRectShape ::
+  (HasCallStack) =>
+  -- | \(x_1\)
+  Int ->
+  -- | \(x_2\)
+  Int ->
+  -- | \(y_1\)
+  Int ->
+  -- | \(y_2\)
+  Int ->
+  -- | \(x_1 \le x_2 \land y_1 \le \y_2\).
+  Bool
 testRectShape x1 x2 y1 y2 = x1 <= x2 && y1 <= y2
 
 -- | \(O(1)\) Asserts \(0 \leq i \lt n\) for an array index \(i\).

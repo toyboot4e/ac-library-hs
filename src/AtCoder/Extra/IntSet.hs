@@ -11,7 +11,7 @@
 -- >>> import AtCoder.Extra.IntSet qualified as IS
 -- >>> is <- IS.new @_ 10
 --
--- `insert`, `delete` and other functions are available:
+-- `insert`, `delete`, `member`, `lookupGT` and other functions are available:
 --
 -- >>> IS.insert is 0
 -- >>> IS.insert is 9

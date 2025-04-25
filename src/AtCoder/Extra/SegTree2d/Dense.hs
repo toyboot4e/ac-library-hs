@@ -187,7 +187,8 @@ write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => DenseSegTree2d (Pr
 write seg@DenseSegTree2d {..} x y a = stToPrim $ do
   modifyM seg (pure . const a) x y
 
--- | \(O(\log  h \log w)\) Given \(f\), modofies the monoid value at \((x, y)\).
+-- | \(O(\log  h \log w)\) Given a user function \(f\), modifies the monoid value at \((x, y)\) with
+-- it.
 --
 -- @since 1.2.3.0
 {-# INLINE modify #-}
@@ -195,7 +196,8 @@ modify :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => DenseSegTree2d (P
 modify seg f x y = stToPrim $ do
   modifyM seg (pure . f) x y
 
--- | \(O(\log h \log w)\) Given \(f\), modofies the monoid value at \((x, y)\).
+-- | \(O(\log h \log w)\) Given a user function \(f\), modifies the monoid value at \((x, y)\) with
+-- it.
 --
 -- @since 1.2.3.0
 {-# INLINEABLE modifyM #-}
