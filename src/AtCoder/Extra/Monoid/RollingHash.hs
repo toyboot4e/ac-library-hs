@@ -76,7 +76,7 @@ data RollingHash b p = RollingHash
 -- @since 1.1.0.0
 {-# INLINE new #-}
 new :: forall b p. (KnownNat b, KnownNat p) => Int -> RollingHash b p
-new h = RollingHash (h `mod` fromIntegral (natVal' (proxy# @p))) (fromIntegral (natVal' (proxy# @b)))
+new h = RollingHash (h `rem` fromIntegral (natVal' (proxy# @p))) (fromIntegral (natVal' (proxy# @b)))
 
 -- | \(O(1)\) Creates a one-length `RollingHash` from an integer without taking the mod.
 --
@@ -90,12 +90,13 @@ unsafeNew h = RollingHash h (fromIntegral (natVal' (proxy# @b)))
 calc :: forall b p. (KnownNat b, KnownNat p) => RollingHash b p -> RollingHash b p -> RollingHash b p
 calc (RollingHash !digit1 !hash1) (RollingHash !digit2 !hash2)
   | p < 3037000499 =
-      let !digit' = digit1 * digit2 `mod` p
-          !hash' = (hash1 * digit2 + hash2) `mod` p
+      let !digit' = digit1 * digit2 `rem` p
+          !hash' = (hash1 * digit2 + hash2) `rem` p
        in RollingHash digit' hash'
   | otherwise =
-      let !digit' = fromIntegral $! to128 digit1 * to128 digit2 `mod` to128 p
-          !hash' = fromIntegral $! (to128 hash1 * to128 digit2 + to128 hash2) `mod` to128 p
+      -- TODO: This is slow
+      let !digit' = fromIntegral $! to128 digit1 * to128 digit2 `rem` to128 p
+          !hash' = fromIntegral $! (to128 hash1 * to128 digit2 + to128 hash2) `rem` to128 p
        in RollingHash digit' hash'
   where
     !p = fromIntegral $ natVal' (proxy# @p)
