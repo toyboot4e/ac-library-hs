@@ -100,6 +100,13 @@ instance QC.Arbitrary (RollingHash b 998244353) where
     pure $ RollingHash hash next
 
 -- orphan instance
+instance QC.Arbitrary (RollingHash b 2305843009213693951) where
+  arbitrary = do
+    hash <- QC.chooseInt (0, 2305843009213693951 - 1)
+    next <- QC.chooseInt (0, 2305843009213693951 - 1)
+    pure $ RollingHash hash next
+
+-- orphan instance
 instance QC.Arbitrary (Max Int) where
   arbitrary = Max <$> QC.arbitrary
 
@@ -249,6 +256,14 @@ tests =
     testGroup
       "RollingHash"
       [ laws @(RollingHash 100 998244353)
+          [ QCC.semigroupLaws,
+            QCC.monoidLaws,
+            QCC.semigroupMonoidLaws
+          ]
+      ],
+    testGroup
+      "RollingHash"
+      [ laws @(RollingHash 100 2305843009213693951)
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws

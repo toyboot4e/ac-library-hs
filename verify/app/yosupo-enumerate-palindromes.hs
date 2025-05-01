@@ -7,7 +7,8 @@ import Data.Semigroup (Dual (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
-type RH = RH.RollingHash 100 998244353
+-- type RH = RH.RollingHash 100 998244353
+type RH = RH.RollingHash 100 2305843009213693951
 
 -- verification-helper: PROBLEM https://judge.yosupo.jp/problem/enumerate_palindromes
 -- TODO: Refactor! It's too complicated

@@ -25,6 +25,7 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import Data.WideWord.Word128
 import GHC.Exts (proxy#)
 import GHC.TypeNats (KnownNat, natVal')
 
@@ -34,7 +35,6 @@ import GHC.TypeNats (KnownNat, natVal')
 -- Combining `RollingHash` with `SegTree` enables \(O(\log |s|)\) string slice creation and
 -- \(O(1)\) slice comparison.
 --
---
 -- ==== __Example__
 -- It's convenient to define a type alias of `RollingHash`:
 --
@@ -42,7 +42,7 @@ import GHC.TypeNats (KnownNat, natVal')
 -- >>> import AtCoder.SegTree qualified as ST
 -- >>> import Data.Char (ord)
 -- >>> import Data.Semigroup (Dual (..))
--- >>> type RH = RH.RollingHash 100 998244353
+-- >>> type RH = RH.RollingHash 100 2305843009213693951
 --
 -- Let's test whether "abcba" is a palindrome:
 --
@@ -85,15 +85,28 @@ new h = RollingHash (h `mod` fromIntegral (natVal' (proxy# @p))) (fromIntegral (
 unsafeNew :: forall b p. (KnownNat b, KnownNat p) => Int -> RollingHash b p
 unsafeNew h = RollingHash h (fromIntegral (natVal' (proxy# @b)))
 
+-- | \(O(1)\)
+{-# INLINE calc #-}
+calc :: forall b p. (KnownNat b, KnownNat p) => RollingHash b p -> RollingHash b p -> RollingHash b p
+calc (RollingHash !digit1 !hash1) (RollingHash !digit2 !hash2)
+  | p < 3037000499 =
+      let !digit' = digit1 * digit2 `mod` p
+          !hash' = (hash1 * digit2 + hash2) `mod` p
+       in RollingHash digit' hash'
+  | otherwise =
+      let !digit' = fromIntegral $! to128 digit1 * to128 digit2 `mod` to128 p
+          !hash' = fromIntegral $! (to128 hash1 * to128 digit2 + to128 hash2) `mod` to128 p
+       in RollingHash digit' hash'
+  where
+    !p = fromIntegral $ natVal' (proxy# @p)
+    to128 :: Int -> Word128
+    to128 = fromIntegral
+
 -- | @since 1.1.0.0
 instance (KnownNat b, KnownNat p) => Semigroup (RollingHash b p) where
-  -- \| \(O(1)\)
+  -- | \(O(1)\)
   {-# INLINE (<>) #-}
-  (RollingHash !digit1 !hash1) <> (RollingHash !digit2 !hash2) = RollingHash digit' hash'
-    where
-      !p = fromIntegral $ natVal' (proxy# @p)
-      !digit' = digit1 * digit2 `mod` p
-      !hash' = (hash1 * digit2 + hash2) `mod` p
+  (<>) = calc
 
 -- | @since 1.1.0.0
 instance (KnownNat b, KnownNat p) => Monoid (RollingHash b p) where
