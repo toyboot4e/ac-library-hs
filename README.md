@@ -2,6 +2,8 @@
 
 Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive programming on [AtCoder](https://atcoder.jp/).
 
+The `main` branch is the version avaiable on AtCoder. See `dev` branch for upcoming updates.
+
 ## Notes
 
 - The library is mainly for AtCoder and only GHC 9.8.4 is guaranteed to be supported.
@@ -10,5 +12,5 @@ Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library f
 
 ## Usage
 
-See the API documentation for more information.
+See the [API documentation on Hackage](https://hackage.haskell.org/package/ac-library-hs) for more information.
 
