@@ -1,5 +1,9 @@
 # Revision history for acl-hs
 
+## 1.3.1.0 -- May 2025
+
+- Fixed `AtCoder.Extra.Monoid.RollingHash` to take 64 bit mod values.
+
 ## 1.3.0.0 -- April 2025
 
 - Added `AtCoder.Extra.Math.isPrimitiveRoot`.
