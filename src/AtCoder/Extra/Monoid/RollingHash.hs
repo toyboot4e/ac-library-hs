@@ -91,7 +91,7 @@ calc :: forall b p. (KnownNat b, KnownNat p) => RollingHash b p -> RollingHash b
 calc (RollingHash !digit1 !hash1) (RollingHash !digit2 !hash2)
   | p < 3037000499 =
       let !digit' = digit1 * digit2 `rem` p
-          !hash' = (hash1 * digit2 + hash2) `rem` p
+          !hash' = addMod p (hash1 * digit2 `rem` p) hash2
        in RollingHash digit' hash'
   | otherwise =
       -- TODO: This is slow
@@ -102,10 +102,13 @@ calc (RollingHash !digit1 !hash1) (RollingHash !digit2 !hash2)
     !p = fromIntegral $ natVal' (proxy# @p)
     to128 :: Int -> Word128
     to128 = fromIntegral
+    addMod :: Int -> Int -> Int -> Int
+    addMod m x y
+      | x + y >= m = x + y - m
+      | otherwise = x + y
 
 -- | @since 1.1.0.0
 instance (KnownNat b, KnownNat p) => Semigroup (RollingHash b p) where
-  -- | \(O(1)\)
   {-# INLINE (<>) #-}
   (<>) = calc
 
