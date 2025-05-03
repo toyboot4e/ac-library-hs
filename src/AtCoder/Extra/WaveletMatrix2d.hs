@@ -2,7 +2,7 @@
 
 -- | A 2D, static wavelet matrix with segment tree, that can handle point add and rectangle sum
 -- queries. Points cannot be added after construction, but monoid values in each point can be
--- modified later.
+-- modified later. Duplicate monoids at the same coordinate will be combined into one.
 --
 -- ==== `SegTree2d` vs `WaveletMatrix2d`
 -- They basically have the same functionalities and performance, however, `SegTree2d` performs better in
@@ -133,8 +133,8 @@ new invWm2d xys = stToPrim $ do
   segTreesWm2d <- V.replicateM (Rwm.heightRwm rawWm2d) (ST.new n)
   pure WaveletMatrix2d {..}
 
--- | \(O(n \log n)\) Creates a `WaveletMatrix2d` with wavelet matrix with segment tree
--- with initial monoid values. Monoids on a duplicate point are accumulated with `(<>)`.
+-- | \(O(n \log n)\) Creates a `WaveletMatrix2d` with wavelet matrix with segment tree with initial
+-- monoid values. Duplicate monoids at the same coordinate will be combined with `(<>)`.
 --
 -- @since 1.1.0.0
 {-# INLINEABLE build #-}
