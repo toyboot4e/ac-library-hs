@@ -51,14 +51,14 @@ data Montgomery64 = Montgomery64
     n2M64 :: {-# UNPACK #-} !Word64
   }
   deriving
-    ( -- | @since 1.2.6.0
+    ( -- | NOTE: The represented value can be equal even if the internal values are different, so
+      -- use `eq` for comparison.
+      --
+      -- @since 1.2.6.0
       Eq,
       -- | @since 1.2.6.0
       Show
     )
-
--- TODO: add unasfePerformIO?
--- TODO: remove NOINLINE?
 
 -- | \(O(1)\) Static, shared storage of `Montgomery64`.
 --
@@ -67,9 +67,8 @@ data Montgomery64 = Montgomery64
 -- - \(m\) is odd
 --
 -- @since 1.2.6.0
-{-# NOINLINE new #-}
+{-# INLINE new #-}
 new :: forall a. (HasCallStack, KnownNat a) => Proxy# a -> Montgomery64
--- FIXME: test allocated once
 new p = fromVal . fromIntegral $! natVal' p
 
 -- | \(O(1)\) Creates a `Montgomery64` for a modulus value \(m\) of type `Word64` value.

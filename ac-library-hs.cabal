@@ -225,6 +225,7 @@ benchmark ac-library-hs-benchmark
     Bench.AddMod
     Bench.Matrix
     Bench.ModInt
+    Bench.Montgomery64
     Bench.PowMod
     Bench.RepeatWithIndex
     Bench.RepeatWithoutIndex
@@ -236,6 +237,8 @@ benchmark ac-library-hs-benchmark
     BenchLib.MulMod.Barrett64
     BenchLib.MulMod.BarrettWideWord
     BenchLib.MulMod.Montgomery
+    BenchLib.Montgomery64.Inline
+    BenchLib.Montgomery64.Noinline
     BenchLib.PowMod
     BenchLib.SwapDupe
 
