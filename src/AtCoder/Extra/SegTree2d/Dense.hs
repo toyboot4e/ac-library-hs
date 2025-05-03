@@ -74,16 +74,12 @@ module AtCoder.Extra.SegTree2d.Dense
 where
 
 import AtCoder.Internal.Assert qualified as ACIA
-import AtCoder.Internal.Bit qualified as ACIB
-import Control.Monad (when)
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Control.Monad.ST (ST)
 import Data.Bits
 import Data.Foldable (for_)
-import Data.Maybe (fromJust, fromMaybe)
+import Data.Maybe (fromMaybe)
 import Data.Vector qualified as V
-import Data.Vector.Algorithms.Intro qualified as VAI
-import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
@@ -164,7 +160,7 @@ build' xs = stToPrim $ buildST xs
 -- @since 1.2.3.0
 {-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => DenseSegTree2d (PrimState m) a -> Int -> Int -> m a
-read seg@DenseSegTree2d {..} x y = do
+read DenseSegTree2d {..} x y = do
   let !_ = ACIA.checkPoint2d "AtCoder.Extra.SegTree2d.Dense.read" x y wDst hDst
   VGM.read dataDst $ idx wDst (y + hDst) (x + wDst)
 
@@ -174,7 +170,7 @@ read seg@DenseSegTree2d {..} x y = do
 -- @since 1.2.3.0
 {-# INLINE readMaybe #-}
 readMaybe :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => DenseSegTree2d (PrimState m) a -> Int -> Int -> m (Maybe a)
-readMaybe seg@DenseSegTree2d {..} x y
+readMaybe DenseSegTree2d {..} x y
   | ACIA.testPoint2d x y wDst hDst = do
       Just <$> VGM.read dataDst (idx wDst (y + hDst) (x + wDst))
   | otherwise = pure Nothing
@@ -245,7 +241,6 @@ prod seg@DenseSegTree2d {..} x1 x2 y1 y2 = stToPrim $ do
 {-# INLINE allProd #-}
 allProd :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => DenseSegTree2d (PrimState m) a -> m a
 allProd DenseSegTree2d {..} = stToPrim $ do
-  -- FIXME: correct?
   fromMaybe mempty <$> VGM.readMaybe dataDst (idx wDst 1 1)
 
 -- -------------------------------------------------------------------------------------------------
