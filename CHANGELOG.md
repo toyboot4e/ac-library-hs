@@ -1,5 +1,9 @@
 # Revision history for acl-hs
 
+## 1.4.0.0 -- May 2025
+
+- Changed `AtCoder.Extra.Pdsu.merge` to return new representative.
+
 ## 1.3.1.0 -- May 2025
 
 - Fixed `AtCoder.Extra.Monoid.RollingHash` to take 64 bit mod values.

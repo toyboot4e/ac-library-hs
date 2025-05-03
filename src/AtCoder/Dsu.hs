@@ -23,6 +23,9 @@
 -- >>> Dsu.merge dsu 0 1  -- 0=1 2 3
 -- 0
 --
+-- >>> Dsu.mergeMaybe dsu 0 1 -- already merged
+-- Nothing
+--
 -- >>> Dsu.merge_ dsu 1 2 -- 0=1=2 3
 -- >>> Dsu.mergeMaybe dsu 1 2
 -- Nothing

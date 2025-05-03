@@ -162,6 +162,7 @@ test-suite ac-library-hs-test
     Tests.Extra.ModInt64
     Tests.Extra.Monoid
     Tests.Extra.MultiSet
+    Tests.Extra.Pdsu
     Tests.Extra.SegTree2d
     Tests.Extra.SegTree2d.Dense
     Tests.Extra.Semigroup.Matrix

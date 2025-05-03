@@ -34,6 +34,7 @@ module AtCoder.Extra.Pdsu
     -- * Merging
     merge,
     merge_,
+    mergeMaybe,
 
     -- * Group information
     size,
@@ -69,7 +70,11 @@ import GHC.Stack (HasCallStack)
 -- The API is similar to @Dsu@, but with differential potential values:
 --
 -- >>> Pdsu.merge dsu 1 0 (Sum 1)  -- p(1) - p(0) := Sum 1
--- True
+-- 0
+--
+-- >>> Pdsu.mergeMaybe dsu 1 0 (Sum 1)
+-- Nothing
+--
 --
 -- >>> Pdsu.merge_ dsu 2 0 (Sum 2) -- p(2) - p(0) := Sum 2
 -- >>> Pdsu.leader dsu 0
@@ -172,15 +177,28 @@ unsafeDiff dsu v1 v2 = stToPrim $ unsafeDiffST dsu v1 v2
 -- TODO: use merge and mergeMaybe
 
 -- | \(O(\alpha(n))\) Merges \(v_1\) to \(v_2\) with differential (relative) potential
--- \(\mathrm{dp}\): \(p(v1) := \mathrm{dp} \cdot p(v2)\). Returns `True` if they're newly merged.
+-- \(\mathrm{dp}\): \(p(v1) := \mathrm{dp} \cdot p(v2)\). Returns the representative of the new
+-- connected component.
 --
--- @since 1.1.0.0
+-- @since 1.4.0.0
 {-# INLINE merge #-}
-merge :: (HasCallStack, PrimMonad m, Monoid a, Ord a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> a -> m Bool
+merge :: (HasCallStack, PrimMonad m, Monoid a, Ord a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> a -> m Int
 merge dsu v10 v20 !dp0 = stToPrim $ mergeST dsu v10 v20 dp0
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.merge" v10 $ nPdsu dsu
     !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.merge" v20 $ nPdsu dsu
+
+-- | \(O(\alpha(n))\) Merges \(v_1\) to \(v_2\) with differential (relative) potential
+-- \(\mathrm{dp}\): \(p(v1) := \mathrm{dp} \cdot p(v2)\). Returns the representative of the new
+-- connected component if it's newly merged, otherwise it returns `Nothing`.
+--
+-- @since 1.4.0.0
+{-# INLINE mergeMaybe #-}
+mergeMaybe :: (HasCallStack, PrimMonad m, Monoid a, Ord a, VU.Unbox a) => Pdsu (PrimState m) a -> Int -> Int -> a -> m (Maybe Int)
+mergeMaybe dsu v10 v20 !dp0 = stToPrim $ mergeMaybeST dsu v10 v20 dp0
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.mergeMaybe" v10 $ nPdsu dsu
+    !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.mergeMaybe" v20 $ nPdsu dsu
 
 -- | \(O(\alpha(n))\) `merge` with the return value discarded.
 --
@@ -263,14 +281,14 @@ potST dsu@Pdsu {..} v1 = do
     !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.potST" v1 nPdsu
 
 {-# INLINEABLE mergeST #-}
-mergeST :: (HasCallStack, Monoid a, Ord a, VU.Unbox a) => Pdsu s a -> Int -> Int -> a -> ST s Bool
+mergeST :: (HasCallStack, Monoid a, Ord a, VU.Unbox a) => Pdsu s a -> Int -> Int -> a -> ST s Int
 mergeST dsu@Pdsu {..} v10 v20 !dp0 = inner v10 v20 dp0
   where
     inner v1 v2 !dp = do
       !r1 <- leaderST dsu v1
       !r2 <- leaderST dsu v2
       if r1 == r2
-        then pure False
+        then pure r1
         else do
           -- NOTE(perf): Union by size (choose smaller one for root).
           -- Another, more proper optimization would be union by rank (depth).
@@ -298,9 +316,18 @@ mergeST dsu@Pdsu {..} v10 v20 !dp0 = inner v10 v20 dp0
               VGM.write parentOrSizePdsu r1 {- record new root -} r2
               VGM.write potentialPdsu r1 pr1'
 
-              pure True
+              pure r2
             else do
               inner v2 v1 $ invertPdsu dp
+
+{-# INLINE mergeMaybeST #-}
+mergeMaybeST :: (HasCallStack, Monoid a, Ord a, VU.Unbox a) => Pdsu s a -> Int -> Int -> a -> ST s (Maybe Int)
+mergeMaybeST dsu v1 v2 !dp0 = do
+  r1 <- leaderST dsu v1
+  r2 <- leaderST dsu v2
+  if r1 == r2
+    then pure Nothing
+    else Just <$> mergeST dsu v1 v2 dp0
 
 {-# INLINEABLE canMergeST #-}
 canMergeST :: (HasCallStack, Semigroup a, Eq a, VU.Unbox a) => Pdsu s a -> Int -> Int -> a -> ST s Bool

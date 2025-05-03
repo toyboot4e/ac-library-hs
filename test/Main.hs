@@ -24,6 +24,7 @@ import Tests.Extra.Math.Montgomery64 qualified
 import Tests.Extra.ModInt64 qualified
 import Tests.Extra.Monoid qualified
 import Tests.Extra.MultiSet qualified
+import Tests.Extra.Pdsu qualified
 import Tests.Extra.SegTree2d qualified
 import Tests.Extra.SegTree2d.Dense qualified
 import Tests.Extra.Semigroup.Matrix qualified
@@ -81,6 +82,7 @@ main =
             testGroup "ModInt64" Tests.Extra.ModInt64.tests,
             testGroup "Monoid" Tests.Extra.Monoid.tests,
             testGroup "MultiSet" Tests.Extra.MultiSet.tests,
+            testGroup "Pdsu" Tests.Extra.Pdsu.tests,
             testGroup "SegTree2d" Tests.Extra.SegTree2d.tests,
             testGroup "SegTree2d.Dense" Tests.Extra.SegTree2d.Dense.tests,
             testGroup "Semigroup.Matrix" Tests.Extra.Semigroup.Matrix.tests,
