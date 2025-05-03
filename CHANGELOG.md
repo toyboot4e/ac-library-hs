@@ -3,6 +3,7 @@
 ## 1.4.0.0 -- May 2025
 
 - Changed `AtCoder.Extra.Pdsu.merge` to return new representative.
+- Fixed `AtCoder.Extra.Hld.jump` to return `Nothing` for `k < 0`.
 
 ## 1.3.1.0 -- May 2025
 

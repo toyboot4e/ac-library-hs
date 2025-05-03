@@ -376,12 +376,13 @@ ancestor Hld {..} parent k0 = inner parent k0
         ihv = indexHld VG.! hv
 
 -- | \(O(\log n)\) Returns the \(k\)-th vertex of the path between \(u\) and \(v\) from \(u\).
--- Returns `Nothing` if \(k\) is bigger than the path length.
+-- Returns `Nothing` if \(k\) is bigger than the path length or \(k < 0\).
 --
--- @since 1.1.0.0
+-- @since 1.4.0.0
 {-# INLINEABLE jump #-}
 jump :: (HasCallStack) => Hld -> Vertex -> Vertex -> Int -> Maybe Vertex
 jump hld@Hld {..} u v k
+  | k < 0 = Nothing
   | k > lenU + lenV = Nothing
   | k <= lenU = Just $ ancestor hld u k
   | otherwise = Just $ ancestor hld v (lenU + lenV - k)
