@@ -42,7 +42,7 @@ main = do
   edges <- MCF.unsafeEdges graph
 
   outGrid <- V.replicateM n (VUM.replicate n '.')
-  VU.forM_ edges $ \(!from, !to, !flow, !_, !_) -> do
+  VU.forM_ edges $ \(!from, !to, !_, !flow, !_) -> do
     unless (from == s || to == t || flow == 0) $ do
       VGM.write (outGrid VG.! (from - row0)) (to - col0) 'X'
 
