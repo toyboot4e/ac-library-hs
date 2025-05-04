@@ -65,7 +65,7 @@ module AtCoder.Extra.DynLazySegTree.Persistent
     -- * Products
     prod,
     -- prodMaybe,
-    allProd, -- FIXME: rename it to prodAll
+    allProd,
 
     -- * Applications
     applyAt,

@@ -97,7 +97,7 @@ module AtCoder.LazySegTree
     -- * Products
     prod,
     prodMaybe,
-    allProd, -- FIXME: rename to prodAll
+    allProd,
 
     -- * Applications
     applyAt,

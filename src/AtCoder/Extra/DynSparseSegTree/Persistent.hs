@@ -54,7 +54,7 @@ module AtCoder.Extra.DynSparseSegTree.Persistent
     -- * Products
     prod,
     -- prodMaybe,
-    allProd, -- FIXME: rename it to prodAll
+    allProd,
 
     -- * Binary searches
     maxRight,

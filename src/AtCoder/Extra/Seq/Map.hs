@@ -59,7 +59,7 @@ module AtCoder.Extra.Seq.Map
     -- sliceST,
     prod,
     prodMaybe,
-    allProd, -- FIXME: rename to `prodAll`
+    allProd,
 
     -- ** Applications
     applyIn,

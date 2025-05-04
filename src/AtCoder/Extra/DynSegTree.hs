@@ -56,7 +56,7 @@ module AtCoder.Extra.DynSegTree
     -- * Products
     prod,
     -- prodMaybe,
-    allProd, -- FIXME: rename it to prodAll
+    allProd,
 
     -- * Tree operations
     resetInterval,

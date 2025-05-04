@@ -55,7 +55,7 @@ module AtCoder.Extra.WaveletMatrix2d
     modify,
     prod,
     prodMaybe,
-    allProd, -- FIXME: rename to prodAll
+    allProd,
     -- wavelet matrix methods could be implemented, too
   )
 where
