@@ -44,6 +44,7 @@ module AtCoder.Internal.Csr
     adj,
     adjW,
     eAdj,
+    eAdjW,
   )
 where
 
@@ -67,7 +68,7 @@ data Csr w = Csr
     --
     -- @since 1.1.0.0
     mCsr :: {-# UNPACK #-} !Int,
-    -- | Starting indices.
+    -- | Maps vertices into the starting indices for `adjCsr` and `wCsr`.
     --
     -- @since 1.1.0.0
     startCsr :: !(VU.Vector Int),
@@ -157,7 +158,7 @@ adjW Csr {..} i =
       ir = startCsr VG.! (i + 1)
    in VU.zip (VU.slice il (ir - il) adjCsr) (VU.slice il (ir - il) wCsr)
 
--- | \(O(n)\) Returns a vector of @(edgeId, adjacentVertex)@.
+-- | \(O(n)\) Returns a vector of @(csrEdgeIndex, adjacentVertex)@.
 --
 -- @since 1.0.0.0
 {-# INLINE eAdj #-}
@@ -166,3 +167,13 @@ eAdj Csr {..} i =
   let il = startCsr VG.! i
       ir = startCsr VG.! (i + 1)
    in VU.imap ((,) . (+ il)) $ VU.slice il (ir - il) adjCsr
+
+-- | \(O(n)\) Returns a vector of @(csrEdgeIndex, adjacentVertex, edgeWeight)@.
+--
+-- @since 1.4.0.0
+{-# INLINE eAdjW #-}
+eAdjW :: (HasCallStack, VU.Unbox w) => Csr w -> Int -> VU.Vector (Int, Int, w)
+eAdjW Csr {..} i =
+  let il = startCsr VG.! i
+      ir = startCsr VG.! (i + 1)
+   in VU.zip3 (VU.enumFromN il (ir - il)) (VU.slice il (ir - il) adjCsr) (VU.slice il (ir - il) wCsr)
