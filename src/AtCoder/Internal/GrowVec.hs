@@ -64,6 +64,8 @@ module AtCoder.Internal.GrowVec
     -- * Readings
     read,
     readMaybe,
+    readBack,
+    readBackMaybe,
 
     -- * Modifications
 
@@ -75,11 +77,17 @@ module AtCoder.Internal.GrowVec
     popBack,
     popBack_,
 
+    -- ** Misc
+    clear,
+    reverse,
+
     -- * Conversion
     freeze,
     unsafeFreeze,
   )
 where
+
+-- NOTE (perf): we have to inine all the functions for reasonable performance
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)
@@ -90,13 +98,15 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
-import Prelude hiding (length, null, read)
+import Prelude hiding (length, null, read, reverse)
 
 -- | Growable vector with some runtime overhead.
 --
 -- @since 1.0.0.0
 data GrowVec s a = GrowVec
   { -- | Stores [l, r) range in the `vecGV`.
+    --
+    -- @since 1.0.0.0
     posGV :: !(VUM.MVector s Int),
     -- | @since 1.0.0.0
     vecGV :: !(MutVar s (VUM.MVector s a))
@@ -160,7 +170,7 @@ null = (<$>) (== 0) . length
 -- | \(O(1)\) Yields the element at the given position. Will throw an exception if the index is out
 -- of range.
 --
--- @since 1.0.0.0
+-- @since 1.4.0.0
 {-# INLINE read #-}
 read :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> m a
 read gv i = stToPrim $ readST gv i
@@ -172,10 +182,25 @@ read gv i = stToPrim $ readST gv i
 readMaybe :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> m (Maybe a)
 readMaybe gv i = stToPrim $ readMaybeST gv i
 
+-- | \(O(1)\) Yields the element at the given position. Will throw an exception if the index is out
+-- of range.
+--
+-- @since 1.4.0.0
+{-# INLINE readBack #-}
+readBack :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> m a
+readBack gv i = stToPrim $ readBackST gv i
+
+-- | \(O(1)\) Yields the element at the given position, or `Nothing` if the index is out of range.
+--
+-- @since 1.4.0.0
+{-# INLINE readBackMaybe #-}
+readBackMaybe :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> m (Maybe a)
+readBackMaybe gv i = stToPrim $ readBackMaybeST gv i
+
 -- | \(O(1)\) Writes to the element at the given position. Will throw an exception if the index is
 -- out of range.
 --
--- @since 1.0.0.0
+-- @since 1.4.0.0
 {-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> Int -> a -> m ()
 write gv i x = stToPrim $ writeST gv i x
@@ -201,6 +226,21 @@ popBack = stToPrim . popBackST
 popBack_ :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m ()
 popBack_ = stToPrim . popBackST_
 
+-- | \(O(1)\) Sets the length to zero.
+--
+-- @since 1.4.0.0
+{-# INLINE clear #-}
+clear :: (PrimMonad m, VU.Unbox a) => GrowVec (PrimState m) a -> m ()
+clear GrowVec {..} = stToPrim $ do
+  VGM.write posGV 0 0
+
+-- | \(O(n)\) Reverses all the elements.
+--
+-- @since 1.4.0.0
+{-# INLINE reverse #-}
+reverse :: (HasCallStack, PrimMonad m, Ord a, VU.Unbox a) => GrowVec (PrimState m) a -> m ()
+reverse = stToPrim . reverseST
+
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --
 -- @since 1.0.0.0
@@ -220,15 +260,15 @@ unsafeFreeze = stToPrim . unsafeFreezeST
 -- Internal
 -- -------------------------------------------------------------------------------------------------
 
-{-# INLINEABLE readST #-}
+{-# INLINE readST #-}
 readST :: (HasCallStack, VU.Unbox a) => GrowVec s a -> Int -> ST s a
 readST GrowVec {..} i = do
   vec <- readMutVar vecGV
-  let len = VUM.length vec
-  let !_ = ACIA.checkIndex "AtCoder.Internal.GrowVec.read" i len
+  len <- VGM.unsafeRead posGV 0
+  let !_ = ACIA.checkIndex "AtCoder.Internal.GrowVec.readST" i len
   VGM.read vec i
 
-{-# INLINEABLE readMaybeST #-}
+{-# INLINE readMaybeST #-}
 readMaybeST :: (HasCallStack, VU.Unbox a) => GrowVec s a -> Int -> ST s (Maybe a)
 readMaybeST GrowVec {..} i = do
   vec <- readMutVar vecGV
@@ -237,15 +277,32 @@ readMaybeST GrowVec {..} i = do
     then Just <$> VGM.unsafeRead vec i
     else pure Nothing
 
-{-# INLINEABLE writeST #-}
+{-# INLINE readBackST #-}
+readBackST :: (HasCallStack, VU.Unbox a) => GrowVec s a -> Int -> ST s a
+readBackST GrowVec {..} i = do
+  vec <- readMutVar vecGV
+  len <- VGM.unsafeRead posGV 0
+  let !_ = ACIA.checkIndex "AtCoder.Internal.GrowVec.readBackST" i len
+  VGM.read vec (len - 1 - i)
+
+{-# INLINE readBackMaybeST #-}
+readBackMaybeST :: (HasCallStack, VU.Unbox a) => GrowVec s a -> Int -> ST s (Maybe a)
+readBackMaybeST GrowVec {..} i = do
+  vec <- readMutVar vecGV
+  len <- VGM.unsafeRead posGV 0
+  if ACIA.testIndex i len
+    then Just <$> VGM.unsafeRead vec (len - 1 - i)
+    else pure Nothing
+
+{-# INLINE writeST #-}
 writeST :: (HasCallStack, VU.Unbox a) => GrowVec s a -> Int -> a -> ST s ()
 writeST GrowVec {..} i x = do
   vec <- readMutVar vecGV
-  let len = VUM.length vec
-  let !_ = ACIA.checkIndex "AtCoder.Internal.GrowVec.write" i len
+  len <- VGM.unsafeRead posGV 0
+  let !_ = ACIA.checkIndex "AtCoder.Internal.GrowVec.writeST" i len
   VGM.write vec i x
 
-{-# INLINEABLE pushBackST #-}
+{-# INLINE pushBackST #-}
 pushBackST :: (VU.Unbox a) => GrowVec s a -> a -> ST s ()
 pushBackST GrowVec {..} e = do
   len <- VGM.unsafeRead posGV 0
@@ -267,7 +324,7 @@ pushBackST GrowVec {..} e = do
     )
     0
 
-{-# INLINEABLE popBackST #-}
+{-# INLINE popBackST #-}
 popBackST :: (VU.Unbox a) => GrowVec s a -> ST s (Maybe a)
 popBackST GrowVec {..} = do
   pos <- VGM.unsafeRead posGV 0
@@ -278,20 +335,28 @@ popBackST GrowVec {..} = do
       vec <- readMutVar vecGV
       Just <$> VGM.read vec (pos - 1)
 
-{-# INLINEABLE popBackST_ #-}
+{-# INLINE popBackST_ #-}
 popBackST_ :: (VU.Unbox a) => GrowVec s a -> ST s ()
 popBackST_ GrowVec {..} = do
   pos <- VGM.unsafeRead posGV 0
   VGM.unsafeWrite posGV 0 $ max 0 $ pos - 1
 
-{-# INLINEABLE freezeST #-}
+{-# INLINE reverseST #-}
+reverseST :: (HasCallStack, Ord a, VU.Unbox a) => GrowVec s a -> ST s ()
+reverseST GrowVec {..} = do
+  len <- VGM.unsafeRead posGV 0
+  vec <- readMutVar vecGV
+  let slice = VUM.take len vec
+  VGM.reverse slice
+
+{-# INLINE freezeST #-}
 freezeST :: (VU.Unbox a) => GrowVec s a -> ST s (VU.Vector a)
 freezeST GrowVec {..} = do
   len <- VGM.unsafeRead posGV 0
   vec <- readMutVar vecGV
   VU.freeze $ VUM.take len vec
 
-{-# INLINEABLE unsafeFreezeST #-}
+{-# INLINE unsafeFreezeST #-}
 unsafeFreezeST :: (VU.Unbox a) => GrowVec s a -> ST s (VU.Vector a)
 unsafeFreezeST GrowVec {..} = do
   len <- VGM.unsafeRead posGV 0
