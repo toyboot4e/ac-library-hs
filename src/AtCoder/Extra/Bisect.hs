@@ -41,11 +41,11 @@ import Data.Functor.Identity
 import Data.Vector.Generic qualified as VG
 import GHC.Stack (HasCallStack)
 
--- | \(O(\log n)\) Returns the maximum \(r\) where \(x_i \lt x_0\) holds for \(i \in [0, r)\).
+-- | \(O(\log n)\) Returns the maximum \(r\) where \(x_i \lt x_{ref}\) holds for \(i \in [0, r)\).
 --
 -- @
--- Y Y Y Y Y N N N N N      Y: x_i < x_0
--- --------- *---------> x  N: x_i >= x_0
+-- Y Y Y Y Y N N N N N      Y: x_i < x_ref
+-- --------- *---------> x  N: x_i >= x_ref
 --           R              R: the right boundary point returned
 -- @
 --
@@ -104,11 +104,11 @@ lowerBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i < target
   where
     !_ = ACIA.checkIntervalBounded "AtCoder.Extra.Bisect.lowerBoundIn" l r $ VG.length vec
 
--- | \(O(\log n)\) Returns the maximum \(r\) where \(x_i \le x_0\) holds for \(i \in [0, r)\).
+-- | \(O(\log n)\) Returns the maximum \(r\) where \(x_i \le x_{ref}\) holds for \(i \in [0, r)\).
 --
 -- @
--- Y Y Y Y Y N N N N N      Y: x_i <= x_0,
--- --------- *---------> x  N: x_i > x_0,
+-- Y Y Y Y Y N N N N N      Y: x_i <= x_ref,
+-- --------- *---------> x  N: x_i > x_ref,
 --           R              R: the right boundary point returned
 -- @
 --

@@ -8,7 +8,7 @@
 module AtCoder.Extra.Graph
   ( -- * Re-export of CSR
 
-    -- | The `Csr.Csr` data type and all the functions such as `build` or `adj` are re-exported.
+    -- | The @Csr@ data type and all the functions such as `build` or `adj` are re-exported.
     -- See the @Csr@ module for details.
     module Csr,
 
@@ -243,8 +243,15 @@ rev Csr {..} = Csr.build nCsr revEdges
 -- TODO: is this minimum cycle?
 
 -- | \(O(n + m)\) Given a directed graph, finds a minimal cycle and returns a vector of vertices and
--- a vector of CSR edge indices (not original edge indices). Returns `Nothing` if the graph has no
--- cycle.
+-- a vector of @(vertices, csrEdgeIndices)@.
+--
+-- ==== __Example__
+--
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let gr = Gr.build' 4 $ VU.fromList [(0, 1), (1, 2), (2, 3), (3, 1)]
+-- >>> findCycleDirected gr -- returns (vs, es)
+-- Just ([1,2,3],[1,2,3])
 --
 -- @since 1.4.0.0
 {-# INLINEABLE findCycleDirected #-}
@@ -340,15 +347,29 @@ findCycleDirected gr@Csr {..} = runST $ do
     else pure $ Just (vs', es')
 
 -- | \(O(n + m)\) Given an undirected graph, finds a minimal cycle and returns a vector of vertices
--- and a vector of CSR edge indices (not original edge indices). Returns `Nothing` if the graph has
--- no cycle.
---
--- Returning a single edge index does not make much sense for an undirected graph, so map back to
--- the original edge index manually if needed.
+-- a vector of @(vertices, csrEdgeIndices)@. A single edge index does not make much sense for an
+-- undirected graph, so map back to the original edge index manually if needed.
 --
 -- ==== Constraints
 -- - The graph must be created with `swapDupe` or `swapDupe'`. Otherwise the returned edge indices
 --   could make no sense.
+--
+-- ==== __Example__
+--
+-- >>> import AtCoder.Extra.Graph qualified as Gr
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let gr = Gr.build' 4 . Gr.swapDupe' $ VU.fromList [(0, 1), (1, 2), (1, 3), (2, 3)]
+-- >>> findCycleUndirected gr -- returns (vs, es)
+-- Just ([1,3,2],[3,5,2])
+--
+-- Retrieve original edge indices that makes up the cycle, by recording them in edge weights:
+--
+-- >>> let gr = Gr.build 4 . Gr.swapDupe $ VU.fromList [(0, 1, 0 :: Int), (1, 2, 1), (1, 3, 2), (2, 3, 3)]
+-- >>> let Just (vs, es) = findCycleUndirected gr -- returns (vs, es)
+-- >>> VU.backpermute (Gr.wCsr gr) es
+-- [2,3,1]
+--
+-- It's a bit hacky.
 --
 -- @since 1.4.0.0
 {-# INLINEABLE findCycleUndirected #-}
