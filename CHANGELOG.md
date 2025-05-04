@@ -2,6 +2,8 @@
 
 ## 1.4.0.0 -- May 2025
 
+- Added cycle detection functions to `AtCoder.Extra.Graph`
+- Fixed the exteremely slow `Internal.GrowVec` functions with `{-# INLINE #-}`
 - Changed `AtCoder.Extra.Pdsu.merge` to return new representative.
 - Fixed `AtCoder.Extra.Hld.jump` to return `Nothing` for `k < 0`.
 

@@ -205,6 +205,16 @@ executable yosupo-biconnected-components-util
   main-is:       yosupo-biconnected-components-util.hs
   build-depends: verify
 
+executable yosupo-cycle-detection
+  import:        app-local
+  main-is:       yosupo-cycle-detection.hs
+  build-depends: verify
+
+executable yosupo-cycle-detection-undirected
+  import:        app-local
+  main-is:       yosupo-cycle-detection-undirected.hs
+  build-depends: verify
+
 executable yosupo-dynamic-point-set-rectangle-affine-rectangle-sum
   import:        app-local
   main-is:       yosupo-dynamic-point-set-rectangle-affine-rectangle-sum.hs

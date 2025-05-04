@@ -17,6 +17,8 @@ module AtCoder.Extra.Graph
     swapDupe',
     scc,
     rev,
+    findCycleDirected,
+    findCycleUndirected,
 
     -- * Generic graph functions
 
@@ -99,25 +101,31 @@ module AtCoder.Extra.Graph
 where
 
 import AtCoder.Dsu qualified as Dsu
+import AtCoder.Extra.HashMap qualified as HM
 import AtCoder.Extra.IntSet qualified as IS
 import AtCoder.Extra.Ix0 (Bounds0, Ix0 (..))
+import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Buffer qualified as B
 import AtCoder.Internal.Csr as Csr
+import AtCoder.Internal.GrowVec qualified as GV
 import AtCoder.Internal.MinHeap qualified as MH
 import AtCoder.Internal.Queue qualified as Q
 import AtCoder.Internal.Scc qualified as ACISCC
-import Control.Monad (replicateM_, when)
+import Control.Applicative ((<|>))
+import Control.Monad (replicateM_, unless, when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Control.Monad.ST (ST, runST)
 import Data.Bit (Bit (..))
+import Data.Bits ((.<<.), (.|.))
 import Data.Foldable (for_)
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, fromMaybe)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
+import Data.Word (Word8)
 import GHC.Stack (HasCallStack)
 
 -- | \(O(n)\) Converts directed edges into non-directed edges; each edge \((u, v, w)\) is duplicated
@@ -231,6 +239,260 @@ rev Csr {..} = Csr.build nCsr revEdges
           !o2 = startCsr VG.! (v1 + 1)
           !vw2s = VU.slice o1 (o2 - o1) vws
        in VU.map (\(!v2, !w2) -> (v2, v1, w2)) vw2s
+
+-- TODO: is this minimum cycle?
+
+-- | \(O(n + m)\) Given a directed graph, finds a minimal cycle and returns a vector of vertices and
+-- a vector of CSR edge indices (not original edge indices). Returns `Nothing` if the graph has no
+-- cycle.
+--
+-- @since 1.4.0.0
+{-# INLINEABLE findCycleDirected #-}
+findCycleDirected :: (HasCallStack, VU.Unbox w) => Csr w -> Maybe (VU.Vector Int, VU.Vector Int)
+findCycleDirected gr@Csr {..} = runST $ do
+  used <- VUM.replicate @_ @Word8 nCsr 0
+  -- par <- VUM.unsafeNew @_ @(Int, Int) nCsr
+  par <- VUM.replicate nCsr (-1 :: Int, -1 :: Int)
+  vs <- GV.new @_ @Int 16
+  es <- GV.new @_ @Int 16
+  esFrom <- GV.new @_ @Int 16 -- If we had `from` in Csr, we could skip this
+  let dfs u = do
+        VGM.write used u 1
+        let next evs = case VU.uncons evs of
+              Nothing -> pure ()
+              Just ((!iEdge, !v), !evs') -> do
+                b <- GV.null es
+                when b $ do
+                  use <- VGM.read used v
+                  case use of
+                    0 -> do
+                      VGM.write par v (u, iEdge)
+                      dfs v
+                      next evs'
+                    1 -> do
+                      GV.pushBack es iEdge
+                      GV.pushBack esFrom u
+                      let backtrack cur
+                            | cur == v = pure ()
+                            | otherwise = do
+                                (!prevVert, !edge) <- VGM.read par cur
+                                GV.pushBack es edge
+                                GV.pushBack esFrom prevVert
+                                backtrack prevVert
+                      backtrack u
+                      GV.reverse es
+                      GV.reverse esFrom
+                    _ -> do
+                      next evs'
+
+        next $ eAdj gr u
+        VGM.write used u 2
+
+  VGM.iforM_ used $ \v use -> do
+    when (use == 0) $ do
+      dfs v
+
+  b <- GV.null es
+  unless b $ do
+    -- find minimum cycle
+    nxt <- VUM.replicate nCsr (-1 :: Int) -- edge indices
+    do
+      es' <- GV.unsafeFreeze es
+      esFrom' <- GV.unsafeFreeze esFrom
+      VU.forM_ (VU.zip es' esFrom') $ \(!iEdge, !vFrom) -> do
+        VGM.write nxt vFrom iEdge
+
+    for_ [0 .. nCsr - 1] $ \vA -> do
+      nxtA <- VGM.read nxt vA
+      unless (nxtA == -1) $ do
+        VU.forM_ (eAdj gr vA) $ \(!iEdge, !vB) -> do
+          nxtB <- VGM.read nxt vB
+          unless (nxtB == -1 || adjCsr VG.! nxtA == vB) $ do
+            let inner x
+                  | x == vB = pure ()
+                  | otherwise = do
+                      nxtX <- VGM.exchange nxt x (-1)
+                      inner $ adjCsr VG.! nxtX
+            inner vA
+            VGM.write nxt vA iEdge
+
+    GV.clear es
+    let loop v
+          | v >= nCsr = pure ()
+          | otherwise = do
+              nxtV <- VGM.read nxt v
+              if nxtV == -1
+                then loop (v + 1)
+                else do
+                  let inner x = do
+                        GV.pushBack vs x
+                        nxtX <- VGM.read nxt x
+                        GV.pushBack es nxtX
+                        let !x' = adjCsr VG.! nxtX
+                        unless (x' == v) $ inner x'
+                  inner v
+    loop 0
+
+  vs' <- GV.unsafeFreeze vs
+  es' <- GV.unsafeFreeze es
+  if VU.null es'
+    then pure Nothing
+    else pure $ Just (vs', es')
+
+-- | \(O(n + m)\) Given an undirected graph, finds a minimal cycle and returns a vector of vertices
+-- and a vector of CSR edge indices (not original edge indices). Returns `Nothing` if the graph has
+-- no cycle.
+--
+-- Returning a single edge index does not make much sense for an undirected graph, so map back to
+-- the original edge index manually if needed.
+--
+-- ==== Constraints
+-- - The graph must be created with `swapDupe` or `swapDupe'`. Otherwise the returned edge indices
+--   could make no sense.
+--
+-- @since 1.4.0.0
+{-# INLINEABLE findCycleUndirected #-}
+findCycleUndirected :: (HasCallStack, VU.Unbox w) => Csr w -> Maybe (VU.Vector Int, VU.Vector Int)
+findCycleUndirected gr@Csr {..} =
+  let !_ = ACIA.runtimeAssert (even mCsr) $ "AtCoder.Extra.Graph.findCycleUndirected: the number of edge in an undirected graph must be even: `" ++ show mCsr ++ "`"
+   in -- If we have the same edge id for duplicated edges, `findCycleSimpleUndirected` could be modified
+      -- to handle both complex and simple graph. We don't, and we need the complex graph handling.
+      -- This is not optimal, but we need a dedicated `buildUndirected` function and different edge ID
+      -- (not index) handling in CSR if we go with the optimal approach.
+      --
+      --  Note that the implementations are suspecious..
+      findCycleComplexUndirected gr <|> findCycleSimpleUndirected gr
+
+{-# INLINEABLE findCycleComplexUndirected #-}
+findCycleComplexUndirected :: (HasCallStack, VU.Unbox w) => Csr w -> Maybe (VU.Vector Int, VU.Vector Int)
+findCycleComplexUndirected gr@Csr {..} = runST $ do
+  usedE <- HM.new @_ @Int (mCsr `div` 2 + {- not needed, but in case of panic? -} 4)
+  cntE <- HM.new @_ @Word8 (mCsr `div` 2 + {- not needed, but in case of panic? -} 4)
+
+  -- we'll give unique indices to (u, v) pairs
+  let ix u v = min u v .<<. 32 .|. max u v
+
+  let nextU u
+        | u >= nCsr = pure Nothing
+        | otherwise = do
+            let nextV evs = case VU.uncons evs of
+                  Nothing -> pure Nothing
+                  Just ((!e, !v), !evs') -> case compare u v of
+                    -- self loop edge
+                    EQ -> pure $ Just (VU.singleton v, VU.singleton e)
+                    LT -> do
+                      let !i = ix u v
+                      c <- fromMaybe 0 <$> HM.lookup cntE i
+                      case c of
+                        0 -> do
+                          HM.insert usedE i e
+                          HM.insert cntE i 1
+                          nextV evs'
+                        1 -> do
+                          -- found the first duplicated edge
+                          HM.insert cntE i 2
+                          nextV evs'
+                        _ -> do
+                          nextV evs'
+                    GT -> do
+                      let !i = ix u v
+                      cnt <- fromMaybe 0 <$> HM.lookup cntE i
+                      case cnt of
+                        2 -> do
+                          -- there are duplicate edges between (u, v) and this is the
+                          -- first (u, v) (u > v)
+                          HM.insert cntE i 3
+                          nextV evs'
+                        3 -> do
+                          -- this is the second duplicate edge (u, v) (u > v)
+                          e1 <- fromJust <$> HM.lookup usedE i
+                          let vs = VU.fromListN 2 [v, u]
+                          let es = VU.fromListN 2 [e1, e]
+                          pure $ Just (vs, es)
+                        _ -> nextV evs'
+
+            res <- nextV $ eAdj gr u
+            case res of
+              Just ret -> pure $ Just ret
+              Nothing -> nextU (u + 1)
+
+  nextU 0
+
+{-# INLINEABLE findCycleSimpleUndirected #-}
+findCycleSimpleUndirected :: (HasCallStack, VU.Unbox w) => Csr w -> Maybe (VU.Vector Int, VU.Vector Int)
+findCycleSimpleUndirected gr@Csr {..} = runST $ do
+  -- marks both (u, v) and (v, u)
+  usedUV <- HM.new @_ @Bit (mCsr + 4)
+
+  -- we'll give unique indices to (u, v) pairs
+  let ix u v = min u v .<<. 32 .|. max u v
+
+  -- depth
+  dep <- VUM.replicate nCsr (-1 :: Int)
+
+  -- vertex -> edge index
+  par <- VUM.replicate nCsr (-1 :: Int)
+  parFrom <- VUM.replicate nCsr (-1 :: Int)
+
+  -- Get DFS forest
+  let dfs u d = do
+        VGM.write dep u d
+        VU.forM_ (eAdj gr u) $ \(!iEdge, !v) -> do
+          dv <- VGM.read dep v
+          when (dv == -1) $ do
+            -- we're marking both direction of an undirected edge
+            HM.insert usedUV (ix u v) $ Bit True
+            VGM.write par v iEdge
+            VGM.write parFrom v u
+            dfs v (d + 1)
+
+  VGM.iforM_ dep $ \v d -> do
+    when (d == -1) $ do
+      dfs v 0
+
+  vs <- GV.new @_ @Int 16
+  es <- GV.new @_ @Int 16
+  dep' <- VU.unsafeFreeze dep
+
+  -- Find edge with minimum depth difference, which makes up a loop (not used in the DFS forets):
+  minLen <- VUM.replicate 1 (maxBound `div` 2 :: Int)
+  backE <- VUM.replicate 1 (-1 :: Int, -1 :: Int)
+  for_ [0 .. nCsr - 1] $ \vA -> do
+    let !dA = dep' VG.! vA
+    VU.forM_ (eAdj gr vA) $ \(!iEdge, !vB) -> do
+      b <- maybe False unBit <$> HM.lookup usedUV (ix vA vB)
+      unless b $ do
+        let !dB = dep' VG.! vB
+        let !d = abs $ dA - dB
+        minLen' <- VGM.read minLen 0
+        when (d < minLen') $ do
+          VGM.write minLen 0 d
+          VGM.write backE 0 (iEdge, vA)
+
+  (!backE', !backFrom) <- VGM.read backE 0
+  when (backE' /= -1) $ do
+    let try a b = do
+          if dep' VG.! a > dep' VG.! b
+            then try b a
+            else do
+              -- v_1 -> v_N -> v_{N - 1} -> .. -> v_2 -> v_1
+              GV.pushBack es backE'
+              GV.pushBack vs a
+              let backtrack v = do
+                    unless (v == a) $ do
+                      parE <- VGM.read par v
+                      v' <- VGM.read parFrom v
+                      GV.pushBack vs v
+                      GV.pushBack es parE
+                      backtrack v'
+              backtrack b
+    try backFrom (adjCsr VG.! backE')
+
+  vs' <- GV.unsafeFreeze vs
+  es' <- GV.unsafeFreeze es
+  if VU.null es'
+    then pure Nothing
+    else pure $ Just (vs', es')
 
 -- -------------------------------------------------------------------------------------------------
 -- Generic graph search functions
