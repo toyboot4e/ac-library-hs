@@ -81,14 +81,19 @@ alias to := touch
 
 # runs local test for a online judge problem
 verify:
-    cd verify && ./script/verify
+    #!/usr/bin/env bash
+    cd verify
+    file="$(basename "$(ls app/*.hs | fzf --history .fzf-history)")"
+    touch "app/$file"
+    oj-verify run "app/$file" # -j 8
 
 [private]
 alias v := verify
 
 # runs local test for all of the online judge problems
 verify-all:
-    cd verify && touch app/* && ./script/verify-all
+    #!/usr/bin/env bash
+    cd verify && touch app/* && oj-verify run app/*.hs -j 8
 
 [private]
 alias va := verify-all
