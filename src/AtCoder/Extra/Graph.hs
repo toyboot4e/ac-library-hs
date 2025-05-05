@@ -242,8 +242,7 @@ rev Csr {..} = Csr.build nCsr revEdges
 
 -- TODO: is this minimum cycle?
 
--- | \(O(n + m)\) Given a directed graph, finds a minimal cycle and returns a vector of vertices and
--- a vector of @(vertices, csrEdgeIndices)@.
+-- | \(O(n + m)\) Given a directed graph, finds a minimal cycle and returns @(vertices, csrEdgeIndices)@.
 --
 -- ==== __Example__
 --
@@ -346,9 +345,9 @@ findCycleDirected gr@Csr {..} = runST $ do
     then pure Nothing
     else pure $ Just (vs', es')
 
--- | \(O(n + m)\) Given an undirected graph, finds a minimal cycle and returns a vector of vertices
--- a vector of @(vertices, csrEdgeIndices)@. A single edge index does not make much sense for an
--- undirected graph, so map back to the original edge index manually if needed.
+-- | \(O(n + m)\) Given an undirected graph, finds a minimal cycle and returns @(vertices, csrEdgeIndices)@.
+-- A single edge index does not make much sense for an undirected graph, so map back to the original
+-- edge index manually if needed.
 --
 -- ==== Constraints
 -- - The graph must be created with `swapDupe` or `swapDupe'`. Otherwise the returned edge indices
