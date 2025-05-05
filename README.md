@@ -2,7 +2,7 @@
 
 Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive programming on [AtCoder](https://atcoder.jp/).
 
-The `main` branch is the version avaiable on AtCoder. See `dev` branch for upcoming updates.
+The `main` branch is the version avaiable on AtCoder (+ documentation fixes). See `dev` branch for upcoming updates.
 
 ## Notes
 
