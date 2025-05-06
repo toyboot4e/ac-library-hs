@@ -101,51 +101,6 @@ library
 
 -- local judges
 
-executable alpc-a
-  import:        app-local
-  main-is:       alpc-a.hs
-  build-depends: verify
-
-executable alpc-b
-  import:        app-local
-  main-is:       alpc-b.hs
-  build-depends: verify
-
-executable alpc-c
-  import:        app-local
-  main-is:       alpc-c.hs
-  build-depends: verify
-
-executable alpc-f
-  import:        app-local
-  main-is:       alpc-f.hs
-  build-depends: verify
-
-executable alpc-f-mod
-  import:        app-local
-  main-is:       alpc-f-mod.hs
-  build-depends: verify
-
-executable alpc-i
-  import:        app-local
-  main-is:       alpc-i.hs
-  build-depends: verify
-
-executable alpc-j
-  import:        app-local
-  main-is:       alpc-j.hs
-  build-depends: verify
-
-executable alpc-k
-  import:        app-local
-  main-is:       alpc-k.hs
-  build-depends: verify
-
-executable alpc-l
-  import:        app-local
-  main-is:       alpc-l.hs
-  build-depends: verify
-
 executable aoj-DSL_2_C
   import:        app-local
   main-is:       aoj-DSL_2_C.hs
@@ -572,6 +527,21 @@ executable abc282_d
   main-is:       abc282_d.hs
   build-depends: verify
 
+executable alpc-a
+  import:        app-online
+  main-is:       alpc-a.hs
+  build-depends: verify
+
+executable alpc-b
+  import:        app-online
+  main-is:       alpc-b.hs
+  build-depends: verify
+
+executable alpc-c
+  import:        app-online
+  main-is:       alpc-c.hs
+  build-depends: verify
+
 executable alpc-d
   import:        app-online
   main-is:       alpc-d.hs
@@ -582,6 +552,16 @@ executable alpc-e
   main-is:       alpc-e.hs
   build-depends: verify
 
+executable alpc-f
+  import:        app-online
+  main-is:       alpc-f.hs
+  build-depends: verify
+
+executable alpc-f-mod
+  import:        app-online
+  main-is:       alpc-f-mod.hs
+  build-depends: verify
+
 executable alpc-g
   import:        app-online
   main-is:       alpc-g.hs
@@ -590,6 +570,26 @@ executable alpc-g
 executable alpc-h
   import:        app-online
   main-is:       alpc-h.hs
+  build-depends: verify
+
+executable alpc-i
+  import:        app-online
+  main-is:       alpc-i.hs
+  build-depends: verify
+
+executable alpc-j
+  import:        app-online
+  main-is:       alpc-j.hs
+  build-depends: verify
+
+executable alpc-k
+  import:        app-online
+  main-is:       alpc-k.hs
+  build-depends: verify
+
+executable alpc-l
+  import:        app-online
+  main-is:       alpc-l.hs
   build-depends: verify
 
 executable aoj-GRL_4_B
