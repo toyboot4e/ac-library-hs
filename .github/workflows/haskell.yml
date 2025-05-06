@@ -13,6 +13,11 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+# It must match to the version in the preinstalled tools (TODO: get it dynamically?)
+# https://github.com/actions/runner-images
+env:
+  cabal-version: '3.14.2.0'
+
 jobs:
   build:
     name: Build (GHC ${{ matrix.ghc-version }} on ${{ matrix.os }})
@@ -32,13 +37,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up GHC ${{ matrix.ghc-version }}
+      # ------------------------------------------------------------
+      # Setup GHC
+      # ------------------------------------------------------------
+      # TODO: Separate setup-verify and verify from build and test, merge build and test
+
+      - name: Restore GHC
+        uses: actions/cache/restore@v4
+        id: ghc-cache
+        with:
+          # Note that `~/.ghcup/bin` contains Cabal
+          path: |
+            ~/.ghcup/env
+            ~/.ghcup/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
+
+      - name: Setup PATH for GHC ${{ matrix.ghc-version }}
+        if: steps.ghc-cache.outputs.cache-hit == 'true'
+        run: source ~/.ghcup/env
+
+      - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
+        if: steps.ghc-cache.outputs.cache-hit != 'true'
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: 'latest'
-          cabal-update: true
+          cabal-version: ${{ env.cabal-version }}
+
+      - name: Save GHC cache
+        uses: actions/cache/save@v4
+        if: steps.ghc-cache.outputs.cache-hit != 'true'
+        with:
+          # TODO: DRY
+          path: |
+            ~/.ghcup/env
+            ~/.ghcup/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+          key: ${{ steps.ghc-cache.outputs.cache-primary-key }}
 
       - name: Configure the build
         run: |
@@ -50,7 +86,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: deps-cache
         env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
         with:
           path: ${{ steps.setup.outputs.cabal-store }}
           key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
@@ -61,7 +97,7 @@ jobs:
         if: steps.deps-cache.outputs.cache-hit != 'true'
         run: cabal build all --only-dependencies
 
-      - name: Save cached dependencies
+      - name: Save dependency cache
         uses: actions/cache/save@v4
         # If we had an exact cache hit, trying to save the cache would error because of key clash.
         if: steps.deps-cache.outputs.cache-hit != 'true'
@@ -76,7 +112,7 @@ jobs:
       - name: Save cached ac-library-hs
         uses: actions/cache/save@v4
         env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
         with:
           path: dist-newstyle
           key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
@@ -104,19 +140,38 @@ jobs:
       # ------------------------------------------------------------
       - uses: actions/checkout@v4
 
-      - name: Set up GHC ${{ matrix.ghc-version }}
+      - name: Restore GHC
+        uses: actions/cache/restore@v4
+        id: ghc-cache
+        with:
+          # Note that `~/.ghcup/bin` contains Cabal
+          path: |
+            ~/.ghcup/env
+            ~/.ghcup/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
+
+      - name: Setup PATH for GHC ${{ matrix.ghc-version }}
+        if: steps.ghc-cache.outputs.cache-hit == 'true'
+        run: source ~/.ghcup/env
+
+      - name: Warn GHC cache miss
+        if: steps.ghc-cache.outputs.cache-hit != 'true'
+        run: echo "::warning::GHC cache miss - GHC will be downloaded"
+
+      - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
+        if: steps.ghc-cache.outputs.cache-hit != 'true'
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: 'latest'
-          cabal-update: true
+          cabal-version: ${{ env.cabal-version }}
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
         id: deps-cache
         env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
         with:
           path: ${{ steps.setup.outputs.cabal-store }}
           key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
@@ -131,7 +186,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: lib-cache
         env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
         with:
           path: dist-newstyle
           key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
@@ -186,13 +241,32 @@ jobs:
       # ------------------------------------------------------------
       - uses: actions/checkout@v4
 
-      - name: Set up GHC ${{ env.ghc-version }}
+      - name: Restore GHC
+        uses: actions/cache/restore@v4
+        id: ghc-cache
+        with:
+          # Note that `~/.ghcup/bin` contains Cabal
+          path: |
+            ~/.ghcup/env
+            ~/.ghcup/bin
+            ~/.ghcup/ghc/${{ env.ghc-version }}/bin
+          key: ${{ runner.os }}-ghc-${{ env.ghc-version }}
+
+      - name: Setup PATH for GHC ${{ env.ghc-version }}
+        if: steps.ghc-cache.outputs.cache-hit == 'true'
+        run: source ~/.ghcup/env
+
+      - name: Warn GHC cache miss
+        if: steps.ghc-cache.outputs.cache-hit != 'true'
+        run: echo "::warning::GHC cache miss - GHC will be downloaded"
+
+      - name: Download GHC ${{ env.ghc-version }}
         uses: haskell-actions/setup@v2
+        if: steps.ghc-cache.outputs.cache-hit != 'true'
         id: setup
         with:
           ghc-version: ${{ env.ghc-version }}
-          cabal-version: 'latest'
-          cabal-update: true
+          cabal-version: ${{ env.cabal-version }}
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
