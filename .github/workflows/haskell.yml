@@ -46,16 +46,16 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          # Note that `$HOME/.ghcup/bin` contains Cabal
+          # Note that `~/.ghcup/bin` contains Cabal
           path: |
-            $HOME/.ghcup/env
-            $HOME/.ghcup/bin
-            $HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+            ~/.ghcup/env
+            ~/.ghcup/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
           key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
 
       - name: Setup PATH for GHC ${{ matrix.ghc-version }}
         if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: source $HOME/.ghcup/env
+        run: source ~/.ghcup/env
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -71,9 +71,9 @@ jobs:
         with:
           # TODO: DRY
           path: |
-            $HOME/.ghcup/env
-            $HOME/.ghcup/bin
-            $HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+            ~/.ghcup/env
+            ~/.ghcup/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
           key: ${{ steps.ghc-cache.outputs.cache-primary-key }}
 
       - name: Configure the build
@@ -144,16 +144,16 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          # Note that `$HOME/.ghcup/bin` contains Cabal
+          # Note that `~/.ghcup/bin` contains Cabal
           path: |
-            $HOME/.ghcup/env
-            $HOME/.ghcup/bin
-            $HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+            ~/.ghcup/env
+            ~/.ghcup/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
           key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
 
       - name: Setup PATH for GHC ${{ matrix.ghc-version }}
         if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: source $HOME/.ghcup/env
+        run: source ~/.ghcup/env
 
       - name: Warn GHC cache miss
         if: steps.ghc-cache.outputs.cache-hit != 'true'
@@ -245,16 +245,16 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          # Note that `$HOME/.ghcup/bin` contains Cabal
+          # Note that `~/.ghcup/bin` contains Cabal
           path: |
-            $HOME/.ghcup/env
-            $HOME/.ghcup/bin
-            $HOME/.ghcup/ghc/${{ env.ghc-version }}/bin
+            ~/.ghcup/env
+            ~/.ghcup/bin
+            ~/.ghcup/ghc/${{ env.ghc-version }}/bin
           key: ${{ runner.os }}-ghc-${{ env.ghc-version }}
 
       - name: Setup PATH for GHC ${{ env.ghc-version }}
         if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: source $HOME/.ghcup/env
+        run: source ~/.ghcup/env
 
       - name: Warn GHC cache miss
         if: steps.ghc-cache.outputs.cache-hit != 'true'
