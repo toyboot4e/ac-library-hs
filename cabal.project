@@ -2,7 +2,7 @@ packages:
   ./ac-library-hs.cabal
   verify/verify.cabal
 
-constraints: bitvec +libgmp,
-             -- clock +llvm,
-             vector-algorithms +llvm
+-- constraints: bitvec +libgmp,
+--              -- clock +llvm,
+--              vector-algorithms +llvm
 optimization: 2

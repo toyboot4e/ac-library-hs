@@ -1,8 +1,11 @@
 #!/usr/bin/env -S bash
 
 dir="$(basename "$1" .hs)"
-cabal build "$dir"
+exe="./.main/$dir"
 
-cp -f "$(cabal list-bin "$dir")" ./main
-chmod +x ./main
+rm "$exe" || true
+
+cabal build "$dir"
+cp "$(cabal list-bin "$dir")" "$exe"
+chmod +x "$exe"
 

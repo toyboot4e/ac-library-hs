@@ -53,7 +53,8 @@ extra-doc-files: CHANGELOG.md
 
 common dependencies
   -- optimized
-  ghc-options:        -Wall -fllvm -O2
+  ghc-options:        -Wall -O2
+  -- ghc-options:        -Wall -O2 -fllvm
   build-depends:
     , ac-library-hs
     , base               >=4.9     && <4.22
