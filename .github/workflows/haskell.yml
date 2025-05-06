@@ -175,6 +175,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ghc-version: '9.8.4'
+    strategy:
+      fail-fast: false
+      matrix:
+        parallel-index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
 
     steps:
       # ------------------------------------------------------------
@@ -229,6 +233,9 @@ jobs:
       - name: Install oj-verify
         run: pip3 install -U online-judge-verify-helper
 
+      # TODO: cache `~/.cache/online-judge-tools/library-checker-problems/`
+      # TODO: cache `.verify-helper/cache/`
+
       - name: Run oj-verify
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -236,4 +243,9 @@ jobs:
         #   GH_PAT: ${{ secrets.GH_PAT }}
         working-directory: verify
         run: |
-          oj-verify run app/* --tle 15 -j 2
+          files="$(find app/ -type f | awk 'NR % 20 == ${{ matrix.parallel-index }}')"
+          echo 'target files:'
+          for f in $files ; do
+            echo "- $f"
+          done
+          oj-verify run $files --tle 15 -j 2
