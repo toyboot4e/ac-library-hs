@@ -276,6 +276,11 @@ executable yosupo-matrix-product-mint
   main-is:       yosupo-matrix-product-mint.hs
   build-depends: verify
 
+executable yosupo-matrix-product-mint-stimes
+  import:        app-local
+  main-is:       yosupo-matrix-product-mint-stimes.hs
+  build-depends: verify
+
 executable yosupo-matrix-rank
   import:        app-local
   main-is:       yosupo-matrix-rank.hs
@@ -353,6 +358,11 @@ executable yosupo-pow-of-matrix
 executable yosupo-pow-of-matrix-mint
   import:        app-local
   main-is:       yosupo-pow-of-matrix-mint.hs
+  build-depends: verify
+
+executable yosupo-pow-of-matrix-stimes
+  import:        app-local
+  main-is:       yosupo-pow-of-matrix-stimes.hs
   build-depends: verify
 
 executable yosupo-predecessor-problem
