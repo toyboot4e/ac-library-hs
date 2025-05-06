@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build with GHC ${{ matrix.ghc-version }} on ${{ matrix.os }}
+    name: Build (GHC ${{ matrix.ghc-version }} on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -83,7 +83,7 @@ jobs:
 
   test:
     needs: build
-    name: Test with GHC ${{ matrix.ghc-version }} on ${{ matrix.os }}
+    name: Test (GHC ${{ matrix.ghc-version }} on ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
 
     # TODO: DRY
@@ -167,3 +167,73 @@ jobs:
       #     # --disable-documentation disables building documentation for dependencies.
       #     # The package's own documentation is still built,
       #     # yet contains no links to the documentation of the dependencies.
+
+  # Run oj-verify in 20 tasks
+  verify:
+    needs: build
+    name: Verify (GHC 9.8.4 on ubuntu-latest)
+    runs-on: ubuntu-latest
+    env:
+      ghc-version: '9.8.4'
+
+    steps:
+      # ------------------------------------------------------------
+      # Setup Haskell (TODO: move to a separate composite action file)
+      # ------------------------------------------------------------
+      - uses: actions/checkout@v4
+
+      - name: Set up GHC ${{ env.ghc-version }}
+        uses: haskell-actions/setup@v2
+        id: setup
+        with:
+          ghc-version: ${{ env.ghc-version }}
+          cabal-version: 'latest'
+          cabal-update: true
+
+      - name: Restore cached dependencies from the `build` job
+        uses: actions/cache/restore@v4
+        id: deps-cache
+        env:
+          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
+        with:
+          path: ${{ steps.setup.outputs.cabal-store }}
+          key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
+          restore-keys: ${{ env.key }}-
+
+      # NOTE: `cache-hit` is not set to `true` on partial hit.
+      # - name: Warn deps-cache miss
+      #   if: steps.deps-cache.outputs.cache-hit != 'true'
+      #   run: echo "::warning::Dependency cache miss - dependencies will be built again (cache hit status ${{ steps.deps-cache.outputs.cache-hit }})"
+
+      - name: Restore cached `ac-lbrary-hs` from the `build` job
+        uses: actions/cache/restore@v4
+        id: lib-cache
+        env:
+          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
+        with:
+          path: dist-newstyle
+          key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
+
+      - name: Warn lib-cache miss
+        if: steps.lib-cache.outputs.cache-hit != 'true'
+        run: echo "::warning::Library cache miss - ac-library-hs will be built again (cache hit status ${{ steps.deps-cache.outputs.cache-hit }})"
+
+      # ------------------------------------------------------------
+      # Run verification test
+      # ------------------------------------------------------------
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install oj-verify
+        run: pip3 install -U online-judge-verify-helper
+
+      - name: Run oj-verify
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #   YUKICODER_TOKEN: ${{ secrets.YUKICODER_TOKEN }}
+        #   GH_PAT: ${{ secrets.GH_PAT }}
+        working-directory: verify
+        run: |
+          oj-verify run app/* --tle 15 -j 2
