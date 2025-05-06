@@ -2,9 +2,10 @@ name: Haskell CI
 
 on:
   push:
-    branches: ["*"]
+    # main forbids direct push, so ignore CI on merge commit:
+    branches-ignore: main
   pull_request:
-    branches: ["*"]
+    branches: '**'
 
 # INFO: The following configuration block ensures that only one build runs per branch,
 # which may be desirable for projects with a costly build process.
