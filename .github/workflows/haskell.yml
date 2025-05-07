@@ -59,8 +59,19 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          path: /usr/local/.ghcup/bin/ghc/${{ matrix.ghc-version }}/bin
+          path: |
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
+            /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
           key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
+
+      - name: Set GHC path
+        if: steps.ghc-cache.outputs.cache-hit == 'true'
+        run: |
+          export PATH="$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin:$PATH"
+          export PATH="$HOME/.cargo/bin:$PATH"
+          ghc --version
+          cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -74,7 +85,10 @@ jobs:
         uses: actions/cache/save@v4
         if: steps.ghc-cache.outputs.cache-hit != 'true'
         with:
-          path: /usr/local/.ghcup/bin/ghc/${{ matrix.ghc-version }}/bin
+          path: |
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
+            /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version}}/bin
           key: ${{ steps.ghc-cache.outputs.cache-primary-key }}
 
       - name: Configure the build
@@ -106,7 +120,7 @@ jobs:
           path: ~/.cabal/store
           key: ${{ steps.deps-cache.outputs.cache-primary-key }}
 
-      # Make build cache of `ac-library-hs` for this run
+      # TODO: use cache? but it would contain unneeded files
       - name: Build ac-library-hs
         run: cabal build lib:ac-library-hs
 
@@ -145,9 +159,20 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          path: /usr/local/.ghcup/bin/ghc/${{ matrix.ghc-version }}/bin
+          path: |
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
+            /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
           # TODO: use hash for caching
           key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
+
+      - name: Set GHC path
+        if: steps.ghc-cache.outputs.cache-hit == 'true'
+        run: |
+          export PATH="$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin:$PATH"
+          export PATH="$HOME/.cargo/bin:$PATH"
+          ghc --version
+          cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -226,8 +251,19 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          path: /usr/local/.ghcup/bin/ghc/${{ env.ghc-version }}/bin
+          path: |
+            ~/.ghcup/ghc/${{ env.ghc-version }}/bin
+            ~/.ghcup/ghc/${{ env.ghc-version }}/lib/ghc-${{ env.ghc-version }}/bin
+            /usr/local/.ghcup/ghc/${{ env.ghc-version }}/lib/ghc-${{ env.ghc-version }}/bin
           key: GHC-${{ runner.os }}-ghc-${{ env.ghc-version }}
+
+      - name: Set GHC path
+        if: steps.ghc-cache.outputs.cache-hit == 'true'
+        run: |
+          export PATH="$HOME/.ghcup/ghc/${{ env.ghc-version }}/bin:$PATH"
+          export PATH="$HOME/.cargo/bin:$PATH"
+          ghc --version
+          cabal update
 
       - name: Download GHC ${{ env.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -241,7 +277,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: deps-cache
         env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ env.ghc-version }}-cabal-${{ env.cabal-version }}
         with:
           path: ~/.cabal/store
           key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
