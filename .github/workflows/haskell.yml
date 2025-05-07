@@ -41,6 +41,7 @@ jobs:
           hostname
           pwd
           echo "$HOME"
+          # Preinstalled tools are there on GitHub Actions, but not on `act`
           find /usr/local/.ghcup
 
       - name: Inspect 2
@@ -54,34 +55,12 @@ jobs:
       # ------------------------------------------------------------
       # TODO: Separate setup-verify and verify from build and test, merge build and test
 
-      # Preinstalled tools will be ignored on GHC cache
-      - name: Record preinstalled tools
-        run: |
-          : > /tmp/ghc-cache-ignore
-          find ~/.ghcup/bin >> /tmp/ghc-cache-ignore
-          cat /tmp/ghc-cache-ignore
-
       - name: Restore GHC ${{ matrix.ghc-version }}
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          path: /tmp/ghc-cache
+          path: /usr/local/.ghcup/bin/ghc/${{ matrix.ghc-version }}/bin
           key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-
-      - name: Distribute GHC ${{ matrix.ghc-version }}
-        if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: |
-          find /tmp/ghc-cache
-          for f in $(ls /tmp/ghc-cache/bin/*) ; do mv "$f" /usr/local/.ghcup/bin/
-          mkdir -p /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}
-          mv /tmp/ghc-cache/ghc/${{ matrix.ghc-version }}/bin /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/bin
-
-          echo 'after distrubuting..'
-          find /usr/local/.ghcup/bin
-          find /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}
-          export PATH=/usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/bin:"$PATH"
-          ghc --version
-          cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -91,21 +70,11 @@ jobs:
           ghc-version: ${{ matrix.ghc-version }}
           cabal-version: ${{ env.cabal-version }}
 
-      - name: Collect GHC cache files
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir /tmp/ghc-cache
-          mkdir /tmp/ghc-cache/bin # ~/.ghcup/bin
-          for f in $(find ~/.ghcup/bin -type f | grep -vxF -f /tmp/ghc-cache-ignore) ; do cp "$f" /tmp/ghc-cache/bin ; done
-          mkdir -p /tmp/ghc-cache/ghc/${{ matrix.ghc-version }}/
-          cp -r /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/bin /tmp/ghc-cache/ghc/${{ matrix.ghc-version}}/
-          find /tmp/ghc-cache
-
       - name: Save GHC cache
         uses: actions/cache/save@v4
         if: steps.ghc-cache.outputs.cache-hit != 'true'
         with:
-          path: /tmp/ghc-cache
+          path: /usr/local/.ghcup/bin/ghc/${{ matrix.ghc-version }}/bin
           key: ${{ steps.ghc-cache.outputs.cache-primary-key }}
 
       - name: Configure the build
@@ -176,24 +145,9 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          path: /tmp/ghc-cache
+          path: /usr/local/.ghcup/bin/ghc/${{ matrix.ghc-version }}/bin
           # TODO: use hash for caching
           key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-
-      - name: Distribute GHC ${{ matrix.ghc-version }}
-        if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: |
-          find /tmp/ghc-cache
-          for f in $(ls /tmp/ghc-cache/bin/*) ; do mv "$f" /usr/local/.ghcup/bin/
-          mkdir -p /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}
-          mv /tmp/ghc-cache/ghc/${{ matrix.ghc-version }}/bin /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/bin
-
-          echo 'after distrubuting..'
-          find /usr/local/.ghcup/bin
-          find /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}
-          export PATH=/usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/bin:"$PATH"
-          ghc --version
-          cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -272,23 +226,8 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          path: /tmp/ghc-cache
+          path: /usr/local/.ghcup/bin/ghc/${{ env.ghc-version }}/bin
           key: GHC-${{ runner.os }}-ghc-${{ env.ghc-version }}
-
-      - name: Distribute GHC ${{ env.ghc-version }}
-        if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: |
-          find /tmp/ghc-cache
-          for f in $(ls /tmp/ghc-cache/bin/*) ; do mv "$f" /usr/local/.ghcup/bin/
-          mkdir -p /usr/local/.ghcup/ghc/${{ env.ghc-version }}
-          mv /tmp/ghc-cache/ghc/${{ env.ghc-version }}/bin /usr/local/.ghcup/ghc/${{ env.ghc-version }}/bin
-
-          echo 'after distrubuting..'
-          find /usr/local/.ghcup/bin
-          find /usr/local/.ghcup/ghc/${{ env.ghc-version }}
-          export PATH=/usr/local/.ghcup/ghc/${{ env.ghc-version }}/bin:"$PATH"
-          ghc --version
-          cabal update
 
       - name: Download GHC ${{ env.ghc-version }}
         uses: haskell-actions/setup@v2
