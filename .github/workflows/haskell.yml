@@ -54,18 +54,32 @@ jobs:
       # ------------------------------------------------------------
       # TODO: Separate setup-verify and verify from build and test, merge build and test
 
+      # Preinstalled tools will be ignored on GHC cache
+      - name: Record preinstalled tools
+        run: |
+          : > /tmp/ghc-cache-ignore
+          find ~/.ghcup/bin >> /tmp/ghc-cache-ignore
+          cat /tmp/ghc-cache-ignore
+
       - name: Restore GHC ${{ matrix.ghc-version }}
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          path: |
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+          path: /tmp/ghc-cache
           key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
 
-      - name: Setup PATH for GHC ${{ matrix.ghc-version }}
+      - name: Distribute GHC ${{ matrix.ghc-version }}
         if: steps.ghc-cache.outputs.cache-hit == 'true'
         run: |
-          export PATH=~/.ghcup/ghc/${{ matrix.ghc-version }}/bin:"$PATH"
+          find /tmp/ghc-cache
+          for f in $(ls /tmp/ghc-cache/bin/*) ; do mv "$f" /usr/local/.ghcup/bin/
+          mkdir -p /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}
+          mv /tmp/ghc-cache/ghc/${{ matrix.ghc-version }}/bin /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+
+          echo 'after distrubuting..'
+          find /usr/local/.ghcup/bin
+          find /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}
+          export PATH=/usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/bin:"$PATH"
           ghc --version
           cabal update
 
@@ -77,19 +91,21 @@ jobs:
           ghc-version: ${{ matrix.ghc-version }}
           cabal-version: ${{ env.cabal-version }}
 
-      - name: Echo GHC cache file names
+      - name: Collect GHC cache files
         if: steps.ghc-cache.outputs.cache-hit != 'true'
         run: |
-          ls -l ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin/*
+          mkdir /tmp/ghc-cache
+          mkdir /tmp/ghc-cache/bin # ~/.ghcup/bin
+          for f in $(find ~/.ghcup/bin -type f | grep -vxF -f /tmp/ghc-cache-ignore) ; do cp "$f" /tmp/ghc-cache/bin ; done
+          mkdir -p /tmp/ghc-cache/ghc/${{ matrix.ghc-version }}/
+          cp -r /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/bin /tmp/ghc-cache/ghc/${{ matrix.ghc-version}}/
+          find /tmp/ghc-cache
 
       - name: Save GHC cache
         uses: actions/cache/save@v4
         if: steps.ghc-cache.outputs.cache-hit != 'true'
         with:
-          # TODO: DRY
-          # TODO: We don't have to cache cabal because it's in the preinstalled binaries? (not sure)
-          # NOTE: `~/.ghcup/bin` seem to come with preinstalled binaries, which cause permission problems
-          path: ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+          path: /tmp/ghc-cache
           key: ${{ steps.ghc-cache.outputs.cache-primary-key }}
 
       - name: Configure the build
@@ -160,20 +176,24 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          path: |
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+          path: /tmp/ghc-cache
+          # TODO: use hash for caching
           key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
 
-      - name: Setup PATH for GHC ${{ matrix.ghc-version }}
+      - name: Distribute GHC ${{ matrix.ghc-version }}
         if: steps.ghc-cache.outputs.cache-hit == 'true'
         run: |
-          export PATH=~/.ghcup/ghc/${{ matrix.ghc-version }}/bin:"$PATH"
+          find /tmp/ghc-cache
+          for f in $(ls /tmp/ghc-cache/bin/*) ; do mv "$f" /usr/local/.ghcup/bin/
+          mkdir -p /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}
+          mv /tmp/ghc-cache/ghc/${{ matrix.ghc-version }}/bin /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/bin
+
+          echo 'after distrubuting..'
+          find /usr/local/.ghcup/bin
+          find /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}
+          export PATH=/usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/bin:"$PATH"
           ghc --version
           cabal update
-
-      - name: Warn GHC cache miss
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        run: echo "::warning::GHC cache miss - GHC will be downloaded"
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -193,11 +213,6 @@ jobs:
           key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
           restore-keys: ${{ env.key }}-
 
-      # NOTE: `cache-hit` is not set to `true` on partial hit.
-      # - name: Warn deps-cache miss
-      #   if: steps.deps-cache.outputs.cache-hit != 'true'
-      #   run: echo "::warning::Dependency cache miss - dependencies will be built again (cache hit status ${{ steps.deps-cache.outputs.cache-hit }})"
-
       - name: Restore cached `ac-lbrary-hs` from the `build` job
         uses: actions/cache/restore@v4
         id: lib-cache
@@ -206,10 +221,6 @@ jobs:
         with:
           path: dist-newstyle
           key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
-
-      - name: Warn lib-cache miss
-        if: steps.lib-cache.outputs.cache-hit != 'true'
-        run: echo "::warning::Library cache miss - ac-library-hs will be built again (cache hit status ${{ steps.deps-cache.outputs.cache-hit }})"
 
       # ------------------------------------------------------------
       # Run tests
@@ -261,20 +272,23 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
-          path: |
-            ~/.ghcup/ghc/${{ env.ghc-version }}/bin
+          path: /tmp/ghc-cache
           key: GHC-${{ runner.os }}-ghc-${{ env.ghc-version }}
 
-      - name: Setup PATH for GHC ${{ env.ghc-version }}
+      - name: Distribute GHC ${{ env.ghc-version }}
         if: steps.ghc-cache.outputs.cache-hit == 'true'
         run: |
-          export PATH=~/.ghcup/ghc/${{ matrix.ghc-version }}/bin:"$PATH"
+          find /tmp/ghc-cache
+          for f in $(ls /tmp/ghc-cache/bin/*) ; do mv "$f" /usr/local/.ghcup/bin/
+          mkdir -p /usr/local/.ghcup/ghc/${{ env.ghc-version }}
+          mv /tmp/ghc-cache/ghc/${{ env.ghc-version }}/bin /usr/local/.ghcup/ghc/${{ env.ghc-version }}/bin
+
+          echo 'after distrubuting..'
+          find /usr/local/.ghcup/bin
+          find /usr/local/.ghcup/ghc/${{ env.ghc-version }}
+          export PATH=/usr/local/.ghcup/ghc/${{ env.ghc-version }}/bin:"$PATH"
           ghc --version
           cabal update
-
-      - name: Warn GHC cache miss
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        run: echo "::warning::GHC cache miss - GHC will be downloaded"
 
       - name: Download GHC ${{ env.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -294,23 +308,14 @@ jobs:
           key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
           restore-keys: ${{ env.key }}-
 
-      # NOTE: `cache-hit` is not set to `true` on partial hit.
-      # - name: Warn deps-cache miss
-      #   if: steps.deps-cache.outputs.cache-hit != 'true'
-      #   run: echo "::warning::Dependency cache miss - dependencies will be built again (cache hit status ${{ steps.deps-cache.outputs.cache-hit }})"
-
       - name: Restore cached `ac-lbrary-hs` from the `build` job
         uses: actions/cache/restore@v4
         id: lib-cache
         env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ env.ghc-version }}-cabal-${{ env.cabal-version }}
         with:
           path: dist-newstyle
           key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
-
-      - name: Warn lib-cache miss
-        if: steps.lib-cache.outputs.cache-hit != 'true'
-        run: echo "::warning::Library cache miss - ac-library-hs will be built again (cache hit status ${{ steps.deps-cache.outputs.cache-hit }})"
 
       # ------------------------------------------------------------
       # Run verification test
@@ -338,4 +343,4 @@ jobs:
           for f in $files ; do
             echo "- $f"
           done
-          oj-verify run $files --tle 15 -j 2
+          oj-verify run $files --tle 15 -j $(nproc)
