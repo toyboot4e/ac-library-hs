@@ -35,6 +35,18 @@ jobs:
         #     ghc-version: '9.8'
 
     steps:
+      - name: Inspect 1
+        run: |
+          whoami
+          hostname
+          pwd
+          echo "$HOME"
+          find /usr/local/.ghcup
+
+      - name: Inspect 2
+        run: |
+          find ~/.ghcup
+
       - uses: actions/checkout@v4
 
       # ------------------------------------------------------------
