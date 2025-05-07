@@ -159,6 +159,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
+          fail-on-cache-miss: true
           path: |
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
@@ -188,6 +189,7 @@ jobs:
         env:
           key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
         with:
+          fail-on-cache-miss: true
           path: ~/.cabal/store
           key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
           restore-keys: ${{ env.key }}-
@@ -198,6 +200,7 @@ jobs:
         env:
           key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
         with:
+          fail-on-cache-miss: true
           path: dist-newstyle
           key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
 
@@ -251,6 +254,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: ghc-cache
         with:
+          fail-on-cache-miss: true
           path: |
             ~/.ghcup/ghc/${{ env.ghc-version }}/bin
             ~/.ghcup/ghc/${{ env.ghc-version }}/lib/ghc-${{ env.ghc-version }}/bin
@@ -279,6 +283,7 @@ jobs:
         env:
           key: ${{ runner.os }}-ghc-${{ env.ghc-version }}-cabal-${{ env.cabal-version }}
         with:
+          fail-on-cache-miss: true
           path: ~/.cabal/store
           key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
           restore-keys: ${{ env.key }}-
@@ -289,6 +294,7 @@ jobs:
         env:
           key: ${{ runner.os }}-ghc-${{ env.ghc-version }}-cabal-${{ env.cabal-version }}
         with:
+          fail-on-cache-miss: true
           path: dist-newstyle
           key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
 
