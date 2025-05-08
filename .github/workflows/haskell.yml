@@ -62,7 +62,7 @@ jobs:
           path: |
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
-            /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/lib
           key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
 
       - name: Set GHC path
@@ -95,10 +95,11 @@ jobs:
         uses: actions/cache/save@v4
         if: steps.ghc-cache.outputs.cache-hit != 'true'
         with:
+          # It contains unnecessary files though
           path: |
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
-            /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version}}/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/lib
           key: ${{ steps.ghc-cache.outputs.cache-primary-key }}
 
       - name: Configure the build
@@ -173,7 +174,7 @@ jobs:
           path: |
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
-            /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
+            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/lib
           # TODO: use hash for caching
           key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
 
@@ -268,7 +269,7 @@ jobs:
           path: |
             ~/.ghcup/ghc/${{ env.ghc-version }}/bin
             ~/.ghcup/ghc/${{ env.ghc-version }}/lib/ghc-${{ env.ghc-version }}/bin
-            /usr/local/.ghcup/ghc/${{ env.ghc-version }}/lib/ghc-${{ env.ghc-version }}/bin
+            ~/.ghcup/ghc/${{ env.ghc-version }}/lib/ghc-${{ env.ghc-version }}/lib
           key: GHC-${{ runner.os }}-ghc-${{ env.ghc-version }}
 
       - name: Set GHC path
