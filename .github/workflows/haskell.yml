@@ -13,11 +13,6 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
-# It must match to the version in the preinstalled tools (TODO: get it dynamically?)
-# https://github.com/actions/runner-images
-env:
-  cabal-version: '3.14.2.0'
-
 jobs:
   build:
     name: Build (GHC ${{ matrix.ghc-version }} on ${{ matrix.os }})
@@ -89,7 +84,6 @@ jobs:
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: ${{ env.cabal-version }}
 
       - name: Save GHC cache
         uses: actions/cache/save@v4
@@ -112,7 +106,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: deps-cache
         env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
         with:
           path: ~/.cabal/store
           key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
@@ -131,14 +125,24 @@ jobs:
           path: ~/.cabal/store
           key: ${{ steps.deps-cache.outputs.cache-primary-key }}
 
-      # TODO: Restore cache? It could result in lots of unnecessary files though.
+      # TODO: Maybe clear the cache if it got too fat
+      - name: Restore cached ac-lbrary-hs
+        uses: actions/cache/restore@v4
+        id: lib-cache
+        env:
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
+        with:
+          fail-on-cache-miss: true
+          path: dist-newstyle
+          key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
+
       - name: Build ac-library-hs
         run: cabal build lib:ac-library-hs
 
       - name: Save cached ac-library-hs
         uses: actions/cache/save@v4
         env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
         with:
           path: dist-newstyle
           key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
@@ -192,13 +196,12 @@ jobs:
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: ${{ env.cabal-version }}
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
         id: deps-cache
         env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
         with:
           fail-on-cache-miss: true
           path: ~/.cabal/store
@@ -209,7 +212,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: lib-cache
         env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ env.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
         with:
           fail-on-cache-miss: true
           path: dist-newstyle
@@ -286,13 +289,12 @@ jobs:
         id: setup
         with:
           ghc-version: ${{ env.ghc-version }}
-          cabal-version: ${{ env.cabal-version }}
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
         id: deps-cache
         env:
-          key: ${{ runner.os }}-ghc-${{ env.ghc-version }}-cabal-${{ env.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ env.ghc-version }}
         with:
           fail-on-cache-miss: true
           path: ~/.cabal/store
@@ -303,7 +305,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: lib-cache
         env:
-          key: ${{ runner.os }}-ghc-${{ env.ghc-version }}-cabal-${{ env.cabal-version }}
+          key: ${{ runner.os }}-ghc-${{ env.ghc-version }}
         with:
           fail-on-cache-miss: true
           path: dist-newstyle
