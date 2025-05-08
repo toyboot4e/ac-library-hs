@@ -72,11 +72,8 @@ jobs:
       - name: Unset Cabal
         if: steps.ghc-cache.outputs.cache-hit != 'true'
         run: |
-          ghcup unset cabal
           which ghc
           ghc --version
-          which cabal
-          cabal --version
 
       - name: Save GHC cache
         uses: actions/cache/save@v4
@@ -91,8 +88,8 @@ jobs:
 
       - name: Configure the build
         run: |
-          cabal configure --enable-tests --enable-benchmarks --disable-documentation
-          cabal build all --dry-run
+          /usr/local/.ghcup/bin/cabal configure --enable-tests --enable-benchmarks --disable-documentation
+          /usr/local/.ghcup/bin/cabal build all --dry-run
         # The last step generates dist-newstyle/cache/plan.json for the cache key.
 
       - name: Restore cached dependencies
@@ -108,7 +105,7 @@ jobs:
       - name: Install dependencies
         # If we had an exact cache hit, the dependencies will be up to date.
         if: steps.deps-cache.outputs.cache-hit != 'true'
-        run: cabal build all --only-dependencies
+        run: /usr/local/.ghcup/bin/cabal build all --only-dependencies
 
       - name: Save dependency cache
         uses: actions/cache/save@v4
@@ -129,7 +126,7 @@ jobs:
           key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
 
       - name: Build ac-library-hs
-        run: cabal build lib:ac-library-hs
+        run: /usr/local/.ghcup/bin/cabal build lib:ac-library-hs
 
       - name: Save cached ac-library-hs
         uses: actions/cache/save@v4
@@ -181,8 +178,6 @@ jobs:
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           which ghc
           ghc --version
-          which cabal
-          cabal --version
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -197,8 +192,6 @@ jobs:
           ghcup unset cabal
           which ghc
           ghc --version
-          which cabal
-          cabal --version
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
@@ -227,20 +220,20 @@ jobs:
       - name: Build check
         # make sure to build all the components in `ac-library-hs.cabal` (TODO: automate this)
         run: |
-          cabal build ac-library-hs
-          cabal build ac-library-hs:example-lazy-segtree
-          cabal build ac-library-hs:ac-library-hs-benchmark
+          /usr/local/.ghcup/bin/cabal build ac-library-hs
+          /usr/local/.ghcup/bin/cabal build ac-library-hs:example-lazy-segtree
+          /usr/local/.ghcup/bin/cabal build ac-library-hs:ac-library-hs-benchmark
 
       - name: Run tests
-        run: cabal test all
+        run: /usr/local/.ghcup/bin/cabal test all
 
       - name: Run doctest
         run: |
-          cabal install doctest
-          cabal repl --with-ghc=doctest --repl-options='-w -Wdefault'
+          /usr/local/.ghcup/bin/cabal install doctest
+          /usr/local/.ghcup/bin/cabal repl --with-ghc=doctest --repl-options='-w -Wdefault'
 
       - name: Check cabal file
-        run: cabal check
+        run: /usr/local/.ghcup/bin/cabal check
 
       # - name: Build documentation
       #   run:
@@ -299,8 +292,6 @@ jobs:
           ghcup unset cabal
           which ghc
           ghc --version
-          which cabal
-          cabal --version
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
