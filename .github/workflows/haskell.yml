@@ -68,8 +68,8 @@ jobs:
       - name: Set GHC path
         if: steps.ghc-cache.outputs.cache-hit == 'true'
         run: |
-          export PATH="$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin:$PATH"
-          export PATH="$HOME/.cargo/bin:$PATH"
+          echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin:$PATH" >> "$GITHUB_PATH"
+          echo "$HOME/.cargo/bin:$PATH" >> "$GITHUB_PATH"
           ghc --version
           cabal update
 
@@ -131,7 +131,7 @@ jobs:
           path: ~/.cabal/store
           key: ${{ steps.deps-cache.outputs.cache-primary-key }}
 
-      # TODO: use cache? but it would contain unneeded files
+      # TODO: Restore cache? It could result in lots of unnecessary files though.
       - name: Build ac-library-hs
         run: cabal build lib:ac-library-hs
 
@@ -181,8 +181,8 @@ jobs:
       - name: Set GHC path
         if: steps.ghc-cache.outputs.cache-hit == 'true'
         run: |
-          export PATH="$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin:$PATH"
-          export PATH="$HOME/.cargo/bin:$PATH"
+          echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin:$PATH" >> "$GITHUB_PATH"
+          echo "$HOME/.cargo/bin:$PATH" >> "$GITHUB_PATH"
           ghc --version
           cabal update
 
@@ -275,8 +275,8 @@ jobs:
       - name: Set GHC path
         if: steps.ghc-cache.outputs.cache-hit == 'true'
         run: |
-          export PATH="$HOME/.ghcup/ghc/${{ env.ghc-version }}/bin:$PATH"
-          export PATH="$HOME/.cargo/bin:$PATH"
+          echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin:$PATH" >> "$GITHUB_PATH"
+          echo "$HOME/.cargo/bin:$PATH" >> "$GITHUB_PATH"
           ghc --version
           cabal update
 
