@@ -61,7 +61,7 @@ jobs:
           echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
-          cabal update
+          # cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -172,7 +172,7 @@ jobs:
           echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
-          cabal update
+          # cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -266,7 +266,7 @@ jobs:
           echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
-          cabal update
+          # cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
