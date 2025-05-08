@@ -30,18 +30,13 @@ jobs:
         #     ghc-version: '9.8'
 
     steps:
-      - name: Inspect 1
+      - name: Inspect
         run: |
           whoami
           hostname
           pwd
           echo "$HOME"
-          # Preinstalled tools are there on GitHub Actions, but not on `act`
-          find /usr/local/.ghcup
-
-      - name: Inspect 2
-        run: |
-          find ~/.ghcup
+          echo "$PATH"
 
       - uses: actions/checkout@v4
 
@@ -67,16 +62,6 @@ jobs:
           echo "$HOME/.cargo/bin:$PATH" >> "$GITHUB_PATH"
           ghc --version
           cabal update
-
-      - name: INS 1
-        if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: find ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
-      - name: INS 2
-        if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: find ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
-      - name: INS 3
-        if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: find /usr/local/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
