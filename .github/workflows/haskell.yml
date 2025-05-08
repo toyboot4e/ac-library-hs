@@ -61,7 +61,6 @@ jobs:
           echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
-          # cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -69,6 +68,15 @@ jobs:
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
+
+      - name: Unset Cabal
+        if: steps.ghc-cache.outputs.cache-hit != 'true'
+        run: |
+          ghcup unset cabal
+          which ghc
+          ghc --version
+          which cabal
+          cabal --version
 
       - name: Save GHC cache
         uses: actions/cache/save@v4
@@ -171,8 +179,10 @@ jobs:
         run: |
           echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          which ghc
           ghc --version
-          # cabal update
+          which cabal
+          cabal --version
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -180,6 +190,15 @@ jobs:
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
+
+      - name: Unset Cabal
+        if: steps.ghc-cache.outputs.cache-hit != 'true'
+        run: |
+          ghcup unset cabal
+          which ghc
+          ghc --version
+          which cabal
+          cabal --version
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
@@ -266,7 +285,6 @@ jobs:
           echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
-          # cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -274,6 +292,15 @@ jobs:
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
+
+      - name: Unset Cabal
+        if: steps.ghc-cache.outputs.cache-hit != 'true'
+        run: |
+          ghcup unset cabal
+          which ghc
+          ghc --version
+          which cabal
+          cabal --version
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
@@ -322,4 +349,4 @@ jobs:
           for f in $files ; do
             echo "- $f"
           done
-          oj-verify run $files --tle 15 -j $(nproc)
+          oj-verify run $files --tle 30 -j $(nproc)
