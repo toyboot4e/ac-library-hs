@@ -53,7 +53,7 @@ jobs:
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/lib
-          key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
+          key: _GHC_${{ runner.os }}-ghc-${{ matrix.ghc-version }}
 
       - name: Set GHC path
         if: steps.ghc-cache.outputs.cache-hit == 'true'
@@ -169,7 +169,7 @@ jobs:
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/lib
           # TODO: use hash for caching
-          key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
+          key: _GHC_${{ runner.os }}-ghc-${{ matrix.ghc-version }}
 
       - name: Set GHC path
         if: steps.ghc-cache.outputs.cache-hit == 'true'
@@ -270,7 +270,7 @@ jobs:
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
             ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/lib
-          key: GHC-${{ runner.os }}-ghc-${{ matrix.ghc-version }}
+          key: _GHC_${{ runner.os }}-ghc-${{ matrix.ghc-version }}
 
       - name: Set GHC path
         if: steps.ghc-cache.outputs.cache-hit == 'true'
