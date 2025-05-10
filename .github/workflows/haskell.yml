@@ -80,6 +80,8 @@ jobs:
 
       - name: Inspect
         run: |
+          ls -lA ~/
+          ls -lA /usr/local
           which ghc
           ghc --version
           echo $XDG_STATE_PATH
