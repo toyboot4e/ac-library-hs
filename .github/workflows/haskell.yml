@@ -101,7 +101,7 @@ jobs:
         env:
           key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
         with:
-          path: ~/.cabal/store
+          path: ~/.local/state/cabal/store
           key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
           restore-keys: ${{ env.key }}-
 
@@ -115,7 +115,7 @@ jobs:
         # If we had an exact cache hit, trying to save the cache would error because of key clash.
         if: steps.deps-cache.outputs.cache-hit != 'true'
         with:
-          path: ~/.cabal/store
+          path: ~/.local/state/cabal/store
           key: ${{ steps.deps-cache.outputs.cache-primary-key }}
 
       # TODO: Maybe clear the cache if it got too fat
@@ -196,6 +196,7 @@ jobs:
           which ghc
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
+          /usr/local/.ghcup/bin/cabal path
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
@@ -204,7 +205,7 @@ jobs:
           key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
         with:
           fail-on-cache-miss: true
-          path: ~/.cabal/store
+          path: ~/.local/state/cabal/store
           key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
           restore-keys: ${{ env.key }}-
 
@@ -297,6 +298,7 @@ jobs:
           which ghc
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
+          /usr/local/.ghcup/bin/cabal path
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
