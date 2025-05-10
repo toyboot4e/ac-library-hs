@@ -37,6 +37,11 @@ jobs:
           pwd
           echo "$HOME"
           echo "$PATH"
+          echo "$XDG_STATE_PATH"
+          ls -l /usr/local/.ghcup/bin/cabal
+          /usr/local/.ghcup/bin/cabal --version
+          /usr/local/.ghcup/bin/cabal path
+          /usr/local/.ghcup/bin/cabal update
 
       - uses: actions/checkout@v4
 
@@ -62,6 +67,7 @@ jobs:
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
+          /usr/local/.ghcup/bin/cabal path
           /usr/local/.ghcup/bin/cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
@@ -75,6 +81,8 @@ jobs:
         run: |
           which ghc
           ghc --version
+          echo $XDG_STATE_PATH
+          ls -l /usr/local/.ghcup/bin/cabal
           /usr/local/.ghcup/bin/cabal --version
           /usr/local/.ghcup/bin/cabal path
 
