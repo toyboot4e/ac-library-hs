@@ -76,7 +76,7 @@ jobs:
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: "3.0.0.0" # dummy, to not the preinstalled version
+          cabal-version: "3.4" # dummy, to not the preinstalled version
 
       - name: Inspect
         run: |
@@ -191,6 +191,7 @@ jobs:
           which ghc
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
+          /usr/local/.ghcup/bin/cabal path
           /usr/local/.ghcup/bin/cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
@@ -293,6 +294,7 @@ jobs:
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
+          /usr/local/.ghcup/bin/cabal path
           /usr/local/.ghcup/bin/cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
