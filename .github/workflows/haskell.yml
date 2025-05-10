@@ -61,6 +61,7 @@ jobs:
           echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
+          /usr/local/.ghcup/bin/cabal --version
           /usr/local/.ghcup/bin/cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
@@ -70,11 +71,11 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc-version }}
 
-      - name: Unset Cabal
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
+      - name: Inspect
         run: |
           which ghc
           ghc --version
+          /usr/local/.ghcup/bin/cabal --version
 
       - name: Save GHC cache
         uses: actions/cache/save@v4
@@ -179,6 +180,7 @@ jobs:
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           which ghc
           ghc --version
+          /usr/local/.ghcup/bin/cabal --version
           /usr/local/.ghcup/bin/cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
@@ -188,12 +190,11 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc-version }}
 
-      - name: Unset Cabal
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
+      - name: Inspect
         run: |
-          ghcup unset cabal
           which ghc
           ghc --version
+          /usr/local/.ghcup/bin/cabal --version
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
@@ -280,6 +281,7 @@ jobs:
           echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
+          /usr/local/.ghcup/bin/cabal --version
           /usr/local/.ghcup/bin/cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
@@ -289,12 +291,11 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc-version }}
 
-      - name: Unset Cabal
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
+      - name: Inspect
         run: |
-          ghcup unset cabal
           which ghc
           ghc --version
+          /usr/local/.ghcup/bin/cabal --version
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
