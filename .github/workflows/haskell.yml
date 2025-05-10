@@ -6,12 +6,13 @@ on:
   pull_request:
     branches-ignore: '**'
 
-# INFO: The following configuration block ensures that only one build runs per branch,
-# which may be desirable for projects with a costly build process.
-# Remove this block from the CI workflow to let each CI job run to completion.
+# Stop other CI in the same branch on new run:
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
+
+# Some Haskell tools are preinstalled in: `/usr/local/.ghcup`.
+# There's a symlink: `~/.ghcup` -> `/usr/local/.ghcup`.
 
 jobs:
   build:
@@ -30,25 +31,20 @@ jobs:
         #     ghc-version: '9.8'
 
     steps:
-      - name: Inspect
-        run: |
-          whoami
-          hostname
-          pwd
-          echo "$HOME"
-          echo "$PATH"
-          echo "$XDG_STATE_PATH"
-          ls -l /usr/local/.ghcup/bin/cabal
-          /usr/local/.ghcup/bin/cabal --version
-          /usr/local/.ghcup/bin/cabal path
-          /usr/local/.ghcup/bin/cabal update
-
       - uses: actions/checkout@v4
 
       # ------------------------------------------------------------
       # Setup GHC
       # ------------------------------------------------------------
       # TODO: Separate setup-verify and verify from build and test, merge build and test
+
+      # This is for preventing `/usr/local/.ghcup/bin/cabal` from overwriting:
+      - name: Remove .ghcup symlink (~/.ghcup -> /usr/local/.ghcup)
+        run: |
+          rm ~/.ghcup
+          # create `~/.ghcup/bin/ghcup` for `haskell-actions/setup`:
+          mkdir -p ~/.ghcup/bin
+          ln -s /usr/local/.ghcup/bin/ghcup ~/.ghcup/bin
 
       - name: Restore GHC ${{ matrix.ghc-version }}
         uses: actions/cache/restore@v4
@@ -84,8 +80,6 @@ jobs:
           ls -lA /usr/local
           which ghc
           ghc --version
-          echo $XDG_STATE_PATH
-          ls -l /usr/local/.ghcup/bin/cabal
           /usr/local/.ghcup/bin/cabal --version
           /usr/local/.ghcup/bin/cabal path
 
@@ -172,6 +166,14 @@ jobs:
       # Setup Haskell (TODO: move to a separate composite action file)
       # ------------------------------------------------------------
       - uses: actions/checkout@v4
+
+      # This is for preventing `/usr/local/.ghcup/bin/cabal` from overwriting:
+      - name: Remove .ghcup symlink (~/.ghcup -> /usr/local/.ghcup)
+        run: |
+          rm ~/.ghcup
+          # create `~/.ghcup/bin/ghcup` for `haskell-actions/setup`:
+          mkdir -p ~/.ghcup/bin
+          ln -s /usr/local/.ghcup/bin/ghcup ~/.ghcup/bin
 
       - name: Restore GHC ${{ matrix.ghc-version }}
         uses: actions/cache/restore@v4
@@ -277,6 +279,14 @@ jobs:
       # Setup Haskell (TODO: move to a separate composite action file)
       # ------------------------------------------------------------
       - uses: actions/checkout@v4
+
+      # This is for preventing `/usr/local/.ghcup/bin/cabal` from overwriting:
+      - name: Remove .ghcup symlink (~/.ghcup -> /usr/local/.ghcup)
+        run: |
+          rm ~/.ghcup
+          # create `~/.ghcup/bin/ghcup` for `haskell-actions/setup`:
+          mkdir -p ~/.ghcup/bin
+          ln -s /usr/local/.ghcup/bin/ghcup ~/.ghcup/bin
 
       - name: Restore GHC ${{ matrix.ghc-version }}
         uses: actions/cache/restore@v4
