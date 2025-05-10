@@ -76,6 +76,7 @@ jobs:
           which ghc
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
+          /usr/local/.ghcup/bin/cabal path
 
       - name: Save GHC cache
         uses: actions/cache/save@v4
