@@ -32,8 +32,8 @@ runs:
       key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ steps.vars.outputs.cabal-version }}
     with:
       path: ${{ steps.vars.outputs.store-path }}
-      key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
-      restore-keys: dist-${{ env.key }}-
+      key: store-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
+      restore-keys: store-${{ env.key }}-
 
   - name: Install dependencies
     # If we had an exact cache hit, the dependencies will be up to date.
