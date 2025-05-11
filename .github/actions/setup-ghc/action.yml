@@ -11,6 +11,12 @@ runs:
   using: composite
   steps:
 
+  - name: Inspect
+    shell: bash
+    run: |
+      /usr/local/.ghcup/bin/cabal --version
+      /usr/local/.ghcup/bin/cabal path
+
   # Because we cannot have `env` vars in composite action:
   - name: Define env-like vars
     id: vars

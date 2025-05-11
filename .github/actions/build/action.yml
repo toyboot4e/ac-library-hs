@@ -12,10 +12,10 @@ runs:
       ver="$(/usr/local/.ghcup/bin/cabal --version | head -n 1 | awk '{print $3}')"
       echo "cabal-version=$ver" >> "$GITHUB_OUTPUT"
       echo "cabal-version=$ver"
-      echo "store-path=~/.local/state/cabal/store" >> "$GITHUB_OUTPUT"
-      echo "store-path=~/.local/state/cabal/store"
-      # echo "store-path=~/.cabal/store" >> "$GITHUB_OUTPUT"
-      # echo "store-path=~/.cabal/store"
+      # echo "store-path=~/.local/state/cabal/store" >> "$GITHUB_OUTPUT"
+      # echo "store-path=~/.local/state/cabal/store"
+      echo "store-path=~/.cabal/store" >> "$GITHUB_OUTPUT"
+      echo "store-path=~/.cabal/store"
 
   - name: Configure the build
     shell: bash
