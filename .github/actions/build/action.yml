@@ -1,5 +1,5 @@
-name: 'Build'
-description: Builds the dependencies and the library
+name: Build
+description: Builds or restores the dependencies and the library from the cache
 
 runs:
   using: composite
@@ -12,11 +12,10 @@ runs:
       ver="$(/usr/local/.ghcup/bin/cabal --version | head -n 1 | awk '{print $3}')"
       echo "cabal-version=$ver" >> "$GITHUB_OUTPUT"
       echo "cabal-version=$ver"
-      ls -lA ~
-      ls -lA ~/.ghcup
-      ls -lA ~/.local
-      echo "store-path=~/.local/state/cabal/store" >> "$GITHUB_OUTPUT"
-      echo "store-path=~/.local/state/cabal/store"
+      # echo "store-path=~/.cabal/store" >> "$GITHUB_OUTPUT"
+      # echo "store-path=~/.cabal/store"
+      echo "store-path=~/.cabal/store" >> "$GITHUB_OUTPUT"
+      echo "store-path=~/.cabal/store"
 
   - name: Configure the build
     shell: 'bash'
@@ -62,7 +61,13 @@ runs:
 
   - name: Build ac-library-hs
     shell: 'bash'
-    run: cabal build lib:ac-library-hs
+    run: |
+      ls -lA ~
+      ls -lA ~/.cabal
+      ls -lA ~/.cabal/store
+      ls -lA ~/.local
+
+      cabal build lib:ac-library-hs
 
   - name: Save cached ac-library-hs
     uses: actions/cache/save@v4

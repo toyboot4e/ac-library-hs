@@ -1,5 +1,5 @@
-name: 'Setup GHC'
-description: Set up Nix environment for GitHub Actions
+name: Setup GHC
+description: Downloads or restores GHC from the cache
 
 inputs:
   ghc-version:
