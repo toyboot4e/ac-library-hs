@@ -17,18 +17,31 @@ runs:
       /usr/local/.ghcup/bin/cabal --version
       /usr/local/.ghcup/bin/cabal path
 
+      # Cabal path change:
+      # https://github.com/haskell/cabal/blob/master/release-notes/cabal-install-3.10.1.0.md#significant-changes
+      echo "Default XDG paths:"
+      echo "XDG_STATE_HOME: $XDG_STATE_HOME"
+      echo "XDG_CONFIG_HOME: $XDG_CONFIG_HOME"
+      echo "XDG_CACHE_HOME: $XDG_CACHE_HOME"
+
+      echo "Setting some XDG paths for cabal.."
+      echo "XDG_CONFIG_HOME=$HOME/.config" >> "$GITHUB_OUTPUT"
+      echo "XDG_STATE_HOME=$HOME/.local/state" >> "$GITHUB_OUTPUT"
+      echo "XDG_CACHE_HOME=$HOME/.cache" >> "$GITHUB_OUTPUT"
+
   # Because we cannot have `env` vars in composite action:
   - name: Define env-like vars
     id: vars
     shell: bash
     run: |
+      /usr/local/.ghcup/bin/cabal path
       ver="$(/usr/local/.ghcup/bin/cabal --version | head -n 1 | awk '{print $3}')"
       echo "cabal-version=$ver" >> "$GITHUB_OUTPUT"
       echo "cabal-version=$ver"
       # The dummy version MUST NOT be equal to the preinstalled version, otherwise Cabal is overridden (?) and
       # we cannot share the cache:
-      echo "dummy-cabal-version=3.10" >> "$GITHUB_OUTPUT"
-      echo "dummy-cabal-version=3.10"
+      echo "dummy-cabal-version=3.12" >> "$GITHUB_OUTPUT"
+      echo "dummy-cabal-version=3.12"
 
   # FIXME: The cache is too large. Select necessary files in `lib/`.
   - name: Restore GHC ${{ inputs.ghc-version }}
@@ -45,13 +58,15 @@ runs:
     if: steps.ghc-cache.outputs.cache-hit == 'true'
     shell: bash
     run: |
+      # remove the configuration file in order to match to the initial state, namely the store path:
+      /home/runner/.config/cabal/config
       # setup PATH manually (since `haskell-actions/setup` is not run on cache hit)
       echo "$HOME/.ghcup/ghc/${{ inputs.ghc-version }}/bin" >> "$GITHUB_PATH"
       echo "$HOME/.cabal/bin" >> "$GITHUB_PATH"
       # inspect preinstalled versions of GHC and Cabal
       ghc --version
       cabal --version
-      cabal path
+      cabal path # the store path must be ~/.local/state/cabal/store
 
   # I don't want to install Cabal with haskell-actions@setup, so:
   - name: Pre downloading GHC ${{ inputs.ghc-version }}
