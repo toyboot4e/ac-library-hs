@@ -12,8 +12,8 @@ runs:
       ver="$(/usr/local/.ghcup/bin/cabal --version | head -n 1 | awk '{print $3}')"
       echo "cabal-version=$ver" >> "$GITHUB_OUTPUT"
       echo "cabal-version=$ver"
-      echo "store-path=.local/state/cabal/store" >> "$GITHUB_OUTPUT"
-      echo "store-path=.local/state/cabal/store"
+      echo "store-path=~/.local/state/cabal/store" >> "$GITHUB_OUTPUT"
+      echo "store-path=~/.local/state/cabal/store"
       # echo "store-path=~/.cabal/store" >> "$GITHUB_OUTPUT"
       # echo "store-path=~/.cabal/store"
 
@@ -62,12 +62,6 @@ runs:
   - name: Build ac-library-hs
     shell: 'bash'
     run: |
-      ls -lA ~
-      ls -lA ~/.local
-      ls -lA ~/.local/state
-      ls -lA ~/.local/state/cabal
-      ls -lA ~/.local/state/cabal/store
-
       cabal build lib:ac-library-hs
 
   - name: Save cached ac-library-hs
