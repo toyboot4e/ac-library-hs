@@ -26,11 +26,21 @@ runs:
       echo "XDG_CONFIG_HOME: $XDG_CONFIG_HOME"
       echo "XDG_CACHE_HOME: $XDG_CACHE_HOME"
 
+      echo "Setting some XDG paths for cabal.."
+      echo "XDG_CONFIG_HOME=$HOME/.config" >> "$GITHUB_OUTPUT"
+      echo "XDG_STATE_HOME=$HOME/.local/state" >> "$GITHUB_OUTPUT"
+      echo "XDG_CACHE_HOME=$HOME/.cache" >> "$GITHUB_OUTPUT"
+
   # Because we cannot have `env` vars in composite action:
   - name: Define env-like vars
     id: vars
     shell: bash
     run: |
+      echo "Current XDG paths:"
+      echo "XDG_STATE_HOME: $XDG_STATE_HOME"
+      echo "XDG_CONFIG_HOME: $XDG_CONFIG_HOME"
+      echo "XDG_CACHE_HOME: $XDG_CACHE_HOME"
+
       /usr/local/.ghcup/bin/cabal path
       ver="$(/usr/local/.ghcup/bin/cabal --version | head -n 1 | awk '{print $3}')"
       echo "cabal-version=$ver" >> "$GITHUB_OUTPUT"
@@ -83,10 +93,6 @@ runs:
     run: |
       mv /usr/local/.ghcup/bin/cabal{-old,}
 
-      # come back to the initial state, otherwise the path is wrong
-      rm ~/.cabal/config || true
-      rm ~/.config/cabal/config || true
-
   - name: Inspect
     shell: bash
     run: |
@@ -95,7 +101,7 @@ runs:
       ghc --version
       which cabal
       cabal --version
-      cabal path
+      cabal path # make sure the cabal store points to `~/.local/state/cabal/store`
 
   - name: Save GHC cache
     uses: actions/cache/save@v4
