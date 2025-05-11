@@ -24,6 +24,7 @@ runs:
       echo "dummy-cabal-version=3.10" >> "$GITHUB_OUTPUT"
       echo "dummy-cabal-version=3.10"
 
+  # FIXME: The cache is too large. Select necessary files in `lib/`.
   - name: Restore GHC ${{ inputs.ghc-version }}
     uses: actions/cache/restore@v4
     id: ghc-cache
