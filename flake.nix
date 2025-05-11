@@ -62,17 +62,6 @@
 
               # GHC 9.8.4
               (haskell.compiler.ghc984.override { useLLVM = true; })
-              (haskell.compiler.ghc984.withPackages (
-                hpkgs: with hpkgs; [
-                  bitvec
-                  bytestring
-                  primitive
-                  random
-                  vector
-                  vector-algorithms
-                  wide-word
-                ]
-              ))
               # FIXME:
               (haskell-language-server.override { supportedGhcVersions = [ "984" ]; })
               haskell.packages.ghc984.cabal-fmt
