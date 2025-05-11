@@ -119,7 +119,10 @@ jobs:
 
       - name: Run doctest
         run: |
+          cabal path
           cabal install doctest
+          # Is it ~/.local/bin?
+          which doctest
           cabal repl --with-ghc=doctest --repl-options='-w -Wdefault'
 
   verify:

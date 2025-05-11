@@ -15,19 +15,16 @@ runs:
     shell: bash
     run: |
       /usr/local/.ghcup/bin/cabal --version
+
+      # This crates `~/.config/cabal/config`. It's super important for having persistent cabal stoer path.
       /usr/local/.ghcup/bin/cabal path
 
-      # Cabal path change:
+      # Cabal used to be using non-xdg path
       # https://github.com/haskell/cabal/blob/master/release-notes/cabal-install-3.10.1.0.md#significant-changes
       echo "Default XDG paths:"
       echo "XDG_STATE_HOME: $XDG_STATE_HOME"
       echo "XDG_CONFIG_HOME: $XDG_CONFIG_HOME"
       echo "XDG_CACHE_HOME: $XDG_CACHE_HOME"
-
-      echo "Setting some XDG paths for cabal.."
-      echo "XDG_CONFIG_HOME=$HOME/.config" >> "$GITHUB_OUTPUT"
-      echo "XDG_STATE_HOME=$HOME/.local/state" >> "$GITHUB_OUTPUT"
-      echo "XDG_CACHE_HOME=$HOME/.cache" >> "$GITHUB_OUTPUT"
 
   # Because we cannot have `env` vars in composite action:
   - name: Define env-like vars
@@ -83,7 +80,12 @@ runs:
   - name: Post downloading GHC ${{ inputs.ghc-version }}
     if: steps.ghc-cache.outputs.cache-hit != 'true'
     shell: bash
-    run: mv /usr/local/.ghcup/bin/cabal{-old,}
+    run: |
+      mv /usr/local/.ghcup/bin/cabal{-old,}
+
+      # come back to the initial state, otherwise the path is wrong
+      rm ~/.cabal/config || true
+      rm ~/.config/cabal/config || true
 
   - name: Inspect
     shell: bash
