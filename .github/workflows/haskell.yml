@@ -63,7 +63,7 @@ jobs:
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
-          /usr/local/.ghcup/bin/cabal path
+          # /usr/local/.ghcup/bin/cabal path
           /usr/local/.ghcup/bin/cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
@@ -81,7 +81,7 @@ jobs:
           which ghc
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
-          /usr/local/.ghcup/bin/cabal path
+          # /usr/local/.ghcup/bin/cabal path
 
       - name: Save GHC cache
         uses: actions/cache/save@v4
@@ -195,7 +195,7 @@ jobs:
           which ghc
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
-          /usr/local/.ghcup/bin/cabal path
+          # /usr/local/.ghcup/bin/cabal path
           /usr/local/.ghcup/bin/cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
@@ -210,7 +210,7 @@ jobs:
           which ghc
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
-          /usr/local/.ghcup/bin/cabal path
+          # /usr/local/.ghcup/bin/cabal path
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
@@ -306,7 +306,7 @@ jobs:
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
-          /usr/local/.ghcup/bin/cabal path
+          # /usr/local/.ghcup/bin/cabal path
           /usr/local/.ghcup/bin/cabal update
 
       - name: Download GHC ${{ matrix.ghc-version }}
@@ -321,7 +321,7 @@ jobs:
           which ghc
           ghc --version
           /usr/local/.ghcup/bin/cabal --version
-          /usr/local/.ghcup/bin/cabal path
+          # /usr/local/.ghcup/bin/cabal path
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
