@@ -72,7 +72,7 @@ jobs:
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: "3.4" # dummy, to not the preinstalled version
+          cabal-version: "3.10" # dummy, to not the preinstalled version
 
       - name: Inspect
         run: |
