@@ -19,23 +19,6 @@ runs:
       /usr/local/.ghcup/bin/cabal --version
       /usr/local/.ghcup/bin/cabal path
 
-      # Does it already have store path?
-      echo >> !!!!!!!!!!!!!
-      cat ~/.config/cabal/config
-      echo >> !!!!!!!!!!!!!
-
-      # Cabal used to be using non-xdg path
-      # https://github.com/haskell/cabal/blob/master/release-notes/cabal-install-3.10.1.0.md#significant-changes
-      echo "Default XDG paths:"
-      echo "XDG_STATE_HOME: $XDG_STATE_HOME"
-      echo "XDG_CONFIG_HOME: $XDG_CONFIG_HOME"
-      echo "XDG_CACHE_HOME: $XDG_CACHE_HOME"
-
-      echo "Setting some XDG paths for cabal.."
-      echo "XDG_CONFIG_HOME=$HOME/.config" >> "$GITHUB_ENV"
-      echo "XDG_STATE_HOME=$HOME/.local/state" >> "$GITHUB_ENV"
-      echo "XDG_CACHE_HOME=$HOME/.cache" >> "$GITHUB_ENV"
-
   # Because we cannot have `env` vars in composite action:
   - name: Define env-like vars
     id: vars
@@ -46,7 +29,6 @@ runs:
       echo "XDG_CONFIG_HOME: $XDG_CONFIG_HOME"
       echo "XDG_CACHE_HOME: $XDG_CACHE_HOME"
 
-      /usr/local/.ghcup/bin/cabal path
       ver="$(/usr/local/.ghcup/bin/cabal --version | head -n 1 | awk '{print $3}')"
       echo "cabal-version=$ver" >> "$GITHUB_OUTPUT"
       echo "cabal-version=$ver"
@@ -72,6 +54,7 @@ runs:
     run: |
       # setup PATH manually (since `haskell-actions/setup` is not run on cache hit)
       echo "$HOME/.ghcup/ghc/${{ inputs.ghc-version }}/bin" >> "$GITHUB_PATH"
+      # TODO: Is this correct for doctest installation path?
       echo "$HOME/.cabal/bin" >> "$GITHUB_PATH"
       # inspect preinstalled versions of GHC and Cabal
       ghc --version
@@ -98,12 +81,10 @@ runs:
     run: |
       mv /usr/local/.ghcup/bin/cabal{-old,}
 
-      cabal path # the store path must be ~/.local/state/cabal/store
-      echo >> !!!!!!!!!!!!!
-      cat ~/.config/cabal/config
-      echo >> !!!!!!!!!!!!!
-      rm ~/.config/cabal/config
-      cabal path # the store path must be ~/.local/state/cabal/store
+      # haskell-actions/setup@v2 intentinally sets non-XDG mode, however, let's disable that behavior
+      ls -lA ~/.cabal
+      rm -rf ~/.cabal
+      rm ~/.config/cabal/config # the last line (`store-dir: /home/runner/.cabal/store`) is created by the setup action
 
   - name: Inspect
     shell: bash
