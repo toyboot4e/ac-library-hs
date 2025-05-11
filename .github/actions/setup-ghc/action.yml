@@ -15,13 +15,14 @@ runs:
     shell: bash
     run: |
       ls -lA ~/ | grep .ghcup # we have ~/.ghcup -> /usr/local/.ghcup
-      cat ~/.cabal/config || true
-      cat ~/.config/cabal/config || true
 
       /usr/local/.ghcup/bin/cabal --version
-
-      # This crates `~/.config/cabal/config`. It's super important for having persistent cabal stoer path.
       /usr/local/.ghcup/bin/cabal path
+
+      # Does it already have store path?
+      echo >> !!!!!!!!!!!!!
+      cat ~/.config/cabal/config
+      echo >> !!!!!!!!!!!!!
 
       # Cabal used to be using non-xdg path
       # https://github.com/haskell/cabal/blob/master/release-notes/cabal-install-3.10.1.0.md#significant-changes
@@ -96,12 +97,12 @@ runs:
     shell: bash
     run: |
       mv /usr/local/.ghcup/bin/cabal{-old,}
+
       cabal path # the store path must be ~/.local/state/cabal/store
-      cat ~/.cabal/config ||
-      rm ~/.cabal/config ||
-      cabal path # the store path must be ~/.local/state/cabal/store
-      cat ~/.config/cabal/config ||
-      rm ~/.config/cabal/config ||
+      echo >> !!!!!!!!!!!!!
+      cat ~/.config/cabal/config
+      echo >> !!!!!!!!!!!!!
+      rm ~/.config/cabal/config
       cabal path # the store path must be ~/.local/state/cabal/store
 
   - name: Inspect
