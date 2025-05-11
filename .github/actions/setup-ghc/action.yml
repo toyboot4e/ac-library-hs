@@ -58,8 +58,6 @@ runs:
     if: steps.ghc-cache.outputs.cache-hit == 'true'
     shell: bash
     run: |
-      # remove the configuration file in order to match to the initial state, namely the store path:
-      /home/runner/.config/cabal/config
       # setup PATH manually (since `haskell-actions/setup` is not run on cache hit)
       echo "$HOME/.ghcup/ghc/${{ inputs.ghc-version }}/bin" >> "$GITHUB_PATH"
       echo "$HOME/.cabal/bin" >> "$GITHUB_PATH"
