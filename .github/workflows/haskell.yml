@@ -79,11 +79,6 @@ jobs:
       - name: Run tests
         run: cabal test all
 
-      - name: Run doctest
-        run: |
-          cabal install doctest
-          cabal repl --with-ghc=doctest --repl-options='-w -Wdefault'
-
       - name: Check cabal file
         run: cabal check
 
@@ -93,6 +88,39 @@ jobs:
       #     # --disable-documentation disables building documentation for dependencies.
       #     # The package's own documentation is still built,
       #     # yet contains no links to the documentation of the dependencies.
+
+  doctest:
+    needs: build
+    name: Doctest (GHC ${{ matrix.ghc-version }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    # TODO: DRY
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ghc-version: ['9.8.4']
+        # include:
+        #   - os: windows-latest
+        #     ghc-version: '9.8'
+        #   - os: macos-latest
+        #     ghc-version: '9.8'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore GHC
+        uses: ./.github/actions/setup-ghc
+        with:
+          ghc-version: ${{ matrix.ghc-version }}
+
+      - name: Restore the library build artifacts
+        uses: ./.github/actions/build
+
+      - name: Run doctest
+        run: |
+          cabal install doctest
+          cabal repl --with-ghc=doctest --repl-options='-w -Wdefault'
 
   verify:
     needs: build
