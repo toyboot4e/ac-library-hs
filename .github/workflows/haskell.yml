@@ -56,7 +56,6 @@ jobs:
           ghc --version
           cabal --version
           cabal path
-          cabal update
 
       # I don't want to install Cabal with haskell-actions@setup, so:
       - name: Pre downloading GHC ${{ matrix.ghc-version }}
@@ -97,6 +96,7 @@ jobs:
 
       - name: Configure the build
         run: |
+          cabal update
           cabal configure --enable-tests --enable-benchmarks --disable-documentation
           cabal build all --dry-run
         # The last step generates dist-newstyle/cache/plan.json for the cache key.
@@ -189,7 +189,6 @@ jobs:
           ghc --version
           cabal --version
           cabal path
-          cabal update
 
       # I don't want to install Cabal with haskell-actions@setup, so:
       - name: Pre downloading GHC ${{ matrix.ghc-version }}
@@ -208,13 +207,19 @@ jobs:
         if: steps.ghc-cache.outputs.cache-hit != 'true'
         run: mv /usr/local/.ghcup/bin/cabal{-old,}
 
-
       - name: Inspect
         run: |
           which ghc
           ghc --version
           cabal --version
           cabal path
+
+      - name: Configure the build
+        run: |
+          cabal update
+          cabal configure --enable-tests --enable-benchmarks --disable-documentation
+          cabal build all --dry-run
+        # The last step generates dist-newstyle/cache/plan.json for the cache key.
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
@@ -303,7 +308,6 @@ jobs:
           ghc --version
           cabal --version
           cabal path
-          cabal update
 
       # I don't want to install Cabal with haskell-actions@setup, so:
       - name: Pre downloading GHC ${{ matrix.ghc-version }}
@@ -322,13 +326,19 @@ jobs:
         if: steps.ghc-cache.outputs.cache-hit != 'true'
         run: mv /usr/local/.ghcup/bin/cabal{-old,}
 
-
       - name: Inspect
         run: |
           which ghc
           ghc --version
           cabal --version
           cabal path
+
+      - name: Configure the build
+        run: |
+          cabal update
+          cabal configure --enable-tests --enable-benchmarks --disable-documentation
+          cabal build all --dry-run
+        # The last step generates dist-newstyle/cache/plan.json for the cache key.
 
       - name: Restore cached dependencies from the `build` job
         uses: actions/cache/restore@v4
