@@ -1,0 +1,85 @@
+name: 'Setup GHC'
+description: Set up Nix environment for GitHub Actions
+
+inputs:
+  ghc-version:
+    description: 'GHC version to install/restore'
+    required: true
+  # preinstalled version of cabal is used
+
+env:
+  dummy-cabal-version: '3.10'
+
+runs:
+  using: composite
+  steps:
+  - name: Detect preinstalled version of cabal
+    id: detect-cabal
+    shell: 'bash'
+    run: |
+      ver="$(/usr/local/.ghcup/bin/cabal --version | head -n 1 | awk '{print $3}')"
+      echo "cabal-version=$ver" >> $GITHUB_OUTPUT
+
+  - name: Restore GHC ${{ inputs.ghc-version }}
+    uses: actions/cache/restore@v4
+    id: ghc-cache
+    with:
+      path: |
+        ~/.ghcup/ghc/${{ inputs.ghc-version }}/bin
+        ~/.ghcup/ghc/${{ inputs.ghc-version }}/lib/ghc-${{ inputs.ghc-version }}/bin
+        ~/.ghcup/ghc/${{ inputs.ghc-version }}/lib/ghc-${{ inputs.ghc-version }}/lib
+      key: _GHC_${{ runner.os }}-ghc-${{ inputs.ghc-version }}-cabal-${{ steps.detect-cabal.cabal-version }}
+
+  - name: Setup GHC path on restore
+    if: steps.ghc-cache.outputs.cache-hit == 'true'
+    shell: 'bash'
+    run: |
+      # setup PATH manually (since `haskell-actions/setup` is not run on cache hit)
+      echo "$HOME/.ghcup/ghc/${{ inputs.ghc-version }}/bin" >> "$GITHUB_PATH"
+      echo "$HOME/.cabal/bin" >> "$GITHUB_PATH"
+      # inspect preinstalled versions of GHC and Cabal
+      ghc --version
+      cabal --version
+      cabal path
+
+  # I don't want to install Cabal with haskell-actions@setup, so:
+  - name: Pre downloading GHC ${{ inputs.ghc-version }}
+    if: steps.ghc-cache.outputs.cache-hit != 'true'
+    shell: 'bash'
+    run: mv /usr/local/.ghcup/bin/cabal{,-old}
+
+  - name: Download GHC ${{ inputs.ghc-version }}
+    uses: haskell-actions/setup@v2
+    if: steps.ghc-cache.outputs.cache-hit != 'true'
+    id: setup
+    with:
+      ghc-version: ${{ inputs.ghc-version }}
+      cabal-version: ${{ env.dummy-cabal-version }}
+
+  - name: Post downloading GHC ${{ inputs.ghc-version }}
+    if: steps.ghc-cache.outputs.cache-hit != 'true'
+    shell: 'bash'
+    run: mv /usr/local/.ghcup/bin/cabal{-old,}
+
+  - name: Inspect
+    shell: 'bash'
+    run: |
+      ls -lA ~/          # ~/.ghcup -> /usr/local/.ghcup
+      ls -lA /usr/local  # /usr/local/.ghcup
+      which ghc
+      ghc --version
+      which cabal
+      cabal --version
+      cabal path
+
+  - name: Save GHC cache
+    uses: actions/cache/save@v4
+    if: steps.ghc-cache.outputs.cache-hit != 'true'
+    with:
+      # It contains unnecessary files though
+      path: |
+        ~/.ghcup/ghc/${{ inputs.ghc-version }}/bin
+        ~/.ghcup/ghc/${{ inputs.ghc-version }}/lib/ghc-${{ inputs.ghc-version }}/bin
+        ~/.ghcup/ghc/${{ inputs.ghc-version }}/lib/ghc-${{ inputs.ghc-version }}/lib
+      key: ${{ steps.ghc-cache.outputs.cache-primary-key }}
+      fail-on-cache-miss: 'true'

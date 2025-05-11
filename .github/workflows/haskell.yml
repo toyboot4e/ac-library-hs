@@ -33,117 +33,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ------------------------------------------------------------
-      # Setup GHC
-      # ------------------------------------------------------------
-      # TODO: Separate setup-verify and verify from build and test, merge build and test
-
-      - name: Restore GHC ${{ matrix.ghc-version }}
-        uses: actions/cache/restore@v4
-        id: ghc-cache
-        with:
-          path: |
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/lib
-          key: _GHC_${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-
-      - name: Set GHC path
-        if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: |
-          echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          ghc --version
-          cabal --version
-          cabal path
-
-      # I don't want to install Cabal with haskell-actions@setup, so:
-      - name: Pre downloading GHC ${{ matrix.ghc-version }}
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        run: mv /usr/local/.ghcup/bin/cabal{,-old}
-
-      - name: Download GHC ${{ matrix.ghc-version }}
-        uses: haskell-actions/setup@v2
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        id: setup
+      - name: Setup GHC
+        uses: ./.github/actions/setup-ghc
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: "3.10" # dummy, to not match to the preinstalled version
 
-      - name: Post downloading GHC ${{ matrix.ghc-version }}
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        run: mv /usr/local/.ghcup/bin/cabal{-old,}
-
-      - name: Inspect
-        run: |
-          ls -lA ~/
-          ls -lA /usr/local
-          which ghc
-          ghc --version
-          cabal --version
-          cabal path
-
-      - name: Save GHC cache
-        uses: actions/cache/save@v4
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        with:
-          # It contains unnecessary files though
-          path: |
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/lib
-          key: ${{ steps.ghc-cache.outputs.cache-primary-key }}
-
-      - name: Configure the build
-        run: |
-          cabal update
-          cabal configure --enable-tests --enable-benchmarks --disable-documentation
-          cabal build all --dry-run
-        # The last step generates dist-newstyle/cache/plan.json for the cache key.
-
-      - name: Restore cached dependencies
-        uses: actions/cache/restore@v4
-        id: deps-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-        with:
-          path: ~/.local/state/cabal/store
-          key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
-          restore-keys: ${{ env.key }}-
-
-      - name: Install dependencies
-        # If we had an exact cache hit, the dependencies will be up to date.
-        if: steps.deps-cache.outputs.cache-hit != 'true'
-        run: cabal build all --only-dependencies
-
-      - name: Save dependency cache
-        uses: actions/cache/save@v4
-        # If we had an exact cache hit, trying to save the cache would error because of key clash.
-        if: steps.deps-cache.outputs.cache-hit != 'true'
-        with:
-          path: ~/.local/state/cabal/store
-          key: ${{ steps.deps-cache.outputs.cache-primary-key }}
-
-      # TODO: Maybe clear the cache if it got too fat
-      - name: Restore cached ac-lbrary-hs
-        uses: actions/cache/restore@v4
-        id: lib-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-        with:
-          path: dist-newstyle
-          key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
-
-      - name: Build ac-library-hs
-        run: cabal build lib:ac-library-hs
-
-      - name: Save cached ac-library-hs
-        uses: actions/cache/save@v4
-        env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-        with:
-          path: dist-newstyle
-          key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
+      - name: Build the library
+        uses: ./.github/actions/build
 
   test:
     needs: build
@@ -156,97 +52,25 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         ghc-version: ['9.8.4']
-
         # include:
         #   - os: windows-latest
         #     ghc-version: '9.8'
         #   - os: macos-latest
         #     ghc-version: '9.8'
+
     steps:
-      # ------------------------------------------------------------
-      # Setup Haskell (TODO: move to a separate composite action file)
-      # ------------------------------------------------------------
       - uses: actions/checkout@v4
 
-      - name: Restore GHC ${{ matrix.ghc-version }}
-        uses: actions/cache/restore@v4
-        id: ghc-cache
-        with:
-          fail-on-cache-miss: true
-          path: |
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/lib
-          # TODO: use hash for caching
-          key: _GHC_${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-
-      - name: Set GHC path
-        if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: |
-          echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          which ghc
-          ghc --version
-          cabal --version
-          cabal path
-
-      # I don't want to install Cabal with haskell-actions@setup, so:
-      - name: Pre downloading GHC ${{ matrix.ghc-version }}
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        run: mv /usr/local/.ghcup/bin/cabal{,-old}
-
-      - name: Download GHC ${{ matrix.ghc-version }}
-        uses: haskell-actions/setup@v2
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        id: setup
+      - name: Restore GHC
+        uses: ./.github/actions/setup-ghc
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: "3.10" # dummy, to not match to the preinstalled version
 
-      - name: Post downloading GHC ${{ matrix.ghc-version }}
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        run: mv /usr/local/.ghcup/bin/cabal{-old,}
+      - name: Restore the library build artifacts
+        uses: ./.github/actions/build
 
-      - name: Inspect
-        run: |
-          which ghc
-          ghc --version
-          cabal --version
-          cabal path
-
-      - name: Configure the build
-        run: |
-          cabal update
-          cabal configure --enable-tests --enable-benchmarks --disable-documentation
-          cabal build all --dry-run
-        # The last step generates dist-newstyle/cache/plan.json for the cache key.
-
-      - name: Restore cached dependencies from the `build` job
-        uses: actions/cache/restore@v4
-        id: deps-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-        with:
-          fail-on-cache-miss: true
-          path: ~/.local/state/cabal/store
-          key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
-          restore-keys: ${{ env.key }}-
-
-      - name: Restore cached `ac-lbrary-hs` from the `build` job
-        uses: actions/cache/restore@v4
-        id: lib-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-        with:
-          fail-on-cache-miss: true
-          path: dist-newstyle
-          key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
-
-      # ------------------------------------------------------------
-      # Run tests
-      # ------------------------------------------------------------
       - name: Build check
-        # make sure to build all the components in `ac-library-hs.cabal` (TODO: automate this)
+        # As a test, build all the components in `ac-library-hs.cabal` (TODO: automate this)
         run: |
           cabal build ac-library-hs
           cabal build ac-library-hs:example-lazy-segtree
@@ -270,7 +94,6 @@ jobs:
       #     # The package's own documentation is still built,
       #     # yet contains no links to the documentation of the dependencies.
 
-  # Run oj-verify in 20 tasks
   verify:
     needs: build
     name: Verify (GHC 9.8.4 on ubuntu-latest)
@@ -284,86 +107,16 @@ jobs:
         ghc-version: ['9.8.4']
 
     steps:
-      # ------------------------------------------------------------
-      # Setup Haskell (TODO: move to a separate composite action file)
-      # ------------------------------------------------------------
       - uses: actions/checkout@v4
 
-      - name: Restore GHC ${{ matrix.ghc-version }}
-        uses: actions/cache/restore@v4
-        id: ghc-cache
-        with:
-          fail-on-cache-miss: true
-          path: |
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/bin
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/bin
-            ~/.ghcup/ghc/${{ matrix.ghc-version }}/lib/ghc-${{ matrix.ghc-version }}/lib
-          key: _GHC_${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-
-      - name: Set GHC path
-        if: steps.ghc-cache.outputs.cache-hit == 'true'
-        run: |
-          echo "$HOME/.ghcup/ghc/${{ matrix.ghc-version }}/bin" >> "$GITHUB_PATH"
-          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
-          ghc --version
-          cabal --version
-          cabal path
-
-      # I don't want to install Cabal with haskell-actions@setup, so:
-      - name: Pre downloading GHC ${{ matrix.ghc-version }}
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        run: mv /usr/local/.ghcup/bin/cabal{,-old}
-
-      - name: Download GHC ${{ matrix.ghc-version }}
-        uses: haskell-actions/setup@v2
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        id: setup
+      - name: Restore GHC
+        uses: ./.github/actions/setup-ghc
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: "3.10" # dummy, to not match to the preinstalled version
 
-      - name: Post downloading GHC ${{ matrix.ghc-version }}
-        if: steps.ghc-cache.outputs.cache-hit != 'true'
-        run: mv /usr/local/.ghcup/bin/cabal{-old,}
+      - name: Restore the library build artifacts
+        uses: ./.github/actions/build
 
-      - name: Inspect
-        run: |
-          which ghc
-          ghc --version
-          cabal --version
-          cabal path
-
-      - name: Configure the build
-        run: |
-          cabal update
-          cabal configure --enable-tests --enable-benchmarks --disable-documentation
-          cabal build all --dry-run
-        # The last step generates dist-newstyle/cache/plan.json for the cache key.
-
-      - name: Restore cached dependencies from the `build` job
-        uses: actions/cache/restore@v4
-        id: deps-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-        with:
-          fail-on-cache-miss: true
-          path: ~/.cabal/store
-          key: dist-${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
-          restore-keys: ${{ env.key }}-
-
-      - name: Restore cached `ac-lbrary-hs` from the `build` job
-        uses: actions/cache/restore@v4
-        id: lib-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}
-        with:
-          fail-on-cache-miss: true
-          path: dist-newstyle
-          key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
-
-      # ------------------------------------------------------------
-      # Run verification test
-      # ------------------------------------------------------------
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
