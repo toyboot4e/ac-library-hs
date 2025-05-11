@@ -57,9 +57,10 @@ runs:
       key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ steps.vars.outputs.cabal-version }}
     with:
       path: dist-newstyle
-      key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
+      key: ac-library-hs-${{ env.key }}-plan-${{ hashFiles('src/**/*.hs') }}
+      restore-keys: ac-library-hs-${{ env.key }}-
 
-  - name: Build the dependencies and ac-library-hs
+  - name: Build the dependencies (if necessary) and ac-library-hs
     shell: 'bash'
     run: |
       cabal build lib:ac-library-hs
@@ -70,4 +71,5 @@ runs:
       key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ steps.vars.outputs.cabal-version }}
     with:
       path: dist-newstyle
-      key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
+      key: ac-library-hs-${{ env.key }}-plan-${{ hashFiles('src/**/*.hs') }}
+      restore-keys: ac-library-hs-${{ env.key }}-
