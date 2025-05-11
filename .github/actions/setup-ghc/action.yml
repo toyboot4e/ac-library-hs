@@ -27,9 +27,9 @@ runs:
       echo "XDG_CACHE_HOME: $XDG_CACHE_HOME"
 
       echo "Setting some XDG paths for cabal.."
-      echo "XDG_CONFIG_HOME=$HOME/.config" >> "$GITHUB_OUTPUT"
-      echo "XDG_STATE_HOME=$HOME/.local/state" >> "$GITHUB_OUTPUT"
-      echo "XDG_CACHE_HOME=$HOME/.cache" >> "$GITHUB_OUTPUT"
+      echo "XDG_CONFIG_HOME=$HOME/.config" >> "$GITHUB_ENV"
+      echo "XDG_STATE_HOME=$HOME/.local/state" >> "$GITHUB_ENV"
+      echo "XDG_CACHE_HOME=$HOME/.cache" >> "$GITHUB_ENV"
 
   # Because we cannot have `env` vars in composite action:
   - name: Define env-like vars
