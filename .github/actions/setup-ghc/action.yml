@@ -15,6 +15,7 @@ runs:
     shell: bash
     run: |
       ls -lA ~/ | grep .ghcup # we have ~/.ghcup -> /usr/local/.ghcup
+      echo "$PATH" # default `PATH` contains `~/.local/bin`, where (recent) `cabal` installs executables
 
       /usr/local/.ghcup/bin/cabal --version
       /usr/local/.ghcup/bin/cabal path
@@ -24,20 +25,15 @@ runs:
     id: vars
     shell: bash
     run: |
-      echo "Current XDG paths:"
-      echo "XDG_STATE_HOME: $XDG_STATE_HOME"
-      echo "XDG_CONFIG_HOME: $XDG_CONFIG_HOME"
-      echo "XDG_CACHE_HOME: $XDG_CACHE_HOME"
-
       ver="$(/usr/local/.ghcup/bin/cabal --version | head -n 1 | awk '{print $3}')"
       echo "cabal-version=$ver" >> "$GITHUB_OUTPUT"
       echo "cabal-version=$ver"
-      # The dummy version MUST NOT be equal to the preinstalled version, otherwise Cabal is overridden (?) and
-      # we cannot share the cache:
+      # The dummy version MUST NOT be equal to the preinstalled version, otherwise Cabal is
+      # overridden and we cannot share the cache:
       echo "dummy-cabal-version=3.12" >> "$GITHUB_OUTPUT"
       echo "dummy-cabal-version=3.12"
 
-  # FIXME: The cache is too large. Select necessary files in `lib/`.
+  # FIXME: The cache is too large. Select only necessary files in `lib/`.
   - name: Restore GHC ${{ inputs.ghc-version }}
     uses: actions/cache/restore@v4
     id: ghc-cache
@@ -54,12 +50,10 @@ runs:
     run: |
       # setup PATH manually (since `haskell-actions/setup` is not run on cache hit)
       echo "$HOME/.ghcup/ghc/${{ inputs.ghc-version }}/bin" >> "$GITHUB_PATH"
-      # TODO: Is this correct for doctest installation path?
-      echo "$HOME/.cabal/bin" >> "$GITHUB_PATH"
       # inspect preinstalled versions of GHC and Cabal
       ghc --version
       cabal --version
-      cabal path # the store path must be ~/.local/state/cabal/store
+      cabal path # the store path must be `~/.local/state/cabal/store`
 
   # I don't want to install Cabal with haskell-actions@setup, so:
   - name: Pre downloading GHC ${{ inputs.ghc-version }}
@@ -67,6 +61,7 @@ runs:
     shell: bash
     run: mv /usr/local/.ghcup/bin/cabal{,-old}
 
+  # TODO: we should rather call the `~/.ghcup` by ourselves
   - name: Download GHC ${{ inputs.ghc-version }}
     uses: haskell-actions/setup@v2
     if: steps.ghc-cache.outputs.cache-hit != 'true'
@@ -81,7 +76,8 @@ runs:
     run: |
       mv /usr/local/.ghcup/bin/cabal{-old,}
 
-      # haskell-actions/setup@v2 intentinally sets non-XDG mode, however, let's disable that behavior
+      # `haskell-actions/setup@v2` intentinally sets non-XDG mode, however, we'll disable that
+      # behavior in order to match the initial environment:
       ls -lA ~/.cabal
       rm -rf ~/.cabal
       rm ~/.config/cabal/config # the last line (`store-dir: /home/runner/.cabal/store`) is created by the setup action
