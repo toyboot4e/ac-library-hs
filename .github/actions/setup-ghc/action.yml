@@ -14,6 +14,10 @@ runs:
   - name: Inspect
     shell: bash
     run: |
+      ls -lA ~/ | grep .ghcup # we have ~/.ghcup -> /usr/local/.ghcup
+      cat ~/.cabal/config || true
+      cat ~/.config/cabal/config || true
+
       /usr/local/.ghcup/bin/cabal --version
 
       # This crates `~/.config/cabal/config`. It's super important for having persistent cabal stoer path.
@@ -92,6 +96,13 @@ runs:
     shell: bash
     run: |
       mv /usr/local/.ghcup/bin/cabal{-old,}
+      cabal path # the store path must be ~/.local/state/cabal/store
+      cat ~/.cabal/config ||
+      rm ~/.cabal/config ||
+      cabal path # the store path must be ~/.local/state/cabal/store
+      cat ~/.config/cabal/config ||
+      rm ~/.config/cabal/config ||
+      cabal path # the store path must be ~/.local/state/cabal/store
 
   - name: Inspect
     shell: bash
