@@ -100,10 +100,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ghc-version: '9.8.4'
+      num-parallel: '15'
     strategy:
       fail-fast: false
       matrix:
-        parallel-index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        parallel-index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
         ghc-version: ['9.8.4']
 
     steps:
@@ -135,7 +136,7 @@ jobs:
         #   GH_PAT: ${{ secrets.GH_PAT }}
         working-directory: verify
         run: |
-          files="$(find app/ -type f | awk 'NR % 20 == ${{ matrix.parallel-index }}')"
+          files="$(find app/ -type f | awk 'NR % ${{ env.num-parallel }} == ${{ matrix.parallel-index }}')"
           echo 'target files:'
           for f in $files ; do
             echo "- $f"
