@@ -7,18 +7,20 @@ inputs:
     required: true
   # preinstalled version of cabal is used
 
-env:
-  dummy-cabal-version: '3.10'
-
 runs:
   using: composite
   steps:
-  - name: Detect preinstalled version of cabal
-    id: detect-cabal
+
+  # Because we cannot have `env` vars in composite action:
+  - name: Define env-like vars
+    id: vars
     shell: 'bash'
     run: |
       ver="$(/usr/local/.ghcup/bin/cabal --version | head -n 1 | awk '{print $3}')"
-      echo "cabal-version=$ver" >> $GITHUB_OUTPUT
+      echo "cabal-version=$ver" >> "$GITHUB_OUTPUT"
+      echo "cabal-version=$ver"
+      echo "dummy-cabal-version=$ver" >> "$GITHUB_OUTPUT"
+      echo "dummy-cabal-version=$ver"
 
   - name: Restore GHC ${{ inputs.ghc-version }}
     uses: actions/cache/restore@v4
@@ -28,7 +30,7 @@ runs:
         ~/.ghcup/ghc/${{ inputs.ghc-version }}/bin
         ~/.ghcup/ghc/${{ inputs.ghc-version }}/lib/ghc-${{ inputs.ghc-version }}/bin
         ~/.ghcup/ghc/${{ inputs.ghc-version }}/lib/ghc-${{ inputs.ghc-version }}/lib
-      key: _GHC_${{ runner.os }}-ghc-${{ inputs.ghc-version }}-cabal-${{ steps.detect-cabal.cabal-version }}
+      key: _GHC_${{ runner.os }}-ghc-${{ inputs.ghc-version }}-cabal-${{ steps.vars.outputs.cabal-version }}
 
   - name: Setup GHC path on restore
     if: steps.ghc-cache.outputs.cache-hit == 'true'
@@ -54,7 +56,7 @@ runs:
     id: setup
     with:
       ghc-version: ${{ inputs.ghc-version }}
-      cabal-version: ${{ env.dummy-cabal-version }}
+      cabal-version: ${{ steps.vars.outputs.dummy-cabal-version }}
 
   - name: Post downloading GHC ${{ inputs.ghc-version }}
     if: steps.ghc-cache.outputs.cache-hit != 'true'
@@ -82,4 +84,3 @@ runs:
         ~/.ghcup/ghc/${{ inputs.ghc-version }}/lib/ghc-${{ inputs.ghc-version }}/bin
         ~/.ghcup/ghc/${{ inputs.ghc-version }}/lib/ghc-${{ inputs.ghc-version }}/lib
       key: ${{ steps.ghc-cache.outputs.cache-primary-key }}
-      fail-on-cache-miss: 'true'
