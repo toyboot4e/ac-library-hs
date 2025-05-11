@@ -6,12 +6,13 @@ on:
   pull_request:
     branches-ignore: '**'
 
-# INFO: The following configuration block ensures that only one build runs per branch,
-# which may be desirable for projects with a costly build process.
-# Remove this block from the CI workflow to let each CI job run to completion.
+# Stop other CI in the same branch on new run:
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
+
+# Some Haskell tools are preinstalled in: `/usr/local/.ghcup`.
+# There's a symlink: `~/.ghcup` -> `/usr/local/.ghcup`.
 
 jobs:
   build:
@@ -32,54 +33,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up GHC ${{ matrix.ghc-version }}
-        uses: haskell-actions/setup@v2
-        id: setup
+      - name: Setup GHC
+        uses: ./.github/actions/setup-ghc
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: 'latest'
-          cabal-update: true
 
-      - name: Configure the build
-        run: |
-          cabal configure --enable-tests --enable-benchmarks --disable-documentation
-          cabal build all --dry-run
-        # The last step generates dist-newstyle/cache/plan.json for the cache key.
-
-      - name: Restore cached dependencies
-        uses: actions/cache/restore@v4
-        id: deps-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
-        with:
-          path: ${{ steps.setup.outputs.cabal-store }}
-          key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
-          restore-keys: ${{ env.key }}-
-
-      - name: Install dependencies
-        # If we had an exact cache hit, the dependencies will be up to date.
-        if: steps.deps-cache.outputs.cache-hit != 'true'
-        run: cabal build all --only-dependencies
-
-      - name: Save cached dependencies
-        uses: actions/cache/save@v4
-        # If we had an exact cache hit, trying to save the cache would error because of key clash.
-        if: steps.deps-cache.outputs.cache-hit != 'true'
-        with:
-          path: ${{ steps.setup.outputs.cabal-store }}
-          key: ${{ steps.deps-cache.outputs.cache-primary-key }}
-
-      # Make build cache of `ac-library-hs` for this run
-      - name: Build ac-library-hs
-        run: cabal build lib:ac-library-hs
-
-      - name: Save cached ac-library-hs
-        uses: actions/cache/save@v4
-        env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
-        with:
-          path: dist-newstyle
-          key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
+      - name: Build the library
+        uses: ./.github/actions/build
 
   test:
     needs: build
@@ -92,59 +52,25 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         ghc-version: ['9.8.4']
-
         # include:
         #   - os: windows-latest
         #     ghc-version: '9.8'
         #   - os: macos-latest
         #     ghc-version: '9.8'
+
     steps:
-      # ------------------------------------------------------------
-      # Setup Haskell (TODO: move to a separate composite action file)
-      # ------------------------------------------------------------
       - uses: actions/checkout@v4
 
-      - name: Set up GHC ${{ matrix.ghc-version }}
-        uses: haskell-actions/setup@v2
-        id: setup
+      - name: Restore GHC
+        uses: ./.github/actions/setup-ghc
         with:
           ghc-version: ${{ matrix.ghc-version }}
-          cabal-version: 'latest'
-          cabal-update: true
 
-      - name: Restore cached dependencies from the `build` job
-        uses: actions/cache/restore@v4
-        id: deps-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
-        with:
-          path: ${{ steps.setup.outputs.cabal-store }}
-          key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
-          restore-keys: ${{ env.key }}-
+      - name: Restore the library build artifacts
+        uses: ./.github/actions/build
 
-      # NOTE: `cache-hit` is not set to `true` on partial hit.
-      # - name: Warn deps-cache miss
-      #   if: steps.deps-cache.outputs.cache-hit != 'true'
-      #   run: echo "::warning::Dependency cache miss - dependencies will be built again (cache hit status ${{ steps.deps-cache.outputs.cache-hit }})"
-
-      - name: Restore cached `ac-lbrary-hs` from the `build` job
-        uses: actions/cache/restore@v4
-        id: lib-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
-        with:
-          path: dist-newstyle
-          key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
-
-      - name: Warn lib-cache miss
-        if: steps.lib-cache.outputs.cache-hit != 'true'
-        run: echo "::warning::Library cache miss - ac-library-hs will be built again (cache hit status ${{ steps.deps-cache.outputs.cache-hit }})"
-
-      # ------------------------------------------------------------
-      # Run tests
-      # ------------------------------------------------------------
       - name: Build check
-        # make sure to build all the components in `ac-library-hs.cabal` (TODO: automate this)
+        # As a test, build all the components in `ac-library-hs.cabal` (TODO: automate this)
         run: |
           cabal build ac-library-hs
           cabal build ac-library-hs:example-lazy-segtree
@@ -152,11 +78,6 @@ jobs:
 
       - name: Run tests
         run: cabal test all
-
-      - name: Run doctest
-        run: |
-          cabal install doctest
-          cabal repl --with-ghc=doctest --repl-options='-w -Wdefault'
 
       - name: Check cabal file
         run: cabal check
@@ -168,63 +89,63 @@ jobs:
       #     # The package's own documentation is still built,
       #     # yet contains no links to the documentation of the dependencies.
 
-  # Run oj-verify in 20 tasks
+  doctest:
+    needs: build
+    name: Doctest (GHC ${{ matrix.ghc-version }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    # TODO: DRY
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        ghc-version: ['9.8.4']
+        # include:
+        #   - os: windows-latest
+        #     ghc-version: '9.8'
+        #   - os: macos-latest
+        #     ghc-version: '9.8'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore GHC
+        uses: ./.github/actions/setup-ghc
+        with:
+          ghc-version: ${{ matrix.ghc-version }}
+
+      - name: Restore the library build artifacts
+        uses: ./.github/actions/build
+
+      - name: Run doctest
+        run: |
+          cabal install doctest
+          cabal repl --with-ghc=doctest --repl-options='-w -Wdefault'
+
   verify:
     needs: build
     name: Verify (GHC 9.8.4 on ubuntu-latest)
     runs-on: ubuntu-latest
     env:
       ghc-version: '9.8.4'
+      num-parallel: '15'
     strategy:
       fail-fast: false
       matrix:
-        parallel-index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        parallel-index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+        ghc-version: ['9.8.4']
 
     steps:
-      # ------------------------------------------------------------
-      # Setup Haskell (TODO: move to a separate composite action file)
-      # ------------------------------------------------------------
       - uses: actions/checkout@v4
 
-      - name: Set up GHC ${{ env.ghc-version }}
-        uses: haskell-actions/setup@v2
-        id: setup
+      - name: Restore GHC
+        uses: ./.github/actions/setup-ghc
         with:
-          ghc-version: ${{ env.ghc-version }}
-          cabal-version: 'latest'
-          cabal-update: true
+          ghc-version: ${{ matrix.ghc-version }}
 
-      - name: Restore cached dependencies from the `build` job
-        uses: actions/cache/restore@v4
-        id: deps-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
-        with:
-          path: ${{ steps.setup.outputs.cabal-store }}
-          key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
-          restore-keys: ${{ env.key }}-
+      - name: Restore the library build artifacts
+        uses: ./.github/actions/build
 
-      # NOTE: `cache-hit` is not set to `true` on partial hit.
-      # - name: Warn deps-cache miss
-      #   if: steps.deps-cache.outputs.cache-hit != 'true'
-      #   run: echo "::warning::Dependency cache miss - dependencies will be built again (cache hit status ${{ steps.deps-cache.outputs.cache-hit }})"
-
-      - name: Restore cached `ac-lbrary-hs` from the `build` job
-        uses: actions/cache/restore@v4
-        id: lib-cache
-        env:
-          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
-        with:
-          path: dist-newstyle
-          key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
-
-      - name: Warn lib-cache miss
-        if: steps.lib-cache.outputs.cache-hit != 'true'
-        run: echo "::warning::Library cache miss - ac-library-hs will be built again (cache hit status ${{ steps.deps-cache.outputs.cache-hit }})"
-
-      # ------------------------------------------------------------
-      # Run verification test
-      # ------------------------------------------------------------
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -243,9 +164,9 @@ jobs:
         #   GH_PAT: ${{ secrets.GH_PAT }}
         working-directory: verify
         run: |
-          files="$(find app/ -type f | awk 'NR % 20 == ${{ matrix.parallel-index }}')"
+          files="$(find app/ -type f | awk 'NR % ${{ env.num-parallel }} == ${{ matrix.parallel-index }}')"
           echo 'target files:'
           for f in $files ; do
             echo "- $f"
           done
-          oj-verify run $files --tle 15 -j 2
+          oj-verify run $files --tle 30 -j $(nproc)
