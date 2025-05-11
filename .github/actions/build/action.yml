@@ -65,6 +65,7 @@ runs:
 
   - name: Save cached ac-library-hs
     uses: actions/cache/save@v4
+    if: steps.lib-cache.outputs.cache-hit != 'true'
     env:
       key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ steps.vars.outputs.cabal-version }}
     with:
