@@ -59,7 +59,7 @@ runs:
       path: dist-newstyle
       key: ac-library-hs-${{ github.run_id }}-${{ env.key }}
 
-  - name: Build ac-library-hs
+  - name: Build the dependencies and ac-library-hs
     shell: 'bash'
     run: |
       cabal build lib:ac-library-hs
