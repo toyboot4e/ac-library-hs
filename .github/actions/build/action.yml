@@ -7,7 +7,7 @@ runs:
   # Because we cannot have `env` vars in composite action:
   - name: Define env-like vars
     id: vars
-    shell: 'bash'
+    shell: bash
     run: |
       ver="$(/usr/local/.ghcup/bin/cabal --version | head -n 1 | awk '{print $3}')"
       echo "cabal-version=$ver" >> "$GITHUB_OUTPUT"
@@ -18,7 +18,7 @@ runs:
       # echo "store-path=~/.cabal/store"
 
   - name: Configure the build
-    shell: 'bash'
+    shell: bash
     run: |
       cabal update
       cabal configure --enable-tests --enable-benchmarks --disable-documentation
@@ -38,7 +38,7 @@ runs:
   - name: Install dependencies
     # If we had an exact cache hit, the dependencies will be up to date.
     if: steps.deps-cache.outputs.cache-hit != 'true'
-    shell: 'bash'
+    shell: bash
     run: cabal build all --only-dependencies
 
   - name: Save dependency cache
@@ -61,7 +61,7 @@ runs:
       restore-keys: ac-library-hs-${{ env.key }}-
 
   - name: Build the dependencies (if necessary) and ac-library-hs
-    shell: 'bash'
+    shell: bash
     run: |
       cabal build lib:ac-library-hs
 
