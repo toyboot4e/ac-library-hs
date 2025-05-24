@@ -242,7 +242,7 @@ newAt tree root
         0
         (VU.singleton (-1))
         (VU.singleton 0)
-        (VU.singleton (-1))
+        (VU.singleton 0)
         (VU.singleton 0)
         (VU.singleton 0)
         (VU.singleton 1)
