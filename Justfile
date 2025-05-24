@@ -97,3 +97,10 @@ verify-all:
 
 [private]
 alias va := verify-all
+
+# runs all of the local tests
+test-all:
+    cabal build && just test && just doctest && just verif-all
+
+[private]
+alias ta := test-all
