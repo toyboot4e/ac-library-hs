@@ -50,7 +50,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
--- | Fixed-sized array for \(O(1)\) allocation and \(O(1)\) clearing after \(O(n)\) construction.
+-- | Fixed-size array for \(O(1)\) allocation and \(O(1)\) clearing after \(O(n)\) construction.
 --
 -- @since 1.2.0.0
 data Pool s a = Pool
@@ -166,9 +166,9 @@ read Pool {dataPool} !i = do
 -- | \(O(1)\) Writes to the \(k\)-th value.
 --
 -- ==== Constraints
+-- - \(0 \le i \lt n\)
 --
 -- @since 1.2.0.0
--- - \(0 \le i \lt n\)
 {-# INLINE write #-}
 write :: (PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> Index -> a -> m ()
 write Pool {dataPool} !i !x = do

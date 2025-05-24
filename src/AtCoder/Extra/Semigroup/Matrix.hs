@@ -1,7 +1,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE RecordWildCards #-}
 
--- | A simple HxW matrix backed by a vector, mainly for binary exponention.
+-- | A simple HxW matrix backed by a vector, mainly for binary exponentiation.
 --
 -- The matrix is a left semigroup action: \(m_2 (m_1 v) = (m_2 \circ m_1) v\).
 --
@@ -65,7 +65,7 @@ import GHC.Stack (HasCallStack)
 import GHC.TypeNats (KnownNat, natVal')
 import Prelude hiding (map)
 
--- | A simple HxW matrix backed by a vector, mainly for binary exponention.
+-- | A simple HxW matrix backed by a vector, mainly for binary exponentiation.
 --
 -- The matrix is a left semigroup action: \(m_2 (m_1 v) = (m_2 \circ m_1) v\).
 --

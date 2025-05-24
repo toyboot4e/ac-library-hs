@@ -80,7 +80,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | A disjoint set union. Akso known as Union-Find tree.
+-- | A disjoint set union. Also known as Union-Find tree.
 --
 -- @since 1.0.0.0
 data Dsu s = Dsu

@@ -85,7 +85,7 @@ verify:
     cd verify
     file="$(basename "$(ls app/*.hs | fzf --history .fzf-history)")"
     touch "app/$file"
-    oj-verify run "app/$file" # -j 8
+    oj-verify run "app/$file" -j $(nproc)
 
 [private]
 alias v := verify
@@ -93,7 +93,14 @@ alias v := verify
 # runs local test for all of the online judge problems
 verify-all:
     #!/usr/bin/env bash
-    cd verify && touch app/* && oj-verify run app/*.hs -j 8
+    cd verify && touch app/* && oj-verify run app/*.hs -j $(nproc)
 
 [private]
 alias va := verify-all
+
+# runs all of the local tests
+test-all:
+    cabal build && just test && just doctest && just verify-all
+
+[private]
+alias ta := test-all

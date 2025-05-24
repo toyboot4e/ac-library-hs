@@ -7,7 +7,7 @@
 -- NOTE: We could integrate cumulative sum / fenwick tree / segment tree.
 -- NOTE: `topK` and `intersects` are not implemented as they are slow.
 
--- | A static Wavelet Matrix without automatic index comperssion. Consider using
+-- | A static Wavelet Matrix without automatic index compression. Consider using
 -- @AtCoder.Extra.WaveletMatrix@ instead.
 --
 -- @since 1.1.0.0

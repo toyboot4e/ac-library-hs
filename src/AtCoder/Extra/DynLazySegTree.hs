@@ -2,7 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 
 -- | A dynamic, lazily propagated segment tree that covers a half-open interval \([l_0, r_0)\).
--- Nodes are instantinated as needed, with the required capacity being /approximately/ \(4q \log_2 L\),
+-- Nodes are instantiated as needed, with the required capacity being /approximately/ \(4q \log_2 L\),
 -- where \(q\) is the number of mutable operations and \(L\) is the length of the interval.
 --
 -- ==== __Example__
@@ -312,7 +312,7 @@ maxRightM :: (HasCallStack, PrimMonad m, SegAct f a, Eq f, Monoid f, VU.Unbox f,
 maxRightM dst root f = do
   Raw.maxRightM dst root f
 
--- | \(O(\log L)\) Claers all the nodes from the storage.
+-- | \(O(\log L)\) Clears all the nodes from the storage.
 --
 -- @since 1.2.2.0
 {-# INLINE clear #-}

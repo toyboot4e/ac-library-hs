@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Immutable Compresed Sparse Row. It is re-exported from the @AtCoder.Extra.Graph@ module with
+-- | Immutable Compressed Sparse Row. It is re-exported from the @AtCoder.Extra.Graph@ module with
 -- additional functionalities.
 --
 -- ==== __Example__

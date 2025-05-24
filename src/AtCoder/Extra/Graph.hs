@@ -242,8 +242,7 @@ rev Csr {..} = Csr.build nCsr revEdges
 
 -- TODO: is this minimum cycle?
 
--- | \(O(n + m)\) Given a directed graph, finds a minimal cycle and returns a vector of vertices and
--- a vector of @(vertices, csrEdgeIndices)@.
+-- | \(O(n + m)\) Given a directed graph, finds a minimal cycle and returns @(vertices, csrEdgeIndices)@.
 --
 -- ==== __Example__
 --
@@ -346,9 +345,9 @@ findCycleDirected gr@Csr {..} = runST $ do
     then pure Nothing
     else pure $ Just (vs', es')
 
--- | \(O(n + m)\) Given an undirected graph, finds a minimal cycle and returns a vector of vertices
--- a vector of @(vertices, csrEdgeIndices)@. A single edge index does not make much sense for an
--- undirected graph, so map back to the original edge index manually if needed.
+-- | \(O(n + m)\) Given an undirected graph, finds a minimal cycle and returns @(vertices, csrEdgeIndices)@.
+-- A single edge index does not make much sense for an undirected graph, so map back to the original
+-- edge index manually if needed.
 --
 -- ==== Constraints
 -- - The graph must be created with `swapDupe` or `swapDupe'`. Otherwise the returned edge indices
@@ -720,7 +719,7 @@ blockCut ::
   Int ->
   -- | \(g\): Graph function, typically @'adj' gr@.
   (Int -> VU.Vector Int) ->
-  -- | Graph that represents a block-cut tree, where super vertices \((n \ge n)\) represent each
+  -- | Graph that represents a block-cut tree, where super vertices \((v \ge n)\) represent each
   -- biconnected component.
   Csr ()
 blockCut n gr = runST $ do
@@ -792,7 +791,7 @@ blockCut n gr = runST $ do
   n' <- VGM.unsafeRead next 0
   Csr.build' n' <$> B.unsafeFreeze edges
 
--- | \(O(n + m)\) Returns [blocks (biconnected comopnents)](https://en.wikipedia.org/wiki/Biconnected_component)
+-- | \(O(n + m)\) Returns [blocks (biconnected components)](https://en.wikipedia.org/wiki/Biconnected_component)
 -- of the graph.
 --
 -- ==== __Example__
@@ -945,62 +944,74 @@ bfsImpl !trackPrev !bnd0 !gr !undefW !sources
 
 -- | \(O(n + m)\) Opinionated 01-BFS that returns a distance array.
 --
+-- Unreachable vertices are given distance of `-1`. Note that the third argument is the capacity of
+-- deque, not distance of unreachable vertices.
+--
+-- ==== Constraints
+-- - \(\marhrm{capacity} \ge 0\)
+--
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let es = VU.fromList [(0, 1, 10 :: Int), (0, 2, 0), (2, 1, 1)]
 -- >>> let gr = Gr.build 4 es
--- >>> let capacity = 10
--- >>> Gr.bfs01 4 (Gr.adjW gr) capacity (VU.singleton (0, 0))
+-- >>> let capacity = VU.length es
+-- >>> Gr.bfs01 4 capacity (Gr.adjW gr) (VU.singleton (0, 0))
 -- [0,1,0,-1]
 --
--- @since 1.2.4.0
+-- @since 1.5.0.0
 {-# INLINE bfs01 #-}
 bfs01 ::
   forall i.
   (HasCallStack, Ix0 i, VU.Unbox i) =>
-  -- | Zero-based index boundary.
+  -- | Zero-based vertex boundary. It's \(n\) if the graph is one-dimensional.
   Bounds0 i ->
+  -- | Capacity of deque, often the number of edges \(m\).
+  Int ->
   -- | Graph function that takes the vertexand returns adjacent vertices with edge weights, where
   -- \(w > 0\).
   (i -> VU.Vector (i, Int)) ->
-  -- | Capacity of deque, often the number of edges \(m\).
-  Int ->
   -- | Weighted source vertices.
   VU.Vector (i, Int) ->
   -- | Distance array in one-dimensional index. Unreachable vertices are assigned distance of @-1@.
   VU.Vector Int
-bfs01 !bnd0 !gr !capacity !sources =
-  let (!dist, !_) = bfs01Impl False bnd0 gr capacity sources
+bfs01 !bnd0 !capacity !gr !sources =
+  let (!dist, !_) = bfs01Impl False bnd0 capacity gr sources
    in dist
 
 -- | \(O(n + m)\) Opinionated 01-BFS that returns a distance array and a predecessor array.
+--
+-- Unreachable vertices are given distance of `-1`. Note that the third argument is the capacity of
+-- deque, not distance of unreachable vertices.
+--
+-- ==== Constraints
+-- - \(\marhrm{capacity} \ge 0\)
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let es = VU.fromList [(0, 1, 10 :: Int), (0, 2, 0), (2, 1, 1)]
 -- >>> let gr = Gr.build 4 es
--- >>> let capacity = 10
--- >>> let (!dist, !prev) = Gr.trackingBfs01 4 (Gr.adjW gr) capacity (VU.singleton (0, 0))
+-- >>> let capacity = VU.length es
+-- >>> let (!dist, !prev) = Gr.trackingBfs01 4 capacity (Gr.adjW gr) (VU.singleton (0, 0))
 -- >>> dist
 -- [0,1,0,-1]
 --
 -- >>> Gr.constructPathFromRoot prev 1
 -- [0,2,1]
 --
--- @since 1.2.4.0
+-- @since 1.5.0.0
 {-# INLINE trackingBfs01 #-}
 trackingBfs01 ::
   forall i.
   (HasCallStack, Ix0 i, VU.Unbox i) =>
-  -- | Zero-based index boundary.
+  -- | Zero-based vertex boundary. It's \(n\) if the graph is one-dimensional.
   Bounds0 i ->
+  -- | Capacity of deque, often the number of edges \(m\).
+  Int ->
   -- | Graph function that takes the vertex and returns adjacent vertices with edge weights, where
   -- \(w > 0\).
   (i -> VU.Vector (i, Int)) ->
-  -- | Capacity of deque, often the number of edges \(m\).
-  Int ->
   -- | Weighted source vertices.
   VU.Vector (i, Int) ->
   -- | A tuple of (distance array in one-dimensional index, predecessor array). Unreachable vertices
@@ -1014,11 +1025,11 @@ bfs01Impl ::
   (HasCallStack, Ix0 i, VU.Unbox i) =>
   Bool ->
   Bounds0 i ->
-  (i -> VU.Vector (i, Int)) ->
   Int ->
+  (i -> VU.Vector (i, Int)) ->
   VU.Vector (i, Int) ->
   (VU.Vector Int, VU.Vector Int)
-bfs01Impl !trackPrev !bnd0 !gr !capacity !sources
+bfs01Impl !trackPrev !bnd0 !capacity !gr !sources
   | VU.null sources && trackPrev = (VU.replicate nVerts (-1), VU.replicate nVerts (-1))
   | VU.null sources = (VU.replicate nVerts (-1), VU.replicate 0 (-1))
   | otherwise = runST $ do
@@ -1029,7 +1040,8 @@ bfs01Impl !trackPrev !bnd0 !gr !capacity !sources
           else VUM.replicate @_ @Int 0 (-1)
       -- NOTE: Just like Dijkstra, we need capacity of `m`, as the first appearance of a vertex is not
       -- always with minimum distance.
-      deque <- Q.newDeque @_ @(i, Int) capacity
+      -- NOTE: Ensure minimum capacity of |sources| (too conservative?)
+      deque <- Q.newDeque @_ @(i, Int) $ capacity + VU.length sources
 
       -- set source values
       VU.forM_ sources $ \(!src, !w0) -> do
@@ -1072,65 +1084,71 @@ bfs01Impl !trackPrev !bnd0 !gr !capacity !sources
 
 -- | \(O((n + m) \log n)\) Dijkstra's algorithm that returns a distance array.
 --
+-- ==== Constraints
+-- - \(\mathrm{capacity} \ge 0\)
+--
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let es = VU.fromList [(0, 1, 10 :: Int), (1, 2, 20), (2, 3, 1), (1, 3, 40), (4, 3, 0)]
 -- >>> let gr = Gr.build 5 es
--- >>> let capacity = 10
--- >>> Gr.dijkstra 5 (Gr.adjW gr) capacity (-1) (VU.singleton (0, 0))
+-- >>> let capacity = VU.length es
+-- >>> Gr.dijkstra 5 capacity (Gr.adjW gr) (-1) (VU.singleton (0, 0))
 -- [0,10,30,31,-1]
 --
--- @since 1.2.4.0
+-- @since 1.5.0.0
 {-# INLINE dijkstra #-}
 dijkstra ::
   forall i w.
   (HasCallStack, Ix0 i, Ord i, VU.Unbox i, Num w, Ord w, VU.Unbox w) =>
-  -- | Zero-based vertex boundary.
+  -- | Zero-based vertex boundary. It's \(n\) if the graph is one-dimensional.
   Bounds0 i ->
+  -- | Capacity of the heap, often the number of edges \(m\).
+  Int ->
   -- | Graph function that takes a vertex and returns adjacent vertices with edge weights, where
   -- \(w \ge 0\).
   (i -> VU.Vector (i, w)) ->
-  -- | Capacity of the heap, often the number of edges \(m\).
-  Int ->
   -- | Distance assignment for unreachable vertices.
   w ->
   -- | Source vertices with initial weights.
   VU.Vector (i, w) ->
   -- | Distance array in one-dimensional index.
   VU.Vector w
-dijkstra !bnd0 !gr !capacity !undefW !sources =
-  let (!dist, !_) = dijkstraImpl False bnd0 gr capacity undefW sources
+dijkstra !bnd0 !capacity !gr !undefW !sources =
+  let (!dist, !_) = dijkstraImpl False bnd0 capacity gr undefW sources
    in dist
 
 -- | \(O((n + m) \log n)\) Dijkstra's algorithm that returns a distance array and a predecessor
 -- array.
+--
+-- ==== Constraints
+-- - \(\mathrm{capacity} \ge 0\)
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let es = VU.fromList [(0, 1, 10 :: Int), (1, 2, 20), (2, 3, 1), (1, 3, 40), (4, 3, 0)]
 -- >>> let gr = Gr.build 5 es
--- >>> let capacity = 10
--- >>> let (!dist, !prev) = Gr.trackingDijkstra 5 (Gr.adjW gr) capacity (-1) (VU.singleton (0, 0))
+-- >>> let capacity = VU.length es
+-- >>> let (!dist, !prev) = Gr.trackingDijkstra 5 capacity (Gr.adjW gr) (-1) (VU.singleton (0, 0))
 -- >>> dist
 -- [0,10,30,31,-1]
 --
 -- >>> Gr.constructPathFromRoot prev 3
 -- [0,1,2,3]
 --
--- @since 1.2.4.0
+-- @since 1.5.0.0
 {-# INLINE trackingDijkstra #-}
 trackingDijkstra ::
   forall i w.
   (HasCallStack, Ix0 i, Ord i, VU.Unbox i, Num w, Ord w, VU.Unbox w) =>
-  -- | Zero-based vertex boundary.
+  -- | Zero-based vertex boundary. It's \(n\) if the graph is one-dimensional.
   Bounds0 i ->
+  -- | Capacity of the heap, often the number of edges \(m\).
+  Int ->
   -- | Graph function that takes a vertex and returns adjacent vertices with edge weights, where
   -- \(w \ge 0\).
   (i -> VU.Vector (i, w)) ->
-  -- | Capacity of the heap, often the number of edges \(m\).
-  Int ->
   -- | Distance assignment for unreachable vertices.
   w ->
   -- | Source vertices with initial weights.
@@ -1145,18 +1163,19 @@ dijkstraImpl ::
   (HasCallStack, Ix0 i, Ord i, VU.Unbox i, Num w, Ord w, VU.Unbox w) =>
   Bool ->
   Bounds0 i ->
-  (i -> VU.Vector (i, w)) ->
   Int ->
+  (i -> VU.Vector (i, w)) ->
   w ->
   VU.Vector (i, w) ->
   (VU.Vector w, VU.Vector Int)
-dijkstraImpl !trackPrev !bnd0 !gr !capacity !undefW !sources
+dijkstraImpl !trackPrev !bnd0 !capacity !gr !undefW !sources
   | VU.null sources && trackPrev = (VU.replicate nVerts undefW, VU.replicate nVerts (-1))
   | VU.null sources = (VU.replicate nVerts undefW, VU.replicate 0 (-1))
   | otherwise = runST $ do
       !dist <- VUM.replicate @_ @w nVerts undefW
       -- REMARK: (w, i) for sort by width
-      !heap <- MH.new @_ @(w, i) capacity
+      -- REMARK: We need least capacity of |source|
+      !heap <- MH.new @_ @(w, i) $ capacity + VU.length sources
       !prev <-
         if trackPrev
           then VUM.replicate @_ @Int nVerts (-1)
@@ -1427,6 +1446,9 @@ trackingFloydWarshall !nVerts !edges !undefW = runST $ do
 -- - There's a negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@
 -- is negative.
 --
+-- ==== Constraints
+-- - \(n \ge 1\)
+--
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -1464,6 +1486,9 @@ newFloydWarshall !nVerts !edges !undefW = stToPrim $ do
 -- - The predecessor matrix should be accessed as @m VG.! (`index0` (n, n) (root, v))@
 -- - There's a negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@
 -- is negative.
+--
+-- ==== Constraints
+-- - \(n \ge 1\)
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -1552,6 +1577,9 @@ newFloydWarshallST !trackPrev !nVerts !edges !undefW = do
 
 -- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight change or new edge addition.
 --
+-- ==== Constraints
+-- - \(n \ge 1\)
+--
 -- @since 1.2.4.0
 {-# INLINE updateEdgeFloydWarshall #-}
 updateEdgeFloydWarshall ::
@@ -1577,6 +1605,9 @@ updateEdgeFloydWarshall mat nVerts undefW a b w = do
   stToPrim $ updateEdgeFloydWarshallST False mat prev nVerts undefW a b w
 
 -- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight chaneg or new edge addition.
+--
+-- ==== Constraints
+-- - \(n \ge 1\)
 --
 -- @since 1.2.4.0
 {-# INLINE updateEdgeTrackingFloydWarshall #-}

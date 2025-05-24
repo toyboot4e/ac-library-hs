@@ -64,7 +64,7 @@ import GHC.Stack (HasCallStack)
 import GHC.TypeNats (natVal')
 
 -- NOTE(pref): Inlining `convolution` functions makes the compile time extremely too slow, while it
--- surely makes beter runtime performance (#51).
+-- surely makes better runtime performance (#51).
 
 -- | Calculates the convolution in \(\bmod m\) for a vector of `ACIM.ModInt`. It returns an empty
 -- array if at least one of \(a\) and \(b\) are empty.

@@ -15,12 +15,12 @@
 --
 -- Append elements with `pushBack`:
 --
--- >>> B.pushBack buf 10 -- [10  _  _ _]
+-- >>> B.pushBack buf 10 -- [10  _   _  _]
 -- >>> B.pushBack buf 11 -- [10, 11  _  _]
 -- >>> length buf
 -- 2
 --
--- Access each elements with `read`, `readMaybe`, `write`, `modify` or `modifyM`:
+-- Access each element with `read`, `readMaybe`, `write`, `modify` or `modifyM`:
 --
 -- >>> B.read buf 0
 -- 10
@@ -36,7 +36,7 @@
 --
 -- >>> B.write buf 1 0   -- [10, 0,  _  _]
 --
--- Remove elements with `pushBack`:
+-- Remove elements with `popBack`:
 --
 -- >>> B.popBack buf     -- [10  _  _  _]
 -- Just 0

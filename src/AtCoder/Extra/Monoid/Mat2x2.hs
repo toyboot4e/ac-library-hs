@@ -2,7 +2,7 @@
 {-# LANGUAGE TypeFamilies #-}
 
 -- | Monoid action \(f: x \rightarrow ax + b\). Less efficient than @Affine1@, but is compatible
--- with inverse opereations.
+-- with inverse operations.
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Monoid.Mat2x2
@@ -136,7 +136,7 @@ map f (Mat2x2 (!a11, !a12, !a21, !a22)) = Mat2x2 (a11', a12', a21', a22')
     !a21' = f a21
     !a22' = f a22
 
--- | \(O(1)\) Returns the determinan of the matrix.
+-- | \(O(1)\) Returns the determinant of the matrix.
 --
 -- @since 1.1.0.0
 {-# INLINE det #-}
@@ -146,7 +146,7 @@ det (Mat2x2 (!a, !b, !c, !d)) = a * d - b * c
 -- | \(O(1)\) Returns the inverse matrix, based on `Fractional` instance (mainly for @ModInt@).
 --
 -- ==== Constraints
--- - The determinant (`det`) of the matrix must be non-zero, otherwise an error is thrown.
+-- - The determinant (`det`) of the matrix must be nonzero, otherwise an error is thrown.
 --
 -- @since 1.1.0.0
 {-# INLINE inv #-}

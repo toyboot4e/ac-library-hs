@@ -9,14 +9,10 @@ import Control.Monad.ST (RealWorld)
 import Data.List qualified as L
 import Data.Map qualified as M
 import Data.Maybe (fromMaybe)
-import Data.Ord (comparing)
 import Data.Semigroup (Sum (..))
-import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Unboxed qualified as VU
-import Test.Hspec
 import Test.QuickCheck.Monadic as QCM
 import Test.Tasty
-import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
 import Tests.Util (intervalGen)
 

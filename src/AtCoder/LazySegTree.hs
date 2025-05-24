@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | A lazily propagted segment tree. It is the data structure for the pair of a [monoid](https://en.wikipedia.org/wiki/Monoid)
+-- | A lazily propagated segment tree. It is the data structure for the pair of a [monoid](https://en.wikipedia.org/wiki/Monoid)
 -- \((S, \cdot: S \times S \to S, e \in S)\) and a set \(F\) of \(S \to S\) mappings that satisfies
 -- the following properties.
 --
@@ -15,8 +15,8 @@
 -- - Calculating the product of the elements of an interval
 --
 -- In Haskell types, \(F\) is a `SegAct` (@'segAct' f@) and \(S\) is a `Monoid`. For simplicity, in
--- this document, we assume that the relevant methods work in constant time. If these they work in
--- \(O(T)\) time, each time complexity appear in this document is multipled by \(O(T)\).
+-- this document, we assume that the relevant methods work in constant time. If these work in
+-- \(O(T)\) time, each time complexity appear in this document is multiplied by \(O(T)\).
 --
 -- ==== __Example__
 -- Here we'll use `AtCoder.Extra.Monoid.Affine1` as a monoid action \(F\) and `Data.Semigroup.Sum`

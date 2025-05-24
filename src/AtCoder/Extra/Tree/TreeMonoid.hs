@@ -17,7 +17,7 @@
 -- o--o--o  --> o-x-o-x-o
 -- @
 --
--- Idea 2. Assign edge weight to the deeper vertex. The is the internal implementation of
+-- Idea 2. Assign edge weight to the deeper vertex. This is the internal implementation of
 -- `fromEdges` and LCAs are ignored on `prod`:
 --
 -- @
@@ -66,7 +66,6 @@
 -- >>> let edges = VU.fromList [(0, 1, Sum (1 :: Int)), (1, 2, Sum 2), (2, 3, Sum 3), (1, 4, Sum 4), (4, 5, Sum 5)]
 -- >>> -- note that the edges must be bi-directed:
 -- >>> let tree = Gr.build n $ Gr.swapDupe edges
--- >>> let hld = Hld.new tree
 -- >>> let hld = Hld.new tree
 -- >>> -- note that the edge doesn't have to be bi-directed:
 -- >>> tm <- TM.fromEdges hld {- `Sum` is commutative -} Commute edges

@@ -3,12 +3,12 @@
 -- original implementation:
 -- <https://qiita.com/drken/items/cce6fc5c579051e64fab>
 
--- | A potentialized disjoint set union on a [group](https://en.wikipedia.org/wiki/Group_(mathematics\))
+-- | A potentialized disjoint set union on a [group](https://en.wikipedia.org/wiki/Group_(mathematics))
 -- under a differential constraint system. Each vertex \(v\) is assigned a potential value \(p(v)\),
 -- where representatives (`leader`) of each group have a potential value of `mempty`, and other
 -- vertices have potentials relative to their representative.
 --
--- The group type is represented as a `Monoid` with a inverse operator, passed on `new`. This
+-- The group type is represented as a `Monoid` with an inverse operator, passed on `new`. This
 -- approach avoids defining a separate typeclass for groups.
 --
 -- ==== Invariant
@@ -166,7 +166,7 @@ diff :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Pdsu (PrimState m) 
 diff dsu v1 v2 = stToPrim $ diffST dsu v1 v2
 
 -- | \(O(\alpha(n))\) Returns the potential of \(v_1\) relative to \(v_2\): \(p(v_1) \cdot p^{-1}(v_2)\)
--- if the two vertices belong to the same group. Returns meaningless value if the two vertices are
+-- if the two vertices belong to the same group. Returns a meaningless value if the two vertices are
 -- not connected.
 --
 -- @since 1.1.0.0

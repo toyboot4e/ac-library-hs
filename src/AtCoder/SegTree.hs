@@ -4,8 +4,8 @@
 -- \((S, \cdot: S \times S \to S, e \in S)\), i.e., the algebraic structure that satisfies the
 -- following properties.
 --
--- - associativity: \((a \cdot b) \cdot c\) = \(a \cdot (b \cdot c)\) for all \(a, b, c \in S\)
--- - existence of the identity element: \(a \cdot e\) = \(e \cdot a\) = \(a\) for all \(a \in S\)
+-- - associativity: \((a \cdot b) \cdot c = a \cdot (b \cdot c)\) for all \(a, b, c \in S\)
+-- - existence of the identity element: \(a \cdot e = e \cdot a = a\) for all \(a \in S\)
 --
 -- Given an array \(S\) of length \(N\), it processes the following queries in \(O(\log N)\) time
 -- (see [Appendix](./appendix.html) for further details).
@@ -14,8 +14,8 @@
 -- - Calculating the product of the elements of an interval
 --
 -- For simplicity, in this document, we assume that the oracles @op@ and @e@ work in constant time.
--- If these oracles work in \(O(T)\) time, each time complexity appear in this document is
--- multipled by \(O(T)\).
+-- If these oracles work in \(O(T)\) time, each time complexity appearing in this document is
+-- multiplied by \(O(T)\).
 --
 -- ==== __Example__
 -- Create a `SegTree` of @'Sum' Int@:

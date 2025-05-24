@@ -360,7 +360,7 @@ parent lct x = stToPrim $ parentST lct x
 jump :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> Int -> m Vertex
 jump lct u v k = stToPrim $ jumpST lct u v k
 
--- | \(O(\log n)\) Returns the LCA of \(u\) and \(v\). Because the root of the underlying changes
+-- | \(O(\log n)\) Returns the LCA of \(u\) and \(v\). Because the root of the underlying tree changes
 -- in almost every operation, one might want to use `evert` beforehand.
 --
 -- ==== Constraints
@@ -397,10 +397,10 @@ prodPath lct@Lct {prodLct} u v = stToPrim $ do
     !_ = ACIA.checkIndex "AtCoder.Extra.Lct.prodPath" v (nLct lct)
 
 -- | Amortized \(O(\log n)\). Fold the subtree under \(v\), considering \(p\) as the root-side
--- vertex. Or, if \(p\) equals to \(v\), \(v\) will be the new root.
+-- vertex. Or, if \(p\) equals \(v\), \(v\) will be the new root.
 --
 -- ==== Constraints
--- - The inverse operator has to be set on consturction (`newInv` or `buildInv`).
+-- - The inverse operator has to be set on construction (`newInv` or `buildInv`).
 --
 -- @since 1.1.1.0
 {-# INLINE prodSubtree #-}

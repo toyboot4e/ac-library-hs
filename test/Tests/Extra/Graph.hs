@@ -11,12 +11,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
-
-genDag :: Int -> QC.Gen (Gr.Csr ())
-genDag n = do
-  edges <- VU.fromList <$> QC.sublistOf [(u, v) | u <- [0 .. n - 1], v <- [u + 1 .. n - 1]]
-  verts <- VU.fromList <$> QC.shuffle [0 .. n - 1]
-  pure $ Gr.build n $ VU.map (\(!u, !v) -> (verts VG.! u, verts VG.! v, ())) edges
+import Tests.Util (genDag)
 
 reachableFlags :: Int -> (Int -> VU.Vector Int) -> Int -> VU.Vector Bool
 reachableFlags n gr u0 = VU.create $ do
@@ -44,7 +39,7 @@ testTopSort n gr vs =
 prop_topSort :: QC.Gen QC.Property
 prop_topSort = do
   n <- QC.chooseInt (1, 3)
-  dag <- genDag n
+  dag <- genDag @() n
   let vs = Gr.topSort n (dag `Gr.adj`)
   let perms = map (VU.fromListN n) $ L.permutations [0 .. n - 1]
   pure $ vs QC.=== minimum (filter (testTopSort n dag) perms)
@@ -89,9 +84,46 @@ unit_loopPathConstruction = testCase "loop path reconstruction" $ do
   let path = Gr.constructPathFromRoot parents 3
   path @?= VU.fromList [0, 1, 2, 3]
 
+unit_one :: TestTree
+unit_one = testCase "one" $ do
+  let !gr = Gr.build @Int 1 VU.empty
+  Gr.topSort 1 (Gr.adj gr) @?= VU.singleton 0
+  Gr.scc gr @?= V.singleton (VU.singleton 0)
+  Gr.rev gr @?= gr
+  Gr.findCycleDirected gr @?= Nothing
+  Gr.findCycleUndirected gr @?= Nothing
+  Gr.connectedComponents 1 (Gr.adj gr) @?= V.singleton (VU.singleton 0)
+  (VU.length <$> (Gr.bipartiteVertexColors 1 (Gr.adj gr))) @?= Just 1
+  -- Gr.blockCut 1 (Gr.adj gr)
+  -- Gr.blockCutComponents 1 (Gr.adj gr)
+  Gr.bfs 1 (Gr.adjW gr) (-1 :: Int) (VU.singleton (0, 7)) @?= (VU.singleton 7)
+  Gr.trackingBfs 1 (Gr.adjW gr) (-1 :: Int) (VU.singleton (0, 7)) @?= (VU.singleton 7, VU.singleton (-1))
+  Gr.bfs01 1 0 (Gr.adjW gr) (VU.singleton (0, 7)) @?= (VU.singleton 7)
+  Gr.trackingBfs01 1 0 (Gr.adjW gr) (VU.singleton (0, 7)) @?= (VU.singleton 7, VU.singleton (-1))
+  Gr.dijkstra 1 0 (Gr.adjW gr) (-1 :: Int) (VU.singleton (0, 7)) @?= (VU.singleton 7)
+  Gr.trackingDijkstra 1 0 (Gr.adjW gr) (-1 :: Int) (VU.singleton (0, 7)) @?= (VU.singleton 7, VU.singleton (-1))
+  Gr.bellmanFord 1 (Gr.adjW gr) (-1 :: Int) (VU.singleton (0, 7)) @?= Just (VU.singleton 7)
+  Gr.trackingBellmanFord 1 (Gr.adjW gr) (-1 :: Int) (VU.singleton (0, 7)) @?= Just (VU.singleton 7, VU.singleton (-1))
+  Gr.floydWarshall 1 VU.empty (maxBound `div` 2 :: Int) @?= VU.singleton 0
+  Gr.trackingFloydWarshall 1 VU.empty (maxBound `div` 2 :: Int) @?= (VU.singleton 0, VU.singleton (-1))
+  (!fw, !prev) <- Gr.newTrackingFloydWarshall 1 VU.empty (maxBound `div` 2 :: Int)
+  let test = do
+        fw' <- VU.unsafeFreeze fw
+        prev' <- VU.unsafeFreeze prev
+        (fw', prev') @?= (VU.singleton 0, VU.singleton (-1))
+  test
+  -- add positive self-loop edge
+  Gr.updateEdgeFloydWarshall fw 1 (maxBound `div` 2) 0 0 1
+  test
+  -- add negative self-loop edge
+  Gr.updateEdgeFloydWarshall fw 1 (maxBound `div` 2) 0 0 (-1)
+  {- TODO: write test here -}
+  pure ()
+
 tests :: [TestTree]
 tests =
   [ QC.testProperty "topSort" prop_topSort,
     -- not writing much tests, as we have verification problems
-    QC.testProperty "floydWarshall" prop_floydWarshall
+    QC.testProperty "floydWarshall" prop_floydWarshall,
+    unit_one
   ]

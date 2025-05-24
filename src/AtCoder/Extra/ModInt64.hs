@@ -110,9 +110,9 @@ new64 = ModInt64 . M64.encode (M64.new (proxy# @a))
 unsafeNew :: (KnownNat a) => Word64 -> ModInt64 a
 unsafeNew = ModInt64
 
--- | \(O(1)\) Retrieve the mod from a `ModInt64` object.
+-- | \(O(1)\) Retrieve the modulus from a `ModInt64` object.
 --
--- ==== Complecity
+-- ==== Complexity
 -- - \(O(1)\)
 --
 -- @since 1.2.6.0
@@ -120,9 +120,9 @@ unsafeNew = ModInt64
 modulus :: forall a. (KnownNat a) => ModInt64 a -> Int
 modulus _ = fromIntegral (natVal' (proxy# @a))
 
--- | \(O(1)\) Returns the internal value in `Int`.
+-- | \(O(1)\) Returns the internal value as an `Int`.
 --
--- ==== Complecity
+-- ==== Complexity
 -- - \(O(1)\)
 --
 -- @since 1.2.6.0
@@ -130,9 +130,9 @@ modulus _ = fromIntegral (natVal' (proxy# @a))
 val :: forall a. (KnownNat a) => ModInt64 a -> Int
 val = fromIntegral . val64
 
--- | \(O(1)\) Returns the internal value in `Word64`.
+-- | \(O(1)\) Returns the internal value as a `Word64`.
 --
--- ==== Complecity
+-- ==== Complexity
 -- - \(O(1)\)
 --
 -- @since 1.2.6.0

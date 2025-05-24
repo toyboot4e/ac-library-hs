@@ -13,6 +13,7 @@ import Tests.Extra.DynSparseSegTree qualified
 import Tests.Extra.DynSparseSegTree.Persistent qualified
 import Tests.Extra.Graph qualified
 import Tests.Extra.HashMap qualified
+import Tests.Extra.Hld qualified
 import Tests.Extra.IntMap qualified
 import Tests.Extra.IntSet qualified
 import Tests.Extra.IntervalMap qualified
@@ -71,6 +72,7 @@ main =
             testGroup "DynSparseSegTree.Persistent" Tests.Extra.DynSparseSegTree.Persistent.tests,
             testGroup "Graph" Tests.Extra.Graph.tests,
             testGroup "HashMap" Tests.Extra.HashMap.tests,
+            testGroup "Hld" Tests.Extra.Hld.tests,
             testGroup "IntervalMap" Tests.Extra.IntervalMap.tests,
             testGroup "Ix0" Tests.Extra.Ix0.tests,
             testGroup "IntMap" Tests.Extra.IntMap.tests,

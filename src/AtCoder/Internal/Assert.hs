@@ -356,7 +356,7 @@ errorRect :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> Int -> Int 
 errorRect funcName x1 x2 y1 y2 w h =
   error $ funcName ++ ": given invalid rectangle `[" ++ show x1 ++ ", " ++ show x2 ++ ") x [" ++ show y1 ++ ", " ++ show y2 ++ ")` for rectangle `[0, " ++ show w ++ ") x [0, " ++ show h ++ ")`"
 
--- | \(O(1)\) Asserts \(x_1 \le x_2\) and \(y_1 \le \y_2\).
+-- | \(O(1)\) Asserts \(x_1 \le x_2\) and \(y_1 \le y_2\).
 --
 -- @since 1.2.3.0
 {-# INLINE checkRectShape #-}

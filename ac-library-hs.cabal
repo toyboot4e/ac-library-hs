@@ -4,7 +4,7 @@ name:            ac-library-hs
 -- PVP summary:  +-+------- breaking API changes
 --               | | +----- non-breaking API additions
 --               | | | +--- code changes with no API change
-version:         1.4.0.0
+version:         1.5.0.0
 synopsis:        Data structures and algorithms
 description:
   Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive
@@ -151,6 +151,7 @@ test-suite ac-library-hs-test
     Tests.Extra.DynSparseSegTree.Persistent
     Tests.Extra.Graph
     Tests.Extra.HashMap
+    Tests.Extra.Hld
     Tests.Extra.IntervalMap
     Tests.Extra.IntMap
     Tests.Extra.IntSet
@@ -192,7 +193,6 @@ test-suite ac-library-hs-test
     Tests.String
     Tests.TwoSat
     Tests.Util
-    Util
 
   type:           exitcode-stdio-1.0
   hs-source-dirs: test

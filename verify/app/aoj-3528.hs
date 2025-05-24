@@ -23,7 +23,7 @@ main = do
 
   let s = (`divMod` w) . fromJust $ BS.elemIndex 'S' gr
   let ti = fromJust $ BS.elemIndex 'G' gr
-  let res = Gr.bfs01 bnd0 grF (4 * h * w) $ VU.singleton (s, 0)
+  let res = Gr.bfs01 bnd0 (4 * h * w) grF $ VU.singleton (s, 0)
         where
           grF (!y, !x) = case c of
             'G' -> VU.empty

@@ -20,7 +20,6 @@ import Test.Hspec
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.Hspec
-import Util (DoNotUnboxLazy (..))
 
 data SegTreeNaive s a = SegTreeNaive
   { nStn :: {-# UNPACK #-} !Int,
@@ -71,7 +70,7 @@ minLeftStn SegTreeNaive {..} r0 f = do
 freezeStn :: (Monoid a, VU.Unbox a, PrimMonad m) => SegTreeNaive (PrimState m) a -> m (VU.Vector a)
 freezeStn = VU.freeze . dStn
 
-type FooRepr = DoNotUnboxLazy String
+type FooRepr = VU.DoNotUnboxStrict String
 
 newtype Foo = Foo String
   deriving (Eq, Ord, Show)
@@ -90,9 +89,9 @@ instance Monoid Foo where
 
 instance VU.IsoUnbox Foo FooRepr where
   {-# INLINE toURepr #-}
-  toURepr (Foo s) = DoNotUnboxLazy s
+  toURepr (Foo s) = VU.DoNotUnboxStrict s
   {-# INLINE fromURepr #-}
-  fromURepr (DoNotUnboxLazy s) = Foo s
+  fromURepr (VU.DoNotUnboxStrict s) = Foo s
 
 newtype instance VU.MVector s Foo = MV_Foo (VU.MVector s FooRepr)
 

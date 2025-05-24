@@ -1,6 +1,6 @@
 -- | It contains string algorithms.
 --
--- Let \(s\) be a string. We denote the substring of \(s\) between \(a\)-th and \(b - 1\)-th
+-- Let \(s\) be a string. We denote the substring of \(s\) between the \(a\)-th and \(b - 1\)-th
 -- character by \(s[a..b)\).
 --
 -- ==== __Examples__

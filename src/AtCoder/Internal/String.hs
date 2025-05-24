@@ -90,9 +90,9 @@ saDoubling s = VU.create $ do
 {-# INLINEABLE saIsImpl #-}
 saIsImpl ::
   (HasCallStack) =>
-  -- | naive threshould
+  -- | naive threshold
   Int ->
-  -- | doubling threshould
+  -- | doubling threshold
   Int ->
   -- | string
   VU.Vector Int ->
