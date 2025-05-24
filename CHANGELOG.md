@@ -1,9 +1,14 @@
 # Revision history for acl-hs
 
+## 1.5.0.0 -- May 2025
+
+- Fixed `Hld.new` to have `headHld` of `[0]`, not `[1]`.
+- Changed the parameter orders of `bfs01` and `dijkstra` in `AtCoder.Extra.Graph`.
+
 ## 1.4.0.0 -- May 2025
 
-- Added cycle detection functions to `AtCoder.Extra.Graph`
-- Fixed the exteremely slow `Internal.GrowVec` functions with `{-# INLINE #-}`
+- Added cycle detection functions to `AtCoder.Extra.Graph`.
+- Fixed the exteremely slow `Internal.GrowVec` functions with `{-# INLINE #-}`.
 - Changed `AtCoder.Extra.Pdsu.merge` to return new representative.
 - Fixed `AtCoder.Extra.Hld.jump` to return `Nothing` for `k < 0`.
 
