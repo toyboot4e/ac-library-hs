@@ -944,6 +944,12 @@ bfsImpl !trackPrev !bnd0 !gr !undefW !sources
 
 -- | \(O(n + m)\) Opinionated 01-BFS that returns a distance array.
 --
+-- Unreachable vertices are given distance of `-1`. Note that the third argument is the capacity of
+-- deque, not distance of unreachable vertices.
+--
+-- ==== Constraints
+-- - \(\marhrm{capacity} \ge 0\)
+--
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -958,7 +964,7 @@ bfsImpl !trackPrev !bnd0 !gr !undefW !sources
 bfs01 ::
   forall i.
   (HasCallStack, Ix0 i, VU.Unbox i) =>
-  -- | Zero-based index boundary.
+  -- | Zero-based vertex boundary. It's \(n\) if the graph is one-dimensional.
   Bounds0 i ->
   -- | Graph function that takes the vertexand returns adjacent vertices with edge weights, where
   -- \(w > 0\).
@@ -974,6 +980,12 @@ bfs01 !bnd0 !gr !capacity !sources =
    in dist
 
 -- | \(O(n + m)\) Opinionated 01-BFS that returns a distance array and a predecessor array.
+--
+-- Unreachable vertices are given distance of `-1`. Note that the third argument is the capacity of
+-- deque, not distance of unreachable vertices.
+--
+-- ==== Constraints
+-- - \(\marhrm{capacity} \ge 0\)
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -993,7 +1005,7 @@ bfs01 !bnd0 !gr !capacity !sources =
 trackingBfs01 ::
   forall i.
   (HasCallStack, Ix0 i, VU.Unbox i) =>
-  -- | Zero-based index boundary.
+  -- | Zero-based vertex boundary. It's \(n\) if the graph is one-dimensional.
   Bounds0 i ->
   -- | Graph function that takes the vertex and returns adjacent vertices with edge weights, where
   -- \(w > 0\).
@@ -1071,6 +1083,9 @@ bfs01Impl !trackPrev !bnd0 !gr !capacity !sources
 
 -- | \(O((n + m) \log n)\) Dijkstra's algorithm that returns a distance array.
 --
+-- ==== Constraints
+-- - \(\mathrm{capacity} \ge 0\)
+--
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -1085,7 +1100,7 @@ bfs01Impl !trackPrev !bnd0 !gr !capacity !sources
 dijkstra ::
   forall i w.
   (HasCallStack, Ix0 i, Ord i, VU.Unbox i, Num w, Ord w, VU.Unbox w) =>
-  -- | Zero-based vertex boundary.
+  -- | Zero-based vertex boundary. It's \(n\) if the graph is one-dimensional.
   Bounds0 i ->
   -- | Graph function that takes a vertex and returns adjacent vertices with edge weights, where
   -- \(w \ge 0\).
@@ -1105,6 +1120,9 @@ dijkstra !bnd0 !gr !capacity !undefW !sources =
 -- | \(O((n + m) \log n)\) Dijkstra's algorithm that returns a distance array and a predecessor
 -- array.
 --
+-- ==== Constraints
+-- - \(\mathrm{capacity} \ge 0\)
+--
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -1123,7 +1141,7 @@ dijkstra !bnd0 !gr !capacity !undefW !sources =
 trackingDijkstra ::
   forall i w.
   (HasCallStack, Ix0 i, Ord i, VU.Unbox i, Num w, Ord w, VU.Unbox w) =>
-  -- | Zero-based vertex boundary.
+  -- | Zero-based vertex boundary. It's \(n\) if the graph is one-dimensional.
   Bounds0 i ->
   -- | Graph function that takes a vertex and returns adjacent vertices with edge weights, where
   -- \(w \ge 0\).
@@ -1426,6 +1444,9 @@ trackingFloydWarshall !nVerts !edges !undefW = runST $ do
 -- - There's a negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@
 -- is negative.
 --
+-- ==== Constraints
+-- - \(n \ge 1\)
+--
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -1463,6 +1484,9 @@ newFloydWarshall !nVerts !edges !undefW = stToPrim $ do
 -- - The predecessor matrix should be accessed as @m VG.! (`index0` (n, n) (root, v))@
 -- - There's a negative loop if there's any vertex \(v\) where @m VU.! (`index0` (n, n) (v, v))@
 -- is negative.
+--
+-- ==== Constraints
+-- - \(n \ge 1\)
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -1551,6 +1575,9 @@ newFloydWarshallST !trackPrev !nVerts !edges !undefW = do
 
 -- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight change or new edge addition.
 --
+-- ==== Constraints
+-- - \(n \ge 1\)
+--
 -- @since 1.2.4.0
 {-# INLINE updateEdgeFloydWarshall #-}
 updateEdgeFloydWarshall ::
@@ -1576,6 +1603,9 @@ updateEdgeFloydWarshall mat nVerts undefW a b w = do
   stToPrim $ updateEdgeFloydWarshallST False mat prev nVerts undefW a b w
 
 -- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight chaneg or new edge addition.
+--
+-- ==== Constraints
+-- - \(n \ge 1\)
 --
 -- @since 1.2.4.0
 {-# INLINE updateEdgeTrackingFloydWarshall #-}

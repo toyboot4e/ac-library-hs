@@ -60,9 +60,9 @@
               # python312Packagesz.sxsdiff # for oj side-by-side diff
               nodejs
 
-              # GHC 9.8.4
+              # GHC 9.8.4 (TODO: pin the version)
+              # FIXME: version mismatch (pin the old nixpkgs?)
               (haskell.compiler.ghc984.override { useLLVM = true; })
-              # FIXME:
               (haskell-language-server.override { supportedGhcVersions = [ "984" ]; })
               haskell.packages.ghc984.cabal-fmt
               haskell.packages.ghc984.cabal-plan
