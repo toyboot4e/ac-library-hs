@@ -2,8 +2,8 @@
 
 ## 1.5.0.0 -- May 2025
 
-- Fixed `Hld.new` to have `headHld` of `[0]`, not `[1]`.
 - Changed the parameter orders of `bfs01` and `dijkstra` in `AtCoder.Extra.Graph`.
+- Fixed `Hld.new` to have `headHld` of `[0]`, not `[-1]`.
 
 ## 1.4.0.0 -- May 2025
 
