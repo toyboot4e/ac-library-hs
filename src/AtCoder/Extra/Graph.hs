@@ -1040,7 +1040,8 @@ bfs01Impl !trackPrev !bnd0 !gr !capacity !sources
           else VUM.replicate @_ @Int 0 (-1)
       -- NOTE: Just like Dijkstra, we need capacity of `m`, as the first appearance of a vertex is not
       -- always with minimum distance.
-      deque <- Q.newDeque @_ @(i, Int) capacity
+      -- NOTE: Ensure minimum capacity of |sources| (too conservative?)
+      deque <- Q.newDeque @_ @(i, Int) $ capacity + VU.length sources
 
       -- set source values
       VU.forM_ sources $ \(!src, !w0) -> do
@@ -1173,7 +1174,8 @@ dijkstraImpl !trackPrev !bnd0 !gr !capacity !undefW !sources
   | otherwise = runST $ do
       !dist <- VUM.replicate @_ @w nVerts undefW
       -- REMARK: (w, i) for sort by width
-      !heap <- MH.new @_ @(w, i) capacity
+      -- REMARK: We need least capacity of |source|
+      !heap <- MH.new @_ @(w, i) $ capacity + VU.length sources
       !prev <-
         if trackPrev
           then VUM.replicate @_ @Int nVerts (-1)
