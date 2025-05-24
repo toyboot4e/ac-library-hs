@@ -3,15 +3,19 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs-for-ghc.url = "github:NixOS/nixpkgs/ebe4301cbd8f81c4f8d3244b3632338bbeb6d49c";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
   outputs =
-    { nixpkgs, flake-utils, ... }:
+    { nixpkgs, nixpkgs-for-ghc, flake-utils, ... }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = import nixpkgs {
+          inherit system;
+        };
+        ghcpkgs = import nixpkgs-for-ghc {
           inherit system;
         };
         oj-verify =
@@ -62,19 +66,19 @@
 
               # GHC 9.8.4 (TODO: pin the version)
               # FIXME: version mismatch (pin the old nixpkgs?)
-              (haskell.compiler.ghc984.override { useLLVM = true; })
-              (haskell-language-server.override { supportedGhcVersions = [ "984" ]; })
-              haskell.packages.ghc984.cabal-fmt
-              haskell.packages.ghc984.cabal-plan
-              haskell.packages.ghc984.doctest
-              haskell.packages.ghc984.implicit-hie
+              (ghcpkgs.haskell.compiler.ghc984.override { useLLVM = true; })
+              (ghcpkgs.haskell-language-server.override { supportedGhcVersions = [ "984" ]; })
+              ghcpkgs.haskell.packages.ghc984.cabal-fmt
+              ghcpkgs.haskell.packages.ghc984.cabal-plan
+              ghcpkgs.haskell.packages.ghc984.doctest
+              ghcpkgs.haskell.packages.ghc984.implicit-hie
 
               hlint
-              haskellPackages.hoogle
-              haskellPackages.ghcid
-              haskellPackages.ghcide
-              haskellPackages.ghci-dap
-              haskellPackages.haskell-dap
+              ghcpkgs.haskellPackages.hoogle
+              ghcpkgs.haskellPackages.ghcid
+              ghcpkgs.haskellPackages.ghcide
+              ghcpkgs.haskellPackages.ghci-dap
+              ghcpkgs.haskellPackages.haskell-dap
 
               # CI
               act
