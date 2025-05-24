@@ -151,6 +151,7 @@ test-suite ac-library-hs-test
     Tests.Extra.DynSparseSegTree.Persistent
     Tests.Extra.Graph
     Tests.Extra.HashMap
+    Tests.Extra.Hld
     Tests.Extra.IntervalMap
     Tests.Extra.IntMap
     Tests.Extra.IntSet
