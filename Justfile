@@ -100,7 +100,7 @@ alias va := verify-all
 
 # runs all of the local tests
 test-all:
-    cabal build && just test && just doctest && just verif-all
+    cabal build && just test && just doctest && just verify-all
 
 [private]
 alias ta := test-all
