@@ -12,7 +12,7 @@ module AtCoder.Extra.Tree
 
     -- * Tree folding
 
-    -- | These function are built around the three type parameters: \(w\), \(f\) and \(a\).
+    -- | These functions are built around the three type parameters: \(w\), \(f\), and \(a\).
     --
     -- - \(w\): Edge weight.
     -- - \(f\): Monoid action to a vertex value. These actions are created from vertex value \(a\)
@@ -70,7 +70,7 @@ diameter n gr !undefW =
       !w = VU.maximum bfs2
    in ((from, to), w)
 
--- | \(O(n + m)\) Returns the path longest path in a tree and the distance of it.
+-- | \(O(n + m)\) Returns the longest path in a tree and the distance of it.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -101,9 +101,9 @@ diameterPath n gr !undefW =
       !w = bfs2 VG.! to
    in (Gr.constructPathFromRoot parents to, w)
 
--- | \(O(m \log m)\) Kruscal's algorithm. Returns edge indices for building a minimum spanning tree.
+-- | \(O(m \log m)\) Kruskal's algorithm. Returns edge indices for building a minimum spanning tree.
 --
--- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u w)\) is required
+-- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u, w)\) is required
 -- for each edge.
 --
 -- ==== __Example__
@@ -127,7 +127,7 @@ diameterPath n gr !undefW =
 mst :: (Num w, Ord w, VU.Unbox w) => Int -> VU.Vector (Int, Int, w) -> (w, VU.Vector Bit, Gr.Csr w)
 mst = mstBy (comparing id)
 
--- | \(O(m \log m)\) Kruscal's algorithm. Returns edge indices for building a minimum/maximum
+-- | \(O(m \log m)\) Kruskal's algorithm. Returns edge indices for building a minimum/maximum
 -- spanning tree.
 --
 -- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u, w)\) is required

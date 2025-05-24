@@ -264,10 +264,10 @@ edges ::
 edges g = stToPrim $ edgesST g
 
 -- | \(O(1)\) Changes the capacity and the flow amount of the $i$-th edge to @newCap@ and
--- @newFlow@, respectively. It oes not change the capacity or the flow amount of other edges.
+-- @newFlow@, respectively. It does not change the capacity or the flow amount of other edges.
 --
 -- ==== Constraints
--- - \(0 \leq \mathrm{newflow} \leq \mathrm{newcap}\)
+-- - \(0 \leq \mathrm{newFlow} \leq \mathrm{newCap}\)
 --
 -- ==== Complexity
 -- - \(O(1)\)

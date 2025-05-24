@@ -8,7 +8,7 @@ module AtCoder.Extra.Monoid.RangeAdd
   ( -- * RangeAdd
     RangeAdd (..),
 
-    -- * Constructor
+    -- * Constructors
     new,
     unRangeAdd,
 

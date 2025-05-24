@@ -1,5 +1,5 @@
 -- | Mo's algorithm for handling \([l, r)\) offline queries in \(O((n + q) \sqrt n f)\) time
--- complecity, where \(n\) is the length of index, \(q\) is the number of queries and \(f\) is the
+-- complexity, where \(n\) is the length of index, \(q\) is the number of queries and \(f\) is the
 -- time for processing element addition or deletion. Due to the high time complexity, it is
 -- recommended to choose an efficient data structure such as Fenwick Tree for query processing.
 --

@@ -31,5 +31,5 @@ argsort xs =
     )
     $ VU.generate (VU.length xs) id
 
--- TODO: maybe add lexical permutations, combinations and subsequences.
+-- TODO: maybe add lexicographic permutations, combinations, and subsequences.
 

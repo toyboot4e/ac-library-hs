@@ -27,14 +27,14 @@
 --
 -- @
 --  0==1==2==3==4==5==6==7==8==9     XX: VertexHld
---     |        |                    ==: edges on the same semgent
+--     |        |                    ==: edges on the same segment
 -- 14==13       10==11==12           |: edge between different segments
 --     |
 --     15
 -- @
 --
 -- Note that vertices on higher (closer to the root) segments are assigned smaller indices. This is
--- very internally very important when calculating `lca`.
+-- internally very important when calculating `lca`.
 --
 -- ===== `headHld`: Vertex -> Vertex
 --
@@ -60,7 +60,7 @@
 -- @
 -- (-1)==0==8==7==3==1==2==12==13==15     XX: original Vertex
 --       |        |
---    5==8        1==11=8
+--    5==8        1==11==8
 --       |
 --       5
 -- @
@@ -218,7 +218,7 @@ data Hld = Hld
 --
 -- ==== Constraints
 -- - \(n \ge 1\)
--- - The input graph must be a tree; the edges must be non-directed (both \((u, v, w)\) and
+-- - The input graph must be a tree; the edges must be undirected (both \((u, v, w)\) and
 --   \((v, u, w)\) edges are required).
 --
 -- @since 1.1.0.0
@@ -230,7 +230,7 @@ new tree = newAt tree 0
 --
 -- ==== Constraints
 -- - \(n \ge 1\)
--- - The input graph must be a tree; the edges must be non-directed (both \((u, v, w)\) and
+-- - The input graph must be a tree; the edges must be undirected (both \((u, v, w)\) and
 --   \((v, u, w)\) edges are required).
 --
 -- @since 1.1.0.0
@@ -364,7 +364,7 @@ lca Hld {..} = inner
 ancestor :: (HasCallStack) => Hld -> Vertex -> Int -> Vertex
 ancestor Hld {..} parent k0 = inner parent k0
   where
-    !_ = ACIA.runtimeAssert (0 <= k0 && k0 <= depthHld VG.! parent) $ "AtCoder.Extra.Tree.Hld.ancestor: k-th ancestor is out of the bounds (`k = " ++ show k0 ++ "`)"
+    !_ = ACIA.runtimeAssert (0 <= k0 && k0 <= depthHld VG.! parent) $ "AtCoder.Extra.Tree.Hld.ancestor: k-th ancestor is out of bounds (`k = " ++ show k0 ++ "`)"
     inner v k
       -- on this segment
       | k <= iv - ihv = revIndexHld VG.! (iv - k)

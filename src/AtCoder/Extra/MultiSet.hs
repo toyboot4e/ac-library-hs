@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 -- | A fast, mutable multiset for `Int` keys backed by a @HashMap@. Most operations are performed
--- in \(O(1)\) in average.
+-- in \(O(1)\) on average.
 --
 -- ==== Capacity limitation
 -- Access to each key creates a new entry. Note that entries cannot be invalidated due to the

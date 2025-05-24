@@ -17,7 +17,7 @@
 -- >>> import AtCoder.Extra.HashMap qualified as HM
 -- >>> hm <- HM.new @_ @Int 10
 --
--- `insert`, `lookup` and other functions are available in \(O(1)\) in averaged:
+-- `insert`, `lookup` and other functions are available in \(O(1)\) on average:
 --
 -- >>> HM.insert hm 0 100
 -- >>> HM.insert hm 10 101

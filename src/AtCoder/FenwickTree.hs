@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | A Fenwick tree, also known as binary indexed tree. Given an array of length \(n\), it processes
+-- | A Fenwick tree, also known as a binary indexed tree. Given an array of length \(n\), it processes
 -- the following queries in \(O(\log n)\) time.
 --
 -- - Updating an element
@@ -270,7 +270,7 @@ minLeft ft r0 f = minLeftM ft r0 (pure . f)
 -- ==== Constraints
 -- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
 -- - \(f(0)\) returns `True`
--- - \(0 \leq l \leq n\)
+-- - \(0 \leq r \leq n\)
 --
 -- ==== Complexity
 -- - \(O(\log n)\)
@@ -284,7 +284,7 @@ minLeftM ::
   FenwickTree (PrimState m) a ->
   -- | \(r\)
   Int ->
-  -- | \(p\): user prediate
+  -- | \(p\): user predicate
   (a -> m Bool) ->
   -- | \(l\): \(p\) holds for \([l, r)\)
   m Int

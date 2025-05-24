@@ -25,9 +25,9 @@ module AtCoder.Internal.Bit
   )
 where
 
--- TODO: faster implmentation
+-- TODO: faster implementation
 
--- | \(O(w)\) Returns minimum \(2^i s.t. 2^i \geq n\).
+-- | \(O(w)\) Returns minimum \(2^i\) s.t. \(2^i \geq n\).
 --
 -- @since 1.0.0.0
 {-# INLINE bitCeil #-}

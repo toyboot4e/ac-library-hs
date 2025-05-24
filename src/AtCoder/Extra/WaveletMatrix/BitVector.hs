@@ -11,7 +11,7 @@ module AtCoder.Extra.WaveletMatrix.BitVector
     -- * Constructor
     build,
 
-    -- * (Internal) Word-based cumultaive sum
+    -- * (Internal) Word-based cumulative sum
     wordSize,
     csumInPlace,
 

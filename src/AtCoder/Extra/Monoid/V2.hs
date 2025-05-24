@@ -4,7 +4,7 @@
 -- | A monoid acted on by `Mat2x2` or `Affine1`, an affine transformation target.
 --
 -- ==== As an `Affine1` action target
--- Compared to `Sum`, `V2` hold the length in the second value.
+-- Compared to `Sum`, `V2` holds the length in the second value.
 --
 -- @since 1.1.0.0
 module AtCoder.Extra.Monoid.V2

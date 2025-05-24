@@ -236,7 +236,7 @@ newtype ModInt a = ModInt
 
 -- | Retrieve the mod from a `ModInt` object.
 --
--- ==== Complecity
+-- ==== Complexity
 -- - \(O(1)\)
 --
 -- @since 1.0.0.0
@@ -246,7 +246,7 @@ modulus _ = fromIntegral (natVal' (proxy# @a))
 
 -- | Returns the internal value in `Int`.
 --
--- ==== Complecity
+-- ==== Complexity
 -- - \(O(1)\)
 --
 -- @since 1.0.0.0
@@ -257,7 +257,7 @@ val = fromIntegral . unModInt
 -- | Returns the internal value as `Word32` without type conversion. It is the function for
 -- constant-factor speedup.
 --
--- ==== Complecity
+-- ==== Complexity
 -- - \(O(1)\)
 --
 -- @since 1.0.0.0
@@ -267,7 +267,7 @@ val32 = unModInt
 
 -- | Returns the internal value in `Word32`.
 --
--- ==== Complecity
+-- ==== Complexity
 -- - \(O(1)\)
 --
 -- @since 1.0.0.0

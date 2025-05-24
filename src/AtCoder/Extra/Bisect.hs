@@ -6,7 +6,7 @@
 -- @
 -- Y Y Y Y Y N N N N N      Y: user predicate holds,
 -- --------* *---------> x  N: user predicate does not hold,
---         L R              L, R: left, right point of the boundary
+--         L R              L, R: left and right points of the boundary
 -- @
 --
 -- ==== __Example__
@@ -63,7 +63,6 @@ import GHC.Stack (HasCallStack)
 --
 -- >>> lowerBound xs 4
 -- 4
---
 --
 -- >>> lowerBound xs 5
 -- 6
@@ -256,7 +255,7 @@ minLeft ::
   Int
 minLeft l r p = runIdentity $ minLeftM l r (pure . p)
 
--- | \(O(\log n)\) Monadic variant of `maxRight`.
+-- | \(O(\log n)\) Monadic variant of `minLeft`.
 --
 -- @since 1.3.0.0
 {-# INLINE minLeftM #-}

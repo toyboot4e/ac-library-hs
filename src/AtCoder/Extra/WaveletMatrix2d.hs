@@ -45,7 +45,7 @@ module AtCoder.Extra.WaveletMatrix2d
   ( -- * Wavelet matrix 2D
     WaveletMatrix2d (..),
 
-    -- * Counstructor
+    -- * Constructor
     new,
     build,
 

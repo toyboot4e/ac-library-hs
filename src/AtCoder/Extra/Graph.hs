@@ -719,7 +719,7 @@ blockCut ::
   Int ->
   -- | \(g\): Graph function, typically @'adj' gr@.
   (Int -> VU.Vector Int) ->
-  -- | Graph that represents a block-cut tree, where super vertices \((n \ge n)\) represent each
+  -- | Graph that represents a block-cut tree, where super vertices \((v \ge n)\) represent each
   -- biconnected component.
   Csr ()
 blockCut n gr = runST $ do
@@ -791,7 +791,7 @@ blockCut n gr = runST $ do
   n' <- VGM.unsafeRead next 0
   Csr.build' n' <$> B.unsafeFreeze edges
 
--- | \(O(n + m)\) Returns [blocks (biconnected comopnents)](https://en.wikipedia.org/wiki/Biconnected_component)
+-- | \(O(n + m)\) Returns [blocks (biconnected components)](https://en.wikipedia.org/wiki/Biconnected_component)
 -- of the graph.
 --
 -- ==== __Example__
