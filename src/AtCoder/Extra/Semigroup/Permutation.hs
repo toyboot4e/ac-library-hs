@@ -61,6 +61,9 @@ newtype Permutation = Permutation
 
 -- | \(O(1)\) Creates a `Permutation`, performing boundary check on input vector.
 --
+-- ==== Constraints
+-- - \(-1 \le x \lt n\)
+--
 -- @since 1.1.0.0
 {-# INLINE new #-}
 new :: (HasCallStack) => VU.Vector Int -> Permutation
@@ -91,7 +94,7 @@ ident = Permutation . (`VU.generate` id)
 zero :: Int -> Permutation
 zero n = Permutation $ VU.replicate n (-1)
 
--- | \(O(1)\) Maps an index.
+-- | \(O(1)\) Maps an index with the permutation.
 --
 -- @since 1.1.0.0
 {-# INLINE act #-}
@@ -112,6 +115,6 @@ instance Semigroup Permutation where
   {-# INLINE (<>) #-}
   Permutation r2 <> Permutation r1 = Permutation $ VU.map f r1
     where
-      !_ = ACIA.runtimeAssert (VU.length r2 == VU.length r1) "AtCoder.Extra.Semigroup.Permutation.(<>): legth mismatch"
+      !_ = ACIA.runtimeAssert (VU.length r2 == VU.length r1) "AtCoder.Extra.Semigroup.Permutation.(<>): length mismatch"
       f (-1) = -1
       f i = VG.unsafeIndex r2 i

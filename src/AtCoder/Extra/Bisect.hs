@@ -10,7 +10,7 @@
 -- @
 --
 -- ==== __Example__
--- Perform index compression:
+-- Perform index compression with `lowerBound`:
 --
 -- >>> import AtCoder.Extra.Bisect
 -- >>> import Data.Vector.Algorithms.Intro qualified as VAI
@@ -22,13 +22,13 @@
 --
 -- @since 1.3.0.0
 module AtCoder.Extra.Bisect
-  ( -- * C++-like binary search
+  ( -- * C++-like binary searches
     lowerBound,
     lowerBoundIn,
     upperBound,
     upperBoundIn,
 
-    -- * Generic bisection method
+    -- * Generic bisection methods
     maxRight,
     maxRightM,
     minLeft,
@@ -45,7 +45,7 @@ import GHC.Stack (HasCallStack)
 --
 -- @
 -- Y Y Y Y Y N N N N N      Y: x_i < x_ref
--- --------- *---------> x  N: x_i >= x_ref
+-- --------- *---------> x  N: not Y
 --           R              R: the right boundary point returned
 -- @
 --
@@ -106,8 +106,8 @@ lowerBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i < target
 -- | \(O(\log n)\) Returns the maximum \(r\) where \(x_i \le x_{ref}\) holds for \(i \in [0, r)\).
 --
 -- @
--- Y Y Y Y Y N N N N N      Y: x_i <= x_ref,
--- --------- *---------> x  N: x_i > x_ref,
+-- Y Y Y Y Y N N N N N      Y: x_i <= x_ref
+-- --------- *---------> x  N: not Y
 --           R              R: the right boundary point returned
 -- @
 --
@@ -175,8 +175,8 @@ upperBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i <= target
 -- right boundary point.
 --
 -- @
--- Y Y Y Y Y N N N N N      Y: p(i) returns `true`,
--- --------- *---------> x  N: p(i) returns `false`,
+-- Y Y Y Y Y N N N N N      Y: p(i) returns `true`
+-- --------- *---------> x  N: not Y
 --           R              R: the right boundary point returned
 -- @
 --
@@ -223,8 +223,8 @@ maxRightM l0 r0 p = bisectImpl (l0 - 1) r0 p
 -- left boundary point.
 --
 -- @
--- N N N N N Y Y Y Y Y      Y: p(i) returns `true`,
--- --------* ----------> x  N: p(i) returns `false`,
+-- N N N N N Y Y Y Y Y      Y: p(i) returns `true`
+-- --------* ----------> x  N: not Y
 --         L                L: the left boundary point returned
 -- @
 --
