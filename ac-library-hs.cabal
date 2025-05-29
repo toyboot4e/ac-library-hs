@@ -170,6 +170,7 @@ test-suite ac-library-hs-test
     Tests.Extra.Semigroup.Permutation
     Tests.Extra.Seq
     Tests.Extra.Seq.Map
+    Tests.Extra.Tree
     Tests.Extra.WaveletMatrix
     Tests.Extra.WaveletMatrix.BitVector
     Tests.Extra.WaveletMatrix.Raw

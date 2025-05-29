@@ -32,6 +32,7 @@ import Tests.Extra.Semigroup.Matrix qualified
 import Tests.Extra.Semigroup.Permutation qualified
 import Tests.Extra.Seq qualified
 import Tests.Extra.Seq.Map qualified
+import Tests.Extra.Tree qualified
 import Tests.Extra.WaveletMatrix qualified
 import Tests.Extra.WaveletMatrix.BitVector qualified
 import Tests.Extra.WaveletMatrix.Raw qualified
@@ -91,6 +92,7 @@ main =
             testGroup "Semigroup.Permutation" Tests.Extra.Semigroup.Permutation.tests,
             testGroup "Seq" Tests.Extra.Seq.tests,
             testGroup "Seq.Map" Tests.Extra.Seq.Map.tests,
+            testGroup "Tree" Tests.Extra.Tree.tests,
             testGroup "WaveletMatrix" Tests.Extra.WaveletMatrix.tests,
             testGroup "WaveletMatrix.BitVector" Tests.Extra.WaveletMatrix.BitVector.tests,
             testGroup "WaveletMatrix.Raw" Tests.Extra.WaveletMatrix.Raw.tests,
