@@ -84,7 +84,7 @@ fromVal m =
   let !m128 :: Word128 = fromIntegral m
       !n2 = word128Lo64 $ (-m128) `mod` m128
       !r = getR m 0
-      !_ = ACIA.runtimeAssert (r * m == -1) "AtCoder.Extra.Montgomery64.fromVal: internal implementation error"
+      !_ = ACIA.runtimeAssert (r * m == maxBound) "AtCoder.Extra.Montgomery64.fromVal: internal implementation error"
    in Montgomery64 m r n2
   where
     !_ = ACIA.runtimeAssert (odd m && m <= bit 62) $ "AtCoder.Extra.Montgomery64.fromVal: not given odd modulus value that is less than or equal to 2^62: " ++ show m
