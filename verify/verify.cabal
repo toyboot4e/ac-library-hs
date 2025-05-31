@@ -211,6 +211,11 @@ executable yosupo-factorize
   main-is:       yosupo-factorize.hs
   build-depends: verify
 
+executable yosupo-incremental-minimum-spanning-forest
+  import:        app-local
+  main-is:       yosupo-incremental-minimum-spanning-forest.hs
+  build-depends: verify
+
 executable yosupo-jump-on-tree
   import:        app-local
   main-is:       yosupo-jump-on-tree.hs

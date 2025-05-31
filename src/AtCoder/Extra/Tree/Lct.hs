@@ -467,17 +467,6 @@ jump lct u v k = stToPrim $ do
 jumpMaybe :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> Int -> m (Maybe Vertex)
 jumpMaybe lct u v k = stToPrim $ jumpMaybeST lct u v k
 
--- | \(O(\log n)\) Given a path between \(u\) and \(v\), returns the length of the path \(u, v\).
---
--- ==== Constraints
--- - \(0 \le u, v \lt n\)
--- - \(u\) and \(v\) must be in the same connected component, otherwise the vehavior is undefined.
---
--- @since 1.5.1.0
-{-# INLINE lengthBetween #-}
-lengthBetween :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> Int -> m (Maybe Vertex)
-lengthBetween lct u v k = stToPrim $ jumpMaybeST lct u v k
-
 -- | \(O(\log n)\) Returns the LCA of \(u\) and \(v\). Because the root of the underlying tree changes
 -- in almost every operation, one might want to use `evert` beforehand.
 --
@@ -844,6 +833,7 @@ linkST lct@Lct {pLct, rLct} c p = do
   _ <- exposeST lct p
   pushNodeST lct p
 
+  -- no assertion and very unsafe..
   -- dbgM $ do
   --   cp <- VGM.unsafeRead pLct c
   --   let !_ = ACIA.runtimeAssert (nullLct cp) $ "cp must be null: " ++ show (c, cp)
@@ -856,6 +846,7 @@ linkST lct@Lct {pLct, rLct} c p = do
   VGM.unsafeWrite rLct p c
   updateNodeST lct p
 
+-- no assertion and very unsafe..
 {-# INLINEABLE cutST #-}
 cutST :: (Monoid a, VU.Unbox a) => Lct s a -> Vertex -> Vertex -> ST s ()
 cutST lct@Lct {pLct, lLct} u v = do
