@@ -61,11 +61,10 @@
               python312Packages.selenium
               python312Packages.pyaml
               python312Packages.importlab
-              # python312Packagesz.sxsdiff # for oj side-by-side diff
+              # python312Packagesz.sxsdiff # TODO: oj side-by-side diff
               nodejs
 
-              # GHC 9.8.4 (TODO: pin the version)
-              # FIXME: version mismatch (pin the old nixpkgs?)
+              # GHC 9.8.4
               (ghcpkgs.haskell.compiler.ghc984.override { useLLVM = true; })
               (ghcpkgs.haskell-language-server.override { supportedGhcVersions = [ "984" ]; })
               ghcpkgs.haskell.packages.ghc984.cabal-fmt
