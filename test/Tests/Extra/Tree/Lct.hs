@@ -4,26 +4,22 @@
 module Tests.Extra.Tree.Lct where
 
 import AtCoder.Extra.Graph qualified as Gr
-import AtCoder.Extra.Tree qualified as Tree
 import AtCoder.Extra.Tree.Lct (Lct (..))
 import AtCoder.Extra.Tree.Lct qualified as Lct
 import AtCoder.Internal.Buffer qualified as B
 import Control.Monad (when)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Foldable (for_)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, fromJust)
 import Data.Semigroup (Sum (..))
 import Data.Vector qualified as V
-import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import Test.QuickCheck.Monadic as QCM
 import Test.Tasty
-import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
-import Tests.Util
 
 -- | Maximum number of vertices.
 maxN :: Int
@@ -93,6 +89,7 @@ data Query
     -- | Parent Int
     -- | Jump
     JumpMaybe Int Int Int
+  | LengthBetween Int Int
   | -- | Lca Int Int
     -- | LcaMaybe Int Int
     ProdPath Int Int
@@ -126,6 +123,7 @@ queryGen n =
       -- \| Parent <$> Int
       -- \| Jump
       JumpMaybe <$> u <*> v <*> k,
+      LengthBetween <$> u <*> v,
       -- Lca <$> u <*> v,
       -- LcaMaybe <$> u <*> v,
       ProdPath <$> u <*> v
@@ -197,6 +195,10 @@ handleRef ref@Ref {..} q = do
       case findPath gr u v of
         Nothing -> pure $ MI Nothing
         Just path -> pure . MI $ path VG.!? k
+    LengthBetween u v -> do
+      gr <- toCsrM ref
+      let !path = fromJust $ findPath gr u v
+      pure . I $ VU.length path - 1
     -- LcaMaybe u v -> do
     --   gr <- toCsrM ref
     --   -- FIXME: HLD cannot be used
@@ -251,6 +253,8 @@ handleAcl lct q = case q of
   -- \| Jump
   JumpMaybe u v k -> do
     MI <$> Lct.jumpMaybe lct u v k
+  LengthBetween u v -> do
+    I <$> Lct.lengthBetween lct u v
   -- LcaMaybe u v -> do
   --   MI <$> Lct.lcaMaybe lct u v
   ProdPath u v -> do
@@ -294,7 +298,8 @@ filterRefM ref@Ref {..} q = case q of
   Expose _ -> pure True
   Expose_ _ -> pure True
   Same _ _ -> pure True
-  JumpMaybe u v k -> same u v
+  JumpMaybe u v _ -> same u v
+  LengthBetween u v -> same u v
   -- LcaMaybe u v -> same u v
   ProdPath u v -> same u v
   ProdSubtree u v -> same u v

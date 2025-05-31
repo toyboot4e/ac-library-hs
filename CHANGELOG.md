@@ -2,7 +2,7 @@
 
 ## 1.5.1.0 -- June 2025
 
-- Added `read`, `lcaMaybe` and `prodTree` to `AtCoder.Extra.Tree.Lct`.
+- Added `read`, `lcaMaybe`, `lengthBetween` and `prodTree` to `AtCoder.Extra.Tree.Lct`.
 - Added `adj1` to `AtCoder.Internal.Csr` and `AtCoder.Extra.Graph`.
 
 ## 1.5.0.0 -- May 2025

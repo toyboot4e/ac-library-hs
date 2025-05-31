@@ -36,7 +36,7 @@
 -- >>> Lct.root lct 3
 -- 2
 --
--- ===== `lca`, `jump`
+-- ===== `lca`, `jump`, `lengthBetween`
 --
 -- Set (`evert`) the root of the underlying tree to \(0\) and get the `lca` of vertices \(2\) and
 -- \(3\):
@@ -52,6 +52,9 @@
 --
 -- >>> Lct.jumpMaybe lct {- path -} 2 3 {- k -} 1000
 -- Nothing
+--
+-- >>> Lct.lengthBetween lct {- path -} 2 3
+-- 2
 --
 -- ===== `parent`
 --
@@ -116,6 +119,7 @@ module AtCoder.Extra.Tree.Lct
     parent,
     jump,
     jumpMaybe,
+    lengthBetween,
     lca,
     lcaMaybe,
 
@@ -466,6 +470,18 @@ jump lct u v k = stToPrim $ do
 {-# INLINE jumpMaybe #-}
 jumpMaybe :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> Int -> m (Maybe Vertex)
 jumpMaybe lct u v k = stToPrim $ jumpMaybeST lct u v k
+
+-- | \(O(\log n)\) Returns the length of path between \(u\) and \(v\).
+--
+-- ==== Constraints
+-- - \(0 \le u, v \lt n\)
+-- - \(u\) and \(v\) must be in the same connected component.
+--
+-- @since 1.5.1.0
+{-# INLINE lengthBetween #-}
+lengthBetween :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> Vertex -> Vertex -> m Vertex
+lengthBetween lct u v = stToPrim $ do
+  lengthBetweenST lct u v
 
 -- | \(O(\log n)\) Returns the LCA of \(u\) and \(v\). Because the root of the underlying tree changes
 -- in almost every operation, one might want to use `evert` beforehand.
@@ -1032,3 +1048,13 @@ prodSubtreeST lct@Lct {nLct, subtreeProdLct} v rootOrParent = do
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.Tree.Lct.prodSubtreeST" v nLct
     !_ = ACIA.checkIndex "AtCoder.Extra.Tree.Lct.prodSubtreeST" rootOrParent nLct
+
+{-# INLINEABLE lengthBetweenST #-}
+lengthBetweenST :: (HasCallStack, Monoid a, VU.Unbox a) => Lct s a -> Vertex -> Vertex -> ST s Int
+lengthBetweenST lct@Lct {sLct} u0 v0 = do
+  -- make @v0@ a new root of the underlying tree
+  evertST lct v0
+  -- make @u0@ in the same preferred path as the root (@v0)
+  _ <- exposeST lct u0
+  size <- VGM.unsafeRead sLct u0
+  pure $ size - 1
