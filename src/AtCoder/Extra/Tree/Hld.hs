@@ -84,6 +84,9 @@
 -- >>> Hld.ancestor hld 5 3 -- go up three parents from `5`
 -- 0
 --
+-- >>> Hld.lca hld 2 5 -- lowest common ancestor of `2` and `5`:
+-- 1
+--
 -- >>> Hld.jump hld 5 2 3   -- go to the third vertex from `5` to `2`:
 -- Just 2
 --
@@ -93,7 +96,8 @@
 -- >>> Hld.path hld 5 3     -- get the path between `5` and `3`:
 -- [5,4,1,2,3]
 --
--- Our `Hld` is rooted at @0@ vertex and subtree queries are available:
+-- So the subtree queries are run with recpect to root vertex `0`, since our HLD is created with
+-- `new`:
 --
 -- >>> Hld.isInSubtree hld 2 3 -- `3` is in the subtree of `2`
 -- True
@@ -218,7 +222,7 @@ data Hld = Hld
 --
 -- ==== Constraints
 -- - \(n \ge 1\)
--- - The input graph must be a tree; the edges must be undirected (both \((u, v, w)\) and
+-- - The input graph must be a tree. Note that the edges must be undirected (both \((u, v, w)\) and
 --   \((v, u, w)\) edges are required).
 --
 -- @since 1.1.0.0
@@ -230,7 +234,7 @@ new tree = newAt tree 0
 --
 -- ==== Constraints
 -- - \(n \ge 1\)
--- - The input graph must be a tree; the edges must be undirected (both \((u, v, w)\) and
+-- - The input graph must be a tree. Note that the edges must be undirected (both \((u, v, w)\) and
 --   \((v, u, w)\) edges are required).
 --
 -- @since 1.1.0.0
