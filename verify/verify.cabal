@@ -256,6 +256,11 @@ executable yosupo-many-aplusb-state
   main-is:       yosupo-many-aplusb-state.hs
   build-depends: verify
 
+executable yosupo-many-aplusb-128-bit
+  import:        app-local
+  main-is:       yosupo-many-aplusb-128-bit.hs
+  build-depends: verify
+
 executable yosupo-matrix-det
   import:        app-local
   main-is:       yosupo-matrix-det.hs
