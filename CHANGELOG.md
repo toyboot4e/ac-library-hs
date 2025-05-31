@@ -1,5 +1,10 @@
 # Revision history for acl-hs
 
+## 1.5.1.0 -- June 2025
+
+- Added `read`, `lcaMaybe` and `prodTree` to `AtCoder.Extra.Tree.Lct`.
+- Added `adj1` to `AtCoder.Internal.Csr` and `AtCoder.Extra.Graph`.
+
 ## 1.5.0.0 -- May 2025
 
 - Changed the parameter orders of `bfs01` and `dijkstra` in `AtCoder.Extra.Graph`.

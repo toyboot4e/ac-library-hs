@@ -171,6 +171,7 @@ test-suite ac-library-hs-test
     Tests.Extra.Seq
     Tests.Extra.Seq.Map
     Tests.Extra.Tree
+    Tests.Extra.Tree.Lct
     Tests.Extra.WaveletMatrix
     Tests.Extra.WaveletMatrix.BitVector
     Tests.Extra.WaveletMatrix.Raw

@@ -72,6 +72,10 @@ many-many-test opts='':
 [private]
 alias mmt := many-many-test
 
+# runs local test a large number of QuickCheck tests
+mmmt opts='':
+    cabal test --enable-tests --test-options '--quickcheck-tests 100000 {{opts}}'
+
 # touches all the verification source files
 touch:
     touch verify/app/*
