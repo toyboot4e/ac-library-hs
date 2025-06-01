@@ -21,7 +21,6 @@ where
 
 -- TODO: maybe add lexicographic permutations, combinations, and subsequences.
 
-import Control.Monad (guard)
 import Control.Monad.Primitive (PrimMonad)
 import Control.Monad.ST (ST, runST)
 import Control.Monad.Trans.State.Strict (StateT, runStateT, state)
@@ -37,9 +36,9 @@ import Data.Vector.Unboxed qualified as VU
 -- | \(O(n \log n)\) Returns indices of the vector, stably sorted by their value.
 --
 -- ==== Example
--- >>> import Data.Vector.Algorithms.Intro qualified as VAI
+-- >>> import AtCoder.Extra.Vector qualified as EV
 -- >>> import Data.Vector.Unboxed qualified as VU
--- >>> argsort $ VU.fromList [0, 1, 0, 1, 0]
+-- >>> EV.argsort $ VU.fromList @Int [0, 1, 0, 1, 0]
 -- [0,2,4,1,3]
 --
 -- @since 1.2.3.0
@@ -53,6 +52,12 @@ argsort xs =
 
 -- | Map a function over a vector and concatenate the results.
 --
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.iconcatMap (\i x -> VU.fromList [i + x, i + x]) $ VU.replicate @Int 3 0
+-- [0,0,1,1,2,2]
+--
 -- @since 1.5.1.0
 {-# INLINE iconcatMap #-}
 iconcatMap :: (VG.Vector v a, VG.Vector v b) => (Int -> a -> v b) -> v a -> v b
@@ -63,6 +68,12 @@ iconcatMap f =
     . VG.stream
 
 -- | Map a function over a vector and concatenate the results.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.iconcatMap (\x -> pure (VU.fromList [x, x])) $ VU.generate @Int 3 id
+-- [0,0,1,1,2,2]
 --
 -- @since 1.5.1.0
 {-# INLINE concatMapM #-}
@@ -78,6 +89,12 @@ concatMapM f =
     . BundleM.fromVector
 
 -- | Map a function over a vector and concatenate the results.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.iconcatMapM (\i x -> pure (VU.fromList [i + x, i + x])) $ VU.replicate @Int 3 0
+-- [0,0,1,1,2,2]
 --
 -- @since 1.5.1.0
 {-# INLINE iconcatMapM #-}
@@ -95,7 +112,11 @@ iconcatMapM f =
 
 -- | Maps a vector with accumulator.
 --
--- This function is ported from [cojna/iota](https://github.com/cojna/iota) (CC0 1.0 license).
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.mapAccumL (\s x -> (s + 1, s * x)) (0 :: Int) $ VU.generate @Int 4 id
+-- (4,[0,1,4,9])
 --
 -- @since 1.5.1.0
 {-# INLINE mapAccumL #-}
@@ -127,7 +148,9 @@ unstreamPrimM s = VGM.munstream s >>= VG.unsafeFreeze
 -- | \(O(n)\) Converts a vector into chunks of vectors with lenth \(k\). The last vector may have
 -- smaller length than \(k\).
 --
--- >>> chunks 3 $ U.fromList ([1, 2, 3, 4, 5, 6, 7] :: [Int])
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.chunks 3 $ VU.fromList ([1, 2, 3, 4, 5, 6, 7] :: [Int])
 -- [[1,2,3],[4,5,6],[7]]
 --
 -- @since 1.5.1.0
