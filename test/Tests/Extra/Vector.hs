@@ -39,6 +39,13 @@ prop_iconcatMapM xs =
       rhs = runST $ EV.iconcatMapM (\i x -> pure (f i x)) vec
    in lhs QC.=== rhs
 
+prop_mapAccumL :: [Int] -> QC.Property
+prop_mapAccumL xs =
+  let f s x = (s * x, s + x)
+      (!l1, !l2) = L.mapAccumL f (0 :: Int) xs
+      (!r1, !r2) = EV.mapAccumL f (0 :: Int) $ VU.fromList xs
+   in QC.conjoin [l1 QC.=== r1, VU.fromList l2 QC.=== r2]
+
 prop_chunks :: QC.Positive Int -> [Int] -> QC.Property
 prop_chunks (QC.Positive k) [] = EV.chunks k (VU.empty @Int) QC.=== V.empty
 prop_chunks (QC.Positive k) xs =
@@ -81,6 +88,7 @@ tests =
     QC.testProperty "maxRangeSum" prop_maxRangeSum,
     QC.testProperty "minRangeSum" prop_minRangeSum,
     QC.testProperty "iconcatMapM" prop_iconcatMapM,
+    QC.testProperty "mapAccumL" prop_mapAccumL,
     QC.testProperty "chunks" prop_chunks,
     QC.testProperty "maxRangeSum" prop_maxRangeSum,
     QC.testProperty "minRangeSum" prop_minRangeSum

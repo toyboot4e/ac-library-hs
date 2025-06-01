@@ -10,6 +10,7 @@ module AtCoder.Extra.Vector
     iconcatMap,
     concatMapM,
     iconcatMapM,
+    mapAccumL,
     chunks,
 
     -- * Queries
@@ -20,12 +21,17 @@ where
 
 -- TODO: maybe add lexicographic permutations, combinations, and subsequences.
 
+import Control.Monad (guard)
+import Control.Monad.Primitive (PrimMonad)
+import Control.Monad.ST (ST, runST)
+import Control.Monad.Trans.State.Strict (StateT, runStateT, state)
 import Data.Vector qualified as V
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Fusion.Bundle qualified as Bundle
 import Data.Vector.Fusion.Bundle.Monadic qualified as BundleM
 import Data.Vector.Fusion.Stream.Monadic qualified as S
 import Data.Vector.Generic qualified as VG
+import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 
 -- | \(O(n \log n)\) Returns indices of the vector, stably sorted by their value.
@@ -86,6 +92,37 @@ iconcatMapM f =
     . BundleM.mapM (uncurry f)
     . BundleM.indexed
     . BundleM.fromVector
+
+-- | Maps a vector with accumulator.
+--
+-- This function is ported from [cojna/iota](https://github.com/cojna/iota) (CC0 1.0 license).
+--
+-- @since 1.5.1.0
+{-# INLINE mapAccumL #-}
+mapAccumL ::
+  forall v s a b.
+  (VG.Vector v a, VG.Vector v b) =>
+  (s -> a -> (s, b)) ->
+  s ->
+  v a ->
+  (s, v b)
+mapAccumL f s0 xs = (\(!x, !s) -> (s, x)) $ runST $ (`runStateT` s0) $ do
+  unstreamPrimM
+    . BundleM.mapM g
+    $ BundleM.fromVector xs
+  where
+    g :: forall st. a -> StateT s (ST st) b
+    g a =
+      state
+        ( \s ->
+            let (!s', !b) = f s a
+             in (b, s')
+        )
+
+-- | https://github.com/haskell/vector/issues/416
+{-# INLINE [1] unstreamPrimM #-}
+unstreamPrimM :: (PrimMonad m, VG.Vector v a) => BundleM.Bundle m u a -> m (v a)
+unstreamPrimM s = VGM.munstream s >>= VG.unsafeFreeze
 
 -- | \(O(n)\) Converts a vector into chunks of vectors with lenth \(k\). The last vector may have
 -- smaller length than \(k\).

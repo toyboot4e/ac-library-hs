@@ -12,7 +12,6 @@ module BenchLib.Vector.ConcatMapM
 where
 
 import Control.Monad.Primitive (PrimMonad)
-import Control.Monad.ST (runST)
 import Data.Vector.Fusion.Bundle.Monadic qualified as BundleM
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM

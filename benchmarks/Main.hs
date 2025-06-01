@@ -11,6 +11,7 @@ import Bench.RepeatWithoutIndex qualified
 import Bench.SwapDupe qualified
 import Bench.Vector.ConcatMapM qualified
 import Bench.Vector.IConcatMapM qualified
+import Bench.Vector.MapAccumL qualified
 import Criterion.Main
 
 main :: IO ()
@@ -27,5 +28,6 @@ main =
       Bench.RepeatWithoutIndex.benches,
       Bench.SwapDupe.benches,
       Bench.Vector.ConcatMapM.benches,
-      Bench.Vector.IConcatMapM.benches
+      Bench.Vector.IConcatMapM.benches,
+      Bench.Vector.MapAccumL.benches
     ]
