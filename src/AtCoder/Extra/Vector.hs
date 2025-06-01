@@ -10,6 +10,7 @@ module AtCoder.Extra.Vector
     iconcatMap,
     concatMapM,
     iconcatMapM,
+    chunks,
 
     -- * Queries
     maxRangeSum,
@@ -19,6 +20,7 @@ where
 
 -- TODO: maybe add lexicographic permutations, combinations, and subsequences.
 
+import Data.Vector qualified as V
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Fusion.Bundle qualified as Bundle
 import Data.Vector.Fusion.Bundle.Monadic qualified as BundleM
@@ -84,6 +86,20 @@ iconcatMapM f =
     . BundleM.mapM (uncurry f)
     . BundleM.indexed
     . BundleM.fromVector
+
+-- | \(O(n)\) Converts a vector into chunks of vectors with lenth \(k\). The last vector may have
+-- smaller length than \(k\).
+--
+-- >>> chunks 3 $ U.fromList ([1, 2, 3, 4, 5, 6, 7] :: [Int])
+-- [[1,2,3],[4,5,6],[7]]
+--
+-- @since 1.5.1.0
+{-# INLINE chunks #-}
+chunks :: (VG.Vector v a) => Int -> v a -> V.Vector (v a)
+chunks len xs0 = V.unfoldrExactN n step xs0
+  where
+    n = (VG.length xs0 + len - 1) `div` len
+    step xs = (VG.take len xs, VG.drop len xs)
 
 -- | \(O(n)\) Returns maximum range sum.
 --

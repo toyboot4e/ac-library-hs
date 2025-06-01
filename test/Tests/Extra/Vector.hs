@@ -4,6 +4,8 @@ import AtCoder.Extra.Vector qualified as EV
 import Control.Monad.ST (runST)
 import Data.List qualified as L
 import Data.Vector.Unboxed qualified as VU
+import Data.Vector qualified as V
+import Data.Vector.Generic qualified as VG
 import Test.Tasty
 import Test.Tasty.QuickCheck as QC
 
@@ -37,6 +39,18 @@ prop_iconcatMapM xs =
       rhs = runST $ EV.iconcatMapM (\i x -> pure (f i x)) vec
    in lhs QC.=== rhs
 
+prop_chunks :: QC.Positive Int -> [Int] -> QC.Property
+prop_chunks (QC.Positive k) [] = EV.chunks k (VU.empty @Int) QC.=== V.empty
+prop_chunks (QC.Positive k) xs =
+  let res = EV.chunks k $ VU.fromList xs
+      n = length xs
+      lastLen = VG.length (V.last res)
+   in QC.conjoin
+      [ V.sum (VG.map VG.length res) QC.=== n,
+        V.all ((== k) . VG.length) (V.init res) QC.=== True,
+        VG.concat (V.toList res) QC.=== VU.fromList xs
+      ]
+
 prop_maxRangeSum :: [Int] -> QC.Property
 prop_maxRangeSum xs =
   let vec = VU.fromList xs
@@ -67,6 +81,7 @@ tests =
     QC.testProperty "maxRangeSum" prop_maxRangeSum,
     QC.testProperty "minRangeSum" prop_minRangeSum,
     QC.testProperty "iconcatMapM" prop_iconcatMapM,
+    QC.testProperty "chunks" prop_chunks,
     QC.testProperty "maxRangeSum" prop_maxRangeSum,
     QC.testProperty "minRangeSum" prop_minRangeSum
   ]
