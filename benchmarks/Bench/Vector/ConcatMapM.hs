@@ -14,15 +14,17 @@ benches :: Benchmark
 benches =
   bgroup
     "concatMapM"
-    [ bench "prim    IO" $ nfIO (prim1 vec),
+    [ -- FIXME: too fast, something is wrong.
+      bench "list" $ nf (concatMap fList) (VU.toList vec),
+      bench "prim    IO" $ nfIO (prim1 vec),
       bench "monad 1 IO" $ nfIO (io1 vec),
       bench "monad 2 IO" $ nfIO (io2 vec),
-      bench "prim    ST" $ whnf (\xs -> runST (prim1 xs)) vec,
-      bench "monad 1 ST" $ whnf st1 vec,
-      bench "monad 2 ST" $ whnf st2 vec,
-      bench "prim    StateT" $ whnf (\vec -> runST $ (`evalStateT` (0 :: Int)) (ConcatMapM.primConcatMapM1 g vec)) vec,
-      bench "monad 1 State" $ whnf ((`evalState` (0 :: Int)) . ConcatMapM.concatMapM1 g) vec,
-      bench "monad 2 State" $ whnf ((`evalState` (0 :: Int)) . ConcatMapM.concatMapM2 g) vec,
+      bench "prim    ST" $ nf (\xs -> runST (prim1 xs)) vec,
+      bench "monad 1 ST" $ nf st1 vec,
+      bench "monad 2 ST" $ nf st2 vec,
+      bench "prim    StateT" $ nf (\vec -> runST $ (`evalStateT` (0 :: Int)) (ConcatMapM.primConcatMapM1 g vec)) vec,
+      bench "monad 1 State" $ nf ((`evalState` (0 :: Int)) . ConcatMapM.concatMapM1 g) vec,
+      bench "monad 2 State" $ nf ((`evalState` (0 :: Int)) . ConcatMapM.concatMapM2 g) vec,
       bench "prime   StateT + IO" $ nfIO (evalStateT (primStateT1 vec) (0 :: Int)),
       bench "monad 1 StateT + IO" $ nfIO (evalStateT (stateT1 vec) (0 :: Int)),
       bench "monad 2 StateT + IO" $ nfIO (evalStateT (stateT2 vec) (0 :: Int))
@@ -34,6 +36,9 @@ benches =
 
     f :: Int -> VU.Vector Int
     f x = VU.fromList [x, x, x, x, x]
+
+    fList :: Int -> [Int]
+    fList x = [x, x, x, x, x]
 
     g :: (MonadState Int m) => Int -> m (VU.Vector Int)
     g x = do

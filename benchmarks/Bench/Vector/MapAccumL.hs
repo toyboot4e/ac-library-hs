@@ -2,6 +2,7 @@ module Bench.Vector.MapAccumL (benches) where
 
 import BenchLib.Vector.MapAccumL qualified as MapAccumL
 import Criterion
+import Data.List qualified as L
 import Data.Vector.Unboxed qualified as VU
 import System.Random
 
@@ -10,6 +11,8 @@ benches =
   bgroup
     "mapAccumL"
     [ -- whnf did not work (somehow) for mapAccumL1, so I'm using nf
+      -- NOTE: list is not fair to compare though
+      bench "list" $ nf (L.mapAccumL f (0 :: Int)) (VU.toList vec),
       bench "mapM + State" $ nf (MapAccumL.mapAccumL1 f (0 :: Int)) vec,
       bench "ifoldM'" $ nf (MapAccumL.mapAccumL2 f (0 :: Int)) vec,
       bench "bundle" $ nf (MapAccumL.mapAccumL3 f (0 :: Int)) vec,
