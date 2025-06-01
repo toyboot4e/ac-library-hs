@@ -2,8 +2,11 @@
 
 ## 1.5.1.0 -- June 2025
 
-- Added `read`, `lcaMaybe`, `lengthBetween` and `prodTree` to `AtCoder.Extra.Tree.Lct`.
-- Added `adj1` to `AtCoder.Internal.Csr` and `AtCoder.Extra.Graph`.
+- Added more functions
+  - `AtCoder.Extra.Lct`: `read`, `lcaMaybe`, `lengthBetween` and `prodTree`
+  - `AtCoder.Extra.Graph`: `adj1`
+  - `AtCoder.Internal.Csr`: `adj1`
+  - `AtCoder.Extra.Vector`: `iconcatMap`, `concatMapM`, `iconcatMapM`, `maxRangeSum` and `minRangeSum`
 
 ## 1.5.0.0 -- May 2025
 
