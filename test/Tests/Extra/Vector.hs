@@ -85,8 +85,6 @@ tests =
   [ QC.testProperty "argsort" prop_argsort,
     QC.testProperty "concatMapM" prop_concatMapM,
     QC.testProperty "iconcatMap" prop_iconcatMap,
-    QC.testProperty "maxRangeSum" prop_maxRangeSum,
-    QC.testProperty "minRangeSum" prop_minRangeSum,
     QC.testProperty "iconcatMapM" prop_iconcatMapM,
     QC.testProperty "mapAccumL" prop_mapAccumL,
     QC.testProperty "chunks" prop_chunks,

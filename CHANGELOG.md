@@ -5,7 +5,7 @@
 - Added `transformers` as a new dependency.
 - Added more functions:
   - `AtCoder.Extra.Lct`: `read`, `lcaMaybe`, `lengthBetween` and `prodTree`.
-  - `AtCoder.Extra.Graph`: `adj1`
+  - `AtCoder.Extra.Graph`: `adj1`.
   - `AtCoder.Internal.Csr`: `adj1`.
   - `AtCoder.Extra.Vector`: `iconcatMap`, `concatMapM`, `iconcatMapM`, `mapAccumL`, `chunks`, `maxRangeSum` and `minRangeSum`.
 

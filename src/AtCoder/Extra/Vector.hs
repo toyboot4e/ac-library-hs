@@ -33,7 +33,7 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 
--- | \(O(n \log n)\) Returns indices of the vector, stably sorted by their value.
+-- | \(O(n \log n)\) Returns indices of the vector elements, stably sorted by their value.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Vector qualified as EV
@@ -50,7 +50,7 @@ argsort xs =
     (VAI.sortBy (\i j -> compare (xs VG.! i) (xs VG.! j) <> compare i j))
     $ VU.generate (VU.length xs) id
 
--- | Map a function over a vector and concatenate the results.
+-- | Maps each element to a vector and concatenate the results.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Vector qualified as EV
@@ -67,7 +67,7 @@ iconcatMap f =
     . Bundle.inplace (S.map (uncurry f) . S.indexed) id
     . VG.stream
 
--- | Map a function over a vector and concatenate the results.
+-- | Maps each element to a vector and concatenate the results.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Vector qualified as EV
@@ -88,7 +88,7 @@ concatMapM f =
     . BundleM.mapM f
     . BundleM.fromVector
 
--- | Map a function over a vector and concatenate the results.
+-- | Maps each element to a vector and concatenate the results.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Vector qualified as EV
@@ -110,7 +110,7 @@ iconcatMapM f =
     . BundleM.indexed
     . BundleM.fromVector
 
--- | Maps a vector with accumulator.
+-- | \(O(n)\) With an accumulator, maps a vector.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Vector qualified as EV
@@ -163,6 +163,12 @@ chunks len xs0 = V.unfoldrExactN n step xs0
 
 -- | \(O(n)\) Returns maximum range sum.
 --
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.maxRangeSum $ VU.fromList @Int [-3, 1, 6, -2, 7, -5]
+-- 12
+--
 -- @since 1.5.1.0
 {-# INLINEABLE maxRangeSum #-}
 maxRangeSum :: forall v a. (VG.Vector v a, Ord a, Num a) => v a -> a
@@ -171,7 +177,13 @@ maxRangeSum xs = fst $ VG.foldl' f (0 :: a, 0 :: a) csum
     csum = VG.postscanl' (+) (0 :: a) xs
     f (!acc, !minL) x = (max acc (x - minL), min minL x)
 
--- | \(O(n)\) Returns maximum range sum.
+-- | \(O(n)\) Returns minimum range sum.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.minRangeSum $ VU.fromList @Int[-3, 1, 6, -20, 7, -9]
+-- -22
 --
 -- @since 1.5.1.0
 {-# INLINEABLE minRangeSum #-}
