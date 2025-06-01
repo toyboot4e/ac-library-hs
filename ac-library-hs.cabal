@@ -8,7 +8,7 @@ version:         1.5.0.0
 synopsis:        Data structures and algorithms
 description:
   Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive
-  programming on [AtCoder](https://atcoder.jp/).
+  programming on [AtCoder](https://atcoder.jp/). ([GitHub](https://github.com/toyboot4e/ac-library-hs), [DeepWiki](https://deepwiki.com/toyboot4e/ac-library-hs))
 
   - Functions primarily use half-open interval \([l, r)\).
   - The `Extra` module contains additional utilities beyond the original C++ library.
