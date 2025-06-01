@@ -108,3 +108,7 @@ test-all:
 
 [private]
 alias ta := test-all
+
+# runs tests and outputs hpc test coverage
+coverage:
+    cabal test ---enable-coverage
