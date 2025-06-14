@@ -9,9 +9,8 @@
   - `AtCoder.Internal.Csr`: `adj1`.
   - `AtCoder.Extra.Vector`:
     - `iconcatMap`, `concatMapM`, `iconcatMapM`
-    - `mapAccumL`,
+    - `compress`, `mapAccumL`, `chunks`
     - `scanlM` variants,
-    - `chunks`,
     - `maxRangeSum`, `minRangeSum`
     - `slideMinIndices`, `slideMaxIndices`
 

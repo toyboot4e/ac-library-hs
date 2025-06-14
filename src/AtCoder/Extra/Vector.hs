@@ -6,6 +6,9 @@ module AtCoder.Extra.Vector
   ( -- * Sort functions
     argsort,
 
+    -- * Index compression
+    compress,
+
     -- * Vector Utilities
     iconcatMap,
     concatMapM,
@@ -35,6 +38,7 @@ where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Queue qualified as Q
+import AtCoder.Extra.Bisect (lowerBound)
 import Control.Monad (when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad)
@@ -67,6 +71,26 @@ argsort xs =
   VU.modify
     (VAI.sortBy (\i j -> compare (xs VG.! i) (xs VG.! j) <> compare i j))
     $ VU.generate (VU.length xs) id
+
+-- | \(O(n \log n)\) One dimensional index compression: xs -> (nubSortXs, xs')
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Bisect (lowerBound)
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> let xs = VU.fromList [0, 20, 40, 10, 30]
+-- >>> let (dict, xs') = EV.compress xs
+-- >>> xs'
+-- [0,2,4,1,3]
+-- >>> lowerBound dict 10
+-- 1
+--
+-- @since 1.5.1.0
+{-# INLINE compress #-}
+compress :: VU.Vector Int -> (VU.Vector Int, VU.Vector Int)
+compress xs = (dict, VG.map (lowerBound dict) xs)
+  where
+    !dict = VG.uniq $ VG.modify VAI.sort xs
 
 -- | Maps each element to a vector and concatenate the results.
 --
@@ -318,6 +342,8 @@ minRangeSum xs = fst $ VG.foldl' f (0 :: a, 0 :: a) csum
 -- [0,1,2,3]
 -- >>> slideMinIndices 3 (VU.fromList [5, 4 .. 0])
 -- [2,3,4,5]
+--
+-- @since 1.5.1.0
 {-# INLINE slideMinIndices #-}
 slideMinIndices :: (HasCallStack) => Int -> VU.Vector Int -> VU.Vector Int
 slideMinIndices k xs
@@ -347,6 +373,8 @@ slideMinIndices k xs
 -- [2,3,4,5]
 -- >>> slideMaxIndices 3 (VU.fromList [5, 4 .. 0])
 -- [0,1,2,3]
+--
+-- @since 1.5.1.0
 {-# INLINE slideMaxIndices #-}
 slideMaxIndices :: (HasCallStack) => Int -> VU.Vector Int -> VU.Vector Int
 slideMaxIndices k xs
