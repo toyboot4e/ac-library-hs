@@ -105,6 +105,36 @@ prop_minRangeSum xs =
       rhs = EV.minRangeSum vec
    in lhs QC.=== rhs
 
+prop_slideMinIndices :: QC.Positive Int -> [Int] -> QC.Property
+prop_slideMinIndices (QC.Positive k) xs =
+  let vec = VU.fromList xs
+   in slideMin k vec QC.=== EV.slideMinIndices k vec
+
+prop_slideMaxIndices :: QC.Positive Int -> [Int] -> QC.Property
+prop_slideMaxIndices (QC.Positive k) xs =
+  let vec = VU.fromList xs
+   in slideMax k vec QC.=== EV.slideMaxIndices k vec
+
+slideMin :: Int -> VU.Vector Int -> VU.Vector Int
+slideMin k xs
+  | VU.null xs = VU.empty
+  | k >= n = VU.singleton $ VU.minIndex xs
+  | otherwise = VU.generate (n - (k - 1)) $ \l ->
+      let slice = VU.take k $ VU.drop l xs
+       in (+ l) $ VU.minIndex slice
+  where
+    n = VU.length xs
+
+slideMax :: Int -> VU.Vector Int -> VU.Vector Int
+slideMax k xs
+  | VU.null xs = VU.empty
+  | k >= n = VU.singleton $ VU.maxIndex xs
+  | otherwise = VU.generate (n - (k - 1)) $ \l ->
+      let slice = VU.take k $ VU.drop l xs
+       in (+ l) $ VU.maxIndex slice
+  where
+    n = VU.length xs
+
 tests :: [TestTree]
 tests =
   [ QC.testProperty "argsort" prop_argsort,
@@ -122,6 +152,8 @@ tests =
     QC.testProperty "scanl1M" (prop_monadicScanl1Like VU.scanl1 EV.scanl1M),
     QC.testProperty "scanl1M'" (prop_monadicScanl1Like VU.scanl1' EV.scanl1M'),
     QC.testProperty "maxRangeSum" prop_maxRangeSum,
-    QC.testProperty "minRangeSum" prop_minRangeSum
+    QC.testProperty "minRangeSum" prop_minRangeSum,
+    QC.testProperty "slideMinIndices" prop_slideMinIndices,
+    QC.testProperty "slideMaxIndices" prop_slideMaxIndices
   ]
 

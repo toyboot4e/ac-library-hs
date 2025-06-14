@@ -26,14 +26,21 @@ module AtCoder.Extra.Vector
     -- * Queries
     maxRangeSum,
     minRangeSum,
+    slideMinIndices,
+    slideMaxIndices,
   )
 where
 
 -- TODO: maybe add lexicographic permutations, combinations, and subsequences.
 
+import AtCoder.Internal.Assert qualified as ACIA
+import AtCoder.Internal.Queue qualified as Q
+import Control.Monad (when)
+import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad)
 import Control.Monad.ST (ST, runST)
 import Control.Monad.Trans.State.Strict (StateT, runStateT, state)
+import Data.Ord (Down (..))
 import Data.Vector qualified as V
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Fusion.Bundle qualified as Bundle
@@ -277,7 +284,7 @@ chunks len xs0 = V.unfoldrExactN n step xs0
 -- 12
 --
 -- @since 1.5.1.0
-{-# INLINEABLE maxRangeSum #-}
+{-# INLINE maxRangeSum #-}
 maxRangeSum :: forall v a. (VG.Vector v a, Ord a, Num a) => v a -> a
 maxRangeSum xs = fst $ VG.foldl' f (0 :: a, 0 :: a) csum
   where
@@ -293,11 +300,83 @@ maxRangeSum xs = fst $ VG.foldl' f (0 :: a, 0 :: a) csum
 -- -22
 --
 -- @since 1.5.1.0
-{-# INLINEABLE minRangeSum #-}
+{-# INLINE minRangeSum #-}
 minRangeSum :: forall v a. (VG.Vector v a, Ord a, Num a) => v a -> a
 minRangeSum xs = fst $ VG.foldl' f (0 :: a, 0 :: a) csum
   where
     csum = VG.postscanl' (+) (0 :: a) xs
     f (!acc, !maxL) x = (min acc (x - maxL), max maxL x)
 
--- TODO: add Swag etc?
+-- | \(O(N)\) Returns indices of minimum values in the windows with the specified length.
+--
+-- ==== Constraints
+-- - \(k \gt 0\)
+--
+-- ==== Example
+--
+-- >>> slideMinIndices 3 (VU.fromList [0 .. 5])
+-- [0,1,2,3]
+-- >>> slideMinIndices 3 (VU.fromList [5, 4 .. 0])
+-- [2,3,4,5]
+{-# INLINE slideMinIndices #-}
+slideMinIndices :: (HasCallStack) => Int -> VU.Vector Int -> VU.Vector Int
+slideMinIndices k xs
+  | VU.null xs = VU.empty
+  | k >= VU.length xs = VU.singleton $ VU.minIndex xs
+  | otherwise = slideCmpIndicesOn Down k xs
+  where
+    !_ = ACIA.runtimeAssert (k > 0) "AtCoder.Extra.Vector.slideMinIndices: given non-positive k"
+
+-- | \(O(N)\) Returns indices of maximum values in the windows with the specified length.
+--
+-- ==== Constraints
+-- - \(k \gt 0\)
+--
+-- ==== Example
+--
+-- @
+-- indices: 0 1 2 3 4 5
+-- values:  0 1 2 3 4 5   max value indices:
+--          [---]         2
+--            [---]       3
+--              [---]     4
+--                [---]   5
+-- @
+--
+-- >>> slideMaxIndices 3 (VU.fromList [0 .. 5])
+-- [2,3,4,5]
+-- >>> slideMaxIndices 3 (VU.fromList [5, 4 .. 0])
+-- [0,1,2,3]
+{-# INLINE slideMaxIndices #-}
+slideMaxIndices :: (HasCallStack) => Int -> VU.Vector Int -> VU.Vector Int
+slideMaxIndices k xs
+  | VU.null xs = VU.empty
+  | k >= VU.length xs = VU.singleton $ VU.maxIndex xs
+  | otherwise = slideCmpIndicesOn id k xs
+  where
+    !_ = ACIA.runtimeAssert (k > 0) "AtCoder.Extra.Vector.slideMaxIndices: given non-positive k"
+
+-- | \(O(N)\) (1) in <https://qiita.com/kuuso1/items/318d42cd089a49eeb332>
+{-# INLINE slideCmpIndicesOn #-}
+slideCmpIndicesOn :: (VG.Vector v a, Ord b) => (a -> b) -> Int -> v a -> VU.Vector Int
+slideCmpIndicesOn wrap len xs = runST $ do
+  -- dequeue of maximum number indices.
+  !buf <- Q.new (VG.length xs)
+
+  fmap (VU.drop (len - 1)) $ VG.generateM (VG.length xs) $ \i -> do
+    -- remove the front indices that are no longer in the span
+    fix $ \loop -> do
+      b <- maybe False (<= i - len) <$> Q.readMaybeFront buf 0
+      when b $ do
+        Q.popFront_ buf
+        loop
+
+    -- remove the last indices that are less attractive to the new coming value
+    fix $ \loop -> do
+      b <- maybe False ((< wrap (xs VG.! i)) . wrap . (xs VG.!)) <$> Q.readMaybeBack buf 0
+      when b $ do
+        Q.popBack_ buf
+        loop
+
+    Q.pushBack buf i
+    Q.readFront buf 0
