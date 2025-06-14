@@ -7,7 +7,7 @@
   - `AtCoder.Extra.Lct`: `read`, `lcaMaybe`, `lengthBetween` and `prodTree`.
   - `AtCoder.Extra.Graph`: `adj1`.
   - `AtCoder.Internal.Csr`: `adj1`.
-  - `AtCoder.Extra.Vector`: `iconcatMap`, `concatMapM`, `iconcatMapM`, `mapAccumL`, `chunks`, `maxRangeSum` and `minRangeSum`.
+  - `AtCoder.Extra.Vector`: `iconcatMap`, `concatMapM`, `iconcatMapM`, `mapAccumL`, `scanlM` variants, `chunks`, `maxRangeSum` and `minRangeSum`.
 
 ## 1.5.0.0 -- May 2025
 
