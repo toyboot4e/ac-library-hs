@@ -32,6 +32,7 @@ import Data.Vector.Fusion.Stream.Monadic qualified as S
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
+import GHC.Stack (HasCallStack)
 
 -- | \(O(n \log n)\) Returns indices of the vector elements, stably sorted by their value.
 --
@@ -44,7 +45,7 @@ import Data.Vector.Unboxed qualified as VU
 -- @since 1.2.3.0
 {-# INLINEABLE argsort #-}
 -- TODO: use generic vector
-argsort :: (Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
+argsort :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
 argsort xs =
   VU.modify
     (VAI.sortBy (\i j -> compare (xs VG.! i) (xs VG.! j) <> compare i j))
@@ -60,7 +61,7 @@ argsort xs =
 --
 -- @since 1.5.1.0
 {-# INLINE iconcatMap #-}
-iconcatMap :: (VG.Vector v a, VG.Vector v b) => (Int -> a -> v b) -> v a -> v b
+iconcatMap :: (HasCallStack, VG.Vector v a, VG.Vector v b) => (Int -> a -> v b) -> v a -> v b
 iconcatMap f =
   VG.unstream
     . Bundle.concatVectors
@@ -78,7 +79,7 @@ iconcatMap f =
 -- @since 1.5.1.0
 {-# INLINE concatMapM #-}
 concatMapM ::
-  (Monad m, VG.Vector v a, VG.Vector v b) =>
+  (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) =>
   (a -> m (v b)) ->
   v a ->
   m (v b)
@@ -99,7 +100,7 @@ concatMapM f =
 -- @since 1.5.1.0
 {-# INLINE iconcatMapM #-}
 iconcatMapM ::
-  (Monad m, VG.Vector v a, VG.Vector v b) =>
+  (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) =>
   (Int -> a -> m (v b)) ->
   v a ->
   m (v b)
@@ -110,7 +111,7 @@ iconcatMapM f =
     . BundleM.indexed
     . BundleM.fromVector
 
--- | \(O(n)\) With an accumulator, maps a vector.
+-- | \(O(n)\) Maps a vector with an accumulator.
 --
 -- ==== Example
 -- >>> import AtCoder.Extra.Vector qualified as EV
@@ -122,7 +123,7 @@ iconcatMapM f =
 {-# INLINE mapAccumL #-}
 mapAccumL ::
   forall v s a b.
-  (VG.Vector v a, VG.Vector v b) =>
+  (HasCallStack, VG.Vector v a, VG.Vector v b) =>
   (s -> a -> (s, b)) ->
   s ->
   v a ->
