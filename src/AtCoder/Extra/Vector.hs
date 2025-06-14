@@ -13,6 +13,16 @@ module AtCoder.Extra.Vector
     mapAccumL,
     chunks,
 
+    -- ** Monadic scanl
+    prescanlM,
+    prescanlM',
+    postscanlM,
+    postscanlM',
+    scanlM,
+    scanlM',
+    scanl1M,
+    scanl1M',
+
     -- * Queries
     maxRangeSum,
     minRangeSum,
@@ -145,6 +155,94 @@ mapAccumL f s0 xs = (\(!x, !s) -> (s, x)) $ runST $ (`runStateT` s0) $ do
 {-# INLINE [1] unstreamPrimM #-}
 unstreamPrimM :: (PrimMonad m, VG.Vector v a) => BundleM.Bundle m u a -> m (v a)
 unstreamPrimM s = VGM.munstream s >>= VG.unsafeFreeze
+
+{-# INLINE prescanlM #-}
+prescanlM :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
+prescanlM f x0 =
+  VG.unstreamM
+    . prescanlMB f x0
+    . VG.stream
+
+{-# INLINE prescanlM' #-}
+prescanlM' :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
+prescanlM' f x0 =
+  VG.unstreamM
+    . prescanlMB' f x0
+    . VG.stream
+
+{-# INLINE postscanlM #-}
+postscanlM :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
+postscanlM f x0 =
+  VG.unstreamM
+    . postscanlMB f x0
+    . VG.stream
+
+{-# INLINE postscanlM' #-}
+postscanlM' :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
+postscanlM' f x0 =
+  VG.unstreamM
+    . postscanlMB' f x0
+    . VG.stream
+
+{-# INLINE scanlM #-}
+scanlM :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
+scanlM f x0 =
+  VG.unstreamM
+    . scanlMB f x0
+    . VG.stream
+
+{-# INLINE scanlM' #-}
+scanlM' :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
+scanlM' f x0 =
+  VG.unstreamM
+    . scanlMB' f x0
+    . VG.stream
+
+{-# INLINE scanl1M #-}
+scanl1M :: (HasCallStack, Monad m, VG.Vector v a) => (a -> a -> m a) -> v a -> m (v a)
+scanl1M f =
+  VG.unstreamM
+    . scanl1MB f
+    . VG.stream
+
+{-# INLINE scanl1M' #-}
+scanl1M' :: (HasCallStack, Monad m, VG.Vector v a) => (a -> a -> m a) -> v a -> m (v a)
+scanl1M' f =
+  VG.unstreamM
+    . scanl1MB' f
+    . VG.stream
+
+{-# INLINE prescanlMB #-}
+prescanlMB :: (Monad m) => (a -> b -> m a) -> a -> Bundle.Bundle v b -> BundleM.Bundle m v a
+prescanlMB f x0 = BundleM.prescanlM f x0 . Bundle.lift
+
+{-# INLINE prescanlMB' #-}
+prescanlMB' :: (Monad m) => (a -> b -> m a) -> a -> Bundle.Bundle v b -> BundleM.Bundle m v a
+prescanlMB' f x0 = BundleM.prescanlM' f x0 . Bundle.lift
+
+{-# INLINE postscanlMB #-}
+postscanlMB :: (Monad m) => (a -> b -> m a) -> a -> Bundle.Bundle v b -> BundleM.Bundle m v a
+postscanlMB f x0 = BundleM.postscanlM f x0 . Bundle.lift
+
+{-# INLINE postscanlMB' #-}
+postscanlMB' :: (Monad m) => (a -> b -> m a) -> a -> Bundle.Bundle v b -> BundleM.Bundle m v a
+postscanlMB' f x0 = BundleM.postscanlM' f x0 . Bundle.lift
+
+{-# INLINE scanlMB #-}
+scanlMB :: (Monad m) => (a -> b -> m a) -> a -> Bundle.Bundle v b -> BundleM.Bundle m v a
+scanlMB f x0 = BundleM.scanlM f x0 . Bundle.lift
+
+{-# INLINE scanlMB' #-}
+scanlMB' :: (Monad m) => (a -> b -> m a) -> a -> Bundle.Bundle v b -> BundleM.Bundle m v a
+scanlMB' f x0 = BundleM.scanlM' f x0 . Bundle.lift
+
+{-# INLINE scanl1MB #-}
+scanl1MB :: (Monad m) => (a -> a -> m a) -> Bundle.Bundle v a -> BundleM.Bundle m v a
+scanl1MB f = BundleM.scanl1M f . Bundle.lift
+
+{-# INLINE scanl1MB' #-}
+scanl1MB' :: (Monad m) => (a -> a -> m a) -> Bundle.Bundle v a -> BundleM.Bundle m v a
+scanl1MB' f = BundleM.scanl1M' f . Bundle.lift
 
 -- | \(O(n)\) Converts a vector into chunks of vectors with lenth \(k\). The last vector may have
 -- smaller length than \(k\).

@@ -1,6 +1,7 @@
 module Tests.Extra.Vector where
 
 import AtCoder.Extra.Vector qualified as EV
+import Data.Functor.Identity (Identity, runIdentity)
 import Control.Monad.ST (runST)
 import Data.List qualified as L
 import Data.Vector.Unboxed qualified as VU
@@ -46,12 +47,36 @@ prop_mapAccumL xs =
       (!r1, !r2) = EV.mapAccumL f (0 :: Int) $ VU.fromList xs
    in QC.conjoin [l1 QC.=== r1, VU.fromList l2 QC.=== r2]
 
+-- | scanM etc.
+prop_monadicScanlLike ::
+  ((Int -> Int -> Int) -> Int -> VU.Vector Int -> VU.Vector Int) ->
+  ((Int -> Int -> Identity Int) -> Int -> VU.Vector Int -> Identity (VU.Vector Int)) ->
+  Int ->
+  [Int] ->
+  QC.Property
+prop_monadicScanlLike ref acl x xs =
+  let xs' = VU.fromList xs
+      f = (+)
+      mf x y = pure $ x + y
+   in ref f x xs' QC.=== runIdentity (acl mf x xs')
+
+-- | scanM1 etc.
+prop_monadicScanl1Like ::
+  ((Int -> Int -> Int) -> VU.Vector Int -> VU.Vector Int) ->
+  ((Int -> Int -> Identity Int) -> VU.Vector Int -> Identity (VU.Vector Int)) ->
+  QC.NonEmptyList Int ->
+  QC.Property
+prop_monadicScanl1Like ref acl (QC.NonEmpty xs) =
+  let xs' = VU.fromList xs
+      f = (+)
+      mf x y = pure $ x + y
+   in ref f xs' QC.=== runIdentity (acl mf xs')
+
 prop_chunks :: QC.Positive Int -> [Int] -> QC.Property
 prop_chunks (QC.Positive k) [] = EV.chunks k (VU.empty @Int) QC.=== V.empty
 prop_chunks (QC.Positive k) xs =
   let res = EV.chunks k $ VU.fromList xs
       n = length xs
-      lastLen = VG.length (V.last res)
    in QC.conjoin
       [ V.sum (VG.map VG.length res) QC.=== n,
         V.all ((== k) . VG.length) (V.init res) QC.=== True,
@@ -88,6 +113,14 @@ tests =
     QC.testProperty "iconcatMapM" prop_iconcatMapM,
     QC.testProperty "mapAccumL" prop_mapAccumL,
     QC.testProperty "chunks" prop_chunks,
+    QC.testProperty "prescanlM" (prop_monadicScanlLike VU.prescanl EV.prescanlM),
+    QC.testProperty "prescanlM'" (prop_monadicScanlLike VU.prescanl' EV.prescanlM'),
+    QC.testProperty "postscanlM" (prop_monadicScanlLike VU.postscanl EV.postscanlM),
+    QC.testProperty "postscanlM'" (prop_monadicScanlLike VU.postscanl' EV.postscanlM'),
+    QC.testProperty "scanlM" (prop_monadicScanlLike VU.scanl EV.scanlM),
+    QC.testProperty "scanlM'" (prop_monadicScanlLike VU.scanl' EV.scanlM'),
+    QC.testProperty "scanl1M" (prop_monadicScanl1Like VU.scanl1 EV.scanl1M),
+    QC.testProperty "scanl1M'" (prop_monadicScanl1Like VU.scanl1' EV.scanl1M'),
     QC.testProperty "maxRangeSum" prop_maxRangeSum,
     QC.testProperty "minRangeSum" prop_minRangeSum
   ]
