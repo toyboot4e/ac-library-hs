@@ -156,6 +156,7 @@ mapAccumL f s0 xs = (\(!x, !s) -> (s, x)) $ runST $ (`runStateT` s0) $ do
 unstreamPrimM :: (PrimMonad m, VG.Vector v a) => BundleM.Bundle m u a -> m (v a)
 unstreamPrimM s = VGM.munstream s >>= VG.unsafeFreeze
 
+-- | @since 1.5.1.0
 {-# INLINE prescanlM #-}
 prescanlM :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
 prescanlM f x0 =
@@ -163,6 +164,7 @@ prescanlM f x0 =
     . prescanlMB f x0
     . VG.stream
 
+-- | @since 1.5.1.0
 {-# INLINE prescanlM' #-}
 prescanlM' :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
 prescanlM' f x0 =
@@ -170,6 +172,7 @@ prescanlM' f x0 =
     . prescanlMB' f x0
     . VG.stream
 
+-- | @since 1.5.1.0
 {-# INLINE postscanlM #-}
 postscanlM :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
 postscanlM f x0 =
@@ -177,6 +180,7 @@ postscanlM f x0 =
     . postscanlMB f x0
     . VG.stream
 
+-- | @since 1.5.1.0
 {-# INLINE postscanlM' #-}
 postscanlM' :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
 postscanlM' f x0 =
@@ -184,6 +188,7 @@ postscanlM' f x0 =
     . postscanlMB' f x0
     . VG.stream
 
+-- | @since 1.5.1.0
 {-# INLINE scanlM #-}
 scanlM :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
 scanlM f x0 =
@@ -191,6 +196,7 @@ scanlM f x0 =
     . scanlMB f x0
     . VG.stream
 
+-- | @since 1.5.1.0
 {-# INLINE scanlM' #-}
 scanlM' :: (HasCallStack, Monad m, VG.Vector v a, VG.Vector v b) => (a -> b -> m a) -> a -> v b -> m (v a)
 scanlM' f x0 =
@@ -198,6 +204,7 @@ scanlM' f x0 =
     . scanlMB' f x0
     . VG.stream
 
+-- | @since 1.5.1.0
 {-# INLINE scanl1M #-}
 scanl1M :: (HasCallStack, Monad m, VG.Vector v a) => (a -> a -> m a) -> v a -> m (v a)
 scanl1M f =
@@ -205,6 +212,7 @@ scanl1M f =
     . scanl1MB f
     . VG.stream
 
+-- | @since 1.5.1.0
 {-# INLINE scanl1M' #-}
 scanl1M' :: (HasCallStack, Monad m, VG.Vector v a) => (a -> a -> m a) -> v a -> m (v a)
 scanl1M' f =
