@@ -948,7 +948,7 @@ bfsImpl !trackPrev !bnd0 !gr !undefW !sources
 -- deque, not distance of unreachable vertices.
 --
 -- ==== Constraints
--- - \(\marhrm{capacity} \ge 0\)
+-- - \(\mathrm{capacity} \ge 0\)
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
@@ -985,7 +985,7 @@ bfs01 !bnd0 !capacity !gr !sources =
 -- deque, not distance of unreachable vertices.
 --
 -- ==== Constraints
--- - \(\marhrm{capacity} \ge 0\)
+-- - \(\mathrm{capacity} \ge 0\)
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr
