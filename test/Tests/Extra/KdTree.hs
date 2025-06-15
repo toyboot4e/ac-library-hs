@@ -33,7 +33,7 @@ instance QC.Arbitrary Init where
     -- n <- QC.chooseInt (1, 256)
     n <- QC.chooseInt (1, 8)
     -- q <- QC.chooseInt (1, 256)
-    q <- QC.chooseInt (1, 4)
+    q <- QC.chooseInt (1, 32)
     refVec <- (VU.fromList <$>) $ QC.vectorOf n $ do
       x <- QC.chooseInt rng
       y <- QC.chooseInt rng

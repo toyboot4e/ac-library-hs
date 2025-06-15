@@ -4,11 +4,11 @@ name:            ac-library-hs
 -- PVP summary:  +-+------- breaking API changes
 --               | | +----- non-breaking API additions
 --               | | | +--- code changes with no API change
-version:         1.5.0.0
+version:         1.5.1.0
 synopsis:        Data structures and algorithms
 description:
   Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive
-  programming on [AtCoder](https://atcoder.jp/).
+  programming on [AtCoder](https://atcoder.jp/). ([GitHub](https://github.com/toyboot4e/ac-library-hs), [DeepWiki](https://deepwiki.com/toyboot4e/ac-library-hs))
 
   - Functions primarily use half-open interval \([l, r)\).
   - The `Extra` module contains additional utilities beyond the original C++ library.
@@ -39,7 +39,8 @@ common dependencies
     , bitvec             <1.2
     , bytestring         <0.14
     , primitive          >=0.6.4.0 && <0.10
-    , random             >=1.2.0 && < 1.3
+    , transformers       >= 0.2.0.0
+    , random             >=1.2.0   && <1.3
     , vector             >=0.13.0  && <0.14
     , vector-algorithms  <0.10
     , wide-word          <0.2
@@ -170,6 +171,8 @@ test-suite ac-library-hs-test
     Tests.Extra.Semigroup.Permutation
     Tests.Extra.Seq
     Tests.Extra.Seq.Map
+    Tests.Extra.Tree
+    Tests.Extra.Tree.Lct
     Tests.Extra.WaveletMatrix
     Tests.Extra.WaveletMatrix.BitVector
     Tests.Extra.WaveletMatrix.Raw
@@ -230,17 +233,22 @@ benchmark ac-library-hs-benchmark
     Bench.RepeatWithIndex
     Bench.RepeatWithoutIndex
     Bench.SwapDupe
+    Bench.Vector.ConcatMapM
+    Bench.Vector.IConcatMapM
+    Bench.Vector.MapAccumL
     BenchLib.AddMod
     BenchLib.Matrix
     BenchLib.ModInt.ModIntNats
     BenchLib.ModInt.Modulus
+    BenchLib.Montgomery64.Inline
+    BenchLib.Montgomery64.Noinline
     BenchLib.MulMod.Barrett64
     BenchLib.MulMod.BarrettWideWord
     BenchLib.MulMod.Montgomery
-    BenchLib.Montgomery64.Inline
-    BenchLib.Montgomery64.Noinline
     BenchLib.PowMod
     BenchLib.SwapDupe
+    BenchLib.Vector.ConcatMapM
+    BenchLib.Vector.MapAccumL
 
   build-depends:
     , ac-library-hs

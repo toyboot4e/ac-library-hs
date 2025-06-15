@@ -1686,7 +1686,7 @@ updateEdgeFloydWarshallST trackPrev mat prev nVerts undefW a b dw = do
   where
     idx !from !to = nVerts * from + to
 
--- | \(O(n)\) Given a predecessor array, retrieves a path from the root to a vertex.
+-- | \(O(n)\) Given a predecessor array, reconstructs a path from the root to a vertex.
 --
 -- ==== Constraints
 -- - The path must not make a cycle, otherwise this function loops forever.
@@ -1698,7 +1698,7 @@ updateEdgeFloydWarshallST trackPrev mat prev nVerts undefW a b dw = do
 constructPathFromRoot :: (HasCallStack) => VU.Vector Int -> Int -> VU.Vector Int
 constructPathFromRoot parents = VU.reverse . constructPathToRoot parents
 
--- | \(O(n)\) Given a predecessor array, retrieves a path from a vertex to the root.
+-- | \(O(n)\) Given a predecessor array, reconstructs a path from a vertex to the root.
 --
 -- ==== Constraints
 -- - The path must not make a cycle, otherwise this function loops forever.
@@ -1713,7 +1713,7 @@ constructPathToRoot parents = VU.unfoldr f
     f (-1) = Nothing
     f v = Just (v, parents VG.! v)
 
--- | \(O(n)\) Given a NxN predecessor matrix (created with `trackingFloydWarshall`), retrieves a
+-- | \(O(n)\) Given a NxN predecessor matrix (created with `trackingFloydWarshall`), reconstructs a
 -- path from the root to a sink vertex.
 --
 -- ==== Constraints
@@ -1735,7 +1735,7 @@ constructPathFromRootMat ::
   VU.Vector Int
 constructPathFromRootMat parents source = VU.reverse . constructPathToRootMat parents source
 
--- | \(O(n)\) Given a NxN predecessor matrix(created with `trackingFloydWarshall`), retrieves a
+-- | \(O(n)\) Given a NxN predecessor matrix(created with `trackingFloydWarshall`), reconstructs a
 -- path from a vertex to the root.
 --
 -- ==== Constraints
@@ -1763,8 +1763,8 @@ constructPathToRootMat parents source sink =
     -- https://zenn.dev/mod_poppo/articles/atcoder-beginner-contest-284-d#%E8%A7%A3%E6%B3%953%EF%BC%9Asqrt%E3%81%A8round%E3%82%92%E4%BD%BF%E3%81%86
     n :: Int = round . sqrt $ (fromIntegral (VU.length parents) :: Double)
 
--- | \(O(n)\) Given a NxN predecessor matrix (created with `newTrackingFloydWarshall`), retrieves a
--- path from the root to a sink vertex.
+-- | \(O(n)\) Given a NxN predecessor matrix (created with `newTrackingFloydWarshall`), reconstructs
+-- a path from the root to a sink vertex.
 --
 -- ==== Constraints
 -- - The path must not make a cycle, otherwise this function loops forever.
@@ -1785,8 +1785,8 @@ constructPathFromRootMatM ::
   m (VU.Vector Int)
 constructPathFromRootMatM parents source = (VU.reverse <$>) . constructPathToRootMatM parents source
 
--- | \(O(n)\) Given a NxN predecessor matrix (created with `newTrackingFloydWarshall`), retrieves a
--- path from a vertex to the root.
+-- | \(O(n)\) Given a NxN predecessor matrix (created with `newTrackingFloydWarshall`),
+-- reconstructs a path from a vertex to the root.
 --
 -- ==== Constraints
 -- - The path must not make a cycle, otherwise this function loops forever.

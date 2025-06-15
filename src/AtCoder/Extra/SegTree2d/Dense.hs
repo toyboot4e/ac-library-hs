@@ -180,7 +180,7 @@ readMaybe DenseSegTree2d {..} x y
 -- @since 1.2.3.0
 {-# INLINE write #-}
 write :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => DenseSegTree2d (PrimState m) a -> Int -> Int -> a -> m ()
-write seg@DenseSegTree2d {..} x y a = stToPrim $ do
+write seg x y a = stToPrim $ do
   modifyM seg (pure . const a) x y
 
 -- | \(O(\log  h \log w)\) Given a user function \(f\), modifies the monoid value at \((x, y)\) with

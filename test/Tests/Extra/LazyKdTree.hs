@@ -44,7 +44,7 @@ instance Show Init where
 instance QC.Arbitrary Init where
   arbitrary = do
     n <- QC.chooseInt (1, 256)
-    q <- QC.chooseInt (1, 256)
+    q <- QC.chooseInt (1, 1024)
     xyws <- (VU.fromList <$>) $ QC.vectorOf n $ do
       x <- QC.chooseInt rng
       y <- QC.chooseInt rng

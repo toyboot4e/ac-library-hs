@@ -1,5 +1,19 @@
 # Revision history for acl-hs
 
+## 1.5.1.0 -- June 2025
+
+- Added `transformers` as a new dependency.
+- Added more functions:
+  - `AtCoder.Extra.Lct`: `read`, `lcaMaybe`, `lengthBetween` and `prodTree`.
+  - `AtCoder.Extra.Graph`: `adj1`.
+  - `AtCoder.Internal.Csr`: `adj1`.
+  - `AtCoder.Extra.Vector`:
+    - `iconcatMap`, `concatMapM`, `iconcatMapM`
+    - `compress`, `mapAccumL`, `chunks`
+    - `scanlM` variants,
+    - `maxRangeSum`, `minRangeSum`
+    - `slideMinIndices`, `slideMaxIndices`
+
 ## 1.5.0.0 -- May 2025
 
 - Changed the parameter orders of `bfs01` and `dijkstra` in `AtCoder.Extra.Graph`.

@@ -211,6 +211,11 @@ executable yosupo-factorize
   main-is:       yosupo-factorize.hs
   build-depends: verify
 
+executable yosupo-incremental-minimum-spanning-forest
+  import:        app-local
+  main-is:       yosupo-incremental-minimum-spanning-forest.hs
+  build-depends: verify
+
 executable yosupo-jump-on-tree
   import:        app-local
   main-is:       yosupo-jump-on-tree.hs
@@ -249,6 +254,11 @@ executable yosupo-many-aplusb-iota
 executable yosupo-many-aplusb-state
   import:        app-local
   main-is:       yosupo-many-aplusb-state.hs
+  build-depends: verify
+
+executable yosupo-many-aplusb-128-bit
+  import:        app-local
+  main-is:       yosupo-many-aplusb-128-bit.hs
   build-depends: verify
 
 executable yosupo-matrix-det

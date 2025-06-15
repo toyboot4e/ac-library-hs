@@ -101,9 +101,10 @@ diameterPath n gr !undefW =
       !w = bfs2 VG.! to
    in (Gr.constructPathFromRoot parents to, w)
 
--- | \(O(m \log m)\) Kruskal's algorithm. Returns edge indices for building a minimum spanning tree.
+-- | \(O(m \log m)\) Kruskal's algorithm. Returns \((w, \mathrm{use}, \mathrm{mst})\): (weight of the minimum
+-- spanning tree, edge use flags, minimum spanning tree).
 --
--- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u, w)\) is required
+-- NOTE: The edges need not be duplicated: only one of \((u, v, w)\) or \((v, u, w)\) is required
 -- for each edge.
 --
 -- ==== __Example__
@@ -127,10 +128,12 @@ diameterPath n gr !undefW =
 mst :: (Num w, Ord w, VU.Unbox w) => Int -> VU.Vector (Int, Int, w) -> (w, VU.Vector Bit, Gr.Csr w)
 mst = mstBy (comparing id)
 
--- | \(O(m \log m)\) Kruskal's algorithm. Returns edge indices for building a minimum/maximum
--- spanning tree.
+-- | \(O(m \log m)\) Kruskal's algorithm for creating either minimum or maximum spanning tree. Returns
+-- \((w, \mathrm{use}, \mathrm{mst})\): (weight of the minimum spanning tree, edge use flags, minimum
+-- spanning tree).
 --
--- NOTE: The edges should not be duplicated: only one of \((u, v, w)\) or \((v, u, w)\) is required
+--
+-- NOTE: The edges need not be duplicated: only one of \((u, v, w)\) or \((v, u, w)\) is required
 -- for each edge.
 --
 -- ==== __Example__

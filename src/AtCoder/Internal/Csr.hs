@@ -43,6 +43,7 @@ module AtCoder.Internal.Csr
     -- * Accessors
     adj,
     adjW,
+    adj1,
     eAdj,
     eAdjW,
   )
@@ -157,6 +158,16 @@ adjW Csr {..} i =
   let il = startCsr VG.! i
       ir = startCsr VG.! (i + 1)
    in VU.zip (VU.slice il (ir - il) adjCsr) (VU.slice il (ir - il) wCsr)
+
+-- | \(O(1)\) Returns the adjacent vertices with \(1\) weights.
+--
+-- @since 1.5.1.0
+{-# INLINE adj1 #-}
+adj1 :: (HasCallStack, VU.Unbox w) => Csr w -> Int -> VU.Vector (Int, Int)
+adj1 Csr {..} i =
+  let il = startCsr VG.! i
+      ir = startCsr VG.! (i + 1)
+   in VU.zip (VU.slice il (ir - il) adjCsr) (VU.replicate (ir - il) 1)
 
 -- | \(O(n)\) Returns a vector of @(csrEdgeIndex, adjacentVertex)@.
 --
