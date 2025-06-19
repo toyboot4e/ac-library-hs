@@ -26,6 +26,10 @@ check:
 [private]
 alias c := check
 
+# builds the library with Core output
+core *args:
+    cabal build --ghc-options='-ddump-to-file -ddump-prep' {{args}}
+
 # generates Haddock document
 doc *args:
     cabal haddock {{args}}
