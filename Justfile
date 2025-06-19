@@ -13,8 +13,8 @@ bench:
 alias be := bench
 
 # builds the library
-build:
-    cabal build
+build *args:
+    cabal build {{args}}
 
 [private]
 alias b := build
@@ -27,8 +27,8 @@ check:
 alias c := check
 
 # generates Haddock document
-doc:
-    cabal haddock
+doc *args:
+    cabal haddock {{args}}
 
 [private]
 alias d := doc
@@ -96,7 +96,6 @@ alias v := verify
 
 # runs local test for all of the online judge problems
 verify-all:
-    #!/usr/bin/env bash
     cd verify && touch app/* && oj-verify run app/*.hs -j $(nproc)
 
 [private]
@@ -110,5 +109,5 @@ test-all:
 alias ta := test-all
 
 # runs tests and outputs hpc test coverage
-coverage:
-    cabal test ---enable-coverage
+coverage *args:
+    cabal test ---enable-coverage {{args}}
