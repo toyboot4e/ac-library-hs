@@ -98,6 +98,7 @@ library
     AtCoder.Extra.Tree.Lct
     AtCoder.Extra.Tree.TreeMonoid
     AtCoder.Extra.Vector
+    AtCoder.Extra.Vector.Prim
     AtCoder.Extra.WaveletMatrix
     AtCoder.Extra.WaveletMatrix.BitVector
     AtCoder.Extra.WaveletMatrix.Raw

@@ -35,6 +35,7 @@ import Tests.Extra.Seq.Map qualified
 import Tests.Extra.Tree qualified
 import Tests.Extra.Tree.Lct qualified
 import Tests.Extra.Vector qualified
+import Tests.Extra.Vector.Prim qualified
 import Tests.Extra.WaveletMatrix qualified
 import Tests.Extra.WaveletMatrix.BitVector qualified
 import Tests.Extra.WaveletMatrix.Raw qualified
@@ -97,6 +98,7 @@ main =
             testGroup "Tree" Tests.Extra.Tree.tests,
             testGroup "Tree.Lct" Tests.Extra.Tree.Lct.tests,
             testGroup "Vector" Tests.Extra.Vector.tests,
+            testGroup "Vector.Prim" Tests.Extra.Vector.Prim.tests,
             testGroup "WaveletMatrix" Tests.Extra.WaveletMatrix.tests,
             testGroup "WaveletMatrix.BitVector" Tests.Extra.WaveletMatrix.BitVector.tests,
             testGroup "WaveletMatrix.Raw" Tests.Extra.WaveletMatrix.Raw.tests,
