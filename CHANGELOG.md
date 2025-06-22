@@ -1,5 +1,10 @@
 # Revision history for acl-hs
 
+## 1.5.2.0 -- June 2025
+
+- Added `AtCoder.Extra.Vector.Prim`
+- Fixed some `INLINE` pragmas
+
 ## 1.5.1.0 -- June 2025
 
 - Added `transformers` as a new dependency.
