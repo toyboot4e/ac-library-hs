@@ -187,7 +187,6 @@ swapDupe uvws = VU.create $ do
 --
 -- @since 1.1.0.0
 {-# INLINEABLE swapDupe' #-}
--- NOTE: concatMap does not fuse anyways, as the vector's code says
 swapDupe' :: VU.Vector (Int, Int) -> VU.Vector (Int, Int)
 swapDupe' uvs = VU.create $ do
   vec <- VUM.unsafeNew (2 * VU.length uvs)
