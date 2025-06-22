@@ -196,12 +196,6 @@ izipWithM_ m as bs = Bundle.zipWithM_ (uncurry m) (Bundle.indexed (VG.stream as)
 
 -- | Maps each element to a vector and concatenate the results.
 --
--- ==== Example
--- >>> import AtCoder.Extra.Vector.Prim qualified as EVP
--- >>> import Data.Vector.Unboxed qualified as VU
--- >>> EVP.iconcatMap (\x -> pure (VU.fromList [x, x])) $ VU.generate @Int 3 id
--- [0,0,1,1,2,2]
---
 -- @since 1.5.2.0
 {-# INLINE concatMapM #-}
 concatMapM ::
@@ -216,12 +210,6 @@ concatMapM f =
     . BundleM.fromVector
 
 -- | Maps each element to a vector and concatenate the results.
---
--- ==== Example
--- >>> import AtCoder.Extra.Vector qualified as EVP
--- >>> import Data.Vector.Unboxed qualified as VU
--- >>> EVP.iconcatMapM (\i x -> pure (VU.fromList [i + x, i + x])) $ VU.replicate @Int 3 0
--- [0,0,1,1,2,2]
 --
 -- @since 1.5.2.0
 {-# INLINE iconcatMapM #-}
