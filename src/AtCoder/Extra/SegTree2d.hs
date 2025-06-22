@@ -126,7 +126,7 @@ data SegTree2d s a = SegTree2d
 -- | \(O(n \log n)\) Creates a `SegTree2d` from a vector of \((x, y)\) coordinates.
 --
 -- @since 1.2.3.0
-{-# INLINEABLE new #-}
+{-# INLINE new #-}
 new ::
   (PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | \((x, y)\) vector

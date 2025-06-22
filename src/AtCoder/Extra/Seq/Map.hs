@@ -144,7 +144,7 @@ assertRootST Seq.Seq {pSeq} i = do
 -- performance.
 --
 -- @since 1.2.1.0
-{-# INLINEABLE new #-}
+{-# INLINE new #-}
 new :: (PrimMonad m, Monoid f, VU.Unbox f, VU.Unbox k, VU.Unbox v, Monoid v) => Int -> m (Map (PrimState m) f k v)
 new n = stToPrim $ do
   seqMap <- Seq.new n
