@@ -46,6 +46,7 @@ module AtCoder.Extra.Pdsu
 where
 
 import AtCoder.Internal.Assert qualified as ACIA
+import AtCoder.Extra.Vector.Prim qualified as EVP
 import Control.Monad
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Control.Monad.ST (ST)
@@ -369,7 +370,7 @@ unsafeDiffST !dsu !v1 !v2 = do
 groupsST :: (Semigroup a, VU.Unbox a) => Pdsu s a -> ST s (V.Vector (VU.Vector Int))
 groupsST dsu@Pdsu {..} = do
   groupSize <- VUM.replicate nPdsu (0 :: Int)
-  leaders <- VU.generateM nPdsu $ \i -> do
+  leaders <- EVP.generateM nPdsu $ \i -> do
     li <- leaderST dsu i
     VGM.modify groupSize (+ 1) li
     pure li

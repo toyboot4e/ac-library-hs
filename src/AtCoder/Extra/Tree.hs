@@ -26,6 +26,7 @@ where
 
 import AtCoder.Dsu qualified as Dsu
 import AtCoder.Extra.Graph qualified as Gr
+import AtCoder.Extra.Vector.Prim qualified as EVP
 import Control.Monad (when)
 import Control.Monad.ST (runST)
 import Data.Bit (Bit (..))
@@ -165,7 +166,7 @@ mstBy !f nVerts edges = runST $ do
         (VU.replicate (VU.length edges) (Bit False))
         <$>
       )
-      . VU.mapM
+      . EVP.mapM
         ( \(i :: Int) -> do
             let !u = us VG.! i
             let !v = vs VG.! i

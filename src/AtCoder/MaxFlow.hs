@@ -59,6 +59,7 @@ where
 
 -- TODO: add `build`.
 
+import AtCoder.Extra.Vector.Prim qualified as EVP
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.GrowVec qualified as ACIGV
 import AtCoder.Internal.Queue qualified as ACIQ
@@ -292,7 +293,7 @@ changeEdge g i newCap newFlow = stToPrim $ changeEdgeST g i newCap newFlow
 -- -------------------------------------------------------------------------------------------------
 
 {-# INLINEABLE newST #-}
-newST :: (PrimMonad m, VU.Unbox cap) => Int -> m (MfGraph (PrimState m) cap)
+newST :: (VU.Unbox cap) => Int -> ST s (MfGraph s cap)
 newST nG = do
   gG <- V.replicateM nG (ACIGV.new 0)
   posG <- ACIGV.new 0
@@ -300,9 +301,9 @@ newST nG = do
 
 {-# INLINEABLE addEdgeST #-}
 addEdgeST ::
-  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  (HasCallStack, Num cap, Ord cap, VU.Unbox cap) =>
   -- | Graph
-  MfGraph (PrimState m) cap ->
+  MfGraph s cap ->
   -- | from
   Int ->
   -- | to
@@ -310,7 +311,7 @@ addEdgeST ::
   -- | cap
   cap ->
   -- | Edge index
-  m Int
+  ST s Int
 addEdgeST MfGraph {..} from to cap = do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdgeST" "`from` vertex" from "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.addEdgeST" "`to` vertex" to "the number of vertices" nG
@@ -327,9 +328,9 @@ addEdgeST MfGraph {..} from to cap = do
 
 {-# INLINEABLE flowST #-}
 flowST ::
-  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  (HasCallStack, Num cap, Ord cap, VU.Unbox cap) =>
   -- | Graph
-  MfGraph (PrimState m) cap ->
+  MfGraph s cap ->
   -- | Source @s@
   Int ->
   -- | Sink @t@
@@ -337,7 +338,7 @@ flowST ::
   -- | Flow limit
   cap ->
   -- | Max flow
-  m cap
+  ST s cap
 flowST MfGraph {..} s t flowLimit = stToPrim $ do
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flowST" "`source` vertex" s "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MaxFlow.flowST" "`sink` vertex" t "the number of vertices" nG
@@ -418,14 +419,14 @@ flowST MfGraph {..} s t flowLimit = stToPrim $ do
 
 {-# INLINEABLE minCutST #-}
 minCutST ::
-  (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  (Num cap, Ord cap, VU.Unbox cap) =>
   -- | Graph
-  MfGraph (PrimState m) cap ->
+  MfGraph s cap ->
   -- | Source @s@
   Int ->
   -- | Minimum cut
-  m (VU.Vector Bit)
-minCutST MfGraph {..} s = stToPrim $ do
+  ST s (VU.Vector Bit)
+minCutST MfGraph {..} s = do
   visited <- VUM.replicate nG $ Bit False
   que <- ACIQ.new nG -- we could use a growable queue here
   ACIQ.pushBack que s
@@ -446,13 +447,13 @@ minCutST MfGraph {..} s = stToPrim $ do
 
 {-# INLINEABLE getEdgeST #-}
 getEdgeST ::
-  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  (HasCallStack, Num cap, Ord cap, VU.Unbox cap) =>
   -- | Graph
-  MfGraph (PrimState m) cap ->
+  MfGraph s cap ->
   -- | Vertex
   Int ->
   -- | Tuple of @(from, to, cap, flow)@
-  m (Int, Int, cap, cap)
+  ST s (Int, Int, cap, cap)
 getEdgeST MfGraph {..} i = stToPrim $ do
   m <- ACIGV.length posG
   let !_ = ACIA.checkEdge "AtCoder.MaxFlow.getEdge" i m
@@ -463,27 +464,27 @@ getEdgeST MfGraph {..} i = stToPrim $ do
 
 {-# INLINEABLE edgesST #-}
 edgesST ::
-  (PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  (Num cap, Ord cap, VU.Unbox cap) =>
   -- | Graph
-  MfGraph (PrimState m) cap ->
+  MfGraph s cap ->
   -- | Vector of @(from, to, cap, flow)@
-  m (VU.Vector (Int, Int, cap, cap))
+  ST s (VU.Vector (Int, Int, cap, cap))
 edgesST g@MfGraph {posG} = do
   len <- ACIGV.length posG
-  VU.generateM len (getEdge g)
+  EVP.generateM len (getEdge g)
 
 {-# INLINEABLE changeEdgeST #-}
 changeEdgeST ::
-  (HasCallStack, PrimMonad m, Num cap, Ord cap, VU.Unbox cap) =>
+  (HasCallStack, Num cap, Ord cap, VU.Unbox cap) =>
   -- | Graph
-  MfGraph (PrimState m) cap ->
+  MfGraph s cap ->
   -- | Edge index
   Int ->
   -- | New capacity
   cap ->
   -- | New flow
   cap ->
-  m ()
+  ST s ()
 changeEdgeST MfGraph {..} i newCap newFlow = stToPrim $ do
   m <- ACIGV.length posG
   let !_ = ACIA.checkEdge "AtCoder.MaxFlow.changeEdgeST" i m

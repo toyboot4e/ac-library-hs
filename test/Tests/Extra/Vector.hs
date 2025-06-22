@@ -1,13 +1,14 @@
 module Tests.Extra.Vector where
 
 import AtCoder.Extra.Vector qualified as EV
-import Data.Functor.Identity (Identity, runIdentity)
 import Control.Monad.ST (runST)
+import Data.Functor.Identity (Identity, runIdentity)
 import Data.List qualified as L
-import Data.Vector.Unboxed qualified as VU
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
+import Data.Vector.Unboxed qualified as VU
 import Test.Tasty
+import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
 
 prop_argsort :: [Int] -> QC.Property
@@ -78,10 +79,15 @@ prop_chunks (QC.Positive k) xs =
   let res = EV.chunks k $ VU.fromList xs
       n = length xs
    in QC.conjoin
-      [ V.sum (VG.map VG.length res) QC.=== n,
-        V.all ((== k) . VG.length) (V.init res) QC.=== True,
-        VG.concat (V.toList res) QC.=== VU.fromList xs
-      ]
+        [ V.sum (VG.map VG.length res) QC.=== n,
+          V.all ((== k) . VG.length) (V.init res) QC.=== True,
+          VG.concat (V.toList res) QC.=== VU.fromList xs
+        ]
+
+unit_maxRangeSum :: TestTree
+unit_maxRangeSum = testCase "unit_maxRangeSum" $ do
+  EV.maxRangeSum (VU.singleton (-1 :: Int)) @?= 0
+  EV.maxRangeSum (VU.empty @Int) @?= 0
 
 prop_maxRangeSum :: [Int] -> QC.Property
 prop_maxRangeSum xs =
@@ -93,6 +99,11 @@ prop_maxRangeSum xs =
          in maximum $ map eval lrs
       rhs = EV.maxRangeSum vec
    in lhs QC.=== rhs
+
+unit_minRangeSum :: TestTree
+unit_minRangeSum = testCase "uni_minRangeSum [1]" $ do
+  EV.minRangeSum (VU.singleton (1 :: Int)) @?= 0
+  EV.minRangeSum (VU.empty @Int) @?= 0
 
 prop_minRangeSum :: [Int] -> QC.Property
 prop_minRangeSum xs =
@@ -153,7 +164,8 @@ tests =
     QC.testProperty "scanl1M'" (prop_monadicScanl1Like VU.scanl1' EV.scanl1M'),
     QC.testProperty "maxRangeSum" prop_maxRangeSum,
     QC.testProperty "minRangeSum" prop_minRangeSum,
+    unit_maxRangeSum,
+    unit_minRangeSum,
     QC.testProperty "slideMinIndices" prop_slideMinIndices,
     QC.testProperty "slideMaxIndices" prop_slideMaxIndices
   ]
-

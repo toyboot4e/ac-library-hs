@@ -226,7 +226,7 @@ data Hld = Hld
 --   \((v, u, w)\) edges are required).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE new #-}
+{-# INLINE new #-}
 new :: forall w. (HasCallStack) => Gr.Csr w -> Hld
 new tree = newAt tree 0
 

@@ -102,98 +102,98 @@ data IntMap s a = IntMap
 -- | \(O(n)\) Creates an `IntMap` for an interval \([0, n)\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE new #-}
+{-# INLINE new #-}
 new :: (PrimMonad m, VU.Unbox a) => Int -> m (IntMap (PrimState m) a)
 new cap = stToPrim $ newST cap
 
 -- | \(O(n + m \log n)\) Creates an `IntMap` for an interval \([0, n)\) with initial entries.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE build #-}
+{-# INLINE build #-}
 build :: (PrimMonad m, VU.Unbox a) => Int -> VU.Vector (Int, a) -> m (IntMap (PrimState m) a)
 build cap xs = stToPrim $ buildST cap xs
 
 -- | \(O(1)\) Returns the capacity \(n\), where the interval \([0, n)\) is covered by the map.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE capacity #-}
+{-# INLINE capacity #-}
 capacity :: IntMap s a -> Int
 capacity = IS.capacity . setIM
 
 -- | \(O(1)\) Returns the number of entries in the map.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE size #-}
+{-# INLINE size #-}
 size :: (PrimMonad m) => IntMap (PrimState m) a -> m Int
 size = IS.size . setIM
 
 -- | \(O(1)\) Returns whether the map is empty.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE null #-}
+{-# INLINE null #-}
 null :: (PrimMonad m) => IntMap (PrimState m) a -> m Bool
 null = IS.null . setIM
 
 -- | \(O(\log n)\) Looks up the value associated with a key.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookup #-}
+{-# INLINE lookup #-}
 lookup :: (PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> Int -> m (Maybe a)
 lookup im k = stToPrim $ lookupST im k
 
 -- | \(O(\log n)\) Tests whether a key \(k\) is in the map.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE member #-}
+{-# INLINE member #-}
 member :: (PrimMonad m) => IntMap (PrimState m) a -> Int -> m Bool
 member = IS.member . setIM
 
 -- | \(O(\log n)\) Tests whether a key \(k\) is not in the map.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE notMember #-}
+{-# INLINE notMember #-}
 notMember :: (PrimMonad m) => IntMap (PrimState m) a -> Int -> m Bool
 notMember = IS.notMember . setIM
 
 -- | \(O(\log n)\) Looks up the \((k, v)\) pair with the smallest key \(k\) such that \(k \ge k_0\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookupGE #-}
+{-# INLINE lookupGE #-}
 lookupGE :: (PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> Int -> m (Maybe (Int, a))
 lookupGE im k = stToPrim $ lookupGEST im k
 
 -- | \(O(\log n)\) Looks up the \((k, v)\) pair with the smallest \(k\) such that \(k \gt k_0\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookupGT #-}
+{-# INLINE lookupGT #-}
 lookupGT :: (PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> Int -> m (Maybe (Int, a))
 lookupGT is k = stToPrim $ lookupGEST is (k + 1)
 
 -- | \(O(\log n)\) Looks up the \((k, v)\) pair with the largest key \(k\) such that \(k \le k_0\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookupLE #-}
+{-# INLINE lookupLE #-}
 lookupLE :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> Int -> m (Maybe (Int, a))
 lookupLE im k = stToPrim $ lookupLEST im k
 
 -- | \(O(\log n)\) Looks up the \((k, v)\) pair with the largest key \(k\) such that \(k \lt k_0\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookupLT #-}
+{-# INLINE lookupLT #-}
 lookupLT :: (PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> Int -> m (Maybe (Int, a))
 lookupLT im k = stToPrim $ lookupLEST im (k - 1)
 
 -- | \(O(\log n)\) Looks up the \((k, v)\) pair with the minimum key \(k\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookupMin #-}
+{-# INLINE lookupMin #-}
 lookupMin :: (PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> m (Maybe (Int, a))
 lookupMin im = stToPrim $ lookupMinST im
 
 -- | \(O(\log n)\) Looks up the \((k, v)\) pair with the maximum key \(k\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE lookupMax #-}
+{-# INLINE lookupMax #-}
 lookupMax :: (PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> m (Maybe (Int, a))
 lookupMax im = stToPrim $ lookupMaxST im
 
@@ -201,7 +201,7 @@ lookupMax im = stToPrim $ lookupMaxST im
 -- exists, it is overwritten.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE insert #-}
+{-# INLINE insert #-}
 insert :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> Int -> a -> m ()
 insert im k v = stToPrim $ insertST im k v
 
@@ -209,7 +209,7 @@ insert im k v = stToPrim $ insertST im k v
 -- exists, it overwritten with \(f(v_{\mathrm{new}}, v_{\mathrm{old}})\).
 --
 -- @since 1.1.0.0
-{-# INLINEABLE insertWith #-}
+{-# INLINE insertWith #-}
 insertWith :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> (a -> a -> a) -> Int -> a -> m ()
 insertWith im f k v = stToPrim $ insertWithST im f k v
 
@@ -217,7 +217,7 @@ insertWith im f k v = stToPrim $ insertWithST im f k v
 -- does not exist, it does nothing.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE modify #-}
+{-# INLINE modify #-}
 modify :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> (a -> a) -> Int -> m ()
 modify im f k = stToPrim $ modifyST im f k
 
@@ -225,7 +225,7 @@ modify im f k = stToPrim $ modifyST im f k
 -- does not exist, it does nothing.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE modifyM #-}
+{-# INLINE modifyM #-}
 modifyM :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> (a -> m a) -> Int -> m ()
 modifyM IntMap {..} f k = do
   b <- IS.member setIM k
@@ -236,7 +236,7 @@ modifyM IntMap {..} f k = do
 -- such key exists. Returns whether the key existed.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE delete #-}
+{-# INLINE delete #-}
 delete :: (PrimMonad m) => IntMap (PrimState m) a -> Int -> m Bool
 delete im = stToPrim . deleteST im
 
@@ -244,42 +244,42 @@ delete im = stToPrim . deleteST im
 -- such key exists.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE delete_ #-}
+{-# INLINE delete_ #-}
 delete_ :: (PrimMonad m) => IntMap (PrimState m) a -> Int -> m ()
 delete_ im = stToPrim . deleteST_ im
 
 -- | \(O(\log n)\) Deletes the \((k, v)\) pair with the minimum key \(k\) in the map.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE deleteMin #-}
+{-# INLINE deleteMin #-}
 deleteMin :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> m (Maybe (Int, a))
 deleteMin is = stToPrim $ deleteMinST is
 
 -- | \(O(\log n)\) Deletes the \((k, v)\) pair with maximum key \(k\) in the map.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE deleteMax #-}
+{-# INLINE deleteMax #-}
 deleteMax :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> m (Maybe (Int, a))
 deleteMax is = stToPrim $ deleteMaxST is
 
 -- | \(O(n \log n)\) Enumerates the keys in the map.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE keys #-}
+{-# INLINE keys #-}
 keys :: (PrimMonad m) => IntMap (PrimState m) a -> m (VU.Vector Int)
 keys = stToPrim . keysST
 
 -- | \(O(n \log n)\) Enumerates the elements (values) in the map.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE elems #-}
+{-# INLINE elems #-}
 elems :: (PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> m (VU.Vector a)
 elems = stToPrim . elemsST
 
 -- | \(O(n \log n)\) Enumerates the key-value pairs in the map.
 --
 -- @since 1.1.0.0
-{-# INLINEABLE assocs #-}
+{-# INLINE assocs #-}
 assocs :: (PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> m (VU.Vector (Int, a))
 assocs = stToPrim . assocsST
 
