@@ -8,7 +8,12 @@
   };
 
   outputs =
-    { nixpkgs, nixpkgs-for-ghc, flake-utils, ... }:
+    {
+      nixpkgs,
+      nixpkgs-for-ghc,
+      flake-utils,
+      ...
+    }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
@@ -42,8 +47,39 @@
             ];
             propagatedBuildInputs = [ setuptools ];
           };
+        competitive-verifier =
+          with pkgs.python3Packages;
+          pkgs.python3Packages.buildPythonApplication {
+            name = "competitive-verifier";
+            version = "3.3.1";
+            pyproject = true;
+            src = pkgs.fetchFromGitHub {
+              owner = "competitive-verifier";
+              repo = "competitive-verifier";
+              rev = "v3.3.1";
+              sha256 = "sha256-eYm70R+XS2qVY6Rk0irdPSnjqd5PSV/e6OZgip54Su4=";
+            };
+            build-system = [ poetry-core ];
+            dependencies = [
+              poetry-core
+            ];
+            propagatedBuildInputs = [
+              colorlog
+              colorama
+              pydantic
+              pyyaml
+              importlab
+              charset-normalizer
+              tomli
+              requests
+              appdirs
+              beautifulsoup4
+            ];
+          };
       in
       {
+        formatter = pkgs.nixfmt-tree;
+
         devShells.default =
           with pkgs;
           mkShell {
@@ -56,6 +92,7 @@
 
             packages = [
               online-judge-tools
+              # competitive-verifier
               oj-verify
 
               python312Packages.selenium
