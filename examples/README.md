@@ -9,7 +9,10 @@ The examples in this directory are intended for copy-paste use.
 
 ## Other examples
 
-- See documentation page for most examples.
-- See `verify/` directroy under the repository root for [AtCoder Library Practice Contest](https://atcoder.jp/contests/practice2) problem solutions.
-- See `test/` directroy under the repository root for test code.
+- See [Hackage API documentation](https://hackage.haskell.org/package/ac-library-hs) for most examples.
+- See `:/verify/` for problem solutions. It contains
+  - [AtCoder Library Practice Contest](https://atcoder.jp/contests/practice2) problem solutions.
+  - [Library Checker](https://judge.yosupo.jp/) (Yosupo) problem solutions.
+  - [Aizu Online Judge](https://judge.u-aizu.ac.jp/onlinejudge/) (AOJ) problem solutions.
+- See `:/test/` for test code.
 
