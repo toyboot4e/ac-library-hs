@@ -1,9 +1,9 @@
 -- | Benchmark for monadic streams.
 module Bench.RepeatWithIndex (benches) where
 
-import Criterion
-import Control.Monad (when, replicateM_)
+import Control.Monad (replicateM_, when)
 import Control.Monad.ST (runST)
+import Criterion
 import Data.Foldable (for_)
 import Data.Vector.Fusion.Stream.Monadic qualified as MS
 import Data.Vector.Generic.Mutable as VGM

@@ -37,8 +37,8 @@ module AtCoder.Extra.ModInt64
   )
 where
 
-import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Extra.Math.Montgomery64 qualified as M64
+import AtCoder.Internal.Assert qualified as ACIA
 import Data.Ratio (denominator, numerator)
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -209,6 +209,7 @@ instance forall p. (KnownNat p) => Num (ModInt64 p) where
   abs = id
   {-# INLINE signum #-}
   signum _ = ModInt64 $ M64.encode (M64.new (proxy# @p)) 1
+
   -- because the input value can be negative, be sure to take the mod:
   {-# INLINE fromInteger #-}
   fromInteger = ModInt64 . M64.encode (M64.new (proxy# @p)) . fromInteger . (`mod` m)

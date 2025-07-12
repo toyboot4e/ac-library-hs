@@ -10,7 +10,7 @@ import AtCoder.Internal.Buffer qualified as B
 import Control.Monad (when)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Data.Foldable (for_)
-import Data.Maybe (isJust, fromJust)
+import Data.Maybe (fromJust, isJust)
 import Data.Semigroup (Sum (..))
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG

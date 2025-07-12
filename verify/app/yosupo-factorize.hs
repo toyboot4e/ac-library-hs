@@ -12,4 +12,3 @@ main = do
     let pns = Math.primeFactors x
     let ps = VU.concatMap (\(!p, !np) -> VU.replicate np p) pns
     printBSB . unwordsBSB $ VU.cons (VU.length ps) ps
-

@@ -129,8 +129,8 @@ reduce Montgomery64 {mM64, rM64} x =
 {-# INLINE addMod #-}
 addMod :: Word64 -> Word64 -> Word64 -> Word64
 addMod m a b
-    | x' >= m = x' - m
-    | otherwise = x'
+  | x' >= m = x' - m
+  | otherwise = x'
   where
     !x' = a + b
 
@@ -138,8 +138,8 @@ addMod m a b
 {-# INLINE subMod #-}
 subMod :: Word64 -> Word64 -> Word64 -> Word64
 subMod m a b
-    | a >= b = a - b
-    | otherwise = a - b + m
+  | a >= b = a - b
+  | otherwise = a - b + m
 
 -- | \(O(1)\) Calculates \(a^n \bmod m\) in the Montgomery form.
 --
@@ -174,4 +174,3 @@ eq mM64 a b = a' == b'
   where
     !a' = if a < mM64 then a else a - mM64
     !b' = if b < mM64 then b else b - mM64
-

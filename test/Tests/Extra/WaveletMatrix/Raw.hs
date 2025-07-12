@@ -205,10 +205,10 @@ unit_boundary = testCase "boundary" $ do
   try WM.kthLargestIn k
   try WM.ikthLargestIn k
 
--- try WM.unsafeKthSmallestIn
--- try WM.unsafeIKthSmallestIn
--- try WM.unsafeKthLargestIn
--- try WM.unsafeIKthLargestIn
+  -- try WM.unsafeKthSmallestIn
+  -- try WM.unsafeIKthSmallestIn
+  -- try WM.unsafeKthLargestIn
+  -- try WM.unsafeIKthLargestIn
 
   let tryRank :: (HasCallStack) => (WM.RawWaveletMatrix -> Int -> Int -> Int -> Int) -> Int -> IO ()
       tryRank f x = do
@@ -244,7 +244,7 @@ unit_boundary = testCase "boundary" $ do
   tryRank WM.rank 1
   tryRank WM.rank (-1)
 
--- TODO: test 
+-- TODO: test
 
 -- (@?= Nothing) $ WM.select wm
 -- (@?= Nothing) $ WM.selectKth wm

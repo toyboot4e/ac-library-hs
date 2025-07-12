@@ -19,4 +19,3 @@ main = do
 
   -- the case of h == 0 or w == 0 is correctly handled under the hood
   printBSB . BSB.intDec $ Mat.rank mat
-

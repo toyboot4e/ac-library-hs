@@ -1,9 +1,8 @@
--- | From `https://github.com/cojna/iota` (CC0 license)
-
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
 
+-- | From `https://github.com/cojna/iota` (CC0 license)
 module Iota.Prelude where
 
 import Control.Monad
@@ -11,37 +10,37 @@ import Control.Monad.Primitive
 import Control.Monad.State.Strict
 import Data.Bits
 import Data.Bool
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Builder as B
-import qualified Data.ByteString.Builder.Prim as BP
-import qualified Data.ByteString.Builder.Prim.Internal as BP
-import qualified Data.ByteString.Internal as B
-import qualified Data.ByteString.Short as B (ShortByteString, toShort)
-import qualified Data.ByteString.Short as B.Short
-import qualified Data.Foldable as F
+import Data.ByteString qualified as B
+import Data.ByteString.Builder qualified as B
+import Data.ByteString.Builder.Prim qualified as BP
+import Data.ByteString.Builder.Prim.Internal qualified as BP
+import Data.ByteString.Internal qualified as B
+import Data.ByteString.Short qualified as B (ShortByteString, toShort)
+import Data.ByteString.Short qualified as B.Short
+import Data.Foldable qualified as F
 import Data.Functor.Identity
 import Data.Primitive
-import qualified Data.Vector as V
-import qualified Data.Vector.Fusion.Bundle as Bundle
-import qualified Data.Vector.Fusion.Bundle.Monadic as MBundle
-import qualified Data.Vector.Fusion.Bundle.Size as Bundle
-import qualified Data.Vector.Fusion.Stream.Monadic as MS
+import Data.Vector qualified as V
+import Data.Vector.Fusion.Bundle qualified as Bundle
+import Data.Vector.Fusion.Bundle.Monadic qualified as MBundle
+import Data.Vector.Fusion.Bundle.Size qualified as Bundle
+import Data.Vector.Fusion.Stream.Monadic qualified as MS
 import Data.Vector.Fusion.Util
-import qualified Data.Vector.Generic as G
-import qualified Data.Vector.Generic.Mutable as GM
-import qualified Data.Vector.Primitive as P
-import qualified Data.Vector.Unboxed as U
-import qualified Data.Vector.Unboxed.Base as U (Vector (..))
-import qualified Data.Vector.Unboxed.Mutable as UM
+import Data.Vector.Generic qualified as G
+import Data.Vector.Generic.Mutable qualified as GM
+import Data.Vector.Primitive qualified as P
+import Data.Vector.Unboxed qualified as U
+import Data.Vector.Unboxed.Base qualified as U (Vector (..))
+import Data.Vector.Unboxed.Mutable qualified as UM
 import Data.Word
 import Foreign.Ptr
 import Foreign.Storable
 import GHC.Exts
+import Iota.PrimParser
 import System.IO
 
-import Iota.PrimParser
-
 -- * Stream utils
+
 rep :: (Monad m) => Int -> (Int -> m ()) -> m ()
 rep n = flip MS.mapM_ (0 ..< n)
 {-# INLINE rep #-}
@@ -60,10 +59,9 @@ rev1 n = flip MS.mapM_ (n + 1 >.. 1)
 
 infix 4 ..<
 
-{- |
->>> runIdentity $ MS.toList (0..<5)
-[0,1,2,3,4]
--}
+-- |
+-- >>> runIdentity $ MS.toList (0..<5)
+-- [0,1,2,3,4]
 (..<) :: (Monad m) => Int -> Int -> MS.Stream m Int
 (..<) !l !r = MS.Stream step l
   where
@@ -75,10 +73,9 @@ infix 4 ..<
 
 infix 4 >..
 
-{- |
->>> runIdentity $ MS.toList (5>..0)
-[4,3,2,1,0]
--}
+-- |
+-- >>> runIdentity $ MS.toList (5>..0)
+-- [4,3,2,1,0]
 (>..) :: (Monad m) => Int -> Int -> MS.Stream m Int
 (>..) !r !l = MS.Stream step (r - 1)
   where
@@ -88,10 +85,9 @@ infix 4 >..
     {-# INLINE [0] step #-}
 {-# INLINE [1] (>..) #-}
 
-{- |
->>> runIdentity $ MS.toList (stride 0 10 3)
-[0,3,6,9]
--}
+-- |
+-- >>> runIdentity $ MS.toList (stride 0 10 3)
+-- [0,3,6,9]
 stride :: (Monad m) => Int -> Int -> Int -> MS.Stream m Int
 stride !l !r !d = MS.Stream step l
   where
@@ -115,36 +111,33 @@ asBVector :: V.Vector a -> V.Vector a
 asBVector = id
 {-# INLINE asBVector #-}
 
-{- |
->>> lowerBound (U.fromList "122333") '2'
-1
->>> lowerBound (U.fromList "122333") '0'
-0
->>> lowerBound (U.fromList "122333") '9'
-6
--}
+-- |
+-- >>> lowerBound (U.fromList "122333") '2'
+-- 1
+-- >>> lowerBound (U.fromList "122333") '0'
+-- 0
+-- >>> lowerBound (U.fromList "122333") '9'
+-- 6
 lowerBound :: (Ord a, G.Vector v a) => v a -> a -> Int
 lowerBound !vec !key = binarySearch 0 (G.length vec) ((key <=) . G.unsafeIndex vec)
 {-# INLINE lowerBound #-}
 
-{- |
->>> upperBound (U.fromList "122333") '2'
-3
->>> upperBound (U.fromList "122333") '0'
-0
->>> upperBound (U.fromList "122333") '9'
-6
--}
+-- |
+-- >>> upperBound (U.fromList "122333") '2'
+-- 3
+-- >>> upperBound (U.fromList "122333") '0'
+-- 0
+-- >>> upperBound (U.fromList "122333") '9'
+-- 6
 upperBound :: (Ord a, G.Vector v a) => v a -> a -> Int
 upperBound !vec !key = binarySearch 0 (G.length vec) ((key <) . G.unsafeIndex vec)
 {-# INLINE upperBound #-}
 
-{- |
->>> radixSort $ U.fromList [3,1,4,1,5,9]
-[1,1,3,4,5,9]
->>> radixSort $ U.fromList [-3,-1,-4,1,5,9]
-[1,5,9,-4,-3,-1]
--}
+-- |
+-- >>> radixSort $ U.fromList [3,1,4,1,5,9]
+-- [1,1,3,4,5,9]
+-- >>> radixSort $ U.fromList [-3,-1,-4,1,5,9]
+-- [1,5,9,-4,-3,-1]
 radixSort :: U.Vector Int -> U.Vector Int
 radixSort v0 = F.foldl' step v0 [0, 16, 32, 48]
   where
@@ -165,12 +158,11 @@ radixSort v0 = F.foldl' step v0 [0, 16, 32, 48]
       return res
 {-# INLINE radixSort #-}
 
-{- |
->>> runLengthEncode $ U.fromList "abbccc"
-[('a',1),('b',2),('c',3)]
->>> runLengthEncode $ U.fromList ""
-[]
--}
+-- |
+-- >>> runLengthEncode $ U.fromList "abbccc"
+-- [('a',1),('b',2),('c',3)]
+-- >>> runLengthEncode $ U.fromList ""
+-- []
 runLengthEncode ::
   (Eq a, G.Vector v a, G.Vector v (a, Int)) =>
   v a ->
@@ -201,10 +193,9 @@ streamRLE (MS.Stream step s0) = MS.Stream step' (Nothing, s0)
     {-# INLINE [0] step' #-}
 {-# INLINE [1] streamRLE #-}
 
-{- |
->>> forAccum (0 :: Int) (U.fromList "abc") $ \acc c -> (acc + 1, (acc, c))
-[(0,'a'),(1,'b'),(2,'c')]
--}
+-- |
+-- >>> forAccum (0 :: Int) (U.fromList "abc") $ \acc c -> (acc + 1, (acc, c))
+-- [(0,'a'),(1,'b'),(2,'c')]
 forAccum ::
   (G.Vector v a, G.Vector v b) =>
   s ->
@@ -368,10 +359,9 @@ streamM :: (G.Vector v a, Monad m) => v a -> MS.Stream m a
 streamM = MS.trans (return . unId) . MBundle.elements . G.stream
 {-# INLINE streamM #-}
 
-{- |
->>> asUVector . unstream 10 . stream $ U.fromList "abc"
-"abc"
--}
+-- |
+-- >>> asUVector . unstream 10 . stream $ U.fromList "abc"
+-- "abc"
 unstream :: (G.Vector v a) => Int -> MS.Stream Id a -> v a
 unstream ub =
   G.unstream
@@ -390,18 +380,18 @@ unstreamM ub s =
 {-# INLINE [1] unstreamM #-}
 
 -- * Bits utils
+
 infixl 8 `shiftRL`, `unsafeShiftRL`, !>>>.
 
 shiftRL :: Int -> Int -> Int
 shiftRL = unsafeShiftRL
 {-# INLINE shiftRL #-}
 
-{- |
->>> unsafeShiftR (-1) 1
--1
->>> unsafeShiftRL (-1) 1
-9223372036854775807
--}
+-- |
+-- >>> unsafeShiftR (-1) 1
+-- -1
+-- >>> unsafeShiftRL (-1) 1
+-- 9223372036854775807
 unsafeShiftRL :: Int -> Int -> Int
 unsafeShiftRL (I# x#) (I# i#) = I# (uncheckedIShiftRL# x# i#)
 {-# INLINE unsafeShiftRL #-}
@@ -410,86 +400,82 @@ unsafeShiftRL (I# x#) (I# i#) = I# (uncheckedIShiftRL# x# i#)
 (!>>>.) = unsafeShiftRL
 {-# INLINE (!>>>.) #-}
 
-{- |
-BSR (Bit Scan Reverse)
-
->>> floorLog2 0
--1
->>> floorLog2 1
-0
->>> floorLog2 2
-1
->>> floorLog2 1023
-9
->>> floorLog2 1024
-10
->>> floorLog2 1025
-10
->>> floorLog2 maxBound
-62
--}
+-- |
+-- BSR (Bit Scan Reverse)
+--
+-- >>> floorLog2 0
+-- -1
+-- >>> floorLog2 1
+-- 0
+-- >>> floorLog2 2
+-- 1
+-- >>> floorLog2 1023
+-- 9
+-- >>> floorLog2 1024
+-- 10
+-- >>> floorLog2 1025
+-- 10
+-- >>> floorLog2 maxBound
+-- 62
 floorLog2 :: Int -> Int
 floorLog2 x = 63 - countLeadingZeros x
 {-# INLINE floorLog2 #-}
 
-{- |
->>> ceilingLog2 0
-0
->>> ceilingLog2 1
-0
->>> ceilingLog2 2
-1
->>> ceilingLog2 1023
-10
->>> ceilingLog2 1024
-10
->>> ceilingLog2 1025
-11
->>> ceilingLog2 maxBound
-63
--}
+-- |
+-- >>> ceilingLog2 0
+-- 0
+-- >>> ceilingLog2 1
+-- 0
+-- >>> ceilingLog2 2
+-- 1
+-- >>> ceilingLog2 1023
+-- 10
+-- >>> ceilingLog2 1024
+-- 10
+-- >>> ceilingLog2 1025
+-- 11
+-- >>> ceilingLog2 maxBound
+-- 63
 ceilingLog2 :: Int -> Int
 ceilingLog2 x
   | x > 1 = 64 - countLeadingZeros (x - 1)
   | otherwise = 0
 {-# INLINE ceilingLog2 #-}
 
-{- |
->>> floorPowerOf2 0
--9223372036854775808
->>> floorPowerOf2 1
-1
->>> floorPowerOf2 2
-2
->>> floorPowerOf2 1023
-512
->>> floorPowerOf2 1024
-1024
->>> floorPowerOf2 1025
-1024
->>> floorPowerOf2 maxBound
-4611686018427387904
--}
+-- |
+-- >>> floorPowerOf2 0
+-- -9223372036854775808
+-- >>> floorPowerOf2 1
+-- 1
+-- >>> floorPowerOf2 2
+-- 2
+-- >>> floorPowerOf2 1023
+-- 512
+-- >>> floorPowerOf2 1024
+-- 1024
+-- >>> floorPowerOf2 1025
+-- 1024
+-- >>> floorPowerOf2 maxBound
+-- 4611686018427387904
 floorPowerOf2 :: Int -> Int
 floorPowerOf2 x = 1 !<<. floorLog2 x
 {-# INLINE floorPowerOf2 #-}
 
-{- |
->>> ceilingPowerOf2 0
-1
->>> ceilingPowerOf2 1
-1
->>> ceilingPowerOf2 2
-2
->>> ceilingPowerOf2 1023
-1024
->>> ceilingPowerOf2 1024
-1024
->>> ceilingPowerOf2 1025
-2048
->>> ceilingPowerOf2 maxBound
--9223372036854775808
--}
+-- |
+-- >>> ceilingPowerOf2 0
+-- 1
+-- >>> ceilingPowerOf2 1
+-- 1
+-- >>> ceilingPowerOf2 2
+-- 2
+-- >>> ceilingPowerOf2 1023
+-- 1024
+-- >>> ceilingPowerOf2 1024
+-- 1024
+-- >>> ceilingPowerOf2 1025
+-- 2048
+-- >>> ceilingPowerOf2 maxBound
+-- -9223372036854775808
 ceilingPowerOf2 :: Int -> Int
 ceilingPowerOf2 x
   | x > 1 = unsafeShiftRL (-1) (countLeadingZeros (x - 1)) + 1
@@ -497,6 +483,7 @@ ceilingPowerOf2 x
 {-# INLINE ceilingPowerOf2 #-}
 
 -- * Parser utils
+
 uvectorN :: (U.Unbox a) => Int -> PrimParser a -> PrimParser (U.Vector a)
 uvectorN = gvectorN
 {-# INLINE uvectorN #-}
@@ -522,11 +509,11 @@ gvectorLn f = PrimParser $ \e p ->
   case memchrP# e p 0xa of
     pos ->
       (#
-        plusAddr# pos 1#
-        , G.unfoldrExactN
-            (I# (minusAddr# pos p))
-            (runPrimParser f (Ptr pos))
-            (Ptr p)
+        plusAddr# pos 1#,
+        G.unfoldrExactN
+          (I# (minusAddr# pos p))
+          (runPrimParser f (Ptr pos))
+          (Ptr p)
       #)
 {-# INLINE gvectorLn #-}
 
@@ -535,6 +522,7 @@ uvectorLn = gvectorLn
 {-# INLINE uvectorLn #-}
 
 -- * ByteString utils
+
 bsToBytes :: B.ByteString -> U.Vector Word8
 bsToBytes bs = case B.toShort bs of
   B.Short.SBS ba# -> baToBytes (ByteArray ba#)
@@ -552,6 +540,7 @@ baToSBS :: ByteArray -> B.ShortByteString
 baToSBS (ByteArray ba#) = B.Short.SBS ba#
 
 -- * Builder utils
+
 unlinesB :: (G.Vector v a) => (a -> B.Builder) -> v a -> B.Builder
 unlinesB f = G.foldMap ((<> lfB) . f)
 
@@ -565,10 +554,9 @@ unwordsB f vec
 concatB :: (G.Vector v a) => (a -> B.Builder) -> v a -> B.Builder
 concatB = G.foldMap
 
-{- |
->>> matrixB B.intDec (2, 3, U.fromListN 6 [1, 2, 3, 4, 5, 6])
-"1 2 3\n4 5 6\n"
--}
+-- |
+-- >>> matrixB B.intDec (2, 3, U.fromListN 6 [1, 2, 3, 4, 5, 6])
+-- "1 2 3\n4 5 6\n"
 matrixB :: (G.Vector v a) => (a -> B.Builder) -> (Int, Int, v a) -> B.Builder
 matrixB f (!h, !w, !mat) =
   U.foldMap
@@ -577,12 +565,11 @@ matrixB f (!h, !w, !mat) =
     )
     $ U.generate h id
 
-{- |
->>> gridB B.char7 (2, 3, U.fromListN 6 ".#.#.#")
-".#.\n#.#\n"
->>> gridB B.intDec (2, 3, U.fromListN 6 [1, 2, 3, 4, 5, 6])
-"123\n456\n"
--}
+-- |
+-- >>> gridB B.char7 (2, 3, U.fromListN 6 ".#.#.#")
+-- ".#.\n#.#\n"
+-- >>> gridB B.intDec (2, 3, U.fromListN 6 [1, 2, 3, 4, 5, 6])
+-- "123\n456\n"
 gridB :: (G.Vector v a) => (a -> B.Builder) -> (Int, Int, v a) -> B.Builder
 gridB f (!h, !w, !mat) =
   U.foldMap
@@ -594,12 +581,11 @@ gridB f (!h, !w, !mat) =
 sizedB :: (G.Vector v a) => (v a -> B.Builder) -> v a -> B.Builder
 sizedB f vec = B.intDec (G.length vec) <> lfB <> f vec
 
-{- |
->>> yesnoB True
-"Yes"
->>> yesnoB False
-"No"
--}
+-- |
+-- >>> yesnoB True
+-- "Yes"
+-- >>> yesnoB False
+-- "No"
 yesnoB :: Bool -> B.Builder
 yesnoB = BP.primBounded $ BP.boundedPrim 4 $ \flg ptr -> do
   if flg
@@ -611,12 +597,11 @@ yesnoB = BP.primBounded $ BP.boundedPrim 4 $ \flg ptr -> do
       return $! plusPtr ptr 2
 {-# INLINE yesnoB #-}
 
-{- |
->>> pairB B.intDec B.intDec $ (0, 1)
-"0 1"
->>> pairB B.intDec (pairB B.intDec B.intDec) $ (0, (1, 2))
-"0 1 2"
--}
+-- |
+-- >>> pairB B.intDec B.intDec $ (0, 1)
+-- "0 1"
+-- >>> pairB B.intDec (pairB B.intDec B.intDec) $ (0, (1, 2))
+-- "0 1 2"
 pairB :: (a -> B.Builder) -> (b -> B.Builder) -> (a, b) -> B.Builder
 pairB f g (x, y) = f x <> spB <> g y
 
@@ -626,17 +611,15 @@ showB = B.string7 . show
 showLnB :: (Show a) => a -> B.Builder
 showLnB = B.string7 . flip shows "\n"
 
-{- |
->>> lfB
-"\n"
--}
+-- |
+-- >>> lfB
+-- "\n"
 lfB :: B.Builder
 lfB = B.word8 0x0a
 
-{- |
->>> spB
-" "
--}
+-- |
+-- >>> spB
+-- " "
 spB :: B.Builder
 spB = B.word8 0x20
 
@@ -647,6 +630,7 @@ putBuilderLn :: (MonadIO m) => B.Builder -> m ()
 putBuilderLn b = putBuilder b *> putBuilder lfB
 
 -- * Misc
+
 newtype YesNo = YesNo Bool
 
 instance Show YesNo where
@@ -674,7 +658,7 @@ forNeighbor8_ h w x y f =
         *> when (y /= w - 1) (f (x - 1) (y + 1))
     )
     *> ( when (y /= 0) (f x (y - 1))
-          *> when (y /= w - 1) (f x (y + 1))
+           *> when (y /= w - 1) (f x (y + 1))
        )
     *> when
       (x /= h - 1)

@@ -1,7 +1,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
-import AtCoder.Extra.Monoid (RangeAdd (..))
 import AtCoder.Extra.KdTree qualified as Kt
+import AtCoder.Extra.Monoid (RangeAdd (..))
 import Data.Semigroup (Sum (..))
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Unboxed qualified as VU

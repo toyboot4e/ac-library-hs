@@ -60,9 +60,9 @@ data Query
   | ExchangeAt !Int !(Sum Int)
   | ProdInInterval !(Int, Int)
   | ApplyInInterval !(Int, Int) !(Affine1 Int)
-  -- | ILowerBound !(Sum Int)
-  -- | ILowerBoundM !(Sum Int)
-  | ILowerBoundProd !(Sum Int)
+  | -- | ILowerBound !(Sum Int)
+    -- | ILowerBoundM !(Sum Int)
+    ILowerBoundProd !(Sum Int)
   | ILowerBoundProdM !(Sum Int)
   | Freeze
   deriving (Show)

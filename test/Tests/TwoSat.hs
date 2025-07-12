@@ -1,7 +1,7 @@
 module Tests.TwoSat (tests) where
 
 import AtCoder.TwoSat qualified as TS
-import Data.Bit (Bit(..))
+import Data.Bit (Bit (..))
 import Data.Vector.Unboxed qualified as VU
 import Test.Tasty
 import Test.Tasty.HUnit

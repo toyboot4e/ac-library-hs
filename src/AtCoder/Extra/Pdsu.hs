@@ -45,8 +45,8 @@ module AtCoder.Extra.Pdsu
   )
 where
 
-import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Extra.Vector.Prim qualified as EVP
+import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Control.Monad.ST (ST)

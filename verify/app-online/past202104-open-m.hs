@@ -1,7 +1,7 @@
 import AtCoder.Extra.Bisect (lowerBound)
 import AtCoder.Extra.IntervalMap qualified as ITM
-import Data.ByteString.Char8 qualified as BS
 import Data.ByteString.Builder qualified as BSB
+import Data.ByteString.Char8 qualified as BS
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM

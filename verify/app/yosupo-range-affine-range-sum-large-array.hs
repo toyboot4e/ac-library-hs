@@ -1,5 +1,5 @@
-import AtCoder.Extra.Monoid (Affine1 (..))
 import AtCoder.Extra.DynLazySegTree qualified as Ldst
+import AtCoder.Extra.Monoid (Affine1 (..))
 import AtCoder.ModInt qualified as M
 import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU

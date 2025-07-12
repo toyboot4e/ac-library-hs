@@ -8,7 +8,7 @@ main = do
   n <- int
   let !m = 200000 :: Int
   xs <- ints
-  let !ps = VU.accumulate (+) (VU.replicate m (0 :: Int)) $ VU.map ((, 1) . pred) xs
-  let !qs = VU.accumulate (+) (VU.replicate m (0 :: Int)) $ VU.map ((, 1) . (m -)) xs
+  let !ps = VU.accumulate (+) (VU.replicate m (0 :: Int)) $ VU.map ((,1) . pred) xs
+  let !qs = VU.accumulate (+) (VU.replicate m (0 :: Int)) $ VU.map ((,1) . (m -)) xs
   let !res = C.convolution64 ps qs
   print $ VU.length $ VU.filter (/= 0) res

@@ -3,8 +3,8 @@ module Bench.Vector.ConcatMapM (benches) where
 import BenchLib.Vector.ConcatMapM qualified as ConcatMapM
 import Control.Monad.Primitive (PrimMonad)
 import Control.Monad.ST (runST)
-import Control.Monad.Trans.State.Strict (StateT (..), evalState, evalStateT)
 import Control.Monad.State.Class (MonadState, modify')
+import Control.Monad.Trans.State.Strict (StateT (..), evalState, evalStateT)
 import Criterion
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM

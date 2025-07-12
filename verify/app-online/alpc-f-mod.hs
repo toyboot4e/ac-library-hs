@@ -1,6 +1,6 @@
-import Data.ByteString.Char8 qualified as BS
 import AtCoder.Convolution qualified as C
 import AtCoder.ModInt qualified as Mint
+import Data.ByteString.Char8 qualified as BS
 import Data.Vector.Unboxed qualified as VU
 import Util
 

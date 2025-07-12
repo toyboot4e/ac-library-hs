@@ -12,12 +12,12 @@ main = do
   xs <- ints
   ps <- ints
   qs <-
-    VU.replicateM q
-      $ withLine
-      $ intP >>= \case
-        0 -> (0 :: Int,,) <$> intP <*> intP
-        1 -> (1 :: Int,,-1) <$> intP
-        _ -> error "unreachable"
+    VU.replicateM q $
+      withLine $
+        intP >>= \case
+          0 -> (0 :: Int,,) <$> intP <*> intP
+          1 -> (1 :: Int,,-1) <$> intP
+          _ -> error "unreachable"
 
   let es = VU.imap (\to from -> (from, to + 1)) ps
   let gr = Gr.build' n $ Gr.swapDupe' es

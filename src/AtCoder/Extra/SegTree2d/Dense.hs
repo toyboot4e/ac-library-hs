@@ -311,7 +311,7 @@ prodX DenseSegTree2d {..} y x1 x2 = do
     -- inclusive interval [xl, xr]
     inner !acc xl xr
       | xl > xr = pure acc
-      | otherwise =do
+      | otherwise = do
           acc' <-
             if testBit xl 0
               then (acc <>) <$> VGM.read dataDst (idx wDst y xl)

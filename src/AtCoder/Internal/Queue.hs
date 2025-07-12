@@ -111,7 +111,7 @@
 --
 -- >>> Q.freeze que
 -- [0,1]
-
+--
 -- >>> Q.clear que
 -- >>> Q.freeze que
 -- []

@@ -100,7 +100,7 @@ build ys =
 --
 -- @since 1.1.0.0
 {-# INLINE access #-}
-access ::  WaveletMatrix -> Int -> Maybe Int
+access :: WaveletMatrix -> Int -> Maybe Int
 access WaveletMatrix {..} i = (yDictWm VG.!) <$> Rwm.access rawWm i
 
 -- | \(O(\log |S|)\) Returns the number of \(y\) in \([l, r)\).

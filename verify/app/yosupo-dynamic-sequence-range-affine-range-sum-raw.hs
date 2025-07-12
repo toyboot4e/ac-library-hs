@@ -3,9 +3,9 @@ import AtCoder.Extra.Seq.Raw qualified as Seq
 import AtCoder.ModInt qualified as M
 import Control.Monad.ST (runST)
 import Data.Semigroup (Sum (..))
+import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
-import Data.Vector.Generic.Mutable qualified as VGM
 import Util
 
 type Mint = M.ModInt 998244353

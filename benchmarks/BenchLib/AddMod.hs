@@ -60,12 +60,12 @@ addModSub# (W32# m#) (W32# x#) (W32# y#) = case x# `plusWord32#` y# of
 -- addMod3 :: Word32 -> Word32 -> Word32 -> Word32
 -- addMod3 (W32# m#) (W32# x#) (W32# y#) = case x# `plusWord32#` y# of
 --   r# -> W32# (r# `subWord32#` ((r# `geWord32#` m#) `timesWord32#` m#))
--- 
+--
 -- {-# INLINE addMod4 #-}
 -- addMod4 :: Word32 -> Word32 -> Word32 -> Word32
 -- addMod4 (W32# m#) (W32# x#) (W32# y#) = case x# plusWord32# y# of
 --   r# -> W32# (r# -# (m# *# (r# >=# m#)))
--- 
+--
 -- {-# INLINE addMod5 #-}
 -- addMod5 :: Word32 -> Word32 -> Word32 -> Word32
 -- addMod5 (W32# m#) (W32# x#) (W32# y#) = W32# (x# plusWord32# y# -# (m# *# (x# plusWord32# y# >=# m#)))

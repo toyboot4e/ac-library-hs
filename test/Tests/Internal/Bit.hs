@@ -3,9 +3,9 @@
 module Tests.Internal.Bit (tests) where
 
 import AtCoder.Internal.Bit qualified as ACIBIT
+import Data.Bits (countTrailingZeros, (.<<.))
 import Test.Tasty
 import Test.Tasty.HUnit
-import Data.Bits ((.<<.), countTrailingZeros)
 
 unit_bitCeil :: TestTree
 unit_bitCeil = testCase "bitCeil" $ do
