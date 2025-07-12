@@ -14,6 +14,8 @@ module AtCoder.Extra.Vector.Prim
     iterateNM,
 
     -- ** Unfolding
+
+    -- TODO: implement unfoldrM
     constructNM,
     constructrNM,
 
@@ -101,7 +103,7 @@ constructNM n f = do
   v' <- VG.unsafeFreeze v
   fill v' 0
   where
-    fill :: v a ->Int -> m (v a)
+    fill :: v a -> Int -> m (v a)
     fill !v i
       | i < n = do
           x <- f (VG.unsafeTake i v)
@@ -123,7 +125,7 @@ constructrNM n f = do
   v' <- VG.unsafeFreeze v
   fill v' 0
   where
-    fill :: v a ->Int -> m (v a)
+    fill :: v a -> Int -> m (v a)
     fill !v i
       | i < n = do
           x <- f (VG.unsafeSlice (n - i) i v)

@@ -16,9 +16,9 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import Test.QuickCheck.Monadic as QCM
 import Test.Tasty
+import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
 import Tests.Util
-import Test.Tasty.HUnit
 
 type Mint = M.ModInt998244353
 

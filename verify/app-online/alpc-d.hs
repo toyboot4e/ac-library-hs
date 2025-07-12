@@ -4,9 +4,9 @@ import Data.ByteString.Builder qualified as BSB
 import Data.ByteString.Char8 qualified as BS
 import Data.Foldable
 import Data.Vector qualified as V
-import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
+import Data.Vector.Unboxed qualified as VU
 import Util
 
 -- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_d
@@ -65,4 +65,3 @@ main = do
 
   outGrid' <- V.mapM VU.unsafeFreeze outGrid
   printBSB $ unlinesWithBSB (BSB.byteString . BS.pack . VU.toList) outGrid'
-

@@ -8,6 +8,7 @@ import Data.Vector.Unboxed qualified as VU
 import Util
 
 type RH = RH.RollingHash 100 998244353
+
 -- type RH = RH.RollingHash 100 2305843009213693951
 
 -- verification-helper: PROBLEM https://judge.yosupo.jp/problem/enumerate_palindromes
@@ -21,7 +22,7 @@ main = do
 
   let solve i0
         | even i0 = do
-            -- | . . .
+            -- \| . . .
             let i = i0 `div` 2
             let maxLen = min i (n - 1 - i)
             d <- max 0 . subtract 1 <$> maxRightM 0 (maxLen + 1) (testAt i)
@@ -33,7 +34,7 @@ main = do
             d <- max 0 . subtract 1 <$> maxRightM 0 (maxLen + 1) (testMid i)
             pure $ 2 * d
         where
-          -- | . j.
+          -- \| . j.
           testAt _ 0 = pure True
           testAt i delta = do
             Dual hash1 <- ST.prod dualSeg (i - delta) (i + 1)

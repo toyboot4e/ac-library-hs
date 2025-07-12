@@ -1,7 +1,7 @@
 import AtCoder.Extra.Seq qualified as Seq
-import Data.ByteString qualified as BS
 import Control.Monad
 import Control.Monad.ST (runST)
+import Data.ByteString qualified as BS
 import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
 import System.Exit (exitSuccess)

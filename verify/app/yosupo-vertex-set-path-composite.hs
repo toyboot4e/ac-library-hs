@@ -1,5 +1,5 @@
-import AtCoder.Extra.Monoid.Affine1 qualified as Affine1
 import AtCoder.Extra.Graph qualified as Gr
+import AtCoder.Extra.Monoid.Affine1 qualified as Affine1
 import AtCoder.Extra.Tree.Hld qualified as Hld
 import AtCoder.Extra.Tree.TreeMonoid qualified as TM
 import AtCoder.ModInt qualified as M

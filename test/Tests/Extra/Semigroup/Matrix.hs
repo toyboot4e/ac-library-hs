@@ -35,7 +35,7 @@ prop_mulToCol = do
   col <- VU.fromList <$> QC.vectorOf w (QC.arbitrary @Int)
   let lhs = Mat.mulToCol mat col
   let rhs = Mat.vecM $ Mat.mul mat (Mat.new w 1 col)
-  pure  $ lhs QC.=== rhs
+  pure $ lhs QC.=== rhs
 
 m :: Int
 m = 998244353

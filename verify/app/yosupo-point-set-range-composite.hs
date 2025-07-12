@@ -1,4 +1,4 @@
-import AtCoder.Extra.Monoid (Affine1(..))
+import AtCoder.Extra.Monoid (Affine1 (..))
 import AtCoder.Extra.Monoid.Affine1 qualified as Affine1
 import AtCoder.ModInt qualified as M
 import AtCoder.SegTree qualified as ST

@@ -36,9 +36,9 @@ where
 
 -- TODO: maybe add lexicographic permutations, combinations, and subsequences.
 
+import AtCoder.Extra.Bisect (lowerBound)
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Queue qualified as Q
-import AtCoder.Extra.Bisect (lowerBound)
 import Control.Monad (when)
 import Control.Monad.Fix (fix)
 import Control.Monad.Primitive (PrimMonad)

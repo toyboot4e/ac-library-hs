@@ -1,9 +1,10 @@
 {-# LANGUAGE DataKinds #-}
+
 module Bench.PowMod (benches) where
 
 import AtCoder.ModInt qualified as M
-import BenchLib.PowMod qualified as PowMod
 import BenchLib.ModInt.ModIntNats qualified as MN
+import BenchLib.PowMod qualified as PowMod
 import Criterion
 import Data.Vector.Unboxed qualified as VU
 import System.Random

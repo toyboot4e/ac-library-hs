@@ -1,11 +1,10 @@
 -- This is a possible template of LazySegTree monoid instances for AtCoder contests.
 -- This code is copy-pasted to the lazy segtree document's example.
-
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeFamilies #-}
 
-import AtCoder.LazySegTree qualified as LST
 import AtCoder.LazySegTree (SegAct (..))
+import AtCoder.LazySegTree qualified as LST
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
@@ -36,7 +35,7 @@ newtype X = X XRepr deriving newtype (Eq, Ord, Show) ; unX :: X -> XRepr ; unX (
 -- | Acted `Int` (same as `Sum Int`).
 type XRepr = Int
 
-deriving instance Num X; -- in our case `X` is a `Num`.
+deriving instance Num X -- in our case `X` is a `Num`.
 
 instance Semigroup X where
   {-# INLINE (<>) #-}
@@ -68,11 +67,10 @@ main = do
   seg <- LST.build @_ @F @X $ VU.map X $ VU.fromList [1, 2, 3, 4]
   LST.applyIn seg 1 3 $ F (2, 1) -- [1, 5, 7, 4]
   LST.write seg 3 $ X 10 -- [1, 5, 7, 10]
-  LST.modify seg (+ (X 1)) 0   -- [2, 5, 7, 10]
+  LST.modify seg (+ (X 1)) 0 -- [2, 5, 7, 10]
   !_ <- (expect "test 1" (X 5)) <$> LST.read seg 1
   !_ <- (expect "test 2" (X 14)) <$> LST.prod seg 0 3 -- reads an interval [0, 3)
   !_ <- (expect "test 3" (X 24)) <$> LST.allProd seg
   !_ <- (expect "test 4" 2) <$> LST.maxRight seg 0 (<= (X 10)) -- sum [0, 2) = 7 <= 10
   !_ <- (expect "test 5" 3) <$> LST.minLeft seg 4 (<= (X 10)) -- sum [3, 4) = 10 <= 10
   putStrLn "=> test passed!"
-

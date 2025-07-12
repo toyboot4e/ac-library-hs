@@ -33,7 +33,6 @@ module Util
     -- * Show
     show2,
     showMat,
-
     -- Print
     putBSB,
     printBSB,

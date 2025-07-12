@@ -1,18 +1,17 @@
--- | From `https://github.com/cojna/iota` (CC0 license)
-
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
 
+-- | From `https://github.com/cojna/iota` (CC0 license)
 module Iota.PrimParser where
 
 import Control.Applicative (Applicative (..))
 import Control.Monad
 import Control.Monad.ST
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Internal as B
-import qualified Data.ByteString.Short as B (ShortByteString)
-import qualified Data.ByteString.Short as B.Short
+import Data.ByteString qualified as B
+import Data.ByteString.Internal qualified as B
+import Data.ByteString.Short qualified as B (ShortByteString)
+import Data.ByteString.Short qualified as B.Short
 import Data.Function
 import Data.Primitive
 import Foreign

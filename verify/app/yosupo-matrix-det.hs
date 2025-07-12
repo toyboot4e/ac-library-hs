@@ -16,4 +16,3 @@ main = do
         pure $ Mat.square n vec
 
   printBSB . BSB.intDec $ Mat.detMod 998244353 mat
-

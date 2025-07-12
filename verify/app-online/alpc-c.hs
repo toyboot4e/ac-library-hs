@@ -10,4 +10,3 @@ main = do
 
   let res = VU.map (\(!n, !m, !a, !b) -> floorSum n m a b) nmabs
   printBSB $ unlinesBSB res
-

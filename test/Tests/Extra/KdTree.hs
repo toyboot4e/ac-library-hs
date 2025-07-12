@@ -8,9 +8,9 @@ import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Unboxed qualified as VU
 import Test.QuickCheck.Monadic as QCM
 import Test.Tasty
+import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
 import Tests.Util
-import Test.Tasty.HUnit
 
 data Init = Init
   { n :: {-# UNPACK #-} !Int,
@@ -69,9 +69,11 @@ handleRef vec q = case q of
     V $ VU.findIndices (\(!x, !y) -> x1 <= x && x < x2 && y1 <= y && y < y2) vec
   FindNearestPoint (!x, !y)
     | VU.null vec -> MI Nothing
-    | otherwise -> MI
-      . Just . VU.minIndex
-        $ VU.map (\(!x', !y') -> (x - x') * (x - x') + (y - y') * (y - y')) vec
+    | otherwise ->
+        MI
+          . Just
+          . VU.minIndex
+          $ VU.map (\(!x', !y') -> (x - x') * (x - x') + (y - y') * (y - y')) vec
 
 -- | ACL
 handleAcl :: Kt.KdTree -> Query -> Result

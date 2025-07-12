@@ -16,8 +16,7 @@ benches :: Benchmark
 benches =
   bgroup
     "addMod"
-    [
-      bench "addModMod" $ whnf (VU.foldl' (addModMod 998244353) w32) randomVec32,
+    [ bench "addModMod" $ whnf (VU.foldl' (addModMod 998244353) w32) randomVec32,
       bench "addModRem" $ whnf (VU.foldl' (addModRem 998244353) w32) randomVec32,
       bench "addModSub" $ whnf (VU.foldl' (addModSub 998244353) w32) randomVec32,
       bench "addModRem#" $ whnf (VU.foldl' (addModRem# 998244353) w32) randomVec32,

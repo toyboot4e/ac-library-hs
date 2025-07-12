@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+
 module Bench.Matrix (benches) where
 
 import AtCoder.Extra.Math qualified as ACEM

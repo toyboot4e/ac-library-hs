@@ -1,6 +1,6 @@
 import AtCoder.Extra.Monoid (RangeSet (..))
 import AtCoder.LazySegTree qualified as LST
-import Data.Bit (Bit(..))
+import Data.Bit (Bit (..))
 import Data.Semigroup (Max (..))
 import Data.Vector.Unboxed qualified as VU
 import Util

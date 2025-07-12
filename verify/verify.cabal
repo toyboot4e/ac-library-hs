@@ -54,6 +54,7 @@ extra-doc-files: CHANGELOG.md
 common dependencies
   -- optimized
   ghc-options:        -Wall -O2
+
   -- ghc-options:        -Wall -O2 -fllvm
   build-depends:
     , ac-library-hs
@@ -641,4 +642,3 @@ executable typical90_ac
   import:        app-online
   main-is:       typical90_ac.hs
   build-depends: verify
-
