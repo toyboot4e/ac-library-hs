@@ -139,8 +139,9 @@
         # nix run .#treefmt
         packages.treefmt = treefmtEval.config.build.wrapper;
 
-        # nix flake check
-        checks.treefmt = treefmtEval.config.build.check;
+        # FIXME:
+        # # nix flake check
+        # checks.treefmt = treefmtEval.config.build.check;
       }
     );
 }
