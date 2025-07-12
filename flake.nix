@@ -104,12 +104,6 @@
               competitive-verifier
               oj-verify
 
-              python3Packages.selenium
-              python3Packages.pyaml
-              python3Packages.importlab
-              # python312Packages.sxsdiff # TODO: oj side-by-side diff
-              nodejs
-
               # GHC 9.8.4
               (ghcpkgs.haskell.compiler.ghc984.override { useLLVM = true; })
               (ghcpkgs.haskell-language-server.override { supportedGhcVersions = [ "984" ]; })

@@ -1,5 +1,6 @@
 .venv
 .verify-helper
+.competitive-verifier
 .fzf-history
 .fzf-history-online
 .main
