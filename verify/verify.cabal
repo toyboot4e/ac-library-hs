@@ -162,6 +162,11 @@ executable yosupo-biconnected-components-util
   main-is:       yosupo-biconnected-components-util.hs
   build-depends: verify
 
+executable yosupo-convolution
+  import:        app-local
+  main-is:       yosupo-convolution.hs
+  build-depends: verify
+
 executable yosupo-cycle-detection
   import:        app-local
   main-is:       yosupo-cycle-detection.hs
