@@ -48,6 +48,14 @@ alias dt := doctest
 eg:
     cabal run example-lazy-segtree
 
+# runs treefmt
+format:
+    # nix fmt .
+    treefmt .
+
+[private]
+alias fmt := format
+
 # rebuilds the project and measures the compile time (nix flakes required)
 measure:
     cabal clean && cabal build ac-library-hs --ghc-options "-ddump-to-file -ddump-timings" && nix run nixpkgs#time-ghc-modules
