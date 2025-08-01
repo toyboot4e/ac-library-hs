@@ -6,7 +6,7 @@ import AtCoder.Extra.IntSet qualified as IS
 import Control.Monad (foldM_)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Control.Monad.ST (RealWorld)
-import Data.Set qualified as ISR -- R: referencial implementation
+import Data.Set qualified as ISR -- R: referential implementation
 import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
 import Test.QuickCheck.Monadic as QCM
@@ -75,7 +75,7 @@ queryGen n = do
     -- for partial functions
     insertKeyGen = QC.chooseInt (0, n - 1)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: ISR.Set Int -> Query -> (ISR.Set Int, Result)
 handleRef is q = case q of
   Member k -> (is, B $ ISR.member k is)

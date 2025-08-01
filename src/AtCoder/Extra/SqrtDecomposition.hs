@@ -205,7 +205,7 @@ foldM_ ::
   (Monad m) =>
   -- | Context: Block length.
   Int ->
-  -- | @readFull@ function that takes a target block index and returns  amonoid value for it.
+  -- | @readFull@ function that takes a target block index and returns a monoid value for it.
   (a -> Int -> m a) ->
   -- | @readPart@ function that takes a target block index, a half-open interval and returns a
   -- monoid value for it.

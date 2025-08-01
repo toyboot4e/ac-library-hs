@@ -85,7 +85,7 @@ queryGen n = do
     v = Sum . modInt <$> QC.arbitrary
     f = Affine1.new <$> (modInt <$> QC.arbitrary) <*> (modInt <$> QC.arbitrary)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: VUM.MVector RealWorld (Int, Int, Sum Mint) -> Query -> IO Result
 handleRef vec q = case q of
   Write i v -> do

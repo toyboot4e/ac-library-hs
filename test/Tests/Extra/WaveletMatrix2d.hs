@@ -61,7 +61,7 @@ data Result
   | MS !(Maybe (Sum Int))
   deriving (Show, Eq)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: M.Map (Int, Int) (Sum Int) -> Query -> (Result, M.Map (Int, Int) (Sum Int))
 handleRef map q = case q of
   Read (!x, !y) -> (S . fromMaybe mempty $ M.lookup (x, y) map, map)

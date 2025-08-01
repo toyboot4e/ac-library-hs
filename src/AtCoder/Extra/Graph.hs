@@ -379,7 +379,7 @@ findCycleUndirected gr@Csr {..} =
       -- This is not optimal, but we need a dedicated `buildUndirected` function and different edge ID
       -- (not index) handling in CSR if we go with the optimal approach.
       --
-      --  Note that the implementations are suspecious..
+      --  Note that the implementations are suspicious..
       findCycleComplexUndirected gr <|> findCycleSimpleUndirected gr
 
 {-# INLINEABLE findCycleComplexUndirected #-}
@@ -473,7 +473,7 @@ findCycleSimpleUndirected gr@Csr {..} = runST $ do
   es <- GV.new @_ @Int 16
   dep' <- VU.unsafeFreeze dep
 
-  -- Find edge with minimum depth difference, which makes up a loop (not used in the DFS forets):
+  -- Find edge with minimum depth difference, which makes up a loop (not used in the DFS forests):
   minLen <- VUM.replicate 1 (maxBound `div` 2 :: Int)
   backE <- VUM.replicate 1 (-1 :: Int, -1 :: Int)
   for_ [0 .. nCsr - 1] $ \vA -> do
@@ -1308,7 +1308,7 @@ bellmanFordImpl {- !policy -} !trackPrev !nVerts !gr !undefW !sources = runST $ 
       VGM.write dist v w
   updated <- VUM.replicate 1 False
 
-  -- look around adjaenct vertices
+  -- look around adjacent vertices
   let update v1 = do
         d1 <- VGM.read dist v1
         when (d1 /= undefW) $ do
@@ -1603,7 +1603,7 @@ updateEdgeFloydWarshall mat nVerts undefW a b w = do
   prev <- VUM.replicate @_ @Int 0 (-1 :: Int)
   stToPrim $ updateEdgeFloydWarshallST False mat prev nVerts undefW a b w
 
--- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight chaneg or new edge addition.
+-- | \(O(n^2)\) Updates distance matrix of Floyd–Warshall on edge weight change or new edge addition.
 --
 -- ==== Constraints
 -- - \(n \ge 1\)

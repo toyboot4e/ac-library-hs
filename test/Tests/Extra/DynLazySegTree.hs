@@ -87,7 +87,7 @@ queryGen n = do
     i = intervalGen n
     f = Affine1.new <$> (modInt <$> arbitrary) <*> (modInt <$> arbitrary)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: Int -> VUM.MVector RealWorld (Sum Mint) -> Query -> IO Result
 handleRef l0 vec q = case q of
   Write k v -> do

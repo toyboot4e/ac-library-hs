@@ -247,7 +247,7 @@ fold tree valAt toF act root = runIdentity $ do
   foldImpl tree valAt toF act root (\_ _ -> pure ())
 
 -- | \(O(n)\) Folds a tree from a root vertex, also known as tree DP. The calculation process on
--- every vertex is recoreded and returned as a vector.
+-- every vertex is recorded and returned as a vector.
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Graph qualified as Gr

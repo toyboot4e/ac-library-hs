@@ -6,7 +6,7 @@ import AtCoder.Extra.IntMap qualified as IM
 import Control.Monad (foldM_)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Control.Monad.ST (RealWorld)
-import Data.Map.Strict qualified as IMR -- R: referencial implementation
+import Data.Map.Strict qualified as IMR -- R: referential implementation
 import Data.Vector.Unboxed qualified as VU
 import GHC.Stack (HasCallStack)
 import Test.QuickCheck.Monadic as QCM
@@ -85,7 +85,7 @@ queryGen n = do
     insertKeyGen = QC.chooseInt (0, n - 1)
     valGen = QC.chooseInt (-10, 10)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: IMR.Map Int Int -> Query -> (IMR.Map Int Int, Result)
 handleRef im q = case q of
   Size -> (im, I $ IMR.size im)

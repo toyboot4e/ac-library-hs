@@ -166,7 +166,7 @@ testPoint2d ::
   Bool
 testPoint2d x y w h = 0 <= x && x < w && 0 <= y && y < h
 
--- | \(O(1)\) Tests \([x_1, x_2) \times [y_1 y_2) \in [0, w) \times [0, h)\).
+-- | \(O(1)\) Tests \([x_1, x_2) \times [y_1, y_2) \in [0, w) \times [0, h)\).
 --
 -- @since 1.2.3.0
 {-# INLINE testRect #-}
@@ -184,11 +184,11 @@ testRect ::
   Int ->
   -- | \(h\)
   Int ->
-  -- | \([x_1, x_2) \times [y_1 y_2) \in [0, w) \times [0, h)\).
+  -- | \([x_1, x_2) \times [y_1, y_2) \in [0, w) \times [0, h)\).
   Bool
 testRect x1 x2 y1 y2 w h = 0 <= x1 && x1 <= x2 && x2 <= w && 0 <= y1 && y1 <= y2 && y2 <= h
 
--- | \(O(1)\) Tests \(x_1 \le x_2 \land y_1 \le \y_2\).
+-- | \(O(1)\) Tests \(x_1 \le x_2 \land y_1 \le y_2\).
 --
 -- @since 1.2.3.0
 {-# INLINE testRectShape #-}
@@ -202,7 +202,7 @@ testRectShape ::
   Int ->
   -- | \(y_2\)
   Int ->
-  -- | \(x_1 \le x_2 \land y_1 \le \y_2\).
+  -- | \(x_1 \le x_2 \land y_1 \le y_2\).
   Bool
 testRectShape x1 x2 y1 y2 = x1 <= x2 && y1 <= y2
 
@@ -283,7 +283,7 @@ checkCustom funcName indexName i setName n
   | testIndex i n = ()
   | otherwise = errorCustom funcName indexName i setName n
 
--- | \(O(1)\) Emis custom index error.
+-- | \(O(1)\) Emits custom index error.
 --
 -- @since 1.0.0.0
 {-# INLINE errorCustom #-}
@@ -339,7 +339,7 @@ errorPoint2d :: (HasCallStack) => String -> Int -> Int -> Int -> Int -> a
 errorPoint2d funcName x y w h =
   error $ funcName ++ ": given invalid point `(" ++ show x ++ ", " ++ show y ++ ")` for rectangle `[0, " ++ show w ++ ") x [0, " ++ show h ++ ")`"
 
--- | \(O(1)\) Asserts \([x_1, x_2) \times [y_1 y_2) \in [0, w) \times [0, h)\).
+-- | \(O(1)\) Asserts \([x_1, x_2) \times [y_1, y_2) \in [0, w) \times [0, h)\).
 --
 -- @since 1.2.3.0
 {-# INLINE checkRect #-}

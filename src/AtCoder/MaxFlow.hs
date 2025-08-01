@@ -15,7 +15,7 @@
 --
 -- >>> MF.addEdge_ g 1 2 (1 :: Int) --  0 --> 1 --> 2
 --
--- Augument the flow with `flow`. `maxFlow` can also be used when there's no flow limit:
+-- Augment the flow with `flow`. `maxFlow` can also be used when there's no flow limit:
 --
 -- >>> MF.flow g 0 2 {- flowLimit -} maxBound -- same as `MF.maxFlow g 0 2`
 -- 1

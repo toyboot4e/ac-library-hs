@@ -93,7 +93,7 @@ queryGen n = do
     deltaGen = QC.chooseInt (-n, n)
     insertValGen = QC.chooseInt (1, n)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: IM.IntMap Int -> Query -> (IM.IntMap Int, Result)
 handleRef im q = case q of
   Member key -> (im, B $ IM.member key im)

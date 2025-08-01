@@ -186,12 +186,12 @@ queryGen n = do
     keyGen = QC.chooseInt (0, n - 1)
     maybeKeyGen = QC.chooseInt (-1, n)
     maybeIntervalGen = (,) <$> QC.chooseInt (-1, n + 1) <*> QC.chooseInt (-1, n + 1)
-    -- use non-negative values for monotoniously increasing sum
+    -- use non-negative values for monotonically increasing sum
     valGen = Sum <$> QC.chooseInt (0, 10)
     -- NOTE: it might throw an error on overflow:
     fGen = Affine1.new <$> QC.chooseInt (0, 4) <*> QC.chooseInt (0, 4)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: S.Seq (Sum Int) -> Query -> (S.Seq (Sum Int), Result)
 handleRef seq q = case q of
   Reset -> (S.empty, None)

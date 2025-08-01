@@ -283,7 +283,7 @@ merge4 seq (Handle hA) (Handle hB) (Handle hC) (Handle hD) = stToPrim $ do
   a <- VGM.unsafeRead hA 0
   b <- VGM.unsafeRead hB 0
   c <- VGM.unsafeRead hC 0
-  d <- VGM.unsafeRead hC 0
+  d <- VGM.unsafeRead hD 0
   root' <- Seq.merge4ST seq a b c d
   VGM.unsafeWrite hA 0 root'
   VGM.unsafeWrite hB 0 P.undefIndex

@@ -107,7 +107,7 @@
 --
 -- ===== Segment queries
 -- Products and segment queries are primarily used by the @TreeMonoid@ module and is not intended
--- for diretct use, but here's some examples. This time the reindex by the HLD is identity:
+-- for direct use, but here's some examples. This time the reindex by the HLD is identity:
 --
 -- >>> Hld.indexHld hld
 -- [0,1,2,3,4,5]
@@ -178,7 +178,7 @@ type Vertex = Int
 -- @since 1.1.0.0
 type VertexHld = Vertex
 
--- | `Hld` partitions a tree into segments and assignes contiguous `VertexHld` for each segment.
+-- | `Hld` partitions a tree into segments and assigns contiguous `VertexHld` for each segment.
 --
 -- @since 1.1.0.0
 data Hld = Hld
@@ -335,7 +335,7 @@ newAt tree root
         <*> pure subtreeSize
   where
     !n = Gr.nCsr tree
-    !_ = ACIA.runtimeAssert (2 * (Gr.nCsr tree - 1) == Gr.mCsr tree) "AtCoder.Extra.Hld.newAt: not a non-directed tree"
+    !_ = ACIA.runtimeAssert (2 * (Gr.nCsr tree - 1) == Gr.mCsr tree) "AtCoder.Extra.Hld.newAt: not an undirected tree"
     !_ = ACIA.runtimeAssert (n >= 1) "AtCoder.Extra.Hld.newAt: the tree must have at least one vertex"
 
 -- | \(O(\log n)\) Calculates the lowest common ancestor of \(u\) and \(v\).

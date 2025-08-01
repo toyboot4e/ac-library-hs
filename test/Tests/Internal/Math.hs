@@ -67,12 +67,12 @@ testBarrettWithModulo modUpper = do
         (a64 * b64) `mod` modulo64 @=? ACIBT.mulMod bt a64 b64
 
 unit_barrettIntBorder :: TestTree
-unit_barrettIntBorder = testCase "barrettIntBobrder" $ do
+unit_barrettIntBorder = testCase "barrettIntBorder" $ do
   let modUpper :: Word32 = fromIntegral $ maxBound @Int32
   testBarrettWithModulo modUpper
 
 unit_barrettWord32Border :: TestTree
-unit_barrettWord32Border = testCase "barrettWord32Bobrder" $ do
+unit_barrettWord32Border = testCase "barrettWord32Border" $ do
   let modUpper = maxBound @Word32
   testBarrettWithModulo modUpper
 

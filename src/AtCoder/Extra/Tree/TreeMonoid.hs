@@ -201,7 +201,7 @@ fromEdges ::
 fromEdges hld commuteTM edges = stToPrim $ fromEdgesST hld commuteTM edges
 
 -- | \(O(\log^2 n)\) Returns the monoid product of the path between two vertices \(u\) and \(v\)
--- (invlusive).
+-- (inclusive).
 --
 -- @since 1.1.0.0
 {-# INLINE prod #-}

@@ -69,9 +69,9 @@ data KdTree = KdTree
 {-# INLINEABLE build #-}
 build ::
   (HasCallStack) =>
-  -- | \(x\) coordnates
+  -- | \(x\) coordinates
   VU.Vector Int ->
-  -- | \(y\) coordnates
+  -- | \(y\) coordinates
   VU.Vector Int ->
   -- | `KdTree`
   KdTree

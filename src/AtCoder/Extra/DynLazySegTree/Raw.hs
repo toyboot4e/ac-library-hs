@@ -56,7 +56,7 @@ import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
 -- | A dynamic, lazily propagated segment tree that covers a half-open interval \([l_0, r_0)\).
--- The nodes are instantinated as needed.
+-- The nodes are instantiated as needed.
 --
 -- @since 1.2.1.0
 data DynLazySegTree s f a = DynLazySegTree
@@ -170,7 +170,7 @@ newSeqST dst@DynLazySegTree {..} !xs = do
 {-# INLINE newNodeInST #-}
 newNodeInST :: (HasCallStack, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => DynLazySegTree s f a -> Int -> Int -> ST s P.Index
 newNodeInST dst@DynLazySegTree {initialProdLdst} l r = do
-  let !_ = ACIA.runtimeAssert (r > l) $ "AtCoder.Extra.DynLazySegTree.Raw.nodeNodeInST: not empty or negative interval: " ++ show (l, r)
+  let !_ = ACIA.runtimeAssert (r > l) $ "AtCoder.Extra.DynLazySegTree.Raw.newNodeInST: not empty or negative interval: " ++ show (l, r)
   newNodeST dst $! initialProdLdst l r
 
 -- | \(O(\log L)\)
@@ -397,7 +397,7 @@ resetIntervalST dst@DynLazySegTree {..} root ql0 qr0
   | ql0 == qr0 = pure root
   | P.nullIndex root = pure P.undefIndex
   | ql0 == l0Ldst && qr0 == r0Ldst = do
-      -- for the case of non-persistent segment tere, we should update the root in-place:
+      -- for the case of non-persistent segment tree, we should update the root in-place:
       root' <- cloneOnWriteST dst root
       VGM.write xLdst (coerce root') $! initialProdLdst l0Ldst r0Ldst
       VGM.write lLdst (coerce root') P.undefIndex

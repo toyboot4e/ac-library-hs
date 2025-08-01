@@ -87,7 +87,7 @@ module AtCoder.Internal.GrowVec
   )
 where
 
--- NOTE (perf): we have to inine all the functions for reasonable performance
+-- NOTE (perf): we have to inline all the functions for reasonable performance
 
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (when)

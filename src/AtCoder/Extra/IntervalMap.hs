@@ -8,8 +8,8 @@
 -- changes during `buildM`, `insertM` and `deleteM` operations.
 --
 -- ==== Invariant
--- Each interval is operated as a whole, similar to a persistant data structure. When part of an
--- inerval is modified, the whole interval is deleted first, and the subintervals are re-inserted.
+-- Each interval is operated as a whole, similar to a persistent data structure. When part of an
+-- interval is modified, the whole interval is deleted first, and the subintervals are re-inserted.
 -- It's important for tracking non-linear interval information with the @onAdd@ and @onDel@ hooks
 -- (callbacks).
 --

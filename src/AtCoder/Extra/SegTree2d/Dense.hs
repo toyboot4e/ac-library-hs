@@ -275,7 +275,7 @@ buildST vec = do
       VGM.write dataDst (idx wDst y x) $! xl <> xr
 
   -- extend each column as a segment tree:
-  -- NOTE (pref): interate from y then x for contiguous memory access
+  -- NOTE (pref): iterate from y then x for contiguous memory access
   for_ [hDst - 1, hDst - 2 .. 0] $ \y -> do
     for_ [0 .. 2 * wDst - 1] $ \x -> do
       xl <- VGM.read dataDst (idx wDst (2 * y + 0) x)

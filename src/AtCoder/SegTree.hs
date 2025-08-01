@@ -119,7 +119,7 @@ import Prelude hiding (read)
 --
 -- @since 1.0.0.0
 data SegTree s a = SegTree
-  { -- | THe number of vertices.
+  { -- | The number of vertices.
     --
     -- @since 1.0.0.0
     nSt :: {-# UNPACK #-} !Int,
@@ -298,7 +298,7 @@ minLeft ::
   SegTree (PrimState m) a ->
   -- | \(r\)
   Int ->
-  -- | \(p\): user prediate
+  -- | \(p\): user predicate
   (a -> Bool) ->
   -- | \(l\): \(p\) holds for \([l, r)\)
   m Int
@@ -324,7 +324,7 @@ minLeftM ::
   SegTree (PrimState m) a ->
   -- | \(r\)
   Int ->
-  -- | \(p\): user prediate
+  -- | \(p\): user predicate
   (a -> m Bool) ->
   -- | \(l\): \(p\) holds for \([l, r)\)
   m Int
@@ -386,13 +386,13 @@ maxRight ::
   SegTree (PrimState m) a ->
   -- | \(l\)
   Int ->
-  -- | \(p\): user prediate
+  -- | \(p\): user predicate
   (a -> Bool) ->
   -- | \(r\): \(p\) holds for \([l, r)\)
   m Int
 maxRight seg l0 f = maxRightM seg l0 (pure . f)
 
--- | Moandic variant of `maxRight`.
+-- | Monadic variant of `maxRight`.
 --
 -- ==== Constraints
 -- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
@@ -410,7 +410,7 @@ maxRightM ::
   SegTree (PrimState m) a ->
   -- | \(l\)
   Int ->
-  -- | \(p\): user prediate
+  -- | \(p\): user predicate
   (a -> m Bool) ->
   -- | \(r\): \(p\) holds for \([l, r)\)
   m Int

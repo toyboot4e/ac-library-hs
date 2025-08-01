@@ -1,4 +1,4 @@
--- | Fenwick tree tests.
+-- | Math tests.
 module Tests.Math (tests) where
 
 import AtCoder.Math qualified as AM

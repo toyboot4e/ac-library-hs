@@ -451,7 +451,7 @@ parent lct v = stToPrim $ parentST lct v
 -- ==== Constraints
 -- - \(0 \le u, v \lt n\)
 -- - \(0 \le k \lt \mathrm{|path|}\)
--- - \(u\) and \(v\) must be in the same connected component, otherwise the vehavior is undefined.
+-- - \(u\) and \(v\) must be in the same connected component, otherwise the behavior is undefined.
 --
 -- @since 1.1.1.0
 {-# INLINE jump #-}
@@ -464,7 +464,7 @@ jump lct u v k = stToPrim $ do
 --
 -- ==== Constraints
 -- - \(0 \le u, v \lt n\)
--- - \(u\) and \(v\) must be in the same connected component, otherwise the vehavior is undefined.
+-- - \(u\) and \(v\) must be in the same connected component, otherwise the behavior is undefined.
 --
 -- @since 1.5.1.0
 {-# INLINE jumpMaybe #-}

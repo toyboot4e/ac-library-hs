@@ -64,7 +64,7 @@ module AtCoder.Extra.MultiSet
   ( -- * MultiSet
     MultiSet,
 
-    -- * Construtors
+    -- * Constructors
     new,
 
     -- * Metadata

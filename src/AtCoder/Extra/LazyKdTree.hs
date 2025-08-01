@@ -116,9 +116,9 @@ data LazyKdTree s f a = LazyKdTree
 {-# INLINE new #-}
 new ::
   (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) =>
-  -- | \(x\) coordnates.
+  -- | \(x\) coordinates.
   VU.Vector Int ->
-  -- | \(y\) coordnates.
+  -- | \(y\) coordinates.
   VU.Vector Int ->
   -- | `LazyKdTree`.
   m (LazyKdTree (PrimState m) f a)
@@ -133,9 +133,9 @@ new xs ys = stToPrim $ buildST xs ys (VU.replicate (VU.length xs) mempty)
 {-# INLINE build #-}
 build ::
   (HasCallStack, PrimMonad m, Monoid f, VU.Unbox f, Semigroup a, VU.Unbox a) =>
-  -- | \(x\) coordnates.
+  -- | \(x\) coordinates.
   VU.Vector Int ->
-  -- | \(y\) coordnates.
+  -- | \(y\) coordinates.
   VU.Vector Int ->
   -- | monoid \(v\)alues.
   VU.Vector a ->

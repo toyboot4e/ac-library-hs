@@ -82,7 +82,7 @@ unit_intMax = testCase "intMax" $ do
   modInt 2147483647 * modInt 2147483647 @?= 0
 
 unit_int128 :: TestTree
-unit_int128 = testCase "intMax" $ do
+unit_int128 = testCase "int128" $ do
   let modInt :: Int -> ModInt.ModInt998244353
       modInt = ModInt.new
 

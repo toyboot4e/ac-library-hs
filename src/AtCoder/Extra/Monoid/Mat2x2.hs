@@ -38,7 +38,7 @@ import GHC.Stack (HasCallStack)
 import Prelude hiding (map)
 
 -- | Monoid action \(f: x \rightarrow ax + b\). Less efficient than @Affine1@, but is compatible
--- with inverse opereations.
+-- with inverse operations.
 --
 -- ==== Composition and dual
 -- The affine transformation acts as a left monoid action: \(f_2 (f_1 v) = (f_2 \circ f_1) v\). To

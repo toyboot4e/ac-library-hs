@@ -98,7 +98,7 @@ data Result
   | Assocs [(Int, Int)]
   deriving (Show, Eq)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: VU.Vector Int -> Query -> Result
 handleRef xs q = case q of
   Access i -> M $ xs VU.!? i

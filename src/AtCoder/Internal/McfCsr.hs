@@ -65,7 +65,7 @@ adj Csr {..} v = VU.slice offset len vec
 buildST :: (HasCallStack, Num cap, VU.Unbox cap, VU.Unbox cost, Num cost) => Int -> VU.Vector (Int, Int, cap, cap, cost) -> ST s (VU.Vector Int, Csr s cap cost)
 buildST n edges = do
   let m = VU.length edges
-  -- craete the offsets first (this is a different step from ac-librar)
+  -- create the offsets first (this is a different step from ac-library)
   let startCsr = VU.create $ do
         start <- VUM.replicate (n + 1) (0 :: Int)
         -- count degrees

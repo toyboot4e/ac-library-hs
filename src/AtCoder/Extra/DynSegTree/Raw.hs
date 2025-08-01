@@ -156,7 +156,7 @@ newSeqST dst@DynSegTree {..} !xs = do
 {-# INLINE newNodeInST #-}
 newNodeInST :: (HasCallStack, Monoid a, VU.Unbox a) => DynSegTree s a -> Int -> Int -> ST s P.Index
 newNodeInST dst@DynSegTree {initialProdDst} l r = do
-  let !_ = ACIA.runtimeAssert (r > l) $ "AtCoder.Extra.DynSegTree.Raw.nodeNodeInST: not empty or negative interval: " ++ show (l, r)
+  let !_ = ACIA.runtimeAssert (r > l) $ "AtCoder.Extra.DynSegTree.Raw.newNodeInST: not empty or negative interval: " ++ show (l, r)
   newNodeST dst $! initialProdDst l r
 
 -- | \(O(\log L)\)
@@ -257,7 +257,7 @@ resetIntervalST dst@DynSegTree {..} root ql0 qr0
   | ql0 == qr0 = pure root
   | P.nullIndex root = pure P.undefIndex
   | ql0 == l0Dst && qr0 == r0Dst = do
-      -- for the case of non-persistent segment tere, we should update the root in-place:
+      -- for the case of non-persistent segment tree, we should update the root in-place:
       root' <- cloneOnWriteST dst root
       VGM.write xDst (coerce root') $! initialProdDst l0Dst r0Dst
       VGM.write lDst (coerce root') P.undefIndex
