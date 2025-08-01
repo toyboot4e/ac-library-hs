@@ -226,10 +226,10 @@ findNearestPoint KdTree {..} x y
       -- it's a leaf
       | dataI /= -1 = (dataI, d)
       -- look into the children
-      | d0 < d1 = inner (2 * i + 0) $ inner (2 * i + 1) res
-      | otherwise = inner (2 * i + 1) $ inner (2 * i + 0) res
+      | d0 < d1 = inner (2 * i + 1) $ inner (2 * i + 0) res
+      | otherwise = inner (2 * i + 0) $ inner (2 * i + 1) res
       where
         d = bestDistSquared i
         dataI = dataKt VG.! i
         d0 = bestDistSquared (2 * i + 0)
-        d1 = bestDistSquared (2 * i + 0)
+        d1 = bestDistSquared (2 * i + 1)
