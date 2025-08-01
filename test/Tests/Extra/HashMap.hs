@@ -6,7 +6,7 @@ import AtCoder.Extra.HashMap qualified as HM
 import Control.Monad (foldM_)
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Control.Monad.ST (RealWorld)
-import Data.HashMap.Strict qualified as HMR -- R: referencial implementation
+import Data.HashMap.Strict qualified as HMR -- R: referential implementation
 import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Unboxed qualified as VU
 import System.IO.Unsafe (unsafePerformIO)
@@ -84,7 +84,7 @@ data Result
   | M (Maybe Int)
   deriving (Show, Eq)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: HMR.HashMap Int Int -> Query -> (HMR.HashMap Int Int, Result)
 handleRef hm q = case q of
   Size -> (hm, I $ HMR.size hm)

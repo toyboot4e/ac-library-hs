@@ -57,7 +57,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | Comperssed Sparse Row representation of a graph.
+-- | Compressed Sparse Row representation of a graph.
 --
 -- @since 1.0.0.0
 data Csr w = Csr

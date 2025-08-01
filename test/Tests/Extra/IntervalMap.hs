@@ -106,7 +106,7 @@ toIntervals vec = do
   let intervals = zipWith (\xs l -> (l, l + VU.length xs, VU.head xs)) groups lens
   pure . VU.fromList $ filter (\(!_, !_, !x) -> x /= undef) intervals
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: (PrimMonad m) => VUM.MVector (PrimState m) Int -> Query -> m Result
 handleRef vec q = do
   intervals <- toIntervals vec

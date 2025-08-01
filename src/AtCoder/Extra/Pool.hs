@@ -62,7 +62,7 @@ data Pool s a = Pool
     nextPool :: !(VUM.MVector s Index)
   }
 
--- | Strongly typed index of pool items. User has to explicitly @corece@ on raw index use.
+-- | Strongly typed index of pool items. User has to explicitly @coerce@ on raw index use.
 --
 -- @since 1.2.0.0
 newtype Index = Index {unIndex :: Int}

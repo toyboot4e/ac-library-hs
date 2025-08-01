@@ -49,7 +49,7 @@ import GHC.TypeNats (KnownNat, natVal')
 -- >>> seg <- ST.build @_ @RH . VU.map (RH.unsafeNew . ord) $ VU.fromList "abcba"
 -- >>> seg' <- ST.build @_ @(Dual RH) . VU.map (Dual . RH.unsafeNew . ord) $ VU.fromList "abcba"
 -- >>> hash1 <- ST.prod seg 2 5       --   cba  (left to right)
--- >>> Dual hash2 <- ST.prod seg' 0 3 -- abc    (right to lett)
+-- >>> Dual hash2 <- ST.prod seg' 0 3 -- abc    (right to left)
 -- >>> hash1 == hash2
 -- True
 --

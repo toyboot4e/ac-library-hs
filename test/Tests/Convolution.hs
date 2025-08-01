@@ -123,7 +123,7 @@ prop_simpleSMod1 = QC.testProperty "simpleSMod1"
   $ \a b -> convMintNaive a b QC.=== ACC.convolution a b
 
 prop_simpleSMod2 :: TestTree
-prop_simpleSMod2 = QC.testProperty "simpleSMod1"
+prop_simpleSMod2 = QC.testProperty "simpleSMod2"
   . testWithRangeMint @924844033
   $ \a b -> convMintNaive a b QC.=== ACC.convolution a b
 

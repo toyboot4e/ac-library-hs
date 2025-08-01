@@ -101,7 +101,7 @@ prop_maxRangeSum xs =
    in lhs QC.=== rhs
 
 unit_minRangeSum :: TestTree
-unit_minRangeSum = testCase "uni_minRangeSum [1]" $ do
+unit_minRangeSum = testCase "unit_minRangeSum [1]" $ do
   EV.minRangeSum (VU.singleton (1 :: Int)) @?= 0
   EV.minRangeSum (VU.empty @Int) @?= 0
 

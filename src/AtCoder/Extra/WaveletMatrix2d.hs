@@ -182,7 +182,7 @@ write WaveletMatrix2d {..} (!x, !y) v = stToPrim $ do
     i_
     $ V.zip (Rwm.bitsRwm rawWm2d) segTreesWm2d
 
--- | \(O(\log^2 n)\) Given a user function \(f\), odifies the monoid value at \((x, y)\). Access to
+-- | \(O(\log^2 n)\) Given a user function \(f\), modifies the monoid value at \((x, y)\). Access to
 -- unknown points are undefined.
 --
 -- @since 1.1.0.0

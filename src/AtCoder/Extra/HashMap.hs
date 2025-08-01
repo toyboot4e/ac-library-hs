@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- original implementaion:
+-- original implementation:
 -- <https://github.com/maspypy/library/blob/main/ds/hashmap.hpp>
 
 -- | A dense, fast `Int` hash map with a fixed-sized `capacity` of \(n\). Most operations are

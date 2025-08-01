@@ -71,7 +71,7 @@ import Prelude hiding (sum)
 --
 -- @since 1.0.0.0
 data FenwickTree s a = FenwickTree
-  { -- | 1.0.0 The number of vertices.
+  { -- | The number of vertices.
     --
     -- @since 1.0.0.0
     nFt :: {-# UNPACK #-} !Int,
@@ -259,7 +259,7 @@ minLeft ::
   FenwickTree (PrimState m) a ->
   -- | \(r\)
   Int ->
-  -- | \(p\): user prediate
+  -- | \(p\): user predicate
   (a -> Bool) ->
   -- | \(l\): \(p\) holds for \([l, r)\)
   m Int

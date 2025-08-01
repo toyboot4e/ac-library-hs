@@ -102,7 +102,7 @@ primes upperLimit
       let !maxPrimeCount :: Int
             -- NOTE: 1,700 is a point where the next function estimates better as far as I tested:
             | limit < 1700 = round (1.25506 * fromIntegral limit / log (fromIntegral limit) :: Double)
-            -- Rosser and Schoenfeld Boundsh (1962): holds for x > e^{3/2}:
+            -- Rosser and Schoenfeld Bounds (1962): holds for x > e^{3/2}:
             | limit < 60184 = round (fromIntegral limit / (log (fromIntegral limit) - 1.5) :: Double)
             -- Pierre Dusart (2010): holds for x >= 60184:
             | otherwise = ceiling (fromIntegral limit / (log (fromIntegral limit) - 1.1) :: Double)
@@ -117,7 +117,7 @@ primes upperLimit
       -- FIXME: carry index?
       nPrimes <- VUM.replicate 1 (1 :: Int)
 
-      -- Sieve of Eratosthenes by block of size `s`, ignoring even numers
+      -- Sieve of Eratosthenes by block of size `s`, ignoring even numbers
       -- FIXME: block length of size `s/2` should make more sense?
       block <- VUM.unsafeNew s
       let !r = limit `div` 2
@@ -151,7 +151,7 @@ primes upperLimit
       pure $ VGM.take len result
 
 -- | \(O(w \log^3 n)\) Miller–Rabin primality test, where \(w = 3\) for \(x \lt 2^{32}\) and
--- \(w = 7\) for \(x \ge 3^{32}\).
+-- \(w = 7\) for \(x \ge 2^{32}\).
 --
 -- ==== __Example__
 -- >>> isPrime 100055128505716009
@@ -233,7 +233,7 @@ rho modVal n c
 
 -- | Tries to find a prime factor for the given value, running Pollard's Rho algorithm.
 --
--- ==== Constrants
+-- ==== Constraints
 -- - \(x \gt 1\)
 {-# INLINEABLE findPrimeFactor #-}
 findPrimeFactor :: (HasCallStack) => StdGen -> Int -> (Maybe Int, StdGen)
@@ -305,8 +305,8 @@ primeFactorsUnsorted n
                   error $ "unable to find prime factor for " ++ show cur
             | otherwise = pure iWrite
 
-      -- NOTE: The seed value ifs fixed here. We could decide it at runtime for possibly faster
-      -- submissions on TLE redjuge, however, 're rather preferring deterministic result:
+      -- NOTE: The seed value is fixed here. We could decide it at runtime for possibly faster
+      -- submissions on TLE redjuge, however, we're rather preferring deterministic result:
       len <- runRho (mkStdGen 123456789) n' iWrite0
       pure $ VUM.take len buf
   where

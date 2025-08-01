@@ -92,7 +92,7 @@ new ::
   Int ->
   -- | Right index boundary \(r_0\)
   Int ->
-  -- | Dynamic propagated segment tree
+  -- | Dynamic segment tree
   m (Raw.DynSegTree (PrimState m) a)
 new nDst l r = stToPrim $ Raw.newST False nDst l r (\_ _ -> mempty)
 

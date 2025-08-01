@@ -2,9 +2,9 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TypeFamilies #-}
 
--- | A dynamic, sparse, persitent segment tree that covers a half-open interval \([l_0, r_0)\). Nodes are
--- instantinated as needed, with the required capacity being \(2q \log_2 L\), where \(q\) is the number of
--- mutable operations. The traid-off compared to the non-sparse variant is that initial monoid
+-- | A dynamic, sparse, persistent segment tree that covers a half-open interval \([l_0, r_0)\). Nodes are
+-- instantiated as needed, with the required capacity being \(2q \log_2 L\), where \(q\) is the number of
+-- mutable operations. The trade-off compared to the non-sparse variant is that initial monoid
 -- values are fixed at `mempty`.
 --
 -- ==== __Example__
@@ -172,7 +172,7 @@ maxRightM :: (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) => Raw.DynSparseS
 maxRightM dst root f = do
   Raw.maxRightM dst root f
 
--- | \(O(\log L)\) Claers all the nodes from the storage.
+-- | \(O(\log L)\) Clears all the nodes from the storage.
 --
 -- @since 1.2.2.0
 {-# INLINE clear #-}

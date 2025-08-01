@@ -3,8 +3,8 @@
 {-# LANGUAGE TypeFamilies #-}
 
 -- | A dynamic, sparse segment tree that covers a half-open interval \([l_0, r_0)\). Nodes are
--- instantinated as needed, with the required capacity being \(q\), where \(q\) is the number of
--- mutable operations. The traid-off compared to the non-sparse variant is that initial monoid
+-- instantiated as needed, with the required capacity being \(q\), where \(q\) is the number of
+-- mutable operations. The trade-off compared to the non-sparse variant is that initial monoid
 -- values are fixed at `mempty`.
 --
 -- ==== __Example__
@@ -189,7 +189,7 @@ maxRightM dst (P.Handle handle) f = do
   root <- VGM.read handle 0
   Raw.maxRightM dst root f
 
--- | \(O(\log L)\) Claers all the nodes from the storage.
+-- | \(O(\log L)\) Clears all the nodes from the storage.
 --
 -- @since 1.2.2.0
 {-# INLINE clear #-}

@@ -77,7 +77,7 @@ queryGen n = do
     v = Sum . modInt <$> QC.arbitrary
     i = intervalGen n
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: Int -> VUM.MVector RealWorld (Sum Mint) -> Query -> IO Result
 handleRef l0 vec q = case q of
   Write k v -> do

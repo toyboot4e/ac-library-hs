@@ -44,8 +44,8 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
--- | A dynamic, sparse segment tree that covers a half-open interval \([l_0, r_0)\). Is is dynamic
--- in that the nodes are instantinated as needed.
+-- | A dynamic, sparse segment tree that covers a half-open interval \([l_0, r_0)\). It is dynamic
+-- in that the nodes are instantiated as needed.
 --
 -- @since 1.2.1.0
 data DynSparseSegTree s a = DynSparseSegTree

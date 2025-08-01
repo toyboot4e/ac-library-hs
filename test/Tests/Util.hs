@@ -105,7 +105,7 @@ genTreeEdge n = case n of
 
       -- sum(deg) will be 2(n - 1) - 2(n - 2) = 2
       for_ (zip [0 :: Int ..] prufer) $ \(!i, !u) -> do
-        -- NOTE: At the beginning, deg[u] > 1, and deg[i] is never decreaesed until iterated
+        -- NOTE: At the beginning, deg[u] > 1, and deg[i] is never decreased until iterated
         !v <- fromJust . VU.findIndex (== 1) <$> VU.unsafeFreeze deg
         -- So we're sure u /= v
         let !_ = ACIA.runtimeAssert (u /= v) "u /= v"

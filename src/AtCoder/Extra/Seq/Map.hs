@@ -178,7 +178,7 @@ reset Map {..} = stToPrim $ do
   VGM.write (Seq.unHandle rootMap) 0 P.undefIndex
 
 -- -------------------------------------------------------------------------------------------
--- Metadta
+-- Metadata
 -- -------------------------------------------------------------------------------------------
 
 -- | \(O(1)\) Returns the maximum number of elements the map can store.

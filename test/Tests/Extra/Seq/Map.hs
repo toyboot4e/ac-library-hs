@@ -125,14 +125,14 @@ queryGen n = do
       l <- QC.chooseInt (-30, 30)
       r <- QC.chooseInt (l, 30)
       pure (l, r)
-    -- use non-negative values for monotoniously increasing sum
+    -- use non-negative values for monotonically increasing sum
     valGen = Sum <$> QC.chooseInt (0, 10)
     -- NOTE: it might throw an error on overflow:
     fGen = Affine1.new <$> QC.chooseInt (0, 4) <*> QC.chooseInt (0, 4)
     iGen = QC.chooseInt (0, n - 1)
     maybeIGen = QC.chooseInt (-1, n)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: Int -> M.Map Int (Sum Int) -> Query -> (M.Map Int (Sum Int), Result)
 handleRef capacity m q = case q of
   Reset -> (M.empty, None)

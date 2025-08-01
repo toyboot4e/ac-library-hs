@@ -47,7 +47,7 @@ module AtCoder.Extra.IntMap
     member,
     notMember,
 
-    -- ** Compartive lookups
+    -- ** Comparative lookups
     lookupGE,
     lookupGT,
     lookupLE,

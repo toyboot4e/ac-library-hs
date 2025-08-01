@@ -75,7 +75,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 
--- | A static Wavelet Matrix without automatic index comperssion.
+-- | A static Wavelet Matrix without automatic index compression.
 --
 -- @since 1.1.0.0
 data RawWaveletMatrix = RawWaveletMatrix

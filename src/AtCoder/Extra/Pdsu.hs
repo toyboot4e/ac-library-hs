@@ -111,7 +111,7 @@ data Pdsu s a = Pdsu
     nPdsu :: {-# UNPACK #-} !Int,
     -- | Parent: non-positive, size: positive
     parentOrSizePdsu :: !(VUM.MVector s Int),
-    -- | Diffierencial potential of each vertex.
+    -- | Differential potential of each vertex.
     potentialPdsu :: !(VUM.MVector s a),
     invertPdsu :: !(a -> a)
   }
@@ -142,7 +142,7 @@ leader pdsu v0 = stToPrim $ leaderST pdsu v0
     !_ = ACIA.checkIndex "AtCoder.Extra.Pdsu.leader" v0 $ nPdsu pdsu
 
 -- | \(O(\alpha(n))\) Returns \(p(v)\), the potential value of vertex \(v\) relative to the
--- reprensetative of its group.
+-- representative of its group.
 --
 -- @since 1.1.0.0
 {-# INLINE pot #-}

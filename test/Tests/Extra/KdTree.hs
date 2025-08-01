@@ -62,7 +62,7 @@ queryGen _n = do
     r = (,) <$> intervalGen' (-rngI) rngI <*> intervalGen' (-rngI) rngI
     xy = intervalGen' (-rngI) rngI
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: VU.Vector (Int, Int) -> Query -> Result
 handleRef vec q = case q of
   FindPointsIn ((!x1, !x2), (!y1, !y2)) -> do

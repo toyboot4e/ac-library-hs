@@ -203,7 +203,7 @@ lcpArrayBS s sa =
 -- \(i\)-th element is the length of the LCP (Longest Common Prefix) of \(s[0..n)\) and \(s[i..n)\).
 --
 -- ==== Constraints
--- - \(n \leq n\)
+-- - \(0 \leq n\)
 --
 -- ==== Complexity
 -- - \(O(n)\)
@@ -246,7 +246,7 @@ zAlgorithm s
 -- element is the length of the LCP (Longest Common Prefix) of \(s[0..n)\) and \(s[i..n)\).
 --
 -- ==== Constraints
--- - \(n \leq n\)
+-- - \(0 \leq n\)
 --
 -- ==== Complexity
 -- - \(O(n)\)

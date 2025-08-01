@@ -194,7 +194,7 @@ new :: (PrimMonad m, VU.Unbox a) => Int -> m (Queue (PrimState m) a)
 new n = stToPrim $ newST n
 
 -- | \(O(n)\) Creates a `Queue` with capacity \(2n + 1\), where the internal front/back position is
--- initialzed at \(n\).
+-- initialized at \(n\).
 --
 -- @since 1.2.4.0
 {-# INLINEABLE newDeque #-}

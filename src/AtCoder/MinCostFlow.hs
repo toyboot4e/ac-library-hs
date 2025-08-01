@@ -15,7 +15,7 @@
 --
 -- >>> MCF.addEdge_ g 1 2 2 5   --  0 --> 1 --> 2
 --
--- Augument flow with `flow`, `maxFlow` or `slope`:
+-- Augment flow with `flow`, `maxFlow` or `slope`:
 --
 -- >>> MCF.slope g 0 2 maxBound -- slope g from to flowLimit
 -- [(0,0),(2,16)]
@@ -169,7 +169,7 @@ flow ::
   (HasCallStack, PrimMonad m, Integral cap, Ord cap, VU.Unbox cap, Num cost, Ord cost, Bounded cost, VU.Unbox cost) =>
   -- | Graph
   McfGraph (PrimState m) cap cost ->
-  -- | Fource @s@
+  -- | Source @s@
   Int ->
   -- | Sink @t@
   Int ->
@@ -342,7 +342,7 @@ slopeST ::
 slopeST McfGraph {..} s t flowLimit = do
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.slopeST" "`source` vertex" s "the number of vertices" nG
   let !_ = ACIA.checkCustom "AtCoder.MinCostFlow.slopeST" "`sink` vertex" t "the number of vertices" nG
-  let !_ = ACIA.runtimeAssert (s /= t) "AtCoder.MinCostFlow.slopeST: `source` and `sink` vertex must be distict"
+  let !_ = ACIA.runtimeAssert (s /= t) "AtCoder.MinCostFlow.slopeST: `source` and `sink` vertex must be distinct"
 
   edges_@(VU.V_5 _ _ _ caps _ _) <- ACIGV.unsafeFreeze edgesG
   (!edgeIdx, !g) <- ACIMCSR.build nG edges_

@@ -1351,7 +1351,7 @@ reverseNodeST seq@Seq {..} i = do
   -- lazily propagate new reverse or cancel:
   VGM.modify revSeq (xor (Bit True)) $ coerce i
 
--- | Amortized \(O(\log n)\). Propgates the lazily propagated values on a node.
+-- | Amortized \(O(\log n)\). Propagates the lazily propagated values on a node.
 --
 -- @since 1.2.1.0
 {-# INLINE propNodeST #-}
@@ -1392,7 +1392,7 @@ propNodeFromRootST Seq {..} = inner
         inner p
       inner i
 
--- | Amortized \(O(\log n)\). Propgates at a node.
+-- | Amortized \(O(\log n)\). Propagates at a node.
 --
 -- @since 1.2.1.0
 {-# INLINE applyNodeST #-}

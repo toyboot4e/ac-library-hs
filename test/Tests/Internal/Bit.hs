@@ -29,7 +29,7 @@ unit_bitCeil = testCase "bitCeil" $ do
   (1 .<<. 62) @=? ACIBIT.bitCeil (1 .<<. 62)
 
 unit_countrZero :: TestTree
-unit_countrZero = testCase "coutrZero" $ do
+unit_countrZero = testCase "countrZero" $ do
   0 @=? countTrailingZeros (1 :: Int)
   1 @=? countTrailingZeros (2 :: Int)
   0 @=? countTrailingZeros (3 :: Int)

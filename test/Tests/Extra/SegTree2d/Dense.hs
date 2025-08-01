@@ -75,7 +75,7 @@ data Result
   | MS !(Maybe (Sum Int))
   deriving (Show, Eq)
 
--- | containers. (referencial implementation)
+-- | containers. (referential implementation)
 handleRef :: Int -> Int -> VUM.MVector RealWorld (Sum Int) -> Query -> IO Result
 handleRef w h vec q = case q of
   Read (!x, !y) -> do

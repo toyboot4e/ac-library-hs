@@ -296,7 +296,7 @@ popBackST Buffer {..} = do
 {-# INLINEABLE popBackST_ #-}
 popBackST_ :: (VU.Unbox a) => Buffer s a -> ST s ()
 popBackST_ buf = do
-  _ <- popBack buf
+  _ <- popBackST buf
   pure ()
 
 {-# INLINEABLE writeST #-}
