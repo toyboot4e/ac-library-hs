@@ -177,6 +177,11 @@ executable yosupo-cycle-detection-undirected
   main-is:       yosupo-cycle-detection-undirected.hs
   build-depends: verify
 
+executable yosupo-deque
+  import:        app-local
+  main-is:       yosupo-deque.hs
+  build-depends: verify
+
 executable yosupo-dynamic-point-set-rectangle-affine-rectangle-sum
   import:        app-local
   main-is:       yosupo-dynamic-point-set-rectangle-affine-rectangle-sum.hs
