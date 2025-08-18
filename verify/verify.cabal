@@ -217,6 +217,11 @@ executable yosupo-enumerate-palindromes
   main-is:       yosupo-enumerate-palindromes.hs
   build-depends: verify
 
+executable yosupo-enumerate-primes
+  import:        app-local
+  main-is:       yosupo-enumerate-primes.hs
+  build-depends: verify
+
 executable yosupo-factorize
   import:        app-local
   main-is:       yosupo-factorize.hs
@@ -356,9 +361,9 @@ executable yosupo-point-set-range-composite-large-array-lazy-persistent
 
   build-depends: verify
 
-executable yosupo-enumerate-primes
+executable yosupo-range-add-range-min
   import:        app-local
-  main-is:       yosupo-enumerate-primes.hs
+  main-is:       yosupo-range-add-range-min.hs
   build-depends: verify
 
 executable yosupo-shortest-path
