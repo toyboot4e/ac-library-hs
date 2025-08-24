@@ -38,6 +38,7 @@ common dependencies
     , base               >=4.9     && <4.22
     , bitvec             <1.2
     , bytestring         <0.14
+    , containers         <0.9
     , primitive          >=0.6.4.0 && <0.10
     , random             >=1.2.0   && <1.4
     , transformers       >=0.2.0.0
