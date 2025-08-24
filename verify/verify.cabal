@@ -358,7 +358,6 @@ executable yosupo-point-set-range-composite-large-array-lazy-persistent
   import:        app-local
   main-is:
     yosupo-point-set-range-composite-large-array-lazy-persistent.hs
-
   build-depends: verify
 
 executable yosupo-range-add-range-min
