@@ -147,6 +147,11 @@ executable aoj-3528
   main-is:       aoj-3528.hs
   build-depends: verify
 
+executable yosupo-aho-corasick
+  import:        app-local
+  main-is:       yosupo-aho-corasick.hs
+  build-depends: verify
+
 executable yosupo-associative-array
   import:        app-local
   main-is:       yosupo-associative-array.hs

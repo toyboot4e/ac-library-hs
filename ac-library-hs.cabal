@@ -35,15 +35,16 @@ common warnings
 
 common dependencies
   build-depends:
-    , base               >=4.9     && <4.22
-    , bitvec             <1.2
-    , bytestring         <0.14
-    , primitive          >=0.6.4.0 && <0.10
-    , random             >=1.2.0   && <1.4
-    , transformers       >=0.2.0.0
-    , vector             >=0.13.0  && <0.14
-    , vector-algorithms  <0.10
-    , wide-word          <0.2
+    , base                  >=4.9     && <4.22
+    , bitvec                <1.2
+    , bytestring            <0.14
+    , primitive             >=0.6.4.0 && <0.10
+    , random                >=1.2.0   && <1.4
+    , transformers          >=0.2.0.0
+    , unordered-containers  <0.3
+    , vector                >=0.13.0  && <0.14
+    , vector-algorithms     <0.10
+    , wide-word             <0.2
 
   default-language: GHC2021
 
@@ -53,7 +54,9 @@ library
   exposed-modules:
     AtCoder.Convolution
     AtCoder.Dsu
+    AtCoder.Extra.AhoCorasick
     AtCoder.Extra.Bisect
+    AtCoder.Extra.DsuMonoid
     AtCoder.Extra.DynLazySegTree
     AtCoder.Extra.DynLazySegTree.Persistent
     AtCoder.Extra.DynLazySegTree.Raw
