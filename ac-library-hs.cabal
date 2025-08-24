@@ -53,6 +53,7 @@ library
   exposed-modules:
     AtCoder.Convolution
     AtCoder.Dsu
+    AtCoder.Extra.AhoCorasick
     AtCoder.Extra.Bisect
     AtCoder.Extra.DynLazySegTree
     AtCoder.Extra.DynLazySegTree.Persistent

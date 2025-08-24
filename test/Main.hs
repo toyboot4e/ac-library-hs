@@ -4,6 +4,7 @@ import Test.Tasty (testGroup)
 import Test.Tasty.Ingredients.Rerun
 import Tests.Convolution qualified
 import Tests.Dsu qualified
+import Tests.Extra.AhoCorasick qualified
 import Tests.Extra.Bisect qualified
 import Tests.Extra.DynLazySegTree qualified
 import Tests.Extra.DynLazySegTree.Persistent qualified
@@ -67,7 +68,8 @@ main =
         testGroup "Dsu" Tests.Dsu.tests,
         testGroup
           "Extra"
-          [ testGroup "Bisect" Tests.Extra.Bisect.tests,
+          [ testGroup "AhoCorasick" Tests.Extra.AhoCorasick.tests,
+            testGroup "Bisect" Tests.Extra.Bisect.tests,
             testGroup "DynLazySegTree" Tests.Extra.DynLazySegTree.tests,
             testGroup "DynLazySegTree.Persistent" Tests.Extra.DynLazySegTree.Persistent.tests,
             testGroup "DynSegTree" Tests.Extra.DynSegTree.tests,
