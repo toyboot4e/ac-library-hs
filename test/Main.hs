@@ -6,6 +6,7 @@ import Tests.Convolution qualified
 import Tests.Dsu qualified
 import Tests.Extra.AhoCorasick qualified
 import Tests.Extra.Bisect qualified
+import Tests.Extra.DsuMonoid qualified
 import Tests.Extra.DynLazySegTree qualified
 import Tests.Extra.DynLazySegTree.Persistent qualified
 import Tests.Extra.DynSegTree qualified
@@ -70,6 +71,7 @@ main =
           "Extra"
           [ testGroup "AhoCorasick" Tests.Extra.AhoCorasick.tests,
             testGroup "Bisect" Tests.Extra.Bisect.tests,
+            testGroup "DsuMonoid" Tests.Extra.DsuMonoid.tests,
             testGroup "DynLazySegTree" Tests.Extra.DynLazySegTree.tests,
             testGroup "DynLazySegTree.Persistent" Tests.Extra.DynLazySegTree.Persistent.tests,
             testGroup "DynSegTree" Tests.Extra.DynSegTree.tests,

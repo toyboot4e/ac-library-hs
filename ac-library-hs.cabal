@@ -56,6 +56,7 @@ library
     AtCoder.Dsu
     AtCoder.Extra.AhoCorasick
     AtCoder.Extra.Bisect
+    AtCoder.Extra.DsuMonoid
     AtCoder.Extra.DynLazySegTree
     AtCoder.Extra.DynLazySegTree.Persistent
     AtCoder.Extra.DynLazySegTree.Raw
