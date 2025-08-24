@@ -2,7 +2,6 @@ module Tests.Extra.AhoCorasick where
 
 import AtCoder.Extra.AhoCorasick qualified as Ac
 import Data.Vector qualified as V
-import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
 import Test.Tasty

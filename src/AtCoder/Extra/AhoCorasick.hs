@@ -7,9 +7,10 @@
 -- >>> import AtCoder.Extra.AhoCorasick qualified as AC
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let patterns = V.fromList [VU.fromList [0, 1], VU.fromList [0, 2], VU.fromList [2, 3]]
--- >>> let ac = AC.build 26 patterns
+-- >>> let ac = AC.build patterns
 -- >>> AC.size ac
 -- 6
+--
 -- >>> AC.retrieve ac (VU.singleton 2)
 -- 4
 --
@@ -21,6 +22,7 @@ module AtCoder.Extra.AhoCorasick
     next,
     nextN,
     retrieve,
+    match,
   )
 where
 
@@ -29,7 +31,7 @@ import Control.Monad (when)
 import Control.Monad.Fix (fix)
 import Control.Monad.ST (runST)
 import Data.Foldable (for_)
-import Data.IntMap.Strict qualified as IM
+import Data.HashMap.Strict qualified as HM
 import Data.Maybe (fromJust)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
@@ -50,7 +52,7 @@ data AhoCorasick = AhoCorasick
     -- | Vertex -> (Char -> Vertex)
     --
     -- @since 1.5.3.0
-    nextAc :: !(V.Vector (IM.IntMap Int)),
+    nextAc :: !(V.Vector (HM.HashMap Int Int)),
     -- | Links to parent vertex.
     --
     -- @since 1.5.3.0
@@ -61,7 +63,7 @@ data AhoCorasick = AhoCorasick
     suffixAc :: !(VU.Vector Int)
   }
 
--- | \(O(\Gamma \sum_i |S_i|)\)
+-- | \(O(\sum_i |S_i| \Gamma)\)
 --
 -- ==== Constraints
 -- - \(|S_i| > 0\)
@@ -78,7 +80,7 @@ build patterns
   | VG.null patterns =
       AhoCorasick
         1
-        (V.singleton IM.empty)
+        (V.singleton HM.empty)
         (VU.replicate 1 0)
         (VU.replicate 1 0)
   | otherwise =
@@ -113,13 +115,13 @@ next ::
   Int
 next AhoCorasick {..} v c0 =
   let !c' = inner c0
-      !v' = fromJust $ IM.lookup c' (nextAc VG.! v)
+      !v' = fromJust $ HM.lookup c' (nextAc VG.! v)
    in v'
   where
     inner c
       -- fallback to a suffix
       -- TODO: why suffixAc -> Char?
-      | IM.notMember c (nextAc VG.! v) = inner $! suffixAc VG.! c
+      | not (HM.member c (nextAc VG.! v)) = inner $! suffixAc VG.! c
       | otherwise = c
 
 -- | \(O(|S_i|)\) Applies `next` N times for a given input string.
@@ -162,25 +164,32 @@ retrieve ::
   Int
 retrieve ac = nextN ac 0
 
--- | \(O(\Gamma \sum_i |S_i|)\)
+-- | \(O(|S_i|)\) TODO
+--
+-- @since 1.5.3.0
+{-# INLINEABLE match #-}
+match :: (HasCallStack) => AhoCorasick -> VU.Vector Int -> VU.Vector (Int, Int)
+match ac t = VU.empty
+
+-- | \(O(\sum_i |S_i| \Gamma)\)
 {-# INLINEABLE buildTrie #-}
-buildTrie :: (HasCallStack) => V.Vector (VU.Vector Int) -> (Int, V.Vector (IM.IntMap Int), VU.Vector Int)
+buildTrie :: (HasCallStack) => V.Vector (VU.Vector Int) -> (Int, V.Vector (HM.HashMap Int Int), VU.Vector Int)
 buildTrie patterns = runST $ do
   let !nMaxNodes = (1 +) . V.sum $ V.map VU.length patterns
   -- (Vertex, Char) -> Vertex
-  nextVec <- VM.replicate nMaxNodes IM.empty
+  nextVec <- VM.replicate nMaxNodes HM.empty
   parentVec <- VUM.replicate nMaxNodes (0 :: Int)
   nNodesVec <- VUM.replicate 1 (1 :: Int)
 
   VG.forM_ patterns $ \pat -> do
     VG.foldM'
       ( \ !u c -> do
-          v0 <- IM.lookup c <$> VGM.read nextVec u
+          v0 <- HM.lookup c <$> VGM.read nextVec u
           case v0 of
             Nothing -> do
               v <- VGM.read nNodesVec 0
               VGM.write nNodesVec 0 $! v + 1
-              VGM.modify nextVec (IM.insert c v) u
+              VGM.modify nextVec (HM.insert c v) u
               VGM.write parentVec v u
               pure v
             Just v -> pure v
@@ -193,15 +202,15 @@ buildTrie patterns = runST $ do
   !parent <- VG.take nNodes <$> VU.unsafeFreeze parentVec
   pure (nNodes, next, parent)
 
--- | \(O(\Gamma \sum_i |S_i|)\)
+-- | \(O(\sum_i |S_i| \Gamma)\)
 {-# INLINEABLE runBfs #-}
-runBfs :: (HasCallStack) => Int -> V.Vector (IM.IntMap Int) -> VU.Vector Int
+runBfs :: (HasCallStack) => Int -> V.Vector (HM.HashMap Int Int) -> VU.Vector Int
 runBfs nNodes next = VU.create $ do
   -- BFS
   suffixVec <- VUM.replicate nNodes (0 :: Int)
   que <- Q.new @_ @Int nNodes
 
-  for_ (IM.elems (next VG.! 0)) $ \v -> do
+  for_ (HM.elems (next VG.! 0)) $ \v -> do
     when (v /= -1) $ do
       Q.pushBack que v
 
@@ -211,12 +220,12 @@ runBfs nNodes next = VU.create $ do
       Nothing -> pure ()
       Just u -> do
         -- visit neighbors
-        for_ (IM.assocs (next VG.! u)) $ \(!c, !v) -> do
+        for_ (HM.toList (next VG.! u)) $ \(!c, !v) -> do
           Q.pushBack que v
           -- find the longest suffix to continue with `c`
           flip fix u $ \suffixLoop p -> do
             !suf <- VGM.read suffixVec p
-            case IM.lookup c (next VG.! suf) of
+            case HM.lookup c (next VG.! suf) of
               Just sufC -> do
                 VGM.write suffixVec v sufC
               Nothing
