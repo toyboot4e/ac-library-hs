@@ -1,5 +1,11 @@
 # Revision history for acl-hs
 
+## 1.5.3.0 -- June 2025
+
+- Added `AtCoder.Extra.AhoCorasick`
+- Added `AtCoder.Extra.DsuMonoid`
+- Fixed the implementation of `KdTree.findNearstPoint`
+
 ## 1.5.2.0 -- June 2025
 
 - Added `AtCoder.Extra.Vector.Prim`
