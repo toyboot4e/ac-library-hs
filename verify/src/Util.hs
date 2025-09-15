@@ -7,6 +7,7 @@ module Util
 
     -- * Parse functions
     intP,
+    integerP,
     mintP,
     intS1P,
     int2P,
@@ -61,6 +62,11 @@ type Parser = StateT BS.ByteString Maybe
 {-# INLINE intP #-}
 intP :: Parser Int
 intP = StateT $ BS.readInt . BS.dropSpace
+
+-- | Parses an `Integer`.
+{-# INLINE integerP #-}
+integerP :: Parser Integer
+integerP = StateT $ BS.readInteger . BS.dropSpace
 
 -- | Parses an `ModInt`.
 {-# INLINE mintP #-}

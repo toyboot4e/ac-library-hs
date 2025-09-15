@@ -147,6 +147,11 @@ executable aoj-3528
   main-is:       aoj-3528.hs
   build-depends: verify
 
+executable yosupo-addition-of-big-integers
+  import:        app-local
+  main-is:       yosupo-addition-of-big-integers.hs
+  build-depends: verify
+
 executable yosupo-aho-corasick
   import:        app-local
   main-is:       yosupo-aho-corasick.hs
@@ -185,6 +190,11 @@ executable yosupo-cycle-detection-undirected
 executable yosupo-deque
   import:        app-local
   main-is:       yosupo-deque.hs
+  build-depends: verify
+
+executable yosupo-division-of-big-integers
+  import:        app-local
+  main-is:       yosupo-division-of-big-integers.hs
   build-depends: verify
 
 executable yosupo-dynamic-point-set-rectangle-affine-rectangle-sum
@@ -320,6 +330,11 @@ executable yosupo-matrix-rank
 executable yosupo-minimum-spanning-tree
   import:        app-local
   main-is:       yosupo-minimum-spanning-tree.hs
+  build-depends: verify
+
+executable yosupo-multiplication-of-big-integers
+  import:        app-local
+  main-is:       yosupo-multiplication-of-big-integers.hs
   build-depends: verify
 
 executable yosupo-point-add-range-sum
