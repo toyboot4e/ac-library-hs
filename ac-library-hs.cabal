@@ -1,11 +1,10 @@
-cabal-version:   3.4
-name:            ac-library-hs
-
+cabal-version: 3.4
+name: ac-library-hs
 -- PVP summary:  +-+------- breaking API changes
 --               | | +----- non-breaking API additions
 --               | | | +--- code changes with no API change
-version:         1.5.3.0
-synopsis:        Data structures and algorithms
+version: 1.5.3.0
+synopsis: Data structures and algorithms
 description:
   Haskell port of [ac-library](https://github.com/atcoder/ac-library), a library for competitive
   programming on [AtCoder](https://atcoder.jp/). ([GitHub](https://github.com/toyboot4e/ac-library-hs), [DeepWiki](https://deepwiki.com/toyboot4e/ac-library-hs))
@@ -13,21 +12,21 @@ description:
   - Functions primarily use half-open interval \([l, r)\).
   - The `Extra` module contains additional utilities beyond the original C++ library.
 
-category:        Algorithms, Data Structures
-license:         CC0-1.0
-license-file:    LICENSE
-author:          toyboot4e <toyboot4e@gmail.com>
-maintainer:      toyboot4e <toyboot4e@gmail.com>
-build-type:      Simple
+category: Algorithms, Data Structures
+license: CC0-1.0
+license-file: LICENSE
+author: toyboot4e <toyboot4e@gmail.com>
+maintainer: toyboot4e <toyboot4e@gmail.com>
+build-type: Simple
 extra-doc-files:
   CHANGELOG.md
-  examples/README.md
   README.md
+  examples/README.md
 
-tested-with:     GHC ==9.8.4
+tested-with: ghc ==9.8.4
 
 source-repository head
-  type:     git
+  type: git
   location: https://github.com/toyboot4e/ac-library-hs.git
 
 common warnings
@@ -35,22 +34,22 @@ common warnings
 
 common dependencies
   build-depends:
-    , base                  >=4.9     && <4.22
-    , bitvec                <1.2
-    , bytestring            <0.14
-    , primitive             >=0.6.4.0 && <0.10
-    , random                >=1.2.0   && <1.4
-    , transformers          >=0.2.0.0
-    , unordered-containers  <0.3
-    , vector                >=0.13.0  && <0.14
-    , vector-algorithms     <0.10
-    , wide-word             <0.2
+    base >=4.9 && <4.22,
+    bitvec <1.2,
+    bytestring <0.14,
+    primitive >=0.6.4.0 && <0.10,
+    random >=1.2.0 && <1.4,
+    transformers >=0.2.0.0,
+    unordered-containers <0.3,
+    vector >=0.13.0 && <0.14,
+    vector-algorithms <0.10,
+    wide-word <0.2,
 
   default-language: GHC2021
 
 library
-  import:          warnings
-  import:          dependencies
+  import: warnings
+  import: dependencies
   exposed-modules:
     AtCoder.Convolution
     AtCoder.Dsu
@@ -68,9 +67,9 @@ library
     AtCoder.Extra.DynSparseSegTree.Raw
     AtCoder.Extra.Graph
     AtCoder.Extra.HashMap
-    AtCoder.Extra.IntervalMap
     AtCoder.Extra.IntMap
     AtCoder.Extra.IntSet
+    AtCoder.Extra.IntervalMap
     AtCoder.Extra.Ix0
     AtCoder.Extra.KdTree
     AtCoder.Extra.LazyKdTree
@@ -132,18 +131,18 @@ library
 
   -- other-modules:
   -- other-extensions:
-  hs-source-dirs:  src
+  hs-source-dirs: src
 
 executable example-lazy-segtree
-  import:         warnings
-  import:         dependencies
+  import: warnings
+  import: dependencies
   hs-source-dirs: examples
-  main-is:        LazySegTree.hs
-  build-depends:  ac-library-hs
+  main-is: LazySegTree.hs
+  build-depends: ac-library-hs
 
 test-suite ac-library-hs-test
-  import:         warnings
-  import:         dependencies
+  import: warnings
+  import: dependencies
   other-modules:
     Tests.Convolution
     Tests.Dsu
@@ -157,9 +156,9 @@ test-suite ac-library-hs-test
     Tests.Extra.Graph
     Tests.Extra.HashMap
     Tests.Extra.Hld
-    Tests.Extra.IntervalMap
     Tests.Extra.IntMap
     Tests.Extra.IntSet
+    Tests.Extra.IntervalMap
     Tests.Extra.Ix0
     Tests.Extra.KdTree
     Tests.Extra.LazyKdTree
@@ -203,32 +202,32 @@ test-suite ac-library-hs-test
     Tests.TwoSat
     Tests.Util
 
-  type:           exitcode-stdio-1.0
+  type: exitcode-stdio-1.0
   hs-source-dirs: test
-  main-is:        Main.hs
+  main-is: Main.hs
   build-depends:
-    , ac-library-hs
-    , containers
-    , hspec
-    , mtl
-    , QuickCheck
-    , quickcheck-classes
-    , random
-    , semirings
-    , tasty
-    , tasty-hspec
-    , tasty-hunit
-    , tasty-quickcheck
-    , tasty-rerun
-    , transformers
-    , unordered-containers
+    QuickCheck,
+    ac-library-hs,
+    containers,
+    hspec,
+    mtl,
+    quickcheck-classes,
+    random,
+    semirings,
+    tasty,
+    tasty-hspec,
+    tasty-hunit,
+    tasty-quickcheck,
+    tasty-rerun,
+    transformers,
+    unordered-containers,
 
 benchmark ac-library-hs-benchmark
-  import:         warnings
-  import:         dependencies
-  ghc-options:    -O2
-  type:           exitcode-stdio-1.0
-  main-is:        Main.hs
+  import: warnings
+  import: dependencies
+  ghc-options: -O2
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
   hs-source-dirs: benchmarks
   other-modules:
     Bench.AddMod
@@ -258,17 +257,17 @@ benchmark ac-library-hs-benchmark
     BenchLib.Vector.MapAccumL
 
   build-depends:
-    , ac-library-hs
-    , base
-    , criterion
-    , mtl
-    , random
-    , tagged
-    , transformers
+    ac-library-hs,
+    base,
+    criterion,
+    mtl,
+    random,
+    tagged,
+    transformers,
 
 test-suite benchlib-test
-  import:         warnings
-  import:         dependencies
+  import: warnings
+  import: dependencies
   other-modules:
     BenchLib.AddMod
     BenchLib.ModInt.ModIntNats
@@ -279,19 +278,19 @@ test-suite benchlib-test
     BenchLib.PowMod
     Tests.MulMod
 
-  type:           exitcode-stdio-1.0
+  type: exitcode-stdio-1.0
   hs-source-dirs: benchmarks
-  main-is:        TestMain.hs
+  main-is: TestMain.hs
   build-depends:
-    , ac-library-hs
-    , hspec
-    , mtl
-    , QuickCheck
-    , random
-    , tagged
-    , tasty
-    , tasty-hunit
-    , tasty-quickcheck
-    , tasty-rerun
+    QuickCheck,
+    ac-library-hs,
+    hspec,
+    mtl,
+    random,
+    tagged,
+    tasty,
+    tasty-hunit,
+    tasty-quickcheck,
+    tasty-rerun,
 
 -- , quickcheck-instances

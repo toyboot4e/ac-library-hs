@@ -58,7 +58,8 @@
         treefmtEval = treefmt-nix.lib.evalModule pkgs {
           projectRootFile = "flake.nix";
           programs = {
-            cabal-fmt.enable = true;
+            # cabal-fmt.enable = true;
+            cabal-gild.enable = true;
             ormolu.enable = true;
           };
         };
@@ -83,7 +84,8 @@
               # GHC 9.8.4
               (ghcpkgs.haskell.compiler.ghc984.override { useLLVM = true; })
               (ghcpkgs.haskell-language-server.override { supportedGhcVersions = [ "984" ]; })
-              ghcpkgs.haskell.packages.ghc984.cabal-fmt
+              ghcpkgs.haskell.packages.ghc984.cabal-gild
+              # ghcpkgs.haskell.packages.ghc984.cabal-fmt
               ghcpkgs.haskell.packages.ghc984.cabal-plan
               ghcpkgs.haskell.packages.ghc984.doctest
               ghcpkgs.haskell.packages.ghc984.implicit-hie
