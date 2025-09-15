@@ -50,6 +50,7 @@ common dependencies
 library
   import: warnings
   import: dependencies
+  -- cabal-gild: discover src
   exposed-modules:
     AtCoder.Convolution
     AtCoder.Dsu
@@ -143,10 +144,13 @@ executable example-lazy-segtree
 test-suite ac-library-hs-test
   import: warnings
   import: dependencies
+  -- cabal-gild: discover test --exclude=test/Main.hs
   other-modules:
     Tests.Convolution
     Tests.Dsu
+    Tests.Extra.AhoCorasick
     Tests.Extra.Bisect
+    Tests.Extra.DsuMonoid
     Tests.Extra.DynLazySegTree
     Tests.Extra.DynLazySegTree.Persistent
     Tests.Extra.DynSegTree

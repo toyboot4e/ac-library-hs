@@ -82,6 +82,7 @@ common app-online
 
 library
   import: dependencies
+  -- cabal-gild: discover src
   exposed-modules:
     Iota.Prelude
     Iota.PrimParser
