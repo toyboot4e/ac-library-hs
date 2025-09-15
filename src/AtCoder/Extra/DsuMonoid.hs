@@ -142,7 +142,7 @@ merge DsuMonoid {..} a b = stToPrim $ do
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 --
--- @since 1.2.4.0
+-- @since 1.5.3.0
 {-# INLINEABLE mergeMaybe #-}
 mergeMaybe :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> Int -> m (Maybe Int)
 mergeMaybe DsuMonoid {..} a b = stToPrim $ do

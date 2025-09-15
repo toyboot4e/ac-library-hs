@@ -3,6 +3,7 @@
 -- ==== __Example__
 --
 -- >>> import AtCoder.Extra.AhoCorasick qualified as AC
+-- >>> import Data.Vector qualified as V
 -- >>> import Data.Vector.Unboxed qualified as VU
 --
 -- Pattern strings must be given as @V.Vector (VU.Vector Int)@:
@@ -49,7 +50,6 @@ where
 
 import AtCoder.Extra.Vector qualified as EV
 import AtCoder.Internal.Queue qualified as Q
-import Control.Monad (when)
 import Control.Monad.Fix (fix)
 import Control.Monad.ST (runST)
 import Data.Foldable (for_)
@@ -92,7 +92,7 @@ data AhoCorasick = AhoCorasick
     outputAc :: !(VU.Vector Int)
   }
 
--- | \(O(\sum_i |S_i|)\)
+-- | \(O(\sum_i |S_i|)\) Build an Aho–Corasick automaton.
 --
 -- ==== Constraints
 -- - \(|S_i| > 0\)
@@ -152,7 +152,7 @@ next AhoCorasick {trieAc, suffixAc} v0 c = inner v0
         -- fallback to the longest match suffix
         | otherwise -> inner $! suffixAc VG.! v
 
--- | \(n\) Applies `next` N times for a given input string.
+-- | \(O(n)\) Applies `next` \(n\) times for the input node.
 --
 -- ==== Constraints
 --
