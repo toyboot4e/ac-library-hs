@@ -8,9 +8,9 @@ Feel free to create any issues.
 
 ## Pull requests
 
-Feel free to create any issues, but consider the target branch.
+Feel free to create any PRs, but consider the target branch.
 
-- `main` branch is the version available on AtCoder. Source change that doesn't change the compiled code should come to this branch.
+- `main` branch is the version available on AtCoder. Pull requests that don't change the compiled code should come to this branch.
   - Documentation fixes
   - Test fixes
   - CI fixes
