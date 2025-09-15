@@ -47,8 +47,8 @@ import Data.Word (Word64)
 import GHC.Stack (HasCallStack)
 import System.Random
 
--- | \(O(n \log \log n)\) Creates an array of prime numbers up to the given limit, using Sieve of
--- Eratosthenes.
+-- | \(O(n \log \log n)\) Creates an array of prime numbers up to the given limit (inclusive), using
+-- Sieve of Eratosthenes.
 --
 -- The minimum computational complexity is \(\Omega(B \log \log B)\), where \(B = 2^{15}\) is the
 -- length of segment. This constraint comes from the use of segmented sieve.
