@@ -1,5 +1,5 @@
-import Data.ByteString.Char8 qualified as BS
 import Data.ByteString.Builder qualified as BSB
+import Data.ByteString.Char8 qualified as BS
 import Data.Maybe (fromJust)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG

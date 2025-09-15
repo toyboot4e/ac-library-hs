@@ -1,6 +1,6 @@
 import AtCoder.Extra.AhoCorasick qualified as Ac
-import Data.ByteString.Char8 qualified as BS
 import Data.ByteString.Builder qualified as BSB
+import Data.ByteString.Char8 qualified as BS
 import Data.Char (ord)
 import Data.Foldable (for_)
 import Data.Vector qualified as V

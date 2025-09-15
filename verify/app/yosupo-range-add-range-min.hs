@@ -1,5 +1,5 @@
-import AtCoder.LazySegTree qualified as LST
 import AtCoder.Extra.Monoid.RangeAdd (RangeAdd (..))
+import AtCoder.LazySegTree qualified as LST
 import Data.Semigroup (Min (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
