@@ -44,10 +44,10 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..))
--- >>> import AtCoder.LazySegTree qualified as LST
--- >>> seg <- LST.build @_ @(Affine1 Int) @(Sum Int) $ VU.generate 3 Sum -- [0, 1, 2]
--- >>> LST.applyIn seg 0 3 $ Affine1 (2, 1) -- [1, 3, 5]
--- >>> getSum <$> LST.allProd seg
+-- >>> import AtCoder.LazySegTree qualified as LSeg
+-- >>> seg <- LSeg.build @_ @(Affine1 Int) @(Sum Int) $ VU.generate 3 Sum -- [0, 1, 2]
+-- >>> LSeg.applyIn seg 0 3 $ Affine1 (2, 1) -- [1, 3, 5]
+-- >>> getSum <$> LSeg.allProd seg
 -- 9
 --
 -- @since 1.0.0.0

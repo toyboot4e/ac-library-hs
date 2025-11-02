@@ -3,7 +3,7 @@
 import AtCoder.Extra.Math qualified as EM
 import AtCoder.Extra.Monoid (Affine1 (..), SegAct (..))
 import AtCoder.Extra.Monoid.Affine1 qualified as Affine1
-import AtCoder.LazySegTree qualified as LST
+import AtCoder.LazySegTree qualified as LSeg
 import AtCoder.ModInt qualified as M
 import Data.Monoid (Dual (..))
 import Data.Vector.Generic qualified as VG
@@ -58,13 +58,13 @@ main = do
       1 -> (1,,,,-1) <$> intP <*> intP <*> intP
       _ -> error "unreachable"
 
-  seg <- LST.build xs
+  seg <- LSeg.build xs
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !l, !r, !a, !b) -> do
-      LST.applyIn seg l r . Op $ (True, Affine1 (modInt a, modInt b))
+      LSeg.applyIn seg l r . Op $ (True, Affine1 (modInt a, modInt b))
       pure Nothing
     (1, !l, !r, !x, !_) -> do
-      Dual f <- LST.prod seg l r
+      Dual f <- LSeg.prod seg l r
       pure . Just . M.val $ Affine1.act f (modInt x)
     _ -> error "unreachable"
 

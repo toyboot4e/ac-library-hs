@@ -1,5 +1,5 @@
 import AtCoder.Extra.Monoid (RangeSet (..))
-import AtCoder.LazySegTree qualified as LST
+import AtCoder.LazySegTree qualified as LSeg
 import Data.Bit (Bit (..))
 import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
@@ -15,13 +15,13 @@ main = do
       1 -> (1 :: Int,,,-1) <$> intP <*> intP
       _ -> error "unreachable"
 
-  seg <- LST.build $ VU.replicate n (Sum (0 :: Int))
+  seg <- LSeg.build $ VU.replicate n (Sum (0 :: Int))
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !l, !r, !x) -> do
-      LST.applyIn seg l (r + 1) $ RangeSet (Bit True, Sum x)
+      LSeg.applyIn seg l (r + 1) $ RangeSet (Bit True, Sum x)
       pure Nothing
     (1, !l, !r, !_) -> do
-      Sum x <- LST.prod seg l (r + 1)
+      Sum x <- LSeg.prod seg l (r + 1)
       pure $ Just x
     _ -> error "unreachable"
 

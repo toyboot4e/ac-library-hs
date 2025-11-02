@@ -48,10 +48,10 @@ import Prelude hiding (map)
 -- >>> import AtCoder.Extra.Monoid.Mat2x2 qualified as Mat2x2
 -- >>> import AtCoder.Extra.Monoid.V2 qualified as V2
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), Mat2x2(..), V2(..))
--- >>> import AtCoder.LazySegTree qualified as LST
--- >>> seg <- LST.build @_ @(Mat2x2 Int) @(V2 Int) $ VU.generate 3 V2.new -- [0, 1, 2]
--- >>> LST.applyIn seg 0 3 $ Mat2x2.new 2 1 -- [1, 3, 5]
--- >>> V2.unV2 <$> LST.allProd seg
+-- >>> import AtCoder.LazySegTree qualified as LSeg
+-- >>> seg <- LSeg.build @_ @(Mat2x2 Int) @(V2 Int) $ VU.generate 3 V2.new -- [0, 1, 2]
+-- >>> LSeg.applyIn seg 0 3 $ Mat2x2.new 2 1 -- [1, 3, 5]
+-- >>> V2.unV2 <$> LSeg.allProd seg
 -- 9
 --
 -- @since 1.1.0.0

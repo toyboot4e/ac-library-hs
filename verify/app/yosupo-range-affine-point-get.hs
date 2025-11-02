@@ -1,5 +1,5 @@
 import AtCoder.Extra.Monoid (Affine1 (..))
-import AtCoder.LazySegTree qualified as LST
+import AtCoder.LazySegTree qualified as LSeg
 import AtCoder.ModInt qualified as M
 import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
@@ -21,13 +21,13 @@ main = do
       1 -> (1,,-1,-1,-1) <$> intP
       _ -> error "unreachable"
 
-  seg <- LST.build xs
+  seg <- LSeg.build xs
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !l, !r, !a, !b) -> do
-      LST.applyIn seg l r $ Affine1 (modInt a, modInt b)
+      LSeg.applyIn seg l r $ Affine1 (modInt a, modInt b)
       pure Nothing
     (1, !i, !_, !_, !_) -> do
-      Sum x <- LST.read seg i
+      Sum x <- LSeg.read seg i
       pure $ Just $ M.val x
     _ -> error "unreachable"
 

@@ -30,12 +30,12 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- ==== __Example__
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeSet(..))
--- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> import AtCoder.LazySegTree qualified as LSeg
 -- >>> import Data.Bit (Bit (..))
 -- >>> import Data.Semigroup (Product(..))
--- >>> seg <- LST.build @_ @(RangeSet (Product Int)) @(Product Int) $ VU.generate 4 Product -- [0, 1, 2, 3]
--- >>> LST.applyIn seg 0 3 $ RangeSet (Bit True, Product 5) -- [5, 5, 5, 3]
--- >>> getProduct <$> LST.prod seg 0 4
+-- >>> seg <- LSeg.build @_ @(RangeSet (Product Int)) @(Product Int) $ VU.generate 4 Product -- [0, 1, 2, 3]
+-- >>> LSeg.applyIn seg 0 3 $ RangeSet (Bit True, Product 5) -- [5, 5, 5, 3]
+-- >>> getProduct <$> LSeg.prod seg 0 4
 -- 375
 --
 -- @since 1.0.0.0

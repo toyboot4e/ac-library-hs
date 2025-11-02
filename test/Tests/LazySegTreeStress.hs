@@ -5,7 +5,7 @@
 
 module Tests.LazySegTreeStress (tests) where
 
-import AtCoder.LazySegTree qualified as LST
+import AtCoder.LazySegTree qualified as LSeg
 import Control.Monad.Primitive (PrimMonad, PrimState)
 import Control.Monad.State (MonadIO, liftIO)
 import Control.Monad.State.Strict (StateT (..))
@@ -80,7 +80,7 @@ instance Semigroup T where
 instance Monoid T where
   mempty = T (-1)
 
-instance LST.SegAct T S where
+instance LSeg.SegAct T S where
   segAct t@(T newTime) s@(S (!l, !r, !time))
     | t == mempty = s
     | time >= newTime = error "unreachable"
@@ -109,17 +109,17 @@ uniformPairM rng@(!lower, !upper) g
 
 -- TODO: write type?
 -- testDriver :: Int ->
---    (Int -> LST.LazySegTree (PrimState (StateT UniformGen IO )
+--    (Int -> LSeg.LazySegTree (PrimState (StateT UniformGen IO )
 testDriver ::
   (MonadIO m, PrimMonad m) =>
   (Int, Int) ->
   Int ->
-  (Int -> LST.LazySegTree (PrimState m) T S -> TimeManager (PrimState m) -> Int -> Int -> Int -> StateT StdGen m Int) ->
+  (Int -> LSeg.LazySegTree (PrimState m) T S -> TimeManager (PrimState m) -> Int -> Int -> Int -> StateT StdGen m Int) ->
   m ()
 testDriver tyRange@(!_, !_) nRepeat f = do
   for_ [1 .. 30] $ \n -> do
     for_ [1 .. 10 - 1] $ \_ -> do
-      seg0 <- LST.build $ VU.generate n $ \i -> S (i, i + 1, -1)
+      seg0 <- LSeg.build $ VU.generate n $ \i -> S (i, i + 1, -1)
       tm <- TimeManager <$> VUM.replicate n (-1)
       runStateGenT_ (mkStdGen 42) $ \g -> do
         VU.foldM'_
@@ -135,8 +135,8 @@ testDriver tyRange@(!_, !_) nRepeat f = do
       expected <- freezeTM tm
       actual <-
         if even n
-          then VU.map (\(S (!_, !_, !t)) -> t) <$> LST.freeze seg0
-          else VU.map (\(S (!_, !_, !t)) -> t) <$> LST.unsafeFreeze seg0
+          then VU.map (\(S (!_, !_, !t)) -> t) <$> LSeg.freeze seg0
+          else VU.map (\(S (!_, !_, !t)) -> t) <$> LSeg.unsafeFreeze seg0
       liftIO $ actual @?= expected
 
 -- | prod, read, applyIn, applyAt
@@ -145,26 +145,26 @@ unit_naiveTest = testCase "naiveTest" $
   testDriver (0, 3) 3000 $ \now seg0 tm ty l r -> case ty of
     0 -> do
       -- prod
-      S (!resL, !resR, !resTime) <- LST.prod seg0 l r
+      S (!resL, !resR, !resTime) <- LSeg.prod seg0 l r
       liftIO $ l @=? resL
       liftIO $ r @=? resR
       liftIO . (@=? resTime) =<< prod tm l r
       pure now
     1 -> do
       -- read
-      S (!resL, !resR, !resTime) <- LST.read seg0 l
+      S (!resL, !resR, !resTime) <- LSeg.read seg0 l
       liftIO $ l @=? resL
       liftIO $ l + 1 @=? resR
       liftIO . (@=? resTime) =<< prod tm l (l + 1)
       pure now
     2 -> do
       -- applyIn
-      LST.applyIn seg0 l r (T (now + 1))
+      LSeg.applyIn seg0 l r (T (now + 1))
       action tm l r (now + 1)
       pure $ now + 1
     3 -> do
       -- applyAt
-      LST.applyAt seg0 l (T (now + 1))
+      LSeg.applyAt seg0 l (T (now + 1))
       action tm l (l + 1) (now + 1)
       pure $ now + 1
     _ -> error "unreachable"
@@ -174,7 +174,7 @@ unit_maxRightTest = testCase "maxRightTest" $ do
   testDriver (0, 2) 1000 $ \now seg0 tm ty l r -> case ty of
     0 -> do
       -- maxRight
-      !_ <- LST.maxRight seg0 l $ \(S (!lS, !rS, !_)) -> case lS of
+      !_ <- LSeg.maxRight seg0 l $ \(S (!lS, !rS, !_)) -> case lS of
         _
           | lS == -1 -> True
           | lS /= l -> error "unreachable"
@@ -183,7 +183,7 @@ unit_maxRightTest = testCase "maxRightTest" $ do
           | otherwise -> rS <= r
       pure now
     _ -> do
-      LST.applyIn seg0 l r $ T (now + 1)
+      LSeg.applyIn seg0 l r $ T (now + 1)
       action tm l r $ now + 1
       pure $ now + 1
 
@@ -192,7 +192,7 @@ unit_minLeftTest = testCase "minLeftTest" $ do
   testDriver (0, 2) 1000 $ \now seg0 tm ty l r -> case ty of
     0 -> do
       -- minLeft
-      !_ <- LST.minLeft seg0 r $ \(S (!lS, !rS, !_)) -> case lS of
+      !_ <- LSeg.minLeft seg0 r $ \(S (!lS, !rS, !_)) -> case lS of
         _
           | lS == -1 -> True
           | rS /= r -> error "unreachable"
@@ -201,7 +201,7 @@ unit_minLeftTest = testCase "minLeftTest" $ do
           | otherwise -> l <= lS
       pure now
     _ -> do
-      LST.applyIn seg0 l r $ T (now + 1)
+      LSeg.applyIn seg0 l r $ T (now + 1)
       action tm l r $ now + 1
       pure $ now + 1
 

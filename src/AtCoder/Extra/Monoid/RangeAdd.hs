@@ -28,20 +28,20 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 --
 -- ==== __Example (action on @Sum@)__
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeAdd(..))
--- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> import AtCoder.LazySegTree qualified as LSeg
 -- >>> import Data.Semigroup (Sum(..))
--- >>> seg <- LST.build @_ @(RangeAdd (Sum Int)) @(Sum Int) $ VU.generate 3 Sum -- [0, 1, 2]
--- >>> LST.applyIn seg 0 3 $ RangeAdd (Sum 5) -- [5, 6, 7]
--- >>> getSum <$> LST.prod seg 0 3
+-- >>> seg <- LSeg.build @_ @(RangeAdd (Sum Int)) @(Sum Int) $ VU.generate 3 Sum -- [0, 1, 2]
+-- >>> LSeg.applyIn seg 0 3 $ RangeAdd (Sum 5) -- [5, 6, 7]
+-- >>> getSum <$> LSeg.prod seg 0 3
 -- 18
 --
 -- ==== __Example (action on @Max@)__
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), RangeAdd(..))
--- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> import AtCoder.LazySegTree qualified as LSeg
 -- >>> import Data.Semigroup (Max(..))
--- >>> seg <- LST.build @_ @(RangeAdd (Max Int)) @(Max Int) $ VU.generate 3 Max -- [0, 1, 2]
--- >>> LST.applyIn seg 0 3 $ RangeAdd (Max 5) -- [5, 6, 7]
--- >>> getMax <$> LST.prod seg 0 3
+-- >>> seg <- LSeg.build @_ @(RangeAdd (Max Int)) @(Max Int) $ VU.generate 3 Max -- [0, 1, 2]
+-- >>> LSeg.applyIn seg 0 3 $ RangeAdd (Max 5) -- [5, 6, 7]
+-- >>> getMax <$> LSeg.prod seg 0 3
 -- 7
 --
 -- @since 1.0.0.0

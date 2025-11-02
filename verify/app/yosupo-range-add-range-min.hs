@@ -1,5 +1,5 @@
 import AtCoder.Extra.Monoid.RangeAdd (RangeAdd (..))
-import AtCoder.LazySegTree qualified as LST
+import AtCoder.LazySegTree qualified as LSeg
 import Data.Semigroup (Min (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
@@ -15,13 +15,13 @@ main = do
       1 -> (1,,,-1) <$> intP <*> intP
       _ -> error "unreachable"
 
-  seg <- LST.build xs
+  seg <- LSeg.build xs
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !l, !r, !x) -> do
-      LST.applyIn seg l r $ RangeAdd (Min x)
+      LSeg.applyIn seg l r $ RangeAdd (Min x)
       pure Nothing
     (1, !l, !r, !_) -> do
-      Min x <- LST.prod seg l r
+      Min x <- LSeg.prod seg l r
       pure $ Just x
     _ -> error "unreachable"
 

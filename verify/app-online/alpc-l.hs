@@ -3,7 +3,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeFamilies #-}
 
-import AtCoder.LazySegTree qualified as LST
+import AtCoder.LazySegTree qualified as LSeg
 import Data.Bits
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Generic.Mutable qualified as VGM
@@ -26,7 +26,7 @@ instance Monoid F where
   {-# INLINE mempty #-}
   mempty = F False
 
-instance LST.SegAct F X where
+instance LSeg.SegAct F X where
   {-# INLINE segAct #-}
   segAct (F False) acc = acc
   segAct (F True) (X (!n0, !n1, !nInv)) = X (n1, n0, n0 * n1 - nInv)
@@ -55,13 +55,13 @@ main = do
     (!t, !l, !r) <- ints3
     pure (t, l - 1, r)
 
-  seg <- LST.build $ VU.map (\case 0 -> X (1, 0, 0); 1 -> X (0, 1, 0)) xs
+  seg <- LSeg.build $ VU.map (\case 0 -> X (1, 0, 0); 1 -> X (0, 1, 0)) xs
   res <- (`VU.mapMaybeM` qs) $ \case
     (1, !l, !r) -> do
-      LST.applyIn seg l r $ F True
+      LSeg.applyIn seg l r $ F True
       pure Nothing
     (2, !l, !r) -> do
-      X (!_, !_, !x) <- LST.prod seg l r
+      X (!_, !_, !x) <- LSeg.prod seg l r
       pure $ Just x
 
   printBSB $ unlinesBSB res

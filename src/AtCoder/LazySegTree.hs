@@ -22,46 +22,46 @@
 -- Here we'll use `AtCoder.Extra.Monoid.Affine1` as a monoid action \(F\) and `Data.Semigroup.Sum`
 -- as the acted monoid \(S\):
 --
--- >>> import AtCoder.LazySegTree qualified as LST
+-- >>> import AtCoder.LazySegTree qualified as LSeg
 -- >>> import AtCoder.Extra.Monoid (SegAct(..), Affine1(..)) -- `SegAct` is also re-exported in Extra.Monoid.
 -- >>> import Data.Semigroup (Sum(..))
 --
 -- Use `build` to construct a `LazySegTree` with initial values. @'build' \@_ \@f \@a@ constructs a
 -- `LazySegTree` of 'SegAct' @f a@:
 --
--- >>> seg <- LST.build @_ @(Affine1 Int) @(Sum Int) $ VU.fromList [1, 2, 3, 4]
+-- >>> seg <- LSeg.build @_ @(Affine1 Int) @(Sum Int) $ VU.fromList [1, 2, 3, 4]
 --
 -- `applyIn` @seg l r f@ applies an action \(f\) to an interval \([l, r)\):
 --
--- >>> LST.applyIn seg 1 3 $ Affine1 (2, 1) -- [1, 5, 7, 4]
+-- >>> LSeg.applyIn seg 1 3 $ Affine1 (2, 1) -- [1, 5, 7, 4]
 --
 -- Modify one element with `write`, `modify`, `modifyM` or `applyAt`:
 --
--- >>> LST.write seg 3 $ Sum 10 -- [1, 5, 7, 10]
--- >>> LST.modify seg (+ 1) 0   -- [2, 5, 7, 10]
+-- >>> LSeg.write seg 3 $ Sum 10 -- [1, 5, 7, 10]
+-- >>> LSeg.modify seg (+ 1) 0   -- [2, 5, 7, 10]
 --
 -- Read the values with `read`, `prod` or `allProd`:
 --
--- >>> LST.read seg 1
+-- >>> LSeg.read seg 1
 -- Sum {getSum = 5}
 --
--- >>> LST.prod seg 0 3 -- product (fold) of `Sum Int` in interval [0, 3)
+-- >>> LSeg.prod seg 0 3 -- product (fold) of `Sum Int` in interval [0, 3)
 -- Sum {getSum = 14}
 --
--- >>> LST.allProd seg
+-- >>> LSeg.allProd seg
 -- Sum {getSum = 24}
 --
 -- Run binary search:
 --
--- >>> LST.maxRight seg 0 (<= (Sum 10)) -- sum [0, 2) = 7 <= 10
+-- >>> LSeg.maxRight seg 0 (<= (Sum 10)) -- sum [0, 2) = 7 <= 10
 -- 2
 --
--- >>> LST.minLeft seg 4 (<= (Sum 10)) -- sum [3, 4) = 10 <= 10
+-- >>> LSeg.minLeft seg 4 (<= (Sum 10)) -- sum [3, 4) = 10 <= 10
 -- 3
 --
 -- Inspect all the values in \(O(n \log n)\) with `freeze` or `unsafeFreeze`:
 --
--- >>> VU.map getSum <$> LST.freeze seg
+-- >>> VU.map getSum <$> LSeg.freeze seg
 -- [2,5,7,10]
 --
 -- ==== Tips
@@ -155,7 +155,7 @@ import Prelude hiding (read)
 -- @
 -- {-# LANGUAGE TypeFamilies #-}
 --
--- import AtCoder.LazySegTree qualified as LST
+-- import AtCoder.LazySegTree qualified as LSeg
 -- import AtCoder.LazySegTree (SegAct (..))
 -- import Data.Monoid
 -- import Data.Vector.Generic qualified as VG
@@ -201,7 +201,7 @@ import Prelude hiding (read)
 -- {-# LANGUAGE DerivingStrategies #-}
 -- {-# LANGUAGE TypeFamilies #-}
 --
--- import AtCoder.LazySegTree qualified as LST
+-- import AtCoder.LazySegTree qualified as LSeg
 -- import AtCoder.LazySegTree (SegAct (..))
 -- import Data.Vector.Generic qualified as VG
 -- import Data.Vector.Generic.Mutable qualified as VGM
@@ -260,15 +260,15 @@ import Prelude hiding (read)
 --
 -- main :: IO ()
 -- main = do
---   seg <- LST.build @_ @F @X $ VU.map X $ VU.fromList [1, 2, 3, 4]
---   LST.applyIn seg 1 3 $ F (2, 1) -- [1, 5, 7, 4]
---   LST.write seg 3 $ X 10 -- [1, 5, 7, 10]
---   LST.modify seg (+ (X 1)) 0   -- [2, 5, 7, 10]
---   !_ \<- (expect "test 1" (X 5)) \<$> LST.read seg 1
---   !_ \<- (expect "test 2" (X 14)) \<$> LST.prod seg 0 3 -- reads an interval [0, 3)
---   !_ \<- (expect "test 3" (X 24)) \<$> LST.allProd seg
---   !_ \<- (expect "test 4" 2) \<$> LST.maxRight seg 0 (<= (X 10)) -- sum [0, 2) = 7 <= 10
---   !_ \<- (expect "test 5" 3) \<$> LST.minLeft seg 4 (<= (X 10)) -- sum [3, 4) = 10 <= 10
+--   seg <- LSeg.build @_ @F @X $ VU.map X $ VU.fromList [1, 2, 3, 4]
+--   LSeg.applyIn seg 1 3 $ F (2, 1) -- [1, 5, 7, 4]
+--   LSeg.write seg 3 $ X 10 -- [1, 5, 7, 10]
+--   LSeg.modify seg (+ (X 1)) 0   -- [2, 5, 7, 10]
+--   !_ \<- (expect "test 1" (X 5)) \<$> LSeg.read seg 1
+--   !_ \<- (expect "test 2" (X 14)) \<$> LSeg.prod seg 0 3 -- reads an interval [0, 3)
+--   !_ \<- (expect "test 3" (X 24)) \<$> LSeg.allProd seg
+--   !_ \<- (expect "test 4" 2) \<$> LSeg.maxRight seg 0 (<= (X 10)) -- sum [0, 2) = 7 <= 10
+--   !_ \<- (expect "test 5" 3) \<$> LSeg.minLeft seg 4 (<= (X 10)) -- sum [3, 4) = 10 <= 10
 --   putStrLn "=> test passed!"
 -- @
 --
