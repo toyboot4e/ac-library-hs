@@ -10,6 +10,48 @@
 -- Combining `RollingHash` with `SegTree` enables \(O(\log |s|)\) string slice creation and
 -- \(O(1)\) slice comparison.
 --
+-- ==== __Example__
+--
+-- Import:
+--
+-- >>> import AtCoder.Extra.Monoid.RollingHash qualified as RH
+-- >>> import AtCoder.SegTree qualified as Seg
+-- >>> import Data.ByteString.Char8 qualified as BS
+-- >>> import Data.Char (ord)
+-- >>> import Data.Vector.Unboxed qualified as VU
+--
+-- Create a helper method for creating `RollingHash` for a specific base and a modulus:
+--
+-- >>> type RH = RH.RollingHash 100 998244353
+-- >>> :{
+-- newRH :: BS.ByteString -> VU.Vector RH
+-- newRH = VU.map (RH.new . ord) . VU.fromList . BS.unpack
+-- :}
+--
+-- Create a segment tree of rolling hash monoids:
+--
+-- >>> let s = BS.pack "ABC_ABC"
+-- >>> seg <- Seg.build $ newRH s
+--
+-- Now, we can create string slices in \(O(\log n)\) and compare them in \(O(1)\) time:
+--
+-- >>> h1 <- Seg.prod seg 0 3 -- "ABC"
+-- >>> h2 <- Seg.prod seg 1 4 -- "BC_"
+-- >>> h3 <- Seg.prod seg 4 7 -- "ABC"
+--
+-- >>> h1 == h2
+-- False
+--
+-- >>> h1 == h3
+-- True
+--
+-- If you need more accurate result, you could use bigger prime, however, note that the performance
+-- gets worse (due to the internal implementation):
+--
+-- @
+-- type RH = RH.RollingHash 100 2305843009213693951
+-- @
+--
 -- @since 1.1.0.0
 module AtCoder.Extra.Monoid.RollingHash
   ( -- * Rolling hash
@@ -94,7 +136,7 @@ calc (RollingHash !digit1 !hash1) (RollingHash !digit2 !hash2)
           !hash' = addMod p (hash1 * digit2 `rem` p) hash2
        in RollingHash digit' hash'
   | otherwise =
-      -- TODO: This is slow
+      -- FIXME: This is slow
       let !digit' = fromIntegral $! to128 digit1 * to128 digit2 `rem` to128 p
           !hash' = fromIntegral $! (to128 hash1 * to128 digit2 + to128 hash2) `rem` to128 p
        in RollingHash digit' hash'
