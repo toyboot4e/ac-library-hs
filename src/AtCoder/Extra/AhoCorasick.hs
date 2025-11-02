@@ -227,7 +227,7 @@ buildTrie patternStrings = runST $ do
 
   !nNodes <- VGM.read nNodesVec 0
 
-  let !pattern = VU.create $ do
+  let !pat = VU.create $ do
         -- We could replace the following with VU.accumulate
         patVec <- VUM.replicate nNodes (-1 :: Int)
         VU.iforM_ patternVerts $ \iPattern v -> do
@@ -235,7 +235,7 @@ buildTrie patternStrings = runST $ do
         pure patVec
   !trie <- VG.take nNodes <$> V.unsafeFreeze nextVec
   !parent <- VG.take nNodes <$> VU.unsafeFreeze parentVec
-  pure (nNodes, pattern, trie, parent)
+  pure (nNodes, pat, trie, parent)
 
 -- | \(O(\sum_i |S_i| \Gamma)\)
 {-# INLINEABLE runBfs #-}
