@@ -1,13 +1,9 @@
 {-# LANGUAGE LambdaCase #-}
 
--- | Bisection methods and binary search functions. They partition a half-open interval \([l, r)\)
--- into two and return either the left or the right point of the boundary.
+-- | Bisection methods and binary search functions.
 --
--- @
--- Y Y Y Y Y N N N N N      Y: user predicate holds,
--- --------* *---------> x  N: user predicate does not hold,
---         L R              L, R: left and right points of the boundary
--- @
+-- __Known bug__: `maxRight` and their variants have a bug ([#140](https://github.com/toyboot4e/ac-library-hs/issues/140)),
+-- so don't use them.
 --
 -- ==== __Example__
 -- Perform index compression with `lowerBound`:
@@ -29,6 +25,10 @@ module AtCoder.Extra.Bisect
     upperBoundIn,
 
     -- * Generic bisection methods
+
+    --
+    -- __Known bug_:_ `maxRight` and their variants have a bug ([#140](https://github.com/toyboot4e/ac-library-hs/issues/140)),
+    -- so don't use them.
     maxRight,
     maxRightM,
     minLeft,
@@ -180,6 +180,8 @@ upperBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i <= target
 --           R              R: the right boundary point returned
 -- @
 --
+-- __Known bug__: user function \(p\) takes __closed intervals__ \([l, r]\).
+--
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let xs = VU.fromList [10, 10, 20, 20, 30, 30]
@@ -212,6 +214,8 @@ maxRight l r p = runIdentity $ maxRightM l r (pure . p)
 
 -- | \(O(\log n)\) Monadic variant of `maxRight`.
 --
+-- __Known bug__: user function \(p\) takes __closed intervals__ \([l, r]\).
+--
 -- @since 1.3.0.0
 {-# INLINE maxRightM #-}
 maxRightM :: (HasCallStack, Monad m) => Int -> Int -> (Int -> m Bool) -> m Int
@@ -227,6 +231,8 @@ maxRightM l0 r0 p = bisectImpl (l0 - 1) r0 p
 -- --------* ----------> x  N: not Y
 --         L                L: the left boundary point returned
 -- @
+--
+-- __Known bug__: user function \(p\) takes __closed intervals__ \([l, r]\).
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -256,6 +262,8 @@ minLeft ::
 minLeft l r p = runIdentity $ minLeftM l r (pure . p)
 
 -- | \(O(\log n)\) Monadic variant of `minLeft`.
+--
+-- __Known bug__: user function \(p\) takes __closed intervals__ \([l, r]\).
 --
 -- @since 1.3.0.0
 {-# INLINE minLeftM #-}
