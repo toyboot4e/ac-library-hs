@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | A disjoint set union with commutative monoid values associated with each group.
+-- | A disjoint set union with commutative semigroup (not necessary a monoid) values associated with
+-- each group.
 --
 -- ==== __Example__
 --
