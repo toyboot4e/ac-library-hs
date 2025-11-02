@@ -38,8 +38,8 @@ doc *args:
 alias d := doc
 
 # runs doctest
-doctest:
-    cabal repl --with-ghc=doctest --repl-options='-w -Wdefault'
+doctest *args:
+    cabal repl --with-ghc=doctest --repl-options='-w -Wdefault' {{args}}
 
 [private]
 alias dt := doctest
@@ -50,8 +50,8 @@ eg:
 
 # runs treefmt
 format:
-    # nix fmt .
-    treefmt .
+    nix fmt .
+    # treefmt .
 
 [private]
 alias fmt := format
