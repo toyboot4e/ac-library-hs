@@ -1,5 +1,11 @@
 # Revision history for acl-hs
 
+## 1.6.0.0 -- TODO: when
+
+- Fixed user functions of `AtCoder.Extra.Bisect.maxRight` and `maxRightM` to take half-open interval `[l, r)` (#140)
+- Added `write`, `modify`, `modifyM`, `unsafeModify`, `unsafeModifyM` to `AtCoder.Extra.DsuMonoid` (#139)
+- Added `isLeader` to `AtCoder.Dsu` and `AtCoder.Extra.DsuMonoid` (#139)
+
 ## 1.5.3.0 -- June 2025
 
 - Added `AtCoder.Extra.AhoCorasick`
