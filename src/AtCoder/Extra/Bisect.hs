@@ -176,7 +176,7 @@ upperBoundIn l r vec target = maxRight l r $ \i -> vec VG.! (i - 1) <= target
 -- >>> maxRight 0 3 (\i -> xs VU.! (i - 1) <= 20)
 -- 3
 --
--- @since 1.3.0.0
+-- @since 1.6.0.0
 {-# INLINE maxRight #-}
 maxRight ::
   (HasCallStack) =>
@@ -193,7 +193,7 @@ maxRight l r p = runIdentity $ maxRightM l r (pure . p)
 
 -- | \(O(\log n)\) Monadic variant of `maxRight`.
 --
--- @since 1.3.0.0
+-- @since 1.6.0.0
 {-# INLINE maxRightM #-}
 maxRightM :: (HasCallStack, Monad m) => Int -> Int -> (Int -> m Bool) -> m Int
 maxRightM l0 r0 = bisectImpl l0 (r0 + 1)
