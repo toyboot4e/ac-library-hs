@@ -61,6 +61,7 @@ module AtCoder.Dsu
 
     -- * Leader
     leader,
+    isLeader,
 
     -- * Component information
     same,
@@ -179,6 +180,21 @@ same dsu a b = stToPrim $ sameST dsu a b
 {-# INLINE leader #-}
 leader :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Int
 leader dsu a = stToPrim $ leaderST dsu a
+
+-- | Returns whether the vertex \(a\) is the representative of the connected component.
+--
+-- ==== Constraints
+-- - \(0 \leq a \lt n\)
+--
+-- ==== Complexity
+-- - \(O(\alpha(n))\) amortized
+--
+-- @since 1.6.0.0
+{-# INLINE isLeader #-}
+isLeader :: (HasCallStack, PrimMonad m) => Dsu (PrimState m) -> Int -> m Bool
+isLeader dsu v = do
+  l <- leader dsu v
+  pure $ l == v
 
 -- | Returns the size of the connected component that contains the vertex \(a\).
 --

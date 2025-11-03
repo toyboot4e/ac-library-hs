@@ -40,6 +40,7 @@ module AtCoder.Extra.DsuMonoid
 
     -- * Leader
     leader,
+    isLeader,
 
     -- * Component information
     same,
@@ -48,8 +49,13 @@ module AtCoder.Extra.DsuMonoid
 
     -- * Monoid values
     read,
+    write,
+    modify,
+    modifyM,
     unsafeRead,
     unsafeWrite,
+    unsafeModify,
+    unsafeModifyM,
   )
 where
 
@@ -201,6 +207,21 @@ same dsu = Dsu.same (dsuDm dsu)
 leader :: (HasCallStack, PrimMonad m) => DsuMonoid (PrimState m) a -> Int -> m Int
 leader dsu = Dsu.leader (dsuDm dsu)
 
+-- | Returns whether the vertex \(a\) is the representative of the connected component.
+--
+-- ==== Constraints
+-- - \(0 \leq a \lt n\)
+--
+-- ==== Complexity
+-- - \(O(\alpha(n))\) amortized
+--
+-- @since 1.6.0.0
+{-# INLINE isLeader #-}
+isLeader :: (HasCallStack, PrimMonad m) => DsuMonoid (PrimState m) a -> Int -> m Bool
+isLeader dsu v = do
+  l <- Dsu.leader (dsuDm dsu) v
+  pure $ l == v
+
 -- | Returns the size of the connected component that contains the vertex \(a\).
 --
 -- ==== Constraints
@@ -224,7 +245,8 @@ size dsu = Dsu.size (dsuDm dsu)
 groups :: (PrimMonad m) => DsuMonoid (PrimState m) a -> m (V.Vector (VU.Vector Int))
 groups dsu = Dsu.groups (dsuDm dsu)
 
--- | \(O(1)\) Reads the group value of the \(k\)-th node.
+-- | \(O(1)\) Reads the group value of the \(k\)-th node. \(k\) is automatically resolved to the
+-- leader vertex.
 --
 -- @since 1.5.3.0
 {-# INLINE read #-}
@@ -232,7 +254,37 @@ read :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> m a
 read DsuMonoid {..} i = do
   VGM.read mDm =<< Dsu.leader dsuDm i
 
--- | \(O(1)\) Reads the group value of the \(k\)-th node.
+-- | \(O(1)\) Writes to the group value of the \(k\)-th node. \(k\) is automatically resolved to the
+-- leader vertex.
+--
+-- @since 1.6.0.0
+{-# INLINE write #-}
+write :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> a -> m ()
+write DsuMonoid {..} i x = do
+  i' <- Dsu.leader dsuDm i
+  VGM.write mDm i' x
+
+-- | \(O(1)\) Modifies the group value of the \(k\)-th node. \(k\) is automatically resolved to the
+-- leader vertex.
+--
+-- @since 1.6.0.0
+{-# INLINE modify #-}
+modify :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> (a -> a) -> Int -> m ()
+modify DsuMonoid {..} f i = do
+  i' <- Dsu.leader dsuDm i
+  VGM.modify mDm f i'
+
+-- | \(O(1)\) Modifies the group value of the \(k\)-th node. \(k\) is automatically resolved to the
+-- leader vertex.
+--
+-- @since 1.6.0.0
+{-# INLINE modifyM #-}
+modifyM :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> (a -> m a) -> Int -> m ()
+modifyM DsuMonoid {..} f i = do
+  i' <- Dsu.leader dsuDm i
+  VGM.modifyM mDm f i'
+
+-- | \(O(1)\) Reads the \(k\)-th node.
 --
 -- @since 1.5.3.0
 {-# INLINE unsafeRead #-}
@@ -240,10 +292,26 @@ unsafeRead :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> m
 unsafeRead DsuMonoid {..} i = do
   VGM.read mDm i
 
--- | \(O(1)\) Writes to the group value of the \(k\)-th node.
+-- | \(O(1)\) Writes to the \(k\)-th node.
 --
 -- @since 1.5.3.0
 {-# INLINE unsafeWrite #-}
 unsafeWrite :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> a -> m ()
 unsafeWrite DsuMonoid {..} i x = do
   VGM.write mDm i x
+
+-- | \(O(1)\) Modifies the value of the \(k\)-th node.
+--
+-- @since 1.6.0.0
+{-# INLINE unsafeModify #-}
+unsafeModify :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> (a -> a) -> Int -> m ()
+unsafeModify DsuMonoid {..} f i = do
+  VGM.modify mDm f i
+
+-- | \(O(1)\) Modifies the value of the \(k\)-th node.
+--
+-- @since 1.6.0.0
+{-# INLINE unsafeModifyM #-}
+unsafeModifyM :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> (a -> m a) -> Int -> m ()
+unsafeModifyM DsuMonoid {..} f i = do
+  VGM.modifyM mDm f i
