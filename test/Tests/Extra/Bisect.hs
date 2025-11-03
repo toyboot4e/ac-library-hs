@@ -79,7 +79,10 @@ prop_maxRight = QC.testProperty "maxRight" $ do
   pure . QC.conjoin $
     map
       ( \(!l, !r) ->
-          naiveMaxRightIn l r (<= boundary) xs == maxRight l r (\i -> xs VG.! i <= boundary)
+          let expected = naiveMaxRightIn l r (<= boundary) xs
+              res = maxRight l r (\i -> xs VG.! (i - 1) <= boundary)
+           in QC.counterexample (show ((l, r), boundary, xs)) $
+                expected QC.=== res
       )
       lrs
 

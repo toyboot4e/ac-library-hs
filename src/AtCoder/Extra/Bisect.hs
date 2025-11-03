@@ -2,9 +2,6 @@
 
 -- | Bisection methods and binary search functions.
 --
--- __Known bug__: `maxRight` and their variants have a bug ([#140](https://github.com/toyboot4e/ac-library-hs/issues/140)),
--- so don't use them.
---
 -- ==== __Example__
 -- Perform index compression with `lowerBound`:
 --
@@ -25,10 +22,6 @@ module AtCoder.Extra.Bisect
     upperBoundIn,
 
     -- * Generic bisection methods
-
-    --
-    -- __Known bug_:_ `maxRight` and their variants have a bug ([#140](https://github.com/toyboot4e/ac-library-hs/issues/140)),
-    -- so don't use them.
     maxRight,
     maxRightM,
     minLeft,
@@ -41,13 +34,8 @@ import Data.Functor.Identity
 import Data.Vector.Generic qualified as VG
 import GHC.Stack (HasCallStack)
 
--- | \(O(\log n)\) Returns the maximum \(r\) where \(x_i \lt x_{ref}\) holds for \(i \in [0, r)\).
---
--- @
--- Y Y Y Y Y N N N N N      Y: x_i < x_ref
--- --------- *---------> x  N: not Y
---           R              R: the right boundary point returned
--- @
+-- | \(O(\log n)\) Returns the maximum \(r_{\mathrm{max}}\) where \(x_i \lt x_{r_{\mathrm{max}}}\)
+-- holds for \(i \in [0, r_{\mathrm{max}})\).
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -72,7 +60,8 @@ import GHC.Stack (HasCallStack)
 lowerBound :: (HasCallStack, VG.Vector v a, Ord a) => v a -> a -> Int
 lowerBound vec = lowerBoundIn 0 (VG.length vec) vec
 
--- | \(O(\log n)\) Computes the `lowerBound` for a slice of a vector within the interval \([l, r)\).
+-- | \(O(\log n)\) Returns the maximum \(r_{\mathrm{max}}\) where \(x_i \lt x_{r_{\mathrm{max}}}\)
+-- holds for \(i \in [l, r_{\mathrm{max}})\) ( \(r_{\mathrm{max}} \le r\) ).
 --
 -- ==== Constraints
 -- - \(0 \le l \le r \le n\)
@@ -99,17 +88,12 @@ lowerBound vec = lowerBoundIn 0 (VG.length vec) vec
 -- @since 1.3.0.0
 {-# INLINE lowerBoundIn #-}
 lowerBoundIn :: (HasCallStack, VG.Vector v a, Ord a) => Int -> Int -> v a -> a -> Int
-lowerBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i < target
+lowerBoundIn l r vec target = maxRight l r $ \i -> vec VG.! (i - 1) < target
   where
     !_ = ACIA.checkIntervalBounded "AtCoder.Extra.Bisect.lowerBoundIn" l r $ VG.length vec
 
--- | \(O(\log n)\) Returns the maximum \(r\) where \(x_i \le x_{ref}\) holds for \(i \in [0, r)\).
---
--- @
--- Y Y Y Y Y N N N N N      Y: x_i <= x_ref
--- --------- *---------> x  N: not Y
---           R              R: the right boundary point returned
--- @
+-- | \(O(\log n)\) Returns the maximum \(r_{\mathrm{max}}\) where \(x_i \le x_{r_{\mathrm{max}}}\)
+-- holds for \(i \in [0, r_{\mathrm{max}})\).
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
@@ -137,7 +121,8 @@ lowerBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i < target
 upperBound :: (HasCallStack, VG.Vector v a, Ord a) => v a -> a -> Int
 upperBound vec = upperBoundIn 0 (VG.length vec) vec
 
--- | \(O(\log n)\) Computes the `upperBound` for a slice of a vector within the interval \([l, r)\).
+-- | \(O(\log n)\) Returns the maximum \(r_{\mathrm{max}}\) where \(x_i \le x_{r_{\mathrm{max}}}\)
+-- holds for \(i \in [l, r_{\mathrm{max}})\) ( \(r_{\mathrm{max}} \le r\) ).
 --
 -- ==== Constraints
 -- - \(0 \le l \le r \le n\)
@@ -167,35 +152,28 @@ upperBound vec = upperBoundIn 0 (VG.length vec) vec
 -- @since 1.3.0.0
 {-# INLINE upperBoundIn #-}
 upperBoundIn :: (HasCallStack, VG.Vector v a, Ord a) => Int -> Int -> v a -> a -> Int
-upperBoundIn l r vec target = maxRight l r $ \i -> vec VG.! i <= target
+upperBoundIn l r vec target = maxRight l r $ \i -> vec VG.! (i - 1) <= target
   where
     !_ = ACIA.checkIntervalBounded "AtCoder.Extra.Bisect.upperBoundIn" l r $ VG.length vec
 
 -- | \(O(\log n)\) Applies the bisection method on a half-open interval \([l, r)\) and returns the
--- right boundary point.
---
--- @
--- Y Y Y Y Y N N N N N      Y: p(i) returns `true`
--- --------- *---------> x  N: not Y
---           R              R: the right boundary point returned
--- @
---
--- __Known bug__: user function \(p\) takes __closed intervals__ \([l, r]\).
+-- right boundary point \(r_{\mathrm{max}}\), where \(p[l, i)\) holds for
+-- \(i \in [l, r_{\mathrm{max}}]\).
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let xs = VU.fromList [10, 10, 20, 20, 30, 30]
 -- >>> let n = VU.length xs
--- >>> maxRight 0 n ((<= 20) . (xs VU.!))
+-- >>> maxRight 0 n (\i -> xs VU.! (i - 1) <= 20)
 -- 4
 --
--- >>> maxRight 0 n ((<= 0) . (xs VU.!))
+-- >>> maxRight 0 n (\i -> xs VU.! (i - 1) <= 0)
 -- 0
 --
--- >>> maxRight 0 n ((<= 100) . (xs VU.!))
+-- >>> maxRight 0 n (\i -> xs VU.! (i - 1) <= 100)
 -- 6
 --
--- >>> maxRight 0 3 ((<= 20) . (xs VU.!))
+-- >>> maxRight 0 3 (\i -> xs VU.! (i - 1) <= 20)
 -- 3
 --
 -- @since 1.3.0.0
@@ -206,45 +184,37 @@ maxRight ::
   Int ->
   -- | \(r\)
   Int ->
-  -- | \(p\)
+  -- | \(p\): user predicate that works on \([l, i)\)
   (Int -> Bool) ->
-  -- | Maximum \(r' (r' \le r)\) where \(p(i)\) holds for \(i \in [l, r')\).
+  -- | Maximum \(r_{\mathrm{max}} (r_{\mathrm{max}} \le r)\) where \(p[l, i)\) holds for
+  -- \(i \in [l, r_{\mathrm{max}}]\).
   Int
 maxRight l r p = runIdentity $ maxRightM l r (pure . p)
 
 -- | \(O(\log n)\) Monadic variant of `maxRight`.
 --
--- __Known bug__: user function \(p\) takes __closed intervals__ \([l, r]\).
---
 -- @since 1.3.0.0
 {-# INLINE maxRightM #-}
 maxRightM :: (HasCallStack, Monad m) => Int -> Int -> (Int -> m Bool) -> m Int
-maxRightM l0 r0 p = bisectImpl (l0 - 1) r0 p
+maxRightM l0 r0 = bisectImpl l0 (r0 + 1)
   where
     !_ = ACIA.checkInterval "AtCoder.Extra.Bisect.maxRightM" l0 r0
 
 -- | \(O(\log n)\) Applies the bisection method on a half-open interval \([l, r)\) and returns the
--- left boundary point.
---
--- @
--- N N N N N Y Y Y Y Y      Y: p(i) returns `true`
--- --------* ----------> x  N: not Y
---         L                L: the left boundary point returned
--- @
---
--- __Known bug__: user function \(p\) takes __closed intervals__ \([l, r]\).
+-- right boundary point \(l_{\mathrm{min}}\), where \(p[i, r)\) holds for
+-- \(i \in [l_{\mathrm{min}}, r]\).
 --
 -- ==== __Example__
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let xs = VU.fromList [10, 10, 20, 20, 30, 30]
 -- >>> let n = VU.length xs
--- >>> minLeft 0 n ((>= 20) . (xs VU.!))
+-- >>> minLeft 0 n (\i -> xs VU.! i >= 20)
 -- 2
 --
--- >>> minLeft 0 n ((>= 0) . (xs VU.!))
+-- >>> minLeft 0 n (\i -> xs VU.! i >= 0)
 -- 0
 --
--- >>> minLeft 0 n ((>= 100) . (xs VU.!))
+-- >>> minLeft 0 n (\i -> xs VU.! i >= 100)
 -- 6
 --
 -- @since 1.3.0.0
@@ -255,30 +225,29 @@ minLeft ::
   Int ->
   -- | \(r\)
   Int ->
-  -- | \(p\)
+  -- | \(p\): user predicate that works on \([i, r)\)
   (Int -> Bool) ->
-  -- | Minimum \(l' (l' \ge l)\) where \(p(i)\) holds for \(i \in [l', r)\)
+  -- | Minimum \(l_{\mathrm{min}}(l_{\mathrm{min}} \ge l)\) where \(p[i, r)\) holds for
+  -- \(i \in [l_{\mathrm{min}}, r]\)
   Int
 minLeft l r p = runIdentity $ minLeftM l r (pure . p)
 
 -- | \(O(\log n)\) Monadic variant of `minLeft`.
 --
--- __Known bug__: user function \(p\) takes __closed intervals__ \([l, r]\).
---
 -- @since 1.3.0.0
 {-# INLINE minLeftM #-}
 minLeftM :: (HasCallStack, Monad m) => Int -> Int -> (Int -> m Bool) -> m Int
-minLeftM l r p = (+ 1) <$> bisectImpl r (l - 1) p
+minLeftM l r = bisectImpl r (l - 1)
   where
     !_ = ACIA.checkInterval "AtCoder.Extra.Bisect.minLeftM" l r
 
--- | Takes an open interval (l, r) or (r, l).
+-- | Takes [l, r + 1) on `maxRight` or [r, l - 1) on `minLeft`.
 {-# INLINE bisectImpl #-}
 bisectImpl :: (HasCallStack, Monad m) => Int -> Int -> (Int -> m Bool) -> m Int
 bisectImpl l0 r0 p = inner l0 r0
   where
     inner l r
-      | abs (r - l) <= 1 = pure r
+      | abs (r - l) <= 1 = pure l
       | otherwise =
           p mid >>= \case
             True -> inner mid r

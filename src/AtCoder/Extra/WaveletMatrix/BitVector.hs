@@ -151,7 +151,7 @@ selectKthIn0 ::
 selectKthIn0 bv l r k
   | k < 0 || nZeros <= k = Nothing
   -- note that `rank0` takes exclusive index
-  | otherwise = Just . maxRight l r $ \i -> rank0 bv (i + 1) - rankL0 < k + 1
+  | otherwise = Just . maxRight l r $ \i -> rank0 bv i - rankL0 < k + 1
   where
     nZeros = rank0 bv r - rankL0
     rankL0 = rank0 bv l
@@ -175,7 +175,7 @@ selectKthIn1 ::
 selectKthIn1 bv l r k
   | k < 0 || nOnes <= k = Nothing
   -- note that `rank1` takes exclusive index
-  | otherwise = Just . maxRight l r $ \i -> rank1 bv (i + 1) - rankL1 < k + 1
+  | otherwise = Just . maxRight l r $ \i -> rank1 bv i - rankL1 < k + 1
   where
     nOnes = rank1 bv r - rankL1
     rankL1 = rank1 bv l

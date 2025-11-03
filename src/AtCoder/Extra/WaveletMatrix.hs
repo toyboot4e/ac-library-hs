@@ -62,7 +62,7 @@ module AtCoder.Extra.WaveletMatrix
   )
 where
 
-import AtCoder.Extra.Bisect
+import AtCoder.Extra.Bisect (lowerBound)
 import AtCoder.Extra.WaveletMatrix.Raw qualified as Rwm
 import Control.Monad
 import Data.Vector.Algorithms.Intro qualified as VAI

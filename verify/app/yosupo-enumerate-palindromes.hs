@@ -25,13 +25,13 @@ main = do
             -- \| . . .
             let i = i0 `div` 2
             let maxLen = min i (n - 1 - i)
-            d <- max 0 . subtract 1 <$> maxRightM 0 (maxLen + 1) (testAt i)
+            d <- max 0 . subtract 1 <$> maxRightM 0 (maxLen + 1) (testAt i . pred)
             pure $ 2 * d + 1
         | otherwise = do
             -- .|. . .
             let i = i0 `div` 2
             let maxLen = min (i + 1) (n - (i + 1))
-            d <- max 0 . subtract 1 <$> maxRightM 0 (maxLen + 1) (testMid i)
+            d <- max 0 . subtract 1 <$> maxRightM 0 (maxLen + 1) (testMid i . pred)
             pure $ 2 * d
         where
           -- \| . j.
