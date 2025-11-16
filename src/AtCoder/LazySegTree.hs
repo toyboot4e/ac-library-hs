@@ -14,9 +14,13 @@
 -- - Acting the map \(f\in F\) (cf. \(x = f(x)\)) on all the elements of an interval
 -- - Calculating the product of the elements of an interval
 --
--- In Haskell types, \(F\) is a `SegAct` (@'segAct' f@) and \(S\) is a `Monoid`. For simplicity, in
--- this document, we assume that the relevant methods work in constant time. If these work in
--- \(O(T)\) time, each time complexity appear in this document is multiplied by \(O(T)\).
+-- In Haskell types, \(F\) is a `SegAct` (@'segAct' f@) and \(S\) is a `Monoid`. You would want to
+-- look into @AtCoder.Extra.Monoid@ for builtin monoid action types. For example, there's no
+-- implementation of @SegAct (Sum Int) (Sum Int)@, but you have @SegAct (RangeAdd Int) (Sum Int)@.
+--
+-- For simplicity, in this document, we assume that the relevant methods work in constant time. If
+-- these work in \(O(T)\) time, each time complexity appear in this document is multiplied by
+-- \(O(T)\).
 --
 -- ==== __Example__
 -- Here we'll use `AtCoder.Extra.Monoid.Affine1` as a monoid action \(F\) and `Data.Semigroup.Sum`
@@ -66,6 +70,7 @@
 --
 -- ==== Tips
 --
+-- - See @AtCoder.Extra.Monoid@ for builtin monoid action types.
 -- - `prod` returns \(a_l \cdot a_{l + 1} \cdot .. \cdot a_{r - 1}\). If you need \(a_{r - 1} \cdot a_{r - 2} \cdot .. \cdot a_{l}\),
 -- wrap your monoid in `Data.Monoid.Dual`.
 -- - If you ever need to store boxed types to `LazySegTree`, wrap it in @Data.Vector.Unboxed.DoNotUnboxStrict@
@@ -133,7 +138,7 @@ import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
 -- | Typeclass reprentation of the `LazySegTree` properties. User can implement either `segAct` or
--- `segActWithLength`.
+-- `segActWithLength`. See @AtCoder.Extra.Monoid@ for builtin monoid action types.
 --
 -- Instances should satisfy the follwing properties:
 --
@@ -150,7 +155,7 @@ import Prelude hiding (read)
 -- order is important for non-commutative monoid implementations.
 --
 -- ==== __Example instance__
--- Take `AtCoder.Extra.Monoid.Affine1` as an example of type \(F\).
+-- Take `AtCoder.Extra.Monoid.Affine1` as an example of type \(F\) instance.
 --
 -- @
 -- {-# LANGUAGE TypeFamilies #-}
