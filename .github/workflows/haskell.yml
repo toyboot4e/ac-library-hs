@@ -153,8 +153,11 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Install setuptools # for `pkg_resources` for `oj-verify`
+        run: pip3 install setuptools
+
       - name: Install oj-verify
-        run: pip3 install -U online-judge-verify-helper
+        run: pip3 install online-judge-verify-helper
 
       # TODO: cache `~/.cache/online-judge-tools/library-checker-problems/`
       # TODO: cache `.verify-helper/cache/`
