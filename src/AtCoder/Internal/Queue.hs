@@ -4,9 +4,9 @@
 --
 -- ==== __Example__
 -- >>> import AtCoder.Internal.Queue qualified as Q
--- >>> que <- Q.new @_ @Int 3
+-- >>> que <- Q.new @_ @Int 4
 -- >>> Q.capacity que
--- 3
+-- 4
 --
 -- >>> Q.pushBack que 0 -- [0  _  _  _]
 -- >>> Q.pushBack que 1 -- [0, 1  _  _]
@@ -109,8 +109,21 @@
 -- >>> Q.popBack que    -- [0, 1  _  _]
 -- Just 2
 --
+-- >>> Q.pushBack que 2 -- [0, 1, 2  _]
+-- >>> Q.pushBack que 3 -- [0, 1, 2, 3]
+-- >>> Q.swap que 0 2   -- [2, 1, 0, 3]
 -- >>> Q.freeze que
--- [0,1]
+-- [2,1,0,3]
+--
+-- >>> Q.swapDelete que 1 --  [2, 3, 0  _  _]
+-- 1
+--
+-- >>> Q.freeze que
+-- [2,3,0]
+--
+-- >>> Q.swapDelete_ que 0 --  [0, 3,  _  _]
+-- >>> Q.freeze que
+-- [0,3]
 --
 -- >>> Q.clear que
 -- >>> Q.freeze que
@@ -157,6 +170,11 @@ module AtCoder.Internal.Queue
     modifyFrontM,
     modifyBack,
     modifyBackM,
+
+    -- ** Swap
+    swap,
+    swapDelete,
+    swapDelete_,
 
     -- ** Clear (reset)
     clear,
@@ -367,6 +385,27 @@ modifyBackM Queue {..} f i = do
   let !_ = ACIA.checkIndex "AtCoder.Internal.Queue.modifyBackM" i (r - l)
   VGM.modifyM vecQ f (r - 1 - i)
 
+-- | \(O(1)\) Swaps two elements.
+--
+-- @since 1.6.0.0
+{-# INLINE swap #-}
+swap :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> Int -> Int -> m ()
+swap que i j = stToPrim $ swapST que i j
+
+-- | \(O(1)\) Swaps an element and the last element, and the pops it.
+--
+-- @since 1.6.0.0
+{-# INLINE swapDelete #-}
+swapDelete :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> Int -> m a
+swapDelete que i = stToPrim $ swapDeleteST que i
+
+-- | \(O(1)\) Swaps an element and the last element and deletes it.
+--
+-- @since 1.6.0.0
+{-# INLINE swapDelete_ #-}
+swapDelete_ :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> Int -> m ()
+swapDelete_ que i = stToPrim $ swapDeleteST_ que i
+
 -- | \(O(1)\) Sets the `length` to zero.
 --
 -- @since 1.0.0.0
@@ -503,6 +542,36 @@ readMaybeBackST Queue {..} i = do
   if 0 <= i && i < r - l
     then Just <$> VGM.read vecQ (r - 1 - i)
     else pure Nothing
+
+{-# INLINEABLE swapST #-}
+swapST :: (HasCallStack, VU.Unbox a) => Queue s a -> Int -> Int -> ST s ()
+swapST Queue {..} i j = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  let !_ = ACIA.checkIndexBounded "AtCoder.Internal.Queue.swapST" i l r
+  let !_ = ACIA.checkIndexBounded "AtCoder.Internal.Queue.swapST" j l r
+  VGM.swap vecQ (l + i) (l + j)
+
+{-# INLINEABLE swapDeleteST #-}
+swapDeleteST :: (HasCallStack, VU.Unbox a) => Queue s a -> Int -> ST s a
+swapDeleteST Queue {..} i = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  let !_ = ACIA.checkIndexBounded "AtCoder.Internal.Queue.swapDeleteST" i l r
+  xr <- VGM.read vecQ (r - 1)
+  xi <- VGM.exchange vecQ (l + i) xr
+  VGM.unsafeWrite posQ 1 (r - 1)
+  pure xi
+
+{-# INLINEABLE swapDeleteST_ #-}
+swapDeleteST_ :: (HasCallStack, VU.Unbox a) => Queue s a -> Int -> ST s ()
+swapDeleteST_ Queue {..} i = do
+  l <- VGM.unsafeRead posQ 0
+  r <- VGM.unsafeRead posQ 1
+  let !_ = ACIA.checkIndexBounded "AtCoder.Internal.Queue.swapDeleteST_" i l r
+  xr <- VGM.read vecQ (r - 1)
+  VGM.write vecQ (l + i) xr
+  VGM.unsafeWrite posQ 1 (r - 1)
 
 {-# INLINEABLE freezeST #-}
 freezeST :: (VU.Unbox a) => Queue s a -> ST s (VU.Vector a)
