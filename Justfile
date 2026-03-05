@@ -56,6 +56,15 @@ format:
 [private]
 alias fmt := format
 
+# runs cabal-gild
+format-cabal:
+    #!/usr/bin/env bash
+    TEMP_FILE=$(mktemp)
+    cat ac-library-hs.cabal | cabal-gild > $TEMP_FILE
+    cat $TEMP_FILE > ac-library-hs.cabal
+    rm $TEMP_FILE
+    # treefmt .
+
 # rebuilds the project and measures the compile time (nix flakes required)
 measure:
     cabal clean && cabal build ac-library-hs --ghc-options "-ddump-to-file -ddump-timings" && nix run nixpkgs#time-ghc-modules
