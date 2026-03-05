@@ -44,11 +44,11 @@
 -- >>> Q.writeFront que 1 20 -- [_ 10, 20 _]
 --
 -- >>> Q.writeFront que (-1) 777
--- *** Exception: AtCoder.Internal.Queue.modifyFrontM: index out of bounds
+-- *** Exception: AtCoder.Internal.Queue.modifyFrontM: given invalid index `-1` over length `2`
 -- ...
 --
 -- >>> Q.writeFront que 2 777
--- *** Exception: AtCoder.Internal.Queue.modifyFrontM: index out of bounds
+-- *** Exception: AtCoder.Internal.Queue.modifyFrontM: given invalid index `2` over length `2`
 -- ...
 --
 -- >>> Q.readBack que 0
@@ -75,11 +75,11 @@
 -- >>> Q.writeBack que 1 100
 --
 -- >>> Q.writeBack que (-1) 777
--- *** Exception: AtCoder.Internal.Queue.modifyBackM: index out of bounds
+-- *** Exception: AtCoder.Internal.Queue.modifyBackM: given invalid index `-1` over length `2`
 -- ...
 --
 -- >>> Q.writeBack que 2 777
--- *** Exception: AtCoder.Internal.Queue.modifyBackM: index out of bounds
+-- *** Exception: AtCoder.Internal.Queue.modifyBackM: given invalid index `2` over length `2`
 -- ...
 --
 -- >>> Q.pushFront que 10 -- [10, 100, 200  _]
@@ -353,7 +353,7 @@ modifyFrontM :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a
 modifyFrontM Queue {..} f i = do
   l <- VGM.unsafeRead posQ 0
   r <- VGM.unsafeRead posQ 1
-  let !_ = ACIA.runtimeAssert (0 <= i && i < r - l) "AtCoder.Internal.Queue.modifyFrontM: index out of bounds"
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Queue.modifyFrontM" i (r - l)
   VGM.modifyM vecQ f (l + i)
 
 -- | \(O(1)\) Given user function \(f\), modifies the \(k\)-th value from the last element with it.
@@ -364,7 +364,7 @@ modifyBackM :: (HasCallStack, PrimMonad m, VU.Unbox a) => Queue (PrimState m) a 
 modifyBackM Queue {..} f i = do
   l <- VGM.unsafeRead posQ 0
   r <- VGM.unsafeRead posQ 1
-  let !_ = ACIA.runtimeAssert (0 <= i && i < r - l) "AtCoder.Internal.Queue.modifyBackM: index out of bounds"
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Queue.modifyBackM" i (r - l)
   VGM.modifyM vecQ f (r - 1 - i)
 
 -- | \(O(1)\) Sets the `length` to zero.
