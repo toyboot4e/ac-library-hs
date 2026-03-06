@@ -77,11 +77,11 @@ instance (QC.Arbitrary a) => QC.Arbitrary (RangeAdd a) where
   arbitrary = RangeAdd <$> QC.arbitrary
 
 -- orphan instance
-instance (QC.Arbitrary a, Monoid a) => QC.Arbitrary (RangeSet a) where
+instance (QC.Arbitrary a, Monoid a) => QC.Arbitrary (RangeWrite a) where
   arbitrary = do
     b <- (== 1) <$> QC.chooseInt (1, 30)
     if b
-      then RangeSet . (Bit True,) <$> QC.arbitrary
+      then RangeWrite . (Bit True,) <$> QC.arbitrary
       else pure mempty
 
 -- orphan instance
@@ -197,37 +197,37 @@ tests =
           ]
       ],
     testGroup
-      "RangeSet"
-      [ laws @(RangeSet (Sum Int))
+      "RangeWrite"
+      [ laws @(RangeWrite (Sum Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
-        laws @(RangeSet (Sum Int), Sum Int)
+        laws @(RangeWrite (Sum Int), Sum Int)
           [ segActLaw
           ],
-        laws @(RangeSet (Product Int))
+        laws @(RangeWrite (Product Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
-        laws @(RangeSet (Product Int), Product Int)
+        laws @(RangeWrite (Product Int), Product Int)
           [ segActLaw
           ],
-        laws @(RangeSet (Max Int))
+        laws @(RangeWrite (Max Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
-        laws @(RangeSet (Max Int), Max Int)
+        laws @(RangeWrite (Max Int), Max Int)
           [ segActLaw
           ],
-        laws @(RangeSet (Min Int))
+        laws @(RangeWrite (Min Int))
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
           ],
-        laws @(RangeSet (Min Int), Min Int)
+        laws @(RangeWrite (Min Int), Min Int)
           [ segActLaw
           ]
       ],

@@ -1,4 +1,4 @@
-import AtCoder.Extra.Monoid (RangeSet (..))
+import AtCoder.Extra.Monoid (RangeWrite (..))
 import AtCoder.LazySegTree qualified as LSeg
 import Data.Bit (Bit (..))
 import Data.Semigroup (Sum (..))
@@ -18,7 +18,7 @@ main = do
   seg <- LSeg.build $ VU.replicate n (Sum (0 :: Int))
   res <- (`VU.mapMaybeM` qs) $ \case
     (0, !l, !r, !x) -> do
-      LSeg.applyIn seg l (r + 1) $ RangeSet (Bit True, Sum x)
+      LSeg.applyIn seg l (r + 1) $ RangeWrite (Bit True, Sum x)
       pure Nothing
     (1, !l, !r, !_) -> do
       Sum x <- LSeg.prod seg l (r + 1)
