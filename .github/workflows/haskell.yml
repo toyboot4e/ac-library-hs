@@ -151,10 +151,10 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.11'
 
       - name: Install oj-verify
-        run: pip3 install online-judge-verify-helper importlib-resources
+        run: pip3 install online-judge-verify-helper
 
       # TODO: cache `~/.cache/online-judge-tools/library-checker-problems/`
       # TODO: cache `.verify-helper/cache/`
