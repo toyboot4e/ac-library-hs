@@ -1,11 +1,10 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | A disjoint set union with commutative semigroup (not necessary a monoid) values associated with
--- each group.
+-- | A disjoint set union with commutative semigroup values associated with each group.
 --
 -- ==== __Example__
 --
--- >>> import AtCoder.Extra.DsuMonoid qualified as Dm
+-- >>> import AtCoder.Extra.DsuSemigroup qualified as Dm
 -- >>> import Data.Semigroup (Sum (..))
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> dsu <- Dm.build $ VU.generate 4 Sum
@@ -24,10 +23,10 @@
 -- >>> Dm.read dsu 0
 -- Sum {getSum = 3}
 --
--- @since 1.5.3.0
-module AtCoder.Extra.DsuMonoid
+-- @since 1.6.0.0
+module AtCoder.Extra.DsuSemigroup
   ( -- * Disjoint set union
-    DsuMonoid (dsuDm, mDm),
+    DsuSemigroup (dsuDm, mDm),
 
     -- * Constructors
     new,
@@ -47,7 +46,7 @@ module AtCoder.Extra.DsuMonoid
     size,
     groups,
 
-    -- * Monoid values
+    -- * Semigroup values
     read,
     write,
     modify,
@@ -68,21 +67,21 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
--- | A disjoint set union with commutative monoid values associated with each group.
+-- | A disjoint set union with commutative semigroup values associated with each group.
 --
--- @since 1.5.3.0
-data DsuMonoid s a = DsuMonoid
+-- @since 1.6.0.0
+data DsuSemigroup s a = DsuSemigroup
   { -- | The original DSU.
     --
-    -- @since 1.5.3.0
+    -- @since 1.6.0.0
     dsuDm :: {-# UNPACK #-} !(Dsu.Dsu s),
-    -- | Commutative monoid values for each group.
+    -- | Commutative semigroup values for each group.
     --
-    -- @since 1.5.3.0
+    -- @since 1.6.0.0
     mDm :: !(VUM.MVector s a)
   }
 
--- | Creates an undirected graph with \(n\) vertices and \(0\) edges.
+-- | Creates an undirected graph with \(n\) vertices and \(0\) edges. Requires @Monoid@ constraint.
 --
 -- ==== Constraints
 -- - \(0 \le n\)
@@ -90,12 +89,12 @@ data DsuMonoid s a = DsuMonoid
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINE new #-}
-new :: (PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (DsuMonoid (PrimState m) a)
+new :: (PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (DsuSemigroup (PrimState m) a)
 new n
   | n >= 0 = build $ VU.replicate n mempty
-  | otherwise = error $ "AtCoder.Extra.DsuMonoid: given negative size (`" ++ show n ++ "`)"
+  | otherwise = error $ "AtCoder.Extra.DsuSemigroup: given negative size (`" ++ show n ++ "`)"
 
 -- | Creates an undirected graph with \(n\) vertices and \(0\) edges.
 --
@@ -105,13 +104,13 @@ new n
 -- ==== Complexity
 -- - \(O(n)\)
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINE build #-}
-build :: (PrimMonad m, Semigroup a, VU.Unbox a) => VU.Vector a -> m (DsuMonoid (PrimState m) a)
+build :: (PrimMonad m, Semigroup a, VU.Unbox a) => VU.Vector a -> m (DsuSemigroup (PrimState m) a)
 build ms = stToPrim $ do
   dsuDm <- Dsu.new $ VU.length ms
   mDm <- VU.thaw ms
-  pure $ DsuMonoid {..}
+  pure $ DsuSemigroup {..}
 
 -- | Adds an edge \((a, b)\). If the vertices \(a\) and \(b\) are in the same connected component, it
 -- returns the representative (`leader`) of this connected component. Otherwise, it returns the
@@ -124,10 +123,10 @@ build ms = stToPrim $ do
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINEABLE merge #-}
-merge :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> Int -> m Int
-merge DsuMonoid {..} a b = stToPrim $ do
+merge :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => DsuSemigroup (PrimState m) a -> Int -> Int -> m Int
+merge DsuSemigroup {..} a b = stToPrim $ do
   r1 <- Dsu.leader dsuDm a
   r2 <- Dsu.leader dsuDm b
   if r1 == r2
@@ -149,10 +148,10 @@ merge DsuMonoid {..} a b = stToPrim $ do
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINEABLE mergeMaybe #-}
-mergeMaybe :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> Int -> m (Maybe Int)
-mergeMaybe DsuMonoid {..} a b = stToPrim $ do
+mergeMaybe :: (HasCallStack, PrimMonad m, Semigroup a, VU.Unbox a) => DsuSemigroup (PrimState m) a -> Int -> Int -> m (Maybe Int)
+mergeMaybe DsuSemigroup {..} a b = stToPrim $ do
   r1 <- Dsu.leader dsuDm a
   r2 <- Dsu.leader dsuDm b
   if r1 == r2
@@ -173,9 +172,9 @@ mergeMaybe DsuMonoid {..} a b = stToPrim $ do
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINE merge_ #-}
-merge_ :: (PrimMonad m, Semigroup a, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> Int -> m ()
+merge_ :: (PrimMonad m, Semigroup a, VU.Unbox a) => DsuSemigroup (PrimState m) a -> Int -> Int -> m ()
 merge_ dsu a b = do
   _ <- merge dsu a b
   pure ()
@@ -189,9 +188,9 @@ merge_ dsu a b = do
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINE same #-}
-same :: (HasCallStack, PrimMonad m) => DsuMonoid (PrimState m) a -> Int -> Int -> m Bool
+same :: (HasCallStack, PrimMonad m) => DsuSemigroup (PrimState m) a -> Int -> Int -> m Bool
 same dsu = Dsu.same (dsuDm dsu)
 
 -- | Returns the representative of the connected component that contains the vertex \(a\).
@@ -202,9 +201,9 @@ same dsu = Dsu.same (dsuDm dsu)
 -- ==== Complexity
 -- - \(O(\alpha(n))\) amortized
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINE leader #-}
-leader :: (HasCallStack, PrimMonad m) => DsuMonoid (PrimState m) a -> Int -> m Int
+leader :: (HasCallStack, PrimMonad m) => DsuSemigroup (PrimState m) a -> Int -> m Int
 leader dsu = Dsu.leader (dsuDm dsu)
 
 -- | Returns whether the vertex \(a\) is the representative of the connected component.
@@ -217,7 +216,7 @@ leader dsu = Dsu.leader (dsuDm dsu)
 --
 -- @since 1.6.0.0
 {-# INLINE isLeader #-}
-isLeader :: (HasCallStack, PrimMonad m) => DsuMonoid (PrimState m) a -> Int -> m Bool
+isLeader :: (HasCallStack, PrimMonad m) => DsuSemigroup (PrimState m) a -> Int -> m Bool
 isLeader dsu v = do
   l <- Dsu.leader (dsuDm dsu) v
   pure $ l == v
@@ -230,9 +229,9 @@ isLeader dsu v = do
 -- ==== Complexity
 -- - \(O(\alpha(n))\)
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINE size #-}
-size :: (HasCallStack, PrimMonad m) => DsuMonoid (PrimState m) a -> Int -> m Int
+size :: (HasCallStack, PrimMonad m) => DsuSemigroup (PrimState m) a -> Int -> m Int
 size dsu = Dsu.size (dsuDm dsu)
 
 -- | \O(n)\) Divides the graph into connected components and returns the vector of them.
@@ -240,18 +239,18 @@ size dsu = Dsu.size (dsuDm dsu)
 -- More precisely, it returns a vector of the "vector of the vertices in a connected component".
 -- Both of the orders of the connected components and the vertices are undefined.
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINE groups #-}
-groups :: (PrimMonad m) => DsuMonoid (PrimState m) a -> m (V.Vector (VU.Vector Int))
+groups :: (PrimMonad m) => DsuSemigroup (PrimState m) a -> m (V.Vector (VU.Vector Int))
 groups dsu = Dsu.groups (dsuDm dsu)
 
 -- | \(O(1)\) Reads the group value of the \(k\)-th node. \(k\) is automatically resolved to the
 -- leader vertex.
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINE read #-}
-read :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> m a
-read DsuMonoid {..} i = do
+read :: (PrimMonad m, VU.Unbox a) => DsuSemigroup (PrimState m) a -> Int -> m a
+read DsuSemigroup {..} i = do
   VGM.read mDm =<< Dsu.leader dsuDm i
 
 -- | \(O(1)\) Writes to the group value of the \(k\)-th node. \(k\) is automatically resolved to the
@@ -259,8 +258,8 @@ read DsuMonoid {..} i = do
 --
 -- @since 1.6.0.0
 {-# INLINE write #-}
-write :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> a -> m ()
-write DsuMonoid {..} i x = do
+write :: (PrimMonad m, VU.Unbox a) => DsuSemigroup (PrimState m) a -> Int -> a -> m ()
+write DsuSemigroup {..} i x = do
   i' <- Dsu.leader dsuDm i
   VGM.write mDm i' x
 
@@ -269,8 +268,8 @@ write DsuMonoid {..} i x = do
 --
 -- @since 1.6.0.0
 {-# INLINE modify #-}
-modify :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> (a -> a) -> Int -> m ()
-modify DsuMonoid {..} f i = do
+modify :: (PrimMonad m, VU.Unbox a) => DsuSemigroup (PrimState m) a -> (a -> a) -> Int -> m ()
+modify DsuSemigroup {..} f i = do
   i' <- Dsu.leader dsuDm i
   VGM.modify mDm f i'
 
@@ -279,39 +278,39 @@ modify DsuMonoid {..} f i = do
 --
 -- @since 1.6.0.0
 {-# INLINE modifyM #-}
-modifyM :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> (a -> m a) -> Int -> m ()
-modifyM DsuMonoid {..} f i = do
+modifyM :: (PrimMonad m, VU.Unbox a) => DsuSemigroup (PrimState m) a -> (a -> m a) -> Int -> m ()
+modifyM DsuSemigroup {..} f i = do
   i' <- Dsu.leader dsuDm i
   VGM.modifyM mDm f i'
 
 -- | \(O(1)\) Reads the \(k\)-th node.
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINE unsafeRead #-}
-unsafeRead :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> m a
-unsafeRead DsuMonoid {..} i = do
+unsafeRead :: (PrimMonad m, VU.Unbox a) => DsuSemigroup (PrimState m) a -> Int -> m a
+unsafeRead DsuSemigroup {..} i = do
   VGM.read mDm i
 
 -- | \(O(1)\) Writes to the \(k\)-th node.
 --
--- @since 1.5.3.0
+-- @since 1.6.0.0
 {-# INLINE unsafeWrite #-}
-unsafeWrite :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> Int -> a -> m ()
-unsafeWrite DsuMonoid {..} i x = do
+unsafeWrite :: (PrimMonad m, VU.Unbox a) => DsuSemigroup (PrimState m) a -> Int -> a -> m ()
+unsafeWrite DsuSemigroup {..} i x = do
   VGM.write mDm i x
 
 -- | \(O(1)\) Modifies the value of the \(k\)-th node.
 --
 -- @since 1.6.0.0
 {-# INLINE unsafeModify #-}
-unsafeModify :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> (a -> a) -> Int -> m ()
-unsafeModify DsuMonoid {..} f i = do
+unsafeModify :: (PrimMonad m, VU.Unbox a) => DsuSemigroup (PrimState m) a -> (a -> a) -> Int -> m ()
+unsafeModify DsuSemigroup {..} f i = do
   VGM.modify mDm f i
 
 -- | \(O(1)\) Modifies the value of the \(k\)-th node.
 --
 -- @since 1.6.0.0
 {-# INLINE unsafeModifyM #-}
-unsafeModifyM :: (PrimMonad m, VU.Unbox a) => DsuMonoid (PrimState m) a -> (a -> m a) -> Int -> m ()
-unsafeModifyM DsuMonoid {..} f i = do
+unsafeModifyM :: (PrimMonad m, VU.Unbox a) => DsuSemigroup (PrimState m) a -> (a -> m a) -> Int -> m ()
+unsafeModifyM DsuSemigroup {..} f i = do
   VGM.modifyM mDm f i

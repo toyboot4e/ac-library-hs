@@ -1,7 +1,7 @@
 -- | Disjoint set union tests.
-module Tests.Extra.DsuMonoid (tests) where
+module Tests.Extra.DsuSemigroup (tests) where
 
-import AtCoder.Extra.DsuMonoid qualified as Dsu
+import AtCoder.Extra.DsuSemigroup qualified as Dsu
 import Data.Foldable
 import Data.Semigroup (Sum (..))
 import Data.Vector qualified as V

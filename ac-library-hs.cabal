@@ -56,7 +56,7 @@ library
     AtCoder.Dsu
     AtCoder.Extra.AhoCorasick
     AtCoder.Extra.Bisect
-    AtCoder.Extra.DsuMonoid
+    AtCoder.Extra.DsuSemigroup
     AtCoder.Extra.DynLazySegTree
     AtCoder.Extra.DynLazySegTree.Persistent
     AtCoder.Extra.DynLazySegTree.Raw
@@ -150,7 +150,7 @@ test-suite ac-library-hs-test
     Tests.Dsu
     Tests.Extra.AhoCorasick
     Tests.Extra.Bisect
-    Tests.Extra.DsuMonoid
+    Tests.Extra.DsuSemigroup
     Tests.Extra.DynLazySegTree
     Tests.Extra.DynLazySegTree.Persistent
     Tests.Extra.DynSegTree
