@@ -74,6 +74,7 @@ module AtCoder.Extra.IntSet
   )
 where
 
+import AtCoder.Extra.Vector qualified as ACEV
 import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad (unless, void)
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
@@ -281,23 +282,35 @@ keys is = stToPrim $ keysST is
 -- -------------------------------------------------------------------------------------------------
 
 {-# INLINEABLE newST #-}
-newST :: Int -> ST s (IntSet s)
+newST :: forall s. Int -> ST s (IntSet s)
 newST capacityIS = do
-  vecIS <-
-    V.unfoldrExactNM
-      (max 1 logSize)
-      ( \len -> do
-          let !len' = (len + wordSize - 1) `div` wordSize
-          (,len') <$> VUM.replicate len' 0
-      )
-      capacityIS
+  let lens :: VU.Vector Int
+      lens =
+        VU.unfoldrExactN
+          (max 1 logSize)
+          ( \len ->
+              let !len' = (len + wordSize - 1) .>>. 6
+               in (len', len')
+          )
+          capacityIS
+  internalVec <- VUM.replicate (VU.sum lens) (0 :: Int)
+  let vecIS :: V.Vector (VUM.MVector s Int)
+      vecIS =
+        snd
+          . ACEV.mapAccumL
+            ( \vec len ->
+                let (!seg, !rest) = VGM.splitAt len vec
+                 in (rest, seg)
+            )
+            internalVec
+          $ VU.convert lens
   sizeIS <- VUM.replicate 1 (0 :: Int)
   pure IntSet {..}
   where
     (!_, !logSize) =
       until
         ((<= 1) . fst)
-        (bimap ((`div` wordSize) . (+ (wordSize - 1))) (+ 1))
+        (bimap ((.>>. 6) . (+ (wordSize - 1))) (+ 1))
         (capacityIS, 0)
 
 {-# INLINEABLE buildST #-}
