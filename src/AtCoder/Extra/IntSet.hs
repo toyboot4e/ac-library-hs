@@ -82,6 +82,8 @@ import Data.Bifunctor (bimap)
 import Data.Bits
   ( Bits (clearBit, setBit, testBit),
     FiniteBits (countLeadingZeros, countTrailingZeros),
+    unsafeShiftR,
+    (.&.),
     (.<<.),
     (.>>.),
   )
@@ -309,7 +311,8 @@ buildST n vs = do
 memberST :: IntSet s -> Int -> ST s Bool
 memberST IntSet {..} k
   | ACIA.testIndex k capacityIS = do
-      let (!q, !r) = k `divMod` wordSize
+      let !q = k `unsafeShiftR` 6
+      let !r = k .&. 63
       (`testBit` r) <$> VGM.unsafeRead (VG.unsafeHead vecIS) q
   | otherwise = pure False
 
@@ -337,7 +340,8 @@ lookupGEST IntSet {..} i0
                   (i + lsbOf d)
                   (V.unsafeBackpermute vecIS (V.enumFromStepN (h - 1) (-1) h))
       where
-        (!q, !r) = i `divMod` wordSize
+        !q = i `unsafeShiftR` 6
+        !r = i .&. 63
 
 {-# INLINEABLE lookupGTST #-}
 lookupGTST :: IntSet s -> Int -> ST s (Maybe Int)
@@ -366,7 +370,8 @@ lookupLEST IntSet {..} i0
                   (i - countLeadingZeros d)
                   (V.unsafeBackpermute vecIS (V.enumFromStepN (h - 1) (-1) h))
       where
-        (!q, !r) = i `divMod` wordSize
+        !q = i `unsafeShiftR` 6
+        !r = i .&. 63
 
 {-# INLINEABLE lookupLTST #-}
 lookupLTST :: IntSet s -> Int -> ST s (Maybe Int)
@@ -388,7 +393,8 @@ insertST is@IntSet {..} k = do
     VUM.unsafeModify sizeIS (+ 1) 0
     V.foldM'_
       ( \i vec -> do
-          let (!q, !r) = i `divMod` wordSize
+          let !q = i `unsafeShiftR` 6
+          let !r = i .&. 63
           VGM.unsafeModify vec (`setBit` r) q
           pure q
       )
@@ -406,7 +412,8 @@ deleteST is@IntSet {..} k = do
       VUM.unsafeModify sizeIS (subtract 1) 0
       V.foldM'_
         ( \(!b, !i) vec -> do
-            let (!q, !r) = i `divMod` wordSize
+            let !q = i `unsafeShiftR` 6
+            let !r = i .&. 63
             -- TODO: early return is possible
             unless b $ do
               VGM.unsafeModify vec (`clearBit` r) q
