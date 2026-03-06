@@ -151,7 +151,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.11'
 
       - name: Install oj-verify
         run: pip3 install -U online-judge-verify-helper
