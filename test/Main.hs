@@ -26,6 +26,9 @@ import Tests.Extra.Math qualified
 import Tests.Extra.Math.Montgomery64 qualified
 import Tests.Extra.ModInt64 qualified
 import Tests.Extra.Monoid qualified
+import Tests.Extra.Monoid.Top2 qualified
+import Tests.Extra.Monoid.Top3 qualified
+import Tests.Extra.Monoid.Top4 qualified
 import Tests.Extra.MultiSet qualified
 import Tests.Extra.Pdsu qualified
 import Tests.Extra.SegTree2d qualified
@@ -91,6 +94,9 @@ main =
             testGroup "Math.Montgomery64" Tests.Extra.Math.Montgomery64.tests,
             testGroup "ModInt64" Tests.Extra.ModInt64.tests,
             testGroup "Monoid" Tests.Extra.Monoid.tests,
+            testGroup "Monoid.Top2" Tests.Extra.Monoid.Top2.tests,
+            testGroup "Monoid.Top3" Tests.Extra.Monoid.Top3.tests,
+            testGroup "Monoid.Top4" Tests.Extra.Monoid.Top4.tests,
             testGroup "MultiSet" Tests.Extra.MultiSet.tests,
             testGroup "Pdsu" Tests.Extra.Pdsu.tests,
             testGroup "SegTree2d" Tests.Extra.SegTree2d.tests,

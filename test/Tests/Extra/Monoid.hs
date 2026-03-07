@@ -118,6 +118,30 @@ instance QC.Arbitrary (Min Int) where
 instance QC.Arbitrary ModInt.ModInt998244353 where
   arbitrary = ModInt.new <$> QC.arbitrary
 
+-- orphan instance
+instance (QC.Arbitrary a, Ord a) => QC.Arbitrary (Top2 a) where
+  arbitrary = do
+    a <- QC.arbitrary
+    b <- QC.arbitrary
+    pure $ Top2 (a, b)
+
+-- orphan instance
+instance (QC.Arbitrary a, Ord a) => QC.Arbitrary (Top3 a) where
+  arbitrary = do
+    a <- QC.arbitrary
+    b <- QC.arbitrary
+    c <- QC.arbitrary
+    pure $ Top3 (a, b, c)
+
+-- orphan instance
+instance (QC.Arbitrary a, Ord a) => QC.Arbitrary (Top4 a) where
+  arbitrary = do
+    a <- QC.arbitrary
+    b <- QC.arbitrary
+    c <- QC.arbitrary
+    d <- QC.arbitrary
+    pure $ Top4 (a, b, c, d)
+
 prop_affineZero :: Affine1 (Sum Int) -> QC.Property
 prop_affineZero a =
   QC.conjoin
@@ -264,6 +288,30 @@ tests =
     testGroup
       "RollingHash"
       [ laws @(RollingHash 100 2305843009213693951)
+          [ QCC.semigroupLaws,
+            QCC.monoidLaws,
+            QCC.semigroupMonoidLaws
+          ]
+      ],
+    testGroup
+      "Top2"
+      [ laws @(Top2 Int)
+          [ QCC.semigroupLaws,
+            QCC.monoidLaws,
+            QCC.semigroupMonoidLaws
+          ]
+      ],
+    testGroup
+      "Top3"
+      [ laws @(Top2 Int)
+          [ QCC.semigroupLaws,
+            QCC.monoidLaws,
+            QCC.semigroupMonoidLaws
+          ]
+      ],
+    testGroup
+      "Top4"
+      [ laws @(Top2 Int)
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws

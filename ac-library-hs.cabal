@@ -84,6 +84,9 @@ library
     AtCoder.Extra.Monoid.RangeAdd
     AtCoder.Extra.Monoid.RangeWrite
     AtCoder.Extra.Monoid.RollingHash
+    AtCoder.Extra.Monoid.Top2
+    AtCoder.Extra.Monoid.Top3
+    AtCoder.Extra.Monoid.Top4
     AtCoder.Extra.Monoid.V2
     AtCoder.Extra.MultiSet
     AtCoder.Extra.Pdsu
@@ -170,6 +173,9 @@ test-suite ac-library-hs-test
     Tests.Extra.Math.Montgomery64
     Tests.Extra.ModInt64
     Tests.Extra.Monoid
+    Tests.Extra.Monoid.Top2
+    Tests.Extra.Monoid.Top3
+    Tests.Extra.Monoid.Top4
     Tests.Extra.MultiSet
     Tests.Extra.Pdsu
     Tests.Extra.SegTree2d
