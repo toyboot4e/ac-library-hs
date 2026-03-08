@@ -26,6 +26,15 @@ module AtCoder.Extra.Vector
     scanl1M,
     scanl1M',
 
+    -- ** Monadic folds and loops
+    forRM_,
+    iforRM_,
+    foldMapM',
+    foldrM',
+    foldrM'_,
+    ifoldrM',
+    ifoldrM'_,
+
     -- * Queries
     maxRangeSum,
     minRangeSum,
@@ -298,6 +307,127 @@ chunks len xs0 = V.unfoldrExactN n step xs0
   where
     n = (VG.length xs0 + len - 1) `div` len
     step xs = (VG.take len xs, VG.drop len xs)
+
+-- | /O(n)/ Monadic right loop.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.forRM_ (VU.fromList @Int [-3, 1, 2]) print
+-- 2
+-- 1
+-- -3
+--
+-- @since 1.6.0.0
+{-# INLINE forRM_ #-}
+forRM_ :: (VG.Vector v a, Monad m) =>  v a -> (a -> m ()) -> m ()
+forRM_ v f = loop (n - 1)
+  where
+    n = VG.length v
+    loop i
+      | i < 0 = pure ()
+      | otherwise = do
+          let a = VG.unsafeIndex v i
+          f a
+          loop (i - 1)
+
+-- Does not compile, due to monad type mismatch
+-- {-# INLINE forRM_ #-}
+-- forRM_ :: (VG.Vector v a, Monad m) => (a -> m ()) -> v a -> m ()
+-- forRM_ f v = BundleM.foldlM' (\() a -> f a) () $ VG.streamR v
+
+-- | /O(n)/ Monadic right loop.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.iforRM_ (VU.fromList @Int [-30, 10, 20]) (\i a -> putStrLn (show i ++ "," ++ show a))
+-- 2,20
+-- 1,10
+-- 0,-30
+--
+-- @since 1.6.0.0
+iforRM_ :: (VG.Vector v a, Monad m) => v a -> (Int -> a -> m ()) -> m ()
+iforRM_ v f = loop (n - 1)
+  where
+    n = VG.length v
+    loop i
+      | i < 0 = pure ()
+      | otherwise = do
+          let a = VG.unsafeIndex v i
+          f i a
+          loop (i - 1)
+
+-- It does not compile, due to monadic type mismatch in Bundle
+-- {-# INLINE iforRM_ #-}
+-- iforRM_ :: (VG.Vector v a, Monad m) => (Int -> a -> m ()) -> v a -> m ()
+-- iforRM_ f v =
+--   BundleM.foldlM' (\() (!i, !a) -> f i a) ()
+--     . Bundle.indexedR (VG.length v)
+--     $ VG.streamR v
+
+-- | /O(n)/ Map each element of the structure to a monoid and combine the results.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Semigroup (Sum (..))
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.foldMapM' (pure . Sum) (VU.fromList @Int [30, 10, 20])
+-- Sum {getSum = 60}
+--
+-- @since 1.6.0.0
+{-# INLINE foldMapM' #-}
+foldMapM' :: (Monoid m, Monad mo, VG.Vector v a) => (a -> mo m) -> v a -> mo m
+foldMapM' f = VG.foldM' (\ !acc a -> (acc <>) <$> f a) mempty
+
+-- | /O(n)/ Monadic right fold with strict accumulator.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.foldrM' (\a b -> pure (a + b)) (0 :: Int) (VU.fromList @Int [30, 10, 20])
+-- 60
+--
+-- @since 1.6.0.0
+{-# INLINE foldrM' #-}
+foldrM' :: (VG.Vector v a, Monad m) => (a -> b -> m b) -> b -> v a -> m b
+foldrM' f z xs = Bundle.foldM' (flip f) z $ VG.streamR xs
+
+-- | /O(n)/ Monadic right fold with strict accumulator.
+--
+-- @since 1.6.0.0
+{-# INLINE foldrM'_ #-}
+foldrM'_ :: (VG.Vector v a, Monad m) => (a -> b -> m b) -> b -> v a -> m ()
+foldrM'_ f b0 v = do
+  _ <- foldrM' f b0 v
+  pure ()
+
+-- | /O(n)/ Monadic right fold with strict accumulator.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.ifoldrM' (\i a b -> putStrLn (show (i, a, b)) >> pure (a + b)) (0 :: Int) (VU.fromList @Int [30, 10, 20])
+-- (2,20,0)
+-- (1,10,20)
+-- (0,30,30)
+-- 60
+--
+-- @since 1.6.0.0
+{-# INLINE ifoldrM' #-}
+ifoldrM' :: (VG.Vector v a, Monad m) => (Int -> a -> b -> m b) -> b -> v a -> m b
+ifoldrM' f z v = Bundle.foldM' (\b (!i, !a) -> f i a b) z
+  . Bundle.indexedR (VG.length v)
+  $ VG.streamR v
+
+-- | /O(n)/ Monadic right fold with strict accumulator.
+--
+-- @since 1.6.0.0
+{-# INLINE ifoldrM'_ #-}
+ifoldrM'_ :: (VG.Vector v a, Monad m) => (Int -> a -> b -> m b) -> b -> v a -> m ()
+ifoldrM'_ f b0 v = do
+  _ <- ifoldrM' f b0 v
+  pure ()
 
 -- | \(O(n)\) Returns maximum range sum.
 --
