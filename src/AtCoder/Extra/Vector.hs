@@ -191,6 +191,22 @@ mapAccumL f s0 xs = (\(!x, !s) -> (s, x)) $ runST $ (`runStateT` s0) $ do
              in (b, s')
         )
 
+-- | \(O(n)\) Converts a vector into chunks of vectors with lenth \(k\). The last vector may have
+-- smaller length than \(k\).
+--
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.chunks 3 $ VU.fromList ([1, 2, 3, 4, 5, 6, 7] :: [Int])
+-- [[1,2,3],[4,5,6],[7]]
+--
+-- @since 1.5.1.0
+{-# INLINE chunks #-}
+chunks :: (VG.Vector v a) => Int -> v a -> V.Vector (v a)
+chunks len xs0 = V.unfoldrExactN n step xs0
+  where
+    n = (VG.length xs0 + len - 1) `div` len
+    step xs = (VG.take len xs, VG.drop len xs)
+
 -- | https://github.com/haskell/vector/issues/416
 {-# INLINE [1] unstreamPrimM #-}
 unstreamPrimM :: (PrimMonad m, VG.Vector v a) => BundleM.Bundle m u a -> m (v a)
@@ -291,22 +307,6 @@ scanl1MB f = BundleM.scanl1M f . Bundle.lift
 {-# INLINE scanl1MB' #-}
 scanl1MB' :: (Monad m) => (a -> a -> m a) -> Bundle.Bundle v a -> BundleM.Bundle m v a
 scanl1MB' f = BundleM.scanl1M' f . Bundle.lift
-
--- | \(O(n)\) Converts a vector into chunks of vectors with lenth \(k\). The last vector may have
--- smaller length than \(k\).
---
--- >>> import AtCoder.Extra.Vector qualified as EV
--- >>> import Data.Vector.Unboxed qualified as VU
--- >>> EV.chunks 3 $ VU.fromList ([1, 2, 3, 4, 5, 6, 7] :: [Int])
--- [[1,2,3],[4,5,6],[7]]
---
--- @since 1.5.1.0
-{-# INLINE chunks #-}
-chunks :: (VG.Vector v a) => Int -> v a -> V.Vector (v a)
-chunks len xs0 = V.unfoldrExactN n step xs0
-  where
-    n = (VG.length xs0 + len - 1) `div` len
-    step xs = (VG.take len xs, VG.drop len xs)
 
 -- | /O(n)/ Monadic right loop.
 --
