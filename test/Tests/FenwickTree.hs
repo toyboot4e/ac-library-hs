@@ -82,6 +82,12 @@ spec_invalid = testSpec "invalid" $ do
   it "throws error" $ do
     FT.sum s 5 3 `shouldThrow` anyException
 
+unit_maxRight :: TestTree
+unit_maxRight = testCase "maxRight corner case" $ do
+  ft <- FT.build @_ @Int (VU.replicate 5 (1 :: Int))
+  r <- FT.maxRight ft 3 (== 0)
+  r @?= 3
+
 prop_maxRight :: QC.NonNegative Int -> QC.NonEmptyList (QC.NonNegative Int) -> QC.Gen QC.Property
 prop_maxRight (QC.NonNegative xRef) (QC.NonEmpty xs_) = do
   let len = length xs_
@@ -128,6 +134,7 @@ tests =
     unit_naive,
     unsafePerformIO spec_invalid,
     unit_sumMaybeBounds,
+    unit_maxRight,
     QC.testProperty "maxRight" prop_maxRight,
     QC.testProperty "minLeft" prop_minLeft
   ]
