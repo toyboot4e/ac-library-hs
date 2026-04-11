@@ -84,21 +84,41 @@ spec_invalid = testSpec "invalid" $ do
 
 prop_maxRight :: QC.NonNegative Int -> QC.NonEmptyList (QC.NonNegative Int) -> QC.Gen QC.Property
 prop_maxRight (QC.NonNegative xRef) (QC.NonEmpty xs_) = do
-  l0 <- QC.chooseInt (0, length xs_)
+  let len = length xs_
+  l0 <- QC.chooseInt (0, len)
+  nAdd <- QC.chooseInt (0, 2 * len)
+  adds :: VU.Vector (Int, Int) <-
+    VU.fromList
+      <$> QC.vectorOf
+        nAdd
+        ((,) <$> (QC.chooseInt (0, len - 1)) <*> ((\(QC.NonNegative x) -> x) <$> QC.arbitrary))
   let xs = VU.fromList $ map (\(QC.NonNegative x) -> x) xs_
-      expected = (l0 +) . VU.length . VU.takeWhile (<= xRef) $ VU.scanl1' (+) $ VU.drop l0 xs
+      xs' = VU.accumulate (+) xs adds
+      expected = (l0 +) . VU.length . VU.takeWhile (<= xRef) $ VU.scanl1' (+) $ VU.drop l0 xs'
       res = runST $ do
         ft <- FT.build xs
+        VU.forM_ adds $ \(!i, !dx) ->
+          FT.add ft i dx
         FT.maxRight ft l0 (<= xRef)
   pure $ expected QC.=== res
 
 prop_minLeft :: QC.NonNegative Int -> QC.NonEmptyList (QC.NonNegative Int) -> QC.Gen QC.Property
 prop_minLeft (QC.NonNegative xRef) (QC.NonEmpty xs_) = do
-  r0 <- QC.chooseInt (0, length xs_)
+  let len = length xs_
+  r0 <- QC.chooseInt (0, len)
+  nAdd <- QC.chooseInt (0, 2 * len)
+  adds :: VU.Vector (Int, Int) <-
+    VU.fromList
+      <$> QC.vectorOf
+        nAdd
+        ((,) <$> (QC.chooseInt (0, len - 1)) <*> ((\(QC.NonNegative x) -> x) <$> QC.arbitrary))
   let xs = VU.fromList $ map (\(QC.NonNegative x) -> x) xs_
-      expected = (r0 -) . VU.length . VU.takeWhile (<= xRef) $ VU.scanl1' (+) $ VU.reverse $ VU.take r0 xs
+      xs' = VU.accumulate (+) xs adds
+      expected = (r0 -) . VU.length . VU.takeWhile (<= xRef) $ VU.scanl1' (+) $ VU.reverse $ VU.take r0 xs'
       res = runST $ do
         ft <- FT.build xs
+        VU.forM_ adds $ \(!i, !dx) -> do
+          FT.add ft i dx
         FT.minLeft ft r0 (<= xRef)
   pure $ expected QC.=== res
 
