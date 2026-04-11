@@ -222,10 +222,15 @@ maxRightM FenwickTree {..} l0 f = do
         | k_ == 0 = pure i
         | i + bit k - 1 < VGM.length dataFt = do
             t <- stToPrim $ (s +) <$> VGM.read dataFt (i + bit k - 1)
-            b <- f t
-            if b
-              then inner2 (i + bit k) k t
-              else inner2 i k s
+            if i + bit k <= l0
+              then do
+                -- for i <= l0, skip
+                inner2 (i + bit k) k t
+              else do
+                b <- f t
+                if b
+                  then inner2 (i + bit k) k t
+                  else inner2 i k s
         | otherwise = inner2 i k s
         where
           k = k_ - 1
