@@ -31,6 +31,11 @@
 -- >>> FT.sum ft 0 3
 -- 8
 --
+-- ==== Known bugs
+--
+-- Currently, `maxRight` and `maxRightM` are not reliable. If you need it, please use `SegTree`
+-- instead.
+--
 -- @since 1.0.0.0
 module AtCoder.FenwickTree
   ( -- * Fenwick tree
@@ -140,7 +145,9 @@ sum ft l r = stToPrim $ sumST ft l r
 sumMaybe :: (HasCallStack, PrimMonad m, Num a, VU.Unbox a) => FenwickTree (PrimState m) a -> Int -> Int -> m (Maybe a)
 sumMaybe ft l r = stToPrim $ sumMaybeST ft l r
 
--- | (Extra API) Applies a binary search on the Fenwick tree. It returns an index \(r\) that
+-- | known bugs: this function is not reliable. if you need t, please use `segtree` instead.
+--
+-- (Extra API) Applies a binary search on the Fenwick tree. It returns an index \(r\) that
 -- satisfies both of the following.
 --
 -- - \(r = l\) or \(f(a[l] + a[l + 1] + ... + a[r - 1])\) returns `True`.
@@ -171,7 +178,9 @@ maxRight ::
   m Int
 maxRight ft l0 f = maxRightM ft l0 (pure . f)
 
--- | (Extra API) Monadic variant of `maxRight`.
+-- | known bugs: this function is not reliable. if you need t, please use `segtree` instead.
+--
+-- (Extra API) Monadic variant of `maxRight`.
 --
 -- ==== Constraints
 -- - if \(f\) is called with the same argument, it returns the same value, i.e., \(f\) has no side effect.
