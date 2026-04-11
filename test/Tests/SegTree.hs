@@ -8,6 +8,7 @@ module Tests.SegTree (tests) where
 import AtCoder.Internal.Assert
 import AtCoder.SegTree qualified as ST
 import Control.Monad.Primitive (PrimMonad, PrimState)
+import Control.Monad.ST (runST)
 import Data.Char (chr, ord)
 import Data.Foldable (for_)
 import Data.Monoid
@@ -20,6 +21,7 @@ import Test.Hspec
 import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.Hspec
+import Test.Tasty.QuickCheck qualified as QC
 
 data SegTreeNaive s a = SegTreeNaive
   { nStn :: {-# UNPACK #-} !Int,
@@ -227,6 +229,46 @@ unit_prodMaybeBounds = testCase "prodMaybeBounds" $ do
   (@?= Nothing) =<< ST.prodMaybe seg 4 5
   (@?= Nothing) =<< ST.prodMaybe seg 5 5
 
+prop_maxRight :: QC.NonNegative (Sum Int) -> QC.NonEmptyList (QC.NonNegative (Sum Int)) -> QC.Gen QC.Property
+prop_maxRight (QC.NonNegative xRef) (QC.NonEmpty xs_) = do
+  let len = length xs_
+  l0 <- QC.chooseInt (0, len)
+  nAdd <- QC.chooseInt (0, 2 * len)
+  adds :: VU.Vector (Int, Sum Int) <-
+    VU.fromList
+      <$> QC.vectorOf
+        nAdd
+        ((,) <$> (QC.chooseInt (0, len - 1)) <*> ((\(QC.NonNegative x) -> Sum x) <$> QC.arbitrary))
+  let xs = VU.fromList $ map (\(QC.NonNegative x) -> x) xs_
+      xs' = VU.accumulate (<>) xs adds
+      expected = (l0 +) . VU.length . VU.takeWhile (<= xRef) $ VU.scanl1' (+) $ VU.drop l0 xs'
+      res = runST $ do
+        seg <- ST.build xs
+        VU.forM_ adds $ \(!i, !dx) ->
+          ST.modify seg (<> dx) i
+        ST.maxRight seg l0 (<= xRef)
+  pure $ expected QC.=== res
+
+prop_minLeft :: QC.NonNegative (Sum Int) -> QC.NonEmptyList (QC.NonNegative (Sum Int)) -> QC.Gen QC.Property
+prop_minLeft (QC.NonNegative xRef) (QC.NonEmpty xs_) = do
+  let len = length xs_
+  r0 <- QC.chooseInt (0, len)
+  nAdd <- QC.chooseInt (0, 2 * len)
+  adds :: VU.Vector (Int, Sum Int) <-
+    VU.fromList
+      <$> QC.vectorOf
+        nAdd
+        ((,) <$> (QC.chooseInt (0, len - 1)) <*> ((\(QC.NonNegative x) -> Sum x) <$> QC.arbitrary))
+  let xs = VU.fromList $ map (\(QC.NonNegative x) -> x) xs_
+      xs' = VU.accumulate (<>) xs adds
+      expected = (r0 -) . VU.length . VU.takeWhile (<= xRef) $ VU.scanl1' (+) $ VU.reverse $ VU.take r0 xs'
+      res = runST $ do
+        seg <- ST.build xs
+        VU.forM_ adds $ \(!i, !dx) -> do
+          ST.modify seg (<> dx) i
+        ST.minLeft seg r0 (<= xRef)
+  pure $ expected QC.=== res
+
 tests :: [TestTree]
 tests =
   [ unit_zero,
@@ -234,5 +276,7 @@ tests =
     unit_one,
     unit_compareNaive,
     unit_freezeZero,
-    unit_prodMaybeBounds
+    unit_prodMaybeBounds,
+    QC.testProperty "maxRight" prop_maxRight,
+    QC.testProperty "minLeft" prop_minLeft
   ]
