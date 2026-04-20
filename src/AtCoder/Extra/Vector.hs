@@ -5,6 +5,7 @@
 module AtCoder.Extra.Vector
   ( -- * Sort functions
     sortIndices,
+    sortIndicesBy,
     sortByArg,
     sortByArgDesc,
 
@@ -75,11 +76,26 @@ import GHC.Stack (HasCallStack)
 -- [0,2,4,1,3]
 --
 -- @since 1.6.0.0
-{-# INLINEABLE sortIndices #-}
+{-# INLINE sortIndices #-}
 sortIndices :: (HasCallStack, Ord a, VG.Vector v a, VG.Vector v Int) => v a -> v Int
-sortIndices xs =
+sortIndices = sortIndicesBy compare
+
+-- | \(O(n \log n)\) Returns indices of the vector elements, stably sorted by their value, using
+-- user comparison function. For equal values, smaller indices come first.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Ord (Down (..), comparing)
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.sortIndicesBy (comparing Down) $ VU.fromList @Int [0, 1, 0, 1, 0]
+-- [1,3,0,2,4]
+--
+-- @since 1.6.0.0
+{-# INLINEABLE sortIndicesBy #-}
+sortIndicesBy :: (HasCallStack, Ord a, VG.Vector v a, VG.Vector v Int) => (a -> a -> Ordering) -> v a -> v Int
+sortIndicesBy compareF xs =
   VG.modify
-    (VAI.sortBy (\i j -> compare (xs VG.! i) (xs VG.! j) <> compare i j))
+    (VAI.sortBy (\i j -> compareF (xs VG.! i) (xs VG.! j) <> compare i j))
     $ VG.generate (VG.length xs) id
 
 -- | \(O(n \log n)\) Sorts 2D points by polar angle from the positive x-axis.

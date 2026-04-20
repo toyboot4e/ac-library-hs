@@ -60,7 +60,7 @@ module AtCoder.Extra.SegTree2d
 where
 
 import AtCoder.Extra.Bisect (lowerBound)
-import AtCoder.Extra.Vector (argsort)
+import AtCoder.Extra.Vector qualified as EV
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIB
 import Control.Monad (when)
@@ -338,7 +338,7 @@ buildST xs ys ws = do
 
   dataSt <- VUM.replicate (2 * VU.last indptrSt) (mempty :: a)
 
-  let yis = argsort ys
+  let yis = EV.sortIndices ys
   let posSt = VU.create $ do
         vec <- VUM.replicate nSt (0 :: Int)
         VU.iforM_ yis $ \i yi -> do

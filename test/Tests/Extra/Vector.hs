@@ -4,6 +4,7 @@ import AtCoder.Extra.Vector qualified as EV
 import Control.Monad.ST (runST)
 import Data.Functor.Identity (Identity, runIdentity)
 import Data.List qualified as L
+import Data.Semigroup (Down (..))
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
@@ -15,6 +16,12 @@ prop_sortIndices :: [Int] -> QC.Property
 prop_sortIndices xs =
   let lhs = VU.fromList . map snd . L.sort $ zip xs [0 :: Int ..]
       rhs = EV.sortIndices $ VU.fromList xs
+   in lhs QC.=== rhs
+
+prop_sortIndicesBy :: [Int] -> QC.Property
+prop_sortIndicesBy xs =
+  let lhs = VU.fromList . map snd . L.sortBy (comparing (\(!a, !i) -> (Down a, i))) $ zip xs [0 :: Int ..]
+      rhs = EV.sortIndicesBy (comparing Down) $ VU.fromList xs
    in lhs QC.=== rhs
 
 prop_concatMapM :: [Int] -> QC.Property
@@ -171,6 +178,7 @@ slideMax k xs
 tests :: [TestTree]
 tests =
   [ QC.testProperty "sortIndices" prop_sortIndices,
+    QC.testProperty "sortIndicesBy" prop_sortIndicesBy,
     QC.testProperty "concatMapM" prop_concatMapM,
     QC.testProperty "iconcatMap" prop_iconcatMap,
     QC.testProperty "iconcatMapM" prop_iconcatMapM,
