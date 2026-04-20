@@ -76,12 +76,11 @@ import GHC.Stack (HasCallStack)
 --
 -- @since 1.6.0.0
 {-# INLINEABLE sortIndices #-}
--- TODO: use generic vector
-sortIndices :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
+sortIndices :: (HasCallStack, Ord a, VG.Vector v a, VG.Vector v Int) => v a -> v Int
 sortIndices xs =
-  VU.modify
+  VG.modify
     (VAI.sortBy (\i j -> compare (xs VG.! i) (xs VG.! j) <> compare i j))
-    $ VU.generate (VU.length xs) id
+    $ VG.generate (VG.length xs) id
 
 -- | \(O(n \log n)\) Sorts 2D points by polar angle from the positive x-axis.
 --
