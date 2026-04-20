@@ -29,10 +29,10 @@ testTopSort n gr vs =
   let reachables = V.generate n (reachableFlags n (gr `Gr.adj`))
    in and
         [ not $ reachables VG.! v VG.! u
-          | iu <- [0 .. n - 1],
-            let u = vs VG.! iu,
-            iv <- [iu + 1 .. n - 1],
-            let v = vs VG.! iv
+        | iu <- [0 .. n - 1],
+          let u = vs VG.! iu,
+          iv <- [iu + 1 .. n - 1],
+          let v = vs VG.! iv
         ]
 
 -- | Tests lexicographically smallest topological ordering.
@@ -74,8 +74,8 @@ prop_floydWarshall = do
                 -- TODO: Shortest paths cannot be uniqueified, so other test would be suitable
                 -- , Gr.constructPathFromRootNN prevFw u v QC.=== Gr.constructPathFromRoot prevB v
                 ]
-          | u <- [0 .. n - 1],
-            v <- [0 .. n - 1]
+        | u <- [0 .. n - 1],
+          v <- [0 .. n - 1]
         ]
 
 unit_loopPathConstruction :: TestTree

@@ -165,7 +165,7 @@ mstBy !f nVerts edges = runST $ do
         (const id)
         (VU.replicate (VU.length edges) (Bit False))
         <$>
-      )
+    )
       . EVP.mapM
         ( \(i :: Int) -> do
             let !u = us VG.! i

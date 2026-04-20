@@ -10,7 +10,6 @@ module AtCoder.Extra.Monoid.Top4
     Top4Repr,
 
     -- * Constructors
-
     new,
     unsafeNew,
     singleton,
@@ -59,7 +58,7 @@ new a b c d =
       (!a2, !c2) = if a1 >= c1 then (a1, c1) else (c1, a1)
       (!b2, !d2) = if b1 >= d1 then (b1, d1) else (d1, b1)
       (!b3, !c3) = if b2 >= c2 then (b2, c2) else (c2, b2)
-  in Top4 (a2, b3, c3, d2)
+   in Top4 (a2, b3, c3, d2)
 
 -- | \(O(1)\) Creates a `Top4` without soritng.
 --
