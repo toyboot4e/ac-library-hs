@@ -11,10 +11,10 @@ import Test.Tasty
 import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck as QC
 
-prop_argsort :: [Int] -> QC.Property
-prop_argsort xs =
+prop_sortIndices :: [Int] -> QC.Property
+prop_sortIndices xs =
   let lhs = VU.fromList . map snd . L.sort $ zip xs [0 :: Int ..]
-      rhs = EV.argsort $ VU.fromList xs
+      rhs = EV.sortIndices $ VU.fromList xs
    in lhs QC.=== rhs
 
 prop_concatMapM :: [Int] -> QC.Property
@@ -170,7 +170,7 @@ slideMax k xs
 
 tests :: [TestTree]
 tests =
-  [ QC.testProperty "argsort" prop_argsort,
+  [ QC.testProperty "sortIndices" prop_sortIndices,
     QC.testProperty "concatMapM" prop_concatMapM,
     QC.testProperty "iconcatMap" prop_iconcatMap,
     QC.testProperty "iconcatMapM" prop_iconcatMapM,

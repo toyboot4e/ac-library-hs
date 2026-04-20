@@ -4,7 +4,7 @@
 -- @since 1.2.2.0
 module AtCoder.Extra.Vector
   ( -- * Sort functions
-    argsort,
+    sortIndices,
     sortByArg,
     sortByArgDesc,
 
@@ -71,14 +71,14 @@ import GHC.Stack (HasCallStack)
 -- ==== Example
 -- >>> import AtCoder.Extra.Vector qualified as EV
 -- >>> import Data.Vector.Unboxed qualified as VU
--- >>> EV.argsort $ VU.fromList @Int [0, 1, 0, 1, 0]
+-- >>> EV.sortIndices $ VU.fromList @Int [0, 1, 0, 1, 0]
 -- [0,2,4,1,3]
 --
--- @since 1.2.3.0
-{-# INLINEABLE argsort #-}
+-- @since 1.6.0.0
+{-# INLINEABLE sortIndices #-}
 -- TODO: use generic vector
-argsort :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
-argsort xs =
+sortIndices :: (HasCallStack, Ord a, VU.Unbox a) => VU.Vector a -> VU.Vector Int
+sortIndices xs =
   VU.modify
     (VAI.sortBy (\i j -> compare (xs VG.! i) (xs VG.! j) <> compare i j))
     $ VU.generate (VU.length xs) id
