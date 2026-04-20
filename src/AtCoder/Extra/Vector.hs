@@ -320,7 +320,7 @@ scanl1MB' f = BundleM.scanl1M' f . Bundle.lift
 --
 -- @since 1.6.0.0
 {-# INLINE forRM_ #-}
-forRM_ :: (VG.Vector v a, Monad m) =>  v a -> (a -> m ()) -> m ()
+forRM_ :: (VG.Vector v a, Monad m) => v a -> (a -> m ()) -> m ()
 forRM_ v f = loop (n - 1)
   where
     n = VG.length v
@@ -416,9 +416,10 @@ foldrM'_ f b0 v = do
 -- @since 1.6.0.0
 {-# INLINE ifoldrM' #-}
 ifoldrM' :: (VG.Vector v a, Monad m) => (Int -> a -> b -> m b) -> b -> v a -> m b
-ifoldrM' f z v = Bundle.foldM' (\b (!i, !a) -> f i a b) z
-  . Bundle.indexedR (VG.length v)
-  $ VG.streamR v
+ifoldrM' f z v =
+  Bundle.foldM' (\b (!i, !a) -> f i a b) z
+    . Bundle.indexedR (VG.length v)
+    $ VG.streamR v
 
 -- | /O(n)/ Monadic right fold with strict accumulator.
 --
