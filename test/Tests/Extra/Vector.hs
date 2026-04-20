@@ -136,6 +136,28 @@ slideMin k xs
   where
     n = VU.length xs
 
+unit_sortByArg :: TestTree
+unit_sortByArg = testCase "sortByArg" $ do
+  -- around x/y axes:
+  let near0 = VU.fromList [(n, 1), (n + 3, 1), (n + 1, 1), (n + 4, 1), (n + 2, 1)]
+  EV.sortByArg near0 @?= VU.fromList [(n + 4, 1), (n + 3, 1), (n + 2, 1), (n + 1, 1), (n, 1)]
+
+  let near90 = VU.fromList [(1, n + 3), (1, n), (1, n + 4), (1, n + 1), (1, n + 2)]
+  EV.sortByArg near90 @?= VU.fromList [(1, n), (1, n + 1), (1, n + 2), (1, n + 3), (1, n + 4)]
+
+  let near180 = VU.fromList [(-n - 4, 1), (-n - 1, 1), (-n - 3, 1), (-n, 1), (-n - 2, 1)]
+  EV.sortByArg near180 @?= VU.fromList [(-n, 1), (-n - 1, 1), (-n - 2, 1), (-n - 3, 1), (-n - 4, 1)]
+
+  let near360 = VU.fromList [(n + 4, -1), (n + 1, -1), (n + 3, -1), (n, -1), (n + 2, -1)]
+  EV.sortByArg near360 @?= VU.fromList [(n, -1), (n + 1, -1), (n + 2, -1), (n + 3, -1), (n + 4, -1)]
+
+  -- example
+  let near45 = VU.fromList [(n + 2, n + 3), (n, n + 1), (n + 4, n + 5), (n + 1, n + 2), (n + 3, n + 4)]
+  EV.sortByArg near45 @?= VU.fromList [(n + 4, n + 5), (n + 3, n + 4), (n + 2, n + 3), (n + 1, n + 2), (n, n + 1)]
+  where
+    -- large number (10^18)
+    n = 1000000000000000000 :: Int
+
 slideMax :: Int -> VU.Vector Int -> VU.Vector Int
 slideMax k xs
   | VU.null xs = VU.empty
@@ -167,5 +189,6 @@ tests =
     unit_maxRangeSum,
     unit_minRangeSum,
     QC.testProperty "slideMinIndices" prop_slideMinIndices,
-    QC.testProperty "slideMaxIndices" prop_slideMaxIndices
+    QC.testProperty "slideMaxIndices" prop_slideMaxIndices,
+    unit_sortByArg
   ]

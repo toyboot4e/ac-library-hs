@@ -5,6 +5,8 @@
 module AtCoder.Extra.Vector
   ( -- * Sort functions
     argsort,
+    sortByArg,
+    sortByArgDesc,
 
     -- * Index compression
     compress,
@@ -80,6 +82,52 @@ argsort xs =
   VU.modify
     (VAI.sortBy (\i j -> compare (xs VG.! i) (xs VG.! j) <> compare i j))
     $ VU.generate (VU.length xs) id
+
+-- | \(O(n \log n)\) Sorts 2D points by polar angle from the positive x-axis.
+--
+-- ==== Constraints
+-- - The input must not contain $(0, 0)$, as its angle is undefined.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.sortByArg $ VU.fromList [(1,0),(0,1),(-1,0),(0,-1)]
+-- [(1,0),(0,1),(-1,0),(0,-1)]
+--
+-- @since 1.6.0.0
+{-# INLINEABLE sortByArg #-}
+sortByArg :: VU.Vector (Int, Int) -> VU.Vector (Int, Int)
+sortByArg = VU.modify (VAI.sortBy compareByArg)
+
+-- | \(O(n \log n)\) Sorts 2D points by polar angle from the positive x-axis in descendant order.
+--
+-- ==== Constraints
+-- - The input must not contain $(0, 0)$, as its angle is undefined.
+--
+-- ==== Coordinates
+-- - Each point is given as $(x, y)$.
+-- - Y axis goes from the bottom to the top, e.g., $(0, 1)$ is at $\pi/2$ radian.
+--
+-- ==== Example
+-- >>> import AtCoder.Extra.Vector qualified as EV
+-- >>> import Data.Vector.Unboxed qualified as VU
+-- >>> EV.sortByArgDesc $ VU.fromList [(1,0),(0,1),(-1,0),(0,-1)]
+-- [(0,-1),(-1,0),(0,1),(1,0)]
+--
+-- @since 1.6.0.0
+{-# INLINEABLE sortByArgDesc #-}
+sortByArgDesc :: VU.Vector (Int, Int) -> VU.Vector (Int, Int)
+sortByArgDesc = VU.modify (VAI.sortBy (flip compareByArg))
+
+{-# INLINE compareByArg #-}
+compareByArg :: (Int, Int) -> (Int, Int) -> Ordering
+compareByArg (!ax, !ay) (!bx, !by) = compare ah bh <> compare 0 cross'
+  where
+    -- (1) Down half comes first
+    ah = ay < 0 || (ay == 0 && ax < 0)
+    bh = by < 0 || (by == 0 && bx < 0)
+    -- (1) Compare with cross product
+    cross' = ax * by - ay * bx
 
 -- | \(O(n \log n)\) One dimensional index compression: xs -> (nubSortXs, xs')
 --
