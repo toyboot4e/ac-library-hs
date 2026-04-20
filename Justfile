@@ -93,6 +93,21 @@ test opts='':
 [private]
 alias t := test
 
+# runs local test for modules selected with fzf (multi-select with Tab)
+test-fzf *args:
+    #!/usr/bin/env bash
+    IFS=$'\n'
+    modules=$(fd -e hs . test/ | fzf -m {{args}})
+    echo "Target modules:"
+    echo "$modules" | sed 's/^/- /'
+    # Extract test group names from file paths: test/Tests/Extra/Vector.hs -> Extra.Vector
+    patterns=$(echo "$modules" | sed 's|^test/Tests/||; s|\.hs$||; s|/|.|g')
+    filter=$(echo "$patterns" | sed 's|.*|/&/|' | paste -sd '\|\|' -)
+    cabal test --enable-tests --test-options "-p \"$filter\""
+
+[private]
+alias tf := test-fzf
+
 # runs local test a large number of QuickCheck tests
 many-test opts='':
     cabal test --enable-tests --test-options '--quickcheck-tests 1000 {{opts}}'
