@@ -39,7 +39,7 @@ common dependencies
     bytestring <0.14,
     primitive >=0.6.4.0 && <0.10,
     random >=1.2.0 && <1.4,
-    transformers >=0.2.0.0,
+    transformers >=0.6.3.0,
     unordered-containers <0.3,
     vector >=0.13.0 && <0.14,
     vector-algorithms <0.10,
@@ -216,21 +216,18 @@ test-suite ac-library-hs-test
   hs-source-dirs: test
   main-is: Main.hs
   build-depends:
-    QuickCheck,
+    QuickCheck ^>=2.17.0.0,
     ac-library-hs,
-    containers,
-    hspec,
-    mtl,
-    quickcheck-classes,
-    random,
-    semirings,
-    tasty,
-    tasty-hspec,
-    tasty-hunit,
-    tasty-quickcheck,
-    tasty-rerun,
-    transformers,
-    unordered-containers,
+    containers ^>=0.8,
+    hspec ^>=2.11.17,
+    mtl ^>=2.3.2,
+    quickcheck-classes ^>=0.6.5.0,
+    semirings ^>=0.7,
+    tasty ^>=1.5.4,
+    tasty-hspec ^>=1.2.0.4,
+    tasty-hunit ^>=0.10.2,
+    tasty-quickcheck ^>=0.11.1,
+    tasty-rerun ^>=1.1.20,
 
 benchmark ac-library-hs-benchmark
   import: warnings
@@ -270,10 +267,9 @@ benchmark ac-library-hs-benchmark
     ac-library-hs,
     base,
     criterion,
-    mtl,
-    random,
-    tagged,
-    transformers,
+    mtl ^>=2.3.2,
+    tagged ^>=0.8.10,
+    transformers ^>=0.6.3.0,
 
 test-suite benchlib-test
   import: warnings
@@ -292,15 +288,14 @@ test-suite benchlib-test
   hs-source-dirs: benchmarks
   main-is: TestMain.hs
   build-depends:
-    QuickCheck,
+    QuickCheck ^>=2.17.0.0,
     ac-library-hs,
-    hspec,
-    mtl,
-    random,
-    tagged,
-    tasty,
-    tasty-hunit,
-    tasty-quickcheck,
-    tasty-rerun,
+    hspec ^>=2.11.17,
+    mtl ^>=2.3.2,
+    tagged ^>=0.8.10,
+    tasty ^>=1.5.4,
+    tasty-hunit ^>=0.10.2,
+    tasty-quickcheck ^>=0.11.1,
+    tasty-rerun ^>=1.1.20,
 
 -- , quickcheck-instances

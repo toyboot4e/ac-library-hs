@@ -10,14 +10,6 @@ import Test.Tasty
 import Test.Tasty.QuickCheck qualified as QC
 import Tests.Util (myForAllShrink)
 
--- orphan instance
-instance QC.Arbitrary (Max Int) where
-  arbitrary = Max <$> QC.arbitrary
-
--- orphan instance
-instance QC.Arbitrary (Min Int) where
-  arbitrary = Min <$> QC.arbitrary
-
 prop_stimes' :: forall a. (Semigroup a, Show a, Eq a, QC.Arbitrary a) => Proxy a -> QC.Property
 prop_stimes' _ = myForAllShrink True (const True) desc lhsS lhs rhsS rhs
   where

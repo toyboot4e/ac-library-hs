@@ -106,14 +106,6 @@ instance QC.Arbitrary (RollingHash b 2305843009213693951) where
     next <- QC.chooseInt (0, 2305843009213693951 - 1)
     pure $ RollingHash hash next
 
--- orphan instance
-instance QC.Arbitrary (Max Int) where
-  arbitrary = Max <$> QC.arbitrary
-
--- orphan instance
-instance QC.Arbitrary (Min Int) where
-  arbitrary = Min <$> QC.arbitrary
-
 -- orphan instance (TODO: move to common implementation)
 instance QC.Arbitrary ModInt.ModInt998244353 where
   arbitrary = ModInt.new <$> QC.arbitrary

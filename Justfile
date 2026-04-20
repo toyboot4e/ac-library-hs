@@ -64,8 +64,7 @@ eg:
 
 # runs treefmt
 format:
-    nix fmt .
-    # treefmt .
+    nix fmt
 
 [private]
 alias fmt := format
