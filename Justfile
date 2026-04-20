@@ -44,6 +44,20 @@ doctest *args:
 [private]
 alias dt := doctest
 
+# runs doctest for modules selected with fzf (multi-select with Tab)
+doctest-fzf *args:
+    #!/usr/bin/env bash
+    IFS=$'\n'
+    files="$(fd -e hs . src/ | fzf -m {{args}})"
+    echo "Target modules:"
+    echo "$files" | sed 's/^/- /'
+    # --repl-options=fileA\n--repl-options=fileB
+    opts=$(printf -- '--repl-options=%s\n' $files)
+    cabal repl --with-ghc=doctest --repl-options='-w -Wdefault' --repl-no-load $opts
+
+[private]
+alias dtf := doctest-fzf
+
 # runs the lazysegtree example
 eg:
     cabal run example-lazy-segtree
