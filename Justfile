@@ -161,3 +161,7 @@ alias ta := test-all
 # runs tests and outputs hpc test coverage
 coverage *args:
     cabal test ---enable-coverage {{args}}
+
+# shows where GHC dependencies are installed (are they at `/nix/store`?)
+locate-deps:
+    ghc-pkg field '*' library-dirs
