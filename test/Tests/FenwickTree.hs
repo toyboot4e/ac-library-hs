@@ -2,6 +2,7 @@
 module Tests.FenwickTree (tests) where
 
 import AtCoder.FenwickTree qualified as FT
+import AtCoder.Internal.Assert qualified as ACIA
 import Control.Monad.ST (runST)
 import Data.Foldable
 import Data.Vector.Unboxed qualified as VU
@@ -105,7 +106,9 @@ prop_maxRight (QC.NonNegative xRef) (QC.NonEmpty xs_) = do
         ft <- FT.build xs
         VU.forM_ adds $ \(!i, !dx) ->
           FT.add ft i dx
-        FT.maxRight ft l0 (<= xRef)
+        -- Previously, we had a bug where we call the predicate for [L, i) (i < L), so need the
+        -- (x >= 0) assertion:
+        FT.maxRight ft l0 (\x -> let !_ = ACIA.runtimeAssert (x >= 0) in x <= xRef)
   pure $ expected QC.=== res
 
 prop_minLeft :: QC.NonNegative Int -> QC.NonEmptyList (QC.NonNegative Int) -> QC.Gen QC.Property
