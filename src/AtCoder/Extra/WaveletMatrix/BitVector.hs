@@ -64,7 +64,7 @@ build bitsBv =
         pure vec
    in BitVector {..}
 
--- | The block size \(64\) for the internal cumultaive sum in the bit vector.
+-- | The block size \(64\) for the internal cumulative sum in the bit vector.
 --
 -- @since 1.1.0.0
 {-# INLINE wordSize #-}
@@ -86,7 +86,7 @@ csumInPlace ::
 csumInPlace csum bits = do
   VGM.unsafeWrite csum 0 (0 :: Int)
 
-  -- Calcuate popCount by word. TODO: use `castToWords` for most elements
+  -- Calculate popCount by word. TODO: use `castToWords` for most elements
   VU.ifoldM'
     ( \ !acc i wordSum -> do
         let !acc' = acc + wordSum

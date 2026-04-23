@@ -137,16 +137,16 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (read)
 
--- | Typeclass reprentation of the `LazySegTree` properties. User can implement either `segAct` or
+-- | Typeclass representation of the `LazySegTree` properties. User can implement either `segAct` or
 -- `segActWithLength`. See @AtCoder.Extra.Monoid@ for builtin monoid action types.
 --
--- Instances should satisfy the follwing properties:
+-- Instances should satisfy the following properties:
 --
 -- [Left monoid action] @'segAct' (f2 '<>' f1) x = 'segAct' f2 ('segAct' f1 x)@
 -- [Identity map] @`segAct` `mempty` x = x@
 -- [Endomorphism] @'segAct' f (x1 '<>' x2) = ('segAct' f x1) '<>' ('segAct' f x2)@
 --
--- If you implement `SegAct` via `segActWithLength`, satisfy one more propety:
+-- If you implement `SegAct` via `segActWithLength`, satisfy one more property:
 --
 -- [Linear left monoid action] @'segActWithLength' len f (stimes len a) = 'Data.Semigroup.stimes' len ('segAct' f a)@.
 --
@@ -172,7 +172,7 @@ import Prelude hiding (read)
 -- newtype 'AtCoder.Extra.Monoid.Affine1.Affine1' a = 'AtCoder.Extra.Monoid.Affine1.Affine1' ('AtCoder.Extra.Monoid.Affine1.Affine1' a)
 --   deriving newtype ('Eq', 'Ord', 'Show')
 --
--- -- | This type alias makes the 'Data.Vector.Unboxed.Unbox' deriving easier, described velow.
+-- -- | This type alias makes the 'Data.Vector.Unboxed.Unbox' deriving easier, described below.
 -- type 'AtCoder.Extra.Monoid.Affine1.Affine1Repr' a = (a, a)
 --
 -- instance ('Num' a) => 'Semigroup' ('AtCoder.Extra.Monoid.Affine1.Affine1' a) where
@@ -584,7 +584,7 @@ minLeftM self@LazySegTree {..} r0 g = do
       | otherwise = pure $ r + 1 - sizeLst
 
 -- | Applies a binary search on the segment tree. It returns an index \(r\) that satisfies both of the
--- followings.
+-- following.
 --
 -- - \(r = l\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r - 1]))\) returns `True`.
 -- - \(r = n\) or \(g(a[l] \cdot a[l + 1] \cdot ... \cdot a[r]))\) returns `False`.
@@ -622,7 +622,7 @@ maxRight seg l0 g = maxRightM seg l0 (pure . g)
 maxRightM :: (HasCallStack, PrimMonad m, SegAct f a, VU.Unbox f, Monoid a, VU.Unbox a) => LazySegTree (PrimState m) f a -> Int -> (a -> m Bool) -> m Int
 maxRightM self@LazySegTree {..} l0 g = do
   b <- g mempty
-  let !_ = ACIA.runtimeAssert b "AtCoder.LazySegTree.maxRightM: `g mempty` must return `False`"
+  let !_ = ACIA.runtimeAssert b "AtCoder.LazySegTree.maxRightM: `g mempty` must return `True`"
   if l0 == nLst
     then pure nLst
     else do

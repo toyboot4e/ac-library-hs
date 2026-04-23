@@ -333,7 +333,7 @@ foldReroot ::
   Int ->
   -- | Graph as a function.
   (Int -> VU.Vector (Int, w)) ->
-  -- | @valAt@:Assignment of initial vertex values.
+  -- | @valAt@: Assignment of initial vertex values.
   (Int -> a) ->
   -- | @toF@: Converts a vertex value into an action onto a neighbor vertex.
   (a -> (Int, w) -> f) ->

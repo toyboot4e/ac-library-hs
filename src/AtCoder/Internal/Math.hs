@@ -78,7 +78,7 @@ powMod x n0 m0
   | m0 == 1 = 0
   | otherwise = fromIntegral $ inner n0 1 $ fromIntegral (x `mod` m0)
   where
-    !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "BenchLib.PowMod.powMod: given invalid `n` or `m`: " ++ show (n0, m0)
+    !_ = ACIA.runtimeAssert (0 <= n0 && 1 <= m0) $ "AtCoder.Internal.Math.powMod: given invalid `n` or `m`: " ++ show (n0, m0)
     bt = ACIBT.new64 $ fromIntegral m0
     inner :: Int -> Word64 -> Word64 -> Word64
     inner !n !r !y

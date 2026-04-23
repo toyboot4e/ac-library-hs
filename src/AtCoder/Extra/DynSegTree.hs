@@ -105,9 +105,9 @@ buildWith ::
   (HasCallStack, PrimMonad m, Monoid a, VU.Unbox a) =>
   -- | Capacity \(n\)
   Int ->
-  -- | Left index boundary \(l_0)\)
+  -- | Left index boundary \(l_0\)
   Int ->
-  -- | Right index boundary \(r_0)\)
+  -- | Right index boundary \(r_0\)
   Int ->
   -- | Initial monoid value assignment \(g: (l, r) \rightarrow a\)
   (Int -> Int -> a) ->

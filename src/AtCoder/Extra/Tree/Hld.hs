@@ -96,7 +96,7 @@
 -- >>> Hld.path hld 5 3     -- get the path between `5` and `3`:
 -- [5,4,1,2,3]
 --
--- So the subtree queries are run with recpect to root vertex `0`, since our HLD is created with
+-- So the subtree queries are run with respect to root vertex `0`, since our HLD is created with
 -- `new`:
 --
 -- >>> Hld.isInSubtree hld 2 3 -- `3` is in the subtree of `2`
@@ -106,7 +106,7 @@
 -- False
 --
 -- ===== Segment queries
--- Products and segment queries are primarily used by the @TreeMonoid@ module and is not intended
+-- Products and segment queries are primarily used by the @TreeMonoid@ module and are not intended
 -- for direct use, but here's some examples. This time the reindex by the HLD is identity:
 --
 -- >>> Hld.indexHld hld
@@ -273,7 +273,7 @@ newAt tree root
                         else do
                           size2 <- loop (depth + 1) v1 v2
                           -- NOTE: It's `>` because we should swap at least once if there's some vertex other
-                          -- that the parent_.
+                          -- than the parent_.
                           pure (size1 + size2, if size1 > size2 then eBig else e2)
                   )
                   (1 :: Int, -1)

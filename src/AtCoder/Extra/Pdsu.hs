@@ -127,7 +127,7 @@ new ::
   Int ->
   -- | The inverse operator of the monoid.
   (a -> a) ->
-  -- | A potencialized DSU.
+  -- | A potentialized DSU.
   m (Pdsu (PrimState m) a)
 new n f = Pdsu n <$> VUM.replicate n (-1 {- size 1 -}) <*> VUM.replicate n (mempty :: a) <*> pure f
 

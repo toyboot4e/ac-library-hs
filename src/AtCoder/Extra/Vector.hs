@@ -114,7 +114,7 @@ sortIndicesBy compareF xs =
 sortByArg :: VU.Vector (Int, Int) -> VU.Vector (Int, Int)
 sortByArg = VU.modify (VAI.sortBy compareByArg)
 
--- | \(O(n \log n)\) Sorts 2D points by polar angle from the positive x-axis in descendant order.
+-- | \(O(n \log n)\) Sorts 2D points by polar angle from the positive x-axis in descending order.
 --
 -- ==== Constraints
 -- - The input must not contain $(0, 0)$, as its angle is undefined.
@@ -254,7 +254,7 @@ mapAccumL f s0 xs = (\(!x, !s) -> (s, x)) $ runST $ (`runStateT` s0) $ do
              in (b, s')
         )
 
--- | \(O(n)\) Converts a vector into chunks of vectors with lenth \(k\). The last vector may have
+-- | \(O(n)\) Converts a vector into chunks of vectors with length \(k\). The last vector may have
 -- smaller length than \(k\).
 --
 -- >>> import AtCoder.Extra.Vector qualified as EV

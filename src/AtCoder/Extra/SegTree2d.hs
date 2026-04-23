@@ -327,7 +327,7 @@ buildST xs ys ws = do
         VU.forM_ compressedXs $ \i -> do
           let inner j
                 | j /= 0 = do
-                    VGM.modify indptr (+ 1) (j + 1) -- +1 for perfix sum
+                    VGM.modify indptr (+ 1) (j + 1) -- +1 for prefix sum
                     inner (j `div` 2)
                 | otherwise = pure ()
           inner $ i + sizeSt

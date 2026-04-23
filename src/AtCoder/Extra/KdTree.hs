@@ -141,7 +141,7 @@ build xs0 ys0 =
 {-# INLINE build2 #-}
 build2 ::
   (HasCallStack) =>
-  -- | \(x, y\) coordnates
+  -- | \(x, y\) coordinates
   VU.Vector (Int, Int) ->
   -- | `KdTree`
   KdTree

@@ -220,7 +220,7 @@ lookupNodeST Map {..} k = do
           kl <- VGM.read kMap (coerce l)
           pure (kl == k, l, root')
 
--- | Amoritzed \(O(\log n)\). Returns whether a node with key \(k\) is in the map.
+-- | Amortized \(O(\log n)\). Returns whether a node with key \(k\) is in the map.
 --
 -- @since 1.2.1.0
 {-# INLINE member #-}
@@ -243,7 +243,7 @@ lookup m@Map {..} k = stToPrim $ do
     else do
       pure Nothing
 
--- | Amoritzed \(O(\log n)\). Adjusts the monoid value of a node with key \(k\).
+-- | Amortized \(O(\log n)\). Adjusts the monoid value of a node with key \(k\).
 --
 -- @since 1.2.1.0
 {-# INLINE adjust #-}
@@ -457,7 +457,7 @@ allProd Map {..} = do
 -- | Amortized \(O(\log n)\).
 --
 -- ==== Constraint
--- - \(0 \le \lt r \le n\). Note that the interval must have positive length.
+-- - \(0 \le l \lt r \le n\). Note that the interval must have positive length.
 {-# INLINEABLE unsafeProdST #-}
 unsafeProdST :: (HasCallStack, Eq f, Monoid f, VU.Unbox f, Ord k, VU.Unbox k, Monoid v, VU.Unbox v, SegAct f v) => Map s f k v -> k -> k -> ST s v
 unsafeProdST m@Map {..} l r = do

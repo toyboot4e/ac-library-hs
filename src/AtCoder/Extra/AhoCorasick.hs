@@ -175,7 +175,7 @@ nextN ac = VU.foldl' (next ac)
 -- source slice.
 --
 -- Note that duplicate patterns are counted just once with one of them; if pattern A and B are the
--- same, their appearence is counted as either A or B.
+-- same, their appearance is counted as either A or B.
 --
 -- @since 1.5.3.0
 {-# INLINEABLE match #-}

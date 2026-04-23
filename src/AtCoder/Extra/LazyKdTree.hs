@@ -383,7 +383,7 @@ buildST xs0 ys0 vs0 = do
 {-# INLINE applyAtST #-}
 applyAtST :: (SegAct f a, VU.Unbox f, VU.Unbox a) => LazyKdTree s f a -> Int -> f -> ST s ()
 applyAtST LazyKdTree {..} i f = do
-  -- NOTE: Here we're asssuming each monoid value has length one. If you need a monoid of length
+  -- NOTE: Here we're assuming each monoid value has length one. If you need a monoid of length
   -- zero, e.g., if you're just reserving new point insertion, you must not rely on
   -- `segActWithLength`. You might want to use `V2` instead of `Sum`.
   let len = sizeLkt VG.! i

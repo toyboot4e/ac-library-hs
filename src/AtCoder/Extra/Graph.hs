@@ -967,7 +967,7 @@ bfs01 ::
   Bounds0 i ->
   -- | Capacity of deque, often the number of edges \(m\).
   Int ->
-  -- | Graph function that takes the vertexand returns adjacent vertices with edge weights, where
+  -- | Graph function that takes the vertex and returns adjacent vertices with edge weights, where
   -- \(w > 0\).
   (i -> VU.Vector (i, Int)) ->
   -- | Weighted source vertices.
@@ -1172,7 +1172,7 @@ dijkstraImpl !trackPrev !bnd0 !capacity !gr !undefW !sources
   | VU.null sources = (VU.replicate nVerts undefW, VU.replicate 0 (-1))
   | otherwise = runST $ do
       !dist <- VUM.replicate @_ @w nVerts undefW
-      -- REMARK: (w, i) for sort by width
+      -- REMARK: (w, i) for sort by weight
       -- REMARK: We need least capacity of |source|
       !heap <- MH.new @_ @(w, i) $ capacity + VU.length sources
       !prev <-
@@ -1208,7 +1208,7 @@ dijkstraImpl !trackPrev !bnd0 !capacity !gr !undefW !sources
     !nVerts = rangeSize0 bnd0
 
 -- -- | Option for `bellmanFord`.
--- data BellmanFordPolicy = QuitOnNegaitveLoop | ContinueOnNegaitveLoop
+-- data BellmanFordPolicy = QuitOnNegativeLoop | ContinueOnNegativeLoop
 
 -- | \(O(nm)\) Bellman–Ford algorithm that returns a distance array, or `Nothing` on negative loop
 -- detection. Vertices are one-dimensional.
@@ -1595,7 +1595,7 @@ updateEdgeFloydWarshall ::
   Int ->
   -- | Edge information: @to@ vertex.
   Int ->
-  -- | Edge information: @weight@ vertex.
+  -- | Edge information: @weight@.
   w ->
   -- | Distance array in one-dimensional index.
   m ()
@@ -1626,14 +1626,14 @@ updateEdgeTrackingFloydWarshall ::
   Int ->
   -- | Edge information: @to@ vertex.
   Int ->
-  -- | Edge information: @weight@ vertex.
+  -- | Edge information: @weight@.
   w ->
   -- | Distance array in one-dimensional index.
   m ()
 updateEdgeTrackingFloydWarshall mat prev nVerts undefW a b w = do
   stToPrim $ updateEdgeFloydWarshallST True mat prev nVerts undefW a b w
 
--- O(2) update floyd warshall on edge weight decreasement or edge addition
+-- O(2) update floyd warshall on edge weight decrease or edge addition
 -- https://www.slideshare.net/chokudai/arc035 - C
 {-# INLINEABLE updateEdgeFloydWarshallST #-}
 updateEdgeFloydWarshallST ::
@@ -1734,7 +1734,7 @@ constructPathFromRootMat ::
   VU.Vector Int
 constructPathFromRootMat parents source = VU.reverse . constructPathToRootMat parents source
 
--- | \(O(n)\) Given a NxN predecessor matrix(created with `trackingFloydWarshall`), reconstructs a
+-- | \(O(n)\) Given a NxN predecessor matrix (created with `trackingFloydWarshall`), reconstructs a
 -- path from a vertex to the root.
 --
 -- ==== Constraints

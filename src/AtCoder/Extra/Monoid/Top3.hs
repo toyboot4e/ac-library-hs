@@ -27,7 +27,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (length)
 
--- | Two biggest values.
+-- | Three biggest values.
 --
 -- @since 1.6.0.0
 newtype Top3 a = Top3 (Top3Repr a)
@@ -69,7 +69,7 @@ new a b c = case compare a b of
     EQ -> Top3 (b, c, a)
     LT -> Top3 (c, b, a)
 
--- | \(O(1)\) Creates a `Top3` without soritng.
+-- | \(O(1)\) Creates a `Top3` without sorting.
 --
 -- @since 1.6.0.0
 {-# INLINE unsafeNew #-}

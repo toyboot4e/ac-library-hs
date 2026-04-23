@@ -234,7 +234,7 @@ isLeader dsu v = do
 size :: (HasCallStack, PrimMonad m) => DsuSemigroup (PrimState m) a -> Int -> m Int
 size dsu = Dsu.size (dsuDm dsu)
 
--- | \O(n)\) Divides the graph into connected components and returns the vector of them.
+-- | \(O(n)\) Divides the graph into connected components and returns the vector of them.
 --
 -- More precisely, it returns a vector of the "vector of the vertices in a connected component".
 -- Both of the orders of the connected components and the vertices are undefined.

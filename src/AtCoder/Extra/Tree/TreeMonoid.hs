@@ -183,7 +183,7 @@ fromVerts ::
   m (TreeMonoid a (PrimState m))
 fromVerts hld commuteTM xs_ = stToPrim $ fromVertsST hld commuteTM xs_
 
--- | \(O(n)\) Creates a `TreeMonoid` with weignts on edges. The don't have to be bi-directed: only
+-- | \(O(n)\) Creates a `TreeMonoid` with weights on edges. They don't have to be bi-directed: only
 -- one of \((u, v, w)\) or \((v, u, w)\) is needed.
 --
 -- @since 1.1.0.0

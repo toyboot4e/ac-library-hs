@@ -206,7 +206,7 @@ insert :: (HasCallStack, PrimMonad m, VU.Unbox a) => IntMap (PrimState m) a -> I
 insert im k v = stToPrim $ insertST im k v
 
 -- | \(O(\log n)\) Inserts a \((k, v)\) pair into the map. If an entry with the same key already
--- exists, it overwritten with \(f(v_{\mathrm{new}}, v_{\mathrm{old}})\).
+-- exists, it is overwritten with \(f(v_{\mathrm{new}}, v_{\mathrm{old}})\).
 --
 -- @since 1.1.0.0
 {-# INLINE insertWith #-}

@@ -290,7 +290,7 @@ merge4 seq (Handle hA) (Handle hB) (Handle hC) (Handle hD) = stToPrim $ do
   VGM.unsafeWrite hC 0 P.undefIndex
   VGM.unsafeWrite hD 0 P.undefIndex
 
--- | Amortized \(O(\log n)\). Splits a sequences into two: \([0, k), [k, n)\). The handle will
+-- | Amortized \(O(\log n)\). Splits a sequence into two: \([0, k), [k, n)\). The handle will
 -- point to the left sequence. Returns the right sequence handle.
 --
 -- ==== Constraints
@@ -305,7 +305,7 @@ split seq (Handle hRoot) k = stToPrim $ do
   VGM.unsafeWrite hRoot 0 r1
   newHandle r2
 
--- | Amortized \(O(\log n)\). Splits a sequences into three: \([0, l), [l, r), [r, n)\). The handle
+-- | Amortized \(O(\log n)\). Splits a sequence into three: \([0, l), [l, r), [r, n)\). The handle
 -- will point to the leftmost sequence. Returns the middle and the right sequence handles.
 --
 -- ==== Constraints
@@ -320,7 +320,7 @@ split3 seq (Handle hRoot) l r = stToPrim $ do
   VGM.unsafeWrite hRoot 0 r1
   (,) <$> newHandle r2 <*> newHandle r3
 
--- | Amortized \(O(\log n)\). Splits a sequences into four: \([0, i), [i, j), [j, k), [k, n)\).
+-- | Amortized \(O(\log n)\). Splits a sequence into four: \([0, i), [i, j), [j, k), [k, n)\).
 -- The handle will point to the leftmost sequence. Returns the non-leftmost sequence handles.
 --
 -- ==== Constraints

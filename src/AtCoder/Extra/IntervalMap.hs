@@ -314,7 +314,7 @@ insertM (IntervalMap dim) l0 r0 x onAdd onDel
               pure (l, r)
           -- (iii): intersecting
           | x' == x -> do
-              -- insersecting interval with the same value: merge into one.
+              -- intersecting interval with the same value: merge into one.
               onDel l' r' x'
               stToPrim $ do
                 IM.delete_ dim l'
@@ -330,7 +330,7 @@ insertM (IntervalMap dim) l0 r0 x onAdd onDel
                 IM.insert dim r (r', x')
                 pure (l, r)
           | otherwise -> do
-              -- insersecting interval with a different value: delete.
+              -- intersecting interval with a different value: delete.
               onDel l' r' x'
               onAdd l' l x'
               stToPrim $ do

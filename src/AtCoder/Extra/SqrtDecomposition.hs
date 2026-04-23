@@ -111,10 +111,10 @@ foldMapWithM ::
   Int ->
   -- | Merges function for output values.
   (a -> a -> a) ->
-  -- | Function: @readFull@ function that a takes target block index and returns a monoid value for
+  -- | Function: @readFull@ function that takes a target block index and returns a monoid value for
   -- it.
   (Int -> m a) ->
-  -- | Function: @readPart@ function that a takes target block index, a half-open interval in it,
+  -- | Function: @readPart@ function that takes a target block index, a half-open interval in it,
   -- and returns the output value for it.
   (Int -> Int -> Int -> m a) ->
   -- | Input: \(l\).
@@ -157,10 +157,10 @@ foldM ::
   (Monad m) =>
   -- | Context: block length.
   Int ->
-  -- | Function: @foldFull@ function that a takes target block index and returns a monoid value for
+  -- | Function: @foldFull@ function that takes a target block index and returns a monoid value for
   -- it.
   (a -> Int -> m a) ->
-  -- | Function: @foldPart@ function that a takes target block index, a half-open interval in it
+  -- | Function: @foldPart@ function that takes a target block index, a half-open interval in it
   -- and returns a monoid value for it.
   (a -> Int -> Int -> Int -> m a) ->
   -- | Initial folding value.

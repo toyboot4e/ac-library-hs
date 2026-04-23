@@ -1,7 +1,7 @@
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE TypeFamilies #-}
 
--- | Three biggest values.
+-- | Four biggest values.
 --
 -- @since 1.6.0.0
 module AtCoder.Extra.Monoid.Top4
@@ -27,7 +27,7 @@ import Data.Vector.Unboxed.Mutable qualified as VUM
 import GHC.Stack (HasCallStack)
 import Prelude hiding (length)
 
--- | Two biggest values.
+-- | Four biggest values.
 --
 -- @since 1.6.0.0
 newtype Top4 a = Top4 (Top4Repr a)
@@ -60,7 +60,7 @@ new a b c d =
       (!b3, !c3) = if b2 >= c2 then (b2, c2) else (c2, b2)
    in Top4 (a2, b3, c3, d2)
 
--- | \(O(1)\) Creates a `Top4` without soritng.
+-- | \(O(1)\) Creates a `Top4` without sorting.
 --
 -- @since 1.6.0.0
 {-# INLINE unsafeNew #-}

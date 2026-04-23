@@ -409,7 +409,7 @@ invRaw (Matrix h w vec) = runST $ do
     !_ = ACIA.runtimeAssert (h == w) $ "AtCoder.Extra.Semigroup.Matrix.inv: given non-square matrix of size " ++ show (h, w)
     n = h
 
--- | \(O(hw \min(h, w))\) Returns the rank of the matrix.
+-- | \(O(hw \min(h, w))\) Returns the determinant of the matrix.
 --
 -- @since 1.1.1.0
 {-# INLINE detMod #-}
@@ -478,7 +478,7 @@ detMod m (Matrix h w vecA) = runST $ do
     !n = h
     !bt = BT.new32 $ fromIntegral m
 
--- | \(O(hw \min(h, w))\) Returns the rank of the matrix.
+-- | \(O(hw \min(h, w))\) Returns the determinant of the matrix.
 --
 -- @since 1.1.1.0
 {-# INLINE detMint #-}

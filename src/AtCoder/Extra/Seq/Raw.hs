@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_HADDOCK hide #-}
 
--- | Base module for implementing dynamic sequences. It internaly uses a splay tree and user has to
+-- | Base module for implementing dynamic sequences. It internally uses a splay tree and user has to
 -- track the root node change.
 --
 -- @since 1.2.0.0
@@ -413,7 +413,7 @@ splitLrST seq@Seq {..} root = do
 -- call.
 --
 -- ==== Constraints
--- - \(0 \le \lt r \le n\). Note that the interval must have positive length.
+-- - \(0 \le l \lt r \le n\). Note that the interval must have positive length.
 --
 -- @since 1.2.0.0
 {-# INLINEABLE sliceST #-}
@@ -567,7 +567,7 @@ prodMaybeST seq@Seq {sSeq} root l r
 -- | Amortized \(O(\log n)\).
 --
 -- ==== Constraint
--- - \(0 \le \lt r \le n\). Note that the interval must have positive length.
+-- - \(0 \le l \lt r \le n\). Note that the interval must have positive length.
 {-# INLINEABLE unsafeProdST #-}
 unsafeProdST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> Int -> Int -> ST s (a, P.Index)
 unsafeProdST seq@Seq {..} root l r = do
@@ -933,7 +933,7 @@ ilowerBoundProdM seq root f = do
       (!r, !_, !root') <- imaxRightProdM seq root f
       pure (r, root')
 
--- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
+-- | Amortized \(O(\log n)\). Given a monotonic sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
 --
 -- @since 1.2.0.0
@@ -950,7 +950,7 @@ isplitMaxRightST ::
   ST s (P.Index, P.Index)
 isplitMaxRightST seq root f = stToPrim $ isplitMaxRightM seq root (\i x -> pure (f i x))
 
--- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
+-- | Amortized \(O(\log n)\). Given a monotonic sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
 --
 -- @since 1.2.0.0
@@ -972,7 +972,7 @@ isplitMaxRightM seq@Seq {..} root f
       (!_, !c, !_) <- imaxRightM seq root f
       if P.nullIndex c
         then stToPrim $ do
-          -- `f` does hot hold
+          -- `f` does not hold
           splayST seq root True
           pure (P.undefIndex, root)
         else stToPrim $ do
@@ -989,7 +989,7 @@ isplitMaxRightM seq@Seq {..} root f
               updateNodeST seq c
               pure (c, right)
 
--- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
+-- | Amortized \(O(\log n)\). Given a monotonic sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
 --
 -- @since 1.2.0.0
@@ -1006,7 +1006,7 @@ isplitMaxRightProdST ::
   ST s (P.Index, P.Index)
 isplitMaxRightProdST seq root f = stToPrim $ isplitMaxRightProdM seq root (\i x -> pure (f i x))
 
--- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
+-- | Amortized \(O(\log n)\). Given a monotonic sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
 --
 -- @since 1.2.0.0
@@ -1029,7 +1029,7 @@ isplitMaxRightProdM seq@Seq {..} root f
       (!_, !c, !_) <- imaxRightProdM seq root f
       if P.nullIndex c
         then stToPrim $ do
-          -- `f` does hot hold
+          -- `f` does not hold
           splayST seq root True
           pure (P.undefIndex, root)
         else stToPrim $ do
@@ -1046,7 +1046,7 @@ isplitMaxRightProdM seq@Seq {..} root f
               updateNodeST seq c
               pure (c, right)
 
--- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v\)
+-- | Amortized \(O(\log n)\). Given a monotonic sequence, returns the rightmost node \(v\)
 -- where \(f(v)\) holds for every \(v_i (0 \le i \lt k)\). Note that \(f\) works for a single
 -- node, not a monoid product.
 --
@@ -1067,7 +1067,7 @@ imaxRightST ::
   ST s (Int, P.Index, P.Index)
 imaxRightST seq root0 f = stToPrim $ imaxRightM seq root0 (\i x -> pure (f i x))
 
--- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
+-- | Amortized \(O(\log n)\). Given a monotonic sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \(v_i (0 \le i \le k)\). Note that \(f\) works for a single
 -- node, not a monoid product.
 --
@@ -1109,7 +1109,7 @@ imaxRightM seq@Seq {..} root0 f = do
   stToPrim $ splayST seq root' True
   pure (r, yes, root')
 
--- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
+-- | Amortized \(O(\log n)\). Given a monotonic sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
 --
 -- ==== Constraints
@@ -1129,7 +1129,7 @@ imaxRightProdST ::
   ST s (Int, P.Index, P.Index)
 imaxRightProdST seq root0 f = imaxRightProdM seq root0 (\i x -> pure (f i x))
 
--- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
+-- | Amortized \(O(\log n)\). Given a monotonic sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
 --
 -- ==== Constraints
@@ -1230,7 +1230,7 @@ splitMaxRightWithST seq@Seq {..} root f
       (!c, !_) <- maxRightWithST seq root f
       if P.nullIndex c
         then do
-          -- `f` does hot hold
+          -- `f` does not hold
           splayST seq root True
           pure (P.undefIndex, root)
         else do
@@ -1247,7 +1247,7 @@ splitMaxRightWithST seq@Seq {..} root f
               updateNodeST seq c
               pure (c, right)
 
--- | Amortized \(O(\log n)\). Given a monotonious sequence, returns the rightmost node \(v_k\)
+-- | Amortized \(O(\log n)\). Given a monotonic sequence, returns the rightmost node \(v_k\)
 -- where \(f(v)\) holds for every \([0, i) (0 \le i \lt k)\).
 --
 -- ==== Constraints
@@ -1278,7 +1278,7 @@ maxRightWithST seq@Seq {..} root0 f = do
   stToPrim $ splayST seq root' True
   pure (yes, root')
 
--- NOTE(pref): inlining node functions are important for the speed
+-- NOTE(perf): inlining node functions are important for the speed
 
 -- | \(O(1)\) Recomputes the node size and the monoid product.
 --
@@ -1355,7 +1355,7 @@ reverseNodeST seq@Seq {..} i = do
 --
 -- @since 1.2.1.0
 {-# INLINE propNodeST #-}
--- NOTE(pref): Although this function is large, inlining it needs for the speed.
+-- NOTE(perf): Although this function is large, inlining it needs for the speed.
 propNodeST :: (HasCallStack, SegAct f a, Eq f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> ST s ()
 propNodeST seq@Seq {..} i = do
   -- action
@@ -1381,7 +1381,7 @@ propNodeST seq@Seq {..} i = do
       -- propagate new reverse or cancel:
       reverseNodeST seq r
 
--- | Amortized \(O(\log n)\). Propagetes from the root to the given node.
+-- | Amortized \(O(\log n)\). Propagates from the root to the given node.
 {-# INLINE propNodeFromRootST #-}
 propNodeFromRootST :: (HasCallStack, SegAct f a, VU.Unbox f, VU.Unbox a, Monoid a) => Seq s f a -> P.Index -> ST s ()
 propNodeFromRootST Seq {..} = inner

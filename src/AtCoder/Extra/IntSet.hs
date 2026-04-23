@@ -270,7 +270,7 @@ deleteMin is = stToPrim $ deleteMinST is
 deleteMax :: (PrimMonad m) => IntSet (PrimState m) -> m (Maybe Int)
 deleteMax is = stToPrim $ deleteMaxST is
 
--- | \(O(n \log n)\) Enumerates the keys in the map.
+-- | \(O(n \log n)\) Enumerates the keys in the set.
 --
 -- @since 1.1.0.0
 {-# INLINE keys #-}

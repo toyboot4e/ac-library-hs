@@ -155,7 +155,7 @@ mulMod mont a b = reduce mont $! fromIntegral a * fromIntegral b
 powMod :: (HasCallStack) => Montgomery64 -> Word64 -> Int -> Word64
 powMod mont x0 n0 = inner n0 (encode mont 1) x0
   where
-    !_ = ACIA.runtimeAssert (0 <= n0) $ "AtCoder.Extra.Math.Montgomery64.powMod: given negative exponential `n`: " ++ show n0 ++ show "`"
+    !_ = ACIA.runtimeAssert (0 <= n0) $ "AtCoder.Extra.Math.Montgomery64.powMod: given negative exponent `n`: " ++ show n0 ++ "`"
     inner :: Int -> Word64 -> Word64 -> Word64
     inner !n !r !y
       | n == 0 = r

@@ -293,7 +293,7 @@ primeFactorsUnsorted n
 
       (!n', !iWrite0) <- runDiv n 0 (2 : [3, 5 .. 97])
 
-      -- for bigger prime numbers, use Polland's rho algorithm:
+      -- for bigger prime numbers, use Pollard's rho algorithm:
       let runRho !gen !cur !iWrite
             | cur > 1 = case findPrimeFactor gen cur of
                 (Just p, !gen') -> do
@@ -306,7 +306,7 @@ primeFactorsUnsorted n
             | otherwise = pure iWrite
 
       -- NOTE: The seed value is fixed here. We could decide it at runtime for possibly faster
-      -- submissions on TLE redjuge, however, we're rather preferring deterministic result:
+      -- submissions on TLE rejudge, however, we're rather preferring deterministic result:
       len <- runRho (mkStdGen 123456789) n' iWrite0
       pure $ VUM.take len buf
   where
@@ -387,7 +387,7 @@ divisorsUnsorted x = VU.create $ do
 {-# INLINEABLE primitiveRoot #-}
 primitiveRoot :: (HasCallStack) => Int -> Int
 primitiveRoot x
-  | not (isPrime x) = error $ "AtCoder.Extra.Math.primitiveRoot: give non-prime value `" ++ show x ++ "`"
+  | not (isPrime x) = error $ "AtCoder.Extra.Math.primitiveRoot: given non-prime value `" ++ show x ++ "`"
   | x == 2 = 1
 primitiveRoot x = tryRandom $ mkStdGen 123456789
   where
