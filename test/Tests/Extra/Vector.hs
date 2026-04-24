@@ -4,7 +4,7 @@ import AtCoder.Extra.Vector qualified as EV
 import Control.Monad.ST (runST)
 import Data.Functor.Identity (Identity, runIdentity)
 import Data.List qualified as L
-import Data.Semigroup (Down (..))
+import Data.Ord (Down (..), comparing)
 import Data.Vector qualified as V
 import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
