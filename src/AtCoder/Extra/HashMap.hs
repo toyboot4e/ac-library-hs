@@ -77,6 +77,7 @@ module AtCoder.Extra.HashMap
 where
 
 import AtCoder.Internal.Assert qualified as ACIA
+import AtCoder.Internal.Bit qualified as ACIB
 import Control.Monad (void, when)
 import Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import Control.Monad.ST (ST)
@@ -283,8 +284,7 @@ unsafeAssocs hm = stToPrim $ unsafeAssocsST hm
 {-# INLINEABLE newST #-}
 newST :: (VU.Unbox a) => Int -> ST s (HashMap s a)
 newST n = do
-  let !k0 = 1
-  let !k = until (>= 2 * n) (* 2) k0
+  let !k = max 1 $ ACIB.bitCeil (2 * n) -- until (>= 2 * n) (* 2) 1
   -- we need extra space
   let !maxCapHM = k `div` 2
   restCapHM <- VUM.replicate 1 maxCapHM
