@@ -1535,6 +1535,7 @@ newFloydWarshallST ::
   ST s (VUM.MVector s w, VUM.MVector s Int)
 newFloydWarshallST !trackPrev !nVerts !edges !undefW = do
   !dist <- VUM.replicate @_ @w (nVerts * nVerts) undefW
+  -- prev[from][to]: the predecessor of `to` on the shortest path from `from` to `to`
   !prev <-
     if trackPrev
       then VUM.replicate @_ @Int (nVerts * nVerts) (-1)
@@ -1658,7 +1659,9 @@ updateEdgeFloydWarshallST trackPrev mat prev nVerts undefW a b dw = do
       for_ [0 .. nVerts - 1] $ \to -> do
         wOld <- VGM.read mat $! idx from to
 
-        w' <- do
+        -- w1: from -> ... -> a -> b -> ... -> to
+        -- w2: from -> ... -> b -> a -> ... -> to
+        (!w', !useW1) <- do
           ia <- VGM.read mat $! idx from a
           bj <- VGM.read mat $! idx b to
           let w1
@@ -1673,15 +1676,23 @@ updateEdgeFloydWarshallST trackPrev mat prev nVerts undefW a b dw = do
 
           pure $!
             if
-              | w1 == undefW -> w2
-              | w2 == undefW -> w1
-              | otherwise -> min w1 w2
+              | w1 == undefW -> (w2, False)
+              | w2 == undefW -> (w1, True)
+              | w1 <= w2 -> (w1, True)
+              | otherwise -> (w2, False)
 
         when (w' /= undefW && (wOld == undefW || w' < wOld)) $ do
           VGM.write mat (idx from to) w'
           when trackPrev $ do
-            VGM.write prev (idx from to) =<< VGM.read prev (idx b to)
-            VGM.write prev (idx from b) a
+            if useW1
+              then do
+                -- path: from -> ... -> a -> b -> ... -> to
+                VGM.write prev (idx from to) =<< VGM.read prev (idx b to)
+                VGM.write prev (idx from b) a
+              else do
+                -- path: from -> ... -> b -> a -> ... -> to
+                VGM.write prev (idx from to) =<< VGM.read prev (idx a to)
+                VGM.write prev (idx from a) b
   where
     idx !from !to = nVerts * from + to
 
