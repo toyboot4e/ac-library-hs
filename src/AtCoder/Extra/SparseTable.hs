@@ -51,11 +51,7 @@ data SparseTable a = SparseTable
 -- | \(O(n \log n)\) Creates `SparseTable` for a sequence of ideomponent monoid values.
 new :: (Monoid a, VU.Unbox a) => VU.Vector a -> SparseTable a
 new xs
-  | VU.null xs =
-      SparseTable
-        { nSt = 0,
-          dataSt = V.singleton (VU.singleton mempty)
-        }
+  | VU.null xs = SparseTable { nSt = 0, dataSt = V.empty}
 new xs = runST $ do
   let nSt = VU.length xs
   let h = ACIB.ceilingLog2 nSt + 1
@@ -80,7 +76,7 @@ new xs = runST $ do
   dataSt <- V.mapM VU.unsafeFreeze vec
   pure SparseTable {..}
 
--- | \(O(1)\) Calculates \(\Pi{m_l, .., m_{r_1}}\) for ideomponent monoid.
+-- | \(O(1)\) Calculates \(\Pi_{i \in [l, r)} {m_i}\) for ideomponent monoid.
 prod :: (Monoid a, VU.Unbox a) => SparseTable a -> Int -> Int -> a
 prod SparseTable {..} l r = case r - l of
   0 -> mempty
