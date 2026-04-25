@@ -548,8 +548,8 @@ swapST :: (HasCallStack, VU.Unbox a) => Queue s a -> Int -> Int -> ST s ()
 swapST Queue {..} i j = do
   l <- VGM.unsafeRead posQ 0
   r <- VGM.unsafeRead posQ 1
-  let !_ = ACIA.checkIndexBounded "AtCoder.Internal.Queue.swapST" i l r
-  let !_ = ACIA.checkIndexBounded "AtCoder.Internal.Queue.swapST" j l r
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Queue.swapST" i (r - l)
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Queue.swapST" j (r - l)
   VGM.swap vecQ (l + i) (l + j)
 
 {-# INLINEABLE swapDeleteST #-}
@@ -557,7 +557,7 @@ swapDeleteST :: (HasCallStack, VU.Unbox a) => Queue s a -> Int -> ST s a
 swapDeleteST Queue {..} i = do
   l <- VGM.unsafeRead posQ 0
   r <- VGM.unsafeRead posQ 1
-  let !_ = ACIA.checkIndexBounded "AtCoder.Internal.Queue.swapDeleteST" i l r
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Queue.swapDeleteST" i (r - l)
   xr <- VGM.read vecQ (r - 1)
   xi <- VGM.exchange vecQ (l + i) xr
   VGM.unsafeWrite posQ 1 (r - 1)
@@ -568,7 +568,7 @@ swapDeleteST_ :: (HasCallStack, VU.Unbox a) => Queue s a -> Int -> ST s ()
 swapDeleteST_ Queue {..} i = do
   l <- VGM.unsafeRead posQ 0
   r <- VGM.unsafeRead posQ 1
-  let !_ = ACIA.checkIndexBounded "AtCoder.Internal.Queue.swapDeleteST_" i l r
+  let !_ = ACIA.checkIndex "AtCoder.Internal.Queue.swapDeleteST_" i (r - l)
   xr <- VGM.read vecQ (r - 1)
   VGM.write vecQ (l + i) xr
   VGM.unsafeWrite posQ 1 (r - 1)
