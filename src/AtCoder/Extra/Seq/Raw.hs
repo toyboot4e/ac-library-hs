@@ -248,8 +248,8 @@ freeSubtreeST Seq {lSeq, rSeq, poolSeq} c0
             unless (P.nullIndex cl) (inner cl)
             cr <- VGM.read rSeq (coerce c)
             unless (P.nullIndex cr) (inner cr)
+            P.free poolSeq c
       inner c0
-      P.free poolSeq c0
 
 -- -------------------------------------------------------------------------------------------------
 -- Metadata
