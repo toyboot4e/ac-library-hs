@@ -102,7 +102,7 @@ maxRight tbl@SparseTable {nSt} l p
   | l == nSt = nSt
   | otherwise = B.maxRight l nSt (\r -> p (prod tbl l r))
   where
-    !_ = ACIA.checkIndex "AtCoder.Extra.SparseTable.maxRight" l nSt
+    !_ = ACIA.runtimeAssert (0 <= l && l <= nSt) $ "AtCoder.Extra.SparseTable.maxRight: given invalid index `" ++ show l ++ "` over length `" ++ show nSt ++ "`"
 
 -- | \(O(log n)\) Runs a bisection method over a monotonious sequence of ideomponent monoids from
 -- right to left.
@@ -111,4 +111,4 @@ minLeft tbl@SparseTable {nSt} r p
   | r == 0 = 0
   | otherwise = B.minLeft 0 r (\l -> p (prod tbl l r))
   where
-    !_ = ACIA.checkIndex "AtCoder.Extra.SparseTable.minLeft" r nSt
+    !_ = ACIA.runtimeAssert (0 <= r && r <= nSt) $ "AtCoder.Extra.SparseTable.minLeft: given invalid index `" ++ show r ++ "` over length `" ++ show nSt ++ "`"
