@@ -568,9 +568,9 @@ delete_ seq (Handle hRoot) i = stToPrim $ do
 detach :: (HasCallStack, PrimMonad m, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq (PrimState m) f a -> Handle (PrimState m) -> Int -> m (Handle (PrimState m))
 detach seq (Handle hRoot) i = stToPrim $ do
   root <- VGM.unsafeRead hRoot 0
-  root' <- Seq.detachST seq root i
+  (!m, !root') <- Seq.detachST seq root i
   VGM.unsafeWrite hRoot 0 root'
-  newHandle root
+  newHandle m
 
 -- -------------------------------------------------------------------------------------------------
 -- Bisection methods

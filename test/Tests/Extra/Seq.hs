@@ -346,10 +346,33 @@ prop_lowerBound xRef xs_ = do
         Seq.ilowerBound s root (\_ x -> x <= Sum xRef)
    in expected QC.=== res
 
+prop_detach :: QC.Gen QC.Property
+prop_detach = do
+  n <- QC.chooseInt (1, 64)
+  xs <- VU.fromListN n <$> QC.vectorOf n (Sum <$> QC.chooseInt (0, 1000))
+  k <- QC.chooseInt (0, n - 1)
+  pure . QCM.monadicIO $ do
+    seq <- QCM.run $ Seq.new @_ @() @(Sum Int) (n + 1)
+    h <- QCM.run $ Seq.newSeq seq xs
+
+    detached <- QCM.run $ Seq.detach seq h k
+
+    -- detached node should hold xs[k]
+    v <- QCM.run $ Seq.read seq detached 0
+    QCM.assertWith (v == xs VU.! k) $
+      "detached value: got " ++ show v ++ ", expected " ++ show (xs VU.! k)
+
+    -- remaining sequence should be xs with index k removed
+    remaining <- QCM.run $ Seq.freeze seq h
+    let expected = VU.ifilter (\i _ -> i /= k) xs
+    QCM.assertWith (remaining == expected) $
+      "remaining: got " ++ show remaining ++ ", expected " ++ show expected
+
 tests :: [TestTree]
 tests =
   [ unit_empty,
     unsafePerformIO spec_boundaries,
+    QC.testProperty "detach" prop_detach,
     QC.testProperty "random test" prop_randomTest,
     QC.testProperty "bisect index" prop_bisectIndex,
     QC.testProperty "newSeq preserves the ordering" prop_newSeq,

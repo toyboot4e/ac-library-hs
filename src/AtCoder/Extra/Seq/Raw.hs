@@ -710,12 +710,11 @@ deleteST_ seq root i = do
 --
 -- @since 1.2.0.0
 {-# INLINEABLE detachST #-}
-detachST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> Int -> ST s P.Index
+detachST :: (HasCallStack, SegAct f a, Eq f, Monoid f, VU.Unbox f, Monoid a, VU.Unbox a) => Seq s f a -> P.Index -> Int -> ST s (P.Index, P.Index)
 detachST seq root i = do
   (!l, !m, !r) <- split3ST seq root i (i + 1)
-  freeNodeST seq m
   root' <- mergeST seq l r
-  pure root'
+  pure (m, root')
 
 -- -------------------------------------------------------------------------------------------------
 -- Balancing
