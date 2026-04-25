@@ -136,7 +136,7 @@ size pool = stToPrim $ sizeST pool
 -- ==== Constraints
 -- - The number of elements must not exceed the `capacity`.
 --
--- @since 1.2.0.0
+-- @since 1.6.0.0
 {-# INLINE alloc #-}
 alloc :: (HasCallStack, PrimMonad m, VU.Unbox a) => Pool (PrimState m) a -> a -> m Index
 alloc pool x = stToPrim $ allocST pool x
@@ -254,7 +254,9 @@ sizeST Pool {..} = do
 allocST :: (HasCallStack, VU.Unbox a) => Pool s a -> a -> ST s Index
 allocST Pool {..} !x = do
   B.popBack freePool >>= \case
-    Just i -> pure i
+    Just i -> do
+      VGM.write dataPool (coerce i) x
+      pure i
     Nothing -> do
       Index i <- VGM.unsafeRead nextPool 0
       if i < VGM.length dataPool
