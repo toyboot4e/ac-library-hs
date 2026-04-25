@@ -79,18 +79,18 @@ import GHC.Stack (HasCallStack)
 --
 -- >>> Pdsu.merge_ dsu 2 0 (Sum 2) -- p(2) - p(0) := Sum 2
 -- >>> Pdsu.leader dsu 0
--- 0
+-- 2
 --
 -- Potential values can be retrieved with `pot`:
 --
--- >>> Pdsu.pot dsu 0
+-- >>> Pdsu.pot dsu 2
 -- Sum {getSum = 0}
 --
 -- >>> Pdsu.pot dsu 1
--- Sum {getSum = 1}
+-- Sum {getSum = -1}
 --
--- >>> Pdsu.pot dsu 2
--- Sum {getSum = 2}
+-- >>> Pdsu.pot dsu 0
+-- Sum {getSum = -2}
 --
 -- Difference of potentials in the same group can be retrieved with `diff`:
 --
