@@ -20,7 +20,7 @@
 --
 -- @1.6.0.0
 module AtCoder.Extra.SparseTable
-  ( SparseTable,
+  ( SparseTable (..),
     new,
     prod,
     maxRight,
@@ -28,9 +28,9 @@ module AtCoder.Extra.SparseTable
   )
 where
 
+import AtCoder.Extra.Bisect qualified as B
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIB
-import AtCoder.Extra.Bisect qualified as B
 import Control.Monad.ST (runST)
 import Data.Bits (bit)
 import Data.Foldable (for_)
@@ -46,12 +46,19 @@ data SparseTable a = SparseTable
     -- | data[i][j] stores monoid product of length 2^i at j.
     dataSt :: !(V.Vector (VU.Vector a))
   }
+  deriving (Show, Eq)
 
 -- | \(O(n \log n)\) Creates `SparseTable` for a sequence of ideomponent monoid values.
 new :: (Monoid a, VU.Unbox a) => VU.Vector a -> SparseTable a
+new xs
+  | VU.null xs =
+      SparseTable
+        { nSt = 0,
+          dataSt = V.singleton (VU.singleton mempty)
+        }
 new xs = runST $ do
   let nSt = VU.length xs
-  let h = ACIB.ceilingLog2 nSt
+  let h = ACIB.ceilingLog2 nSt + 1
 
   vec <- V.unfoldrExactN h (VUM.splitAt nSt) <$> VUM.replicate (h * nSt) mempty
   -- TODO: use VUM.copy
@@ -77,7 +84,7 @@ new xs = runST $ do
 prod :: (Monoid a, VU.Unbox a) => SparseTable a -> Int -> Int -> a
 prod SparseTable {..} l r = case r - l of
   0 -> mempty
-  1 -> dataSt VG.! l
+  1 -> dataSt VG.! 0 VG.! l
   _ ->
     -- The two intervals cover [l, r), maybe making a overlap
     let !lx = dataSt VG.! logLen VG.! l
@@ -91,17 +98,17 @@ prod SparseTable {..} l r = case r - l of
 -- | \(O(log n)\) Runs a bisection method over a monotonious sequence of ideomponent monoids from
 -- left to right.
 maxRight :: (Monoid a, VU.Unbox a) => SparseTable a -> Int -> (a -> Bool) -> Int
-maxRight SparseTable {..} l p
-  | l == n = n
-  | otherwise = B.maxRight l nSt p
+maxRight tbl@SparseTable {nSt} l p
+  | l == nSt = nSt
+  | otherwise = B.maxRight l nSt (\r -> p (prod tbl l r))
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.SparseTable.maxRight" l nSt
 
 -- | \(O(log n)\) Runs a bisection method over a monotonious sequence of ideomponent monoids from
 -- right to left.
 minLeft :: (Monoid a, VU.Unbox a) => SparseTable a -> Int -> (a -> Bool) -> Int
-minLeft SparseTable {..} r p
+minLeft tbl@SparseTable {nSt} r p
   | r == 0 = 0
-  | otherwise = B.minLeft 0 r p
+  | otherwise = B.minLeft 0 r (\l -> p (prod tbl l r))
   where
     !_ = ACIA.checkIndex "AtCoder.Extra.SparseTable.minLeft" r nSt

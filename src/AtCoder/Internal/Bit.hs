@@ -4,13 +4,15 @@
 --
 -- ==== __Example__
 --
--- `bitCeil`:
+-- Ceiling functions:
 --
 -- >>> map bitCeil [0..4]
 -- [1,1,2,4,4]
 --
 -- >>> map ceilingLog2 [0..4]
 -- [0,0,1,2,2]
+--
+-- Flooring functions:
 --
 -- >>> map bitFloor [1..5]
 -- [1,2,2,4,4]
