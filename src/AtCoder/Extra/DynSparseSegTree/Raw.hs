@@ -130,16 +130,19 @@ newNodeST DynSparseSegTree {..} idx !x = do
 
 -- | \(O(n)\)
 --
--- @since 1.2.1.0
+-- @since 1.6.0.0
 {-# INLINE freeSubtreeST #-}
 freeSubtreeST :: (HasCallStack, Monoid a, VU.Unbox a) => DynSparseSegTree s a -> P.Index -> ST s ()
-freeSubtreeST DynSparseSegTree {..} i = do
-  let inner c = do
-        cl <- VGM.read lDsst (coerce c)
-        cr <- VGM.read rDsst (coerce c)
-        unless (P.nullIndex cl) $ P.free poolDsst cl
-        unless (P.nullIndex cr) $ P.free poolDsst cr
-  inner i
+freeSubtreeST DynSparseSegTree {..} i
+  | P.nullIndex i = pure ()
+  | otherwise = do
+      let inner c = do
+            cl <- VGM.read lDsst (coerce c)
+            unless (P.nullIndex cl) (inner cl)
+            cr <- VGM.read rDsst (coerce c)
+            unless (P.nullIndex cr) (inner cr)
+            P.free poolDsst c
+      inner i
 
 -- | \(O(\log L)\)
 --
