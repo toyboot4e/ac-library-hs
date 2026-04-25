@@ -3,7 +3,7 @@ import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/rectangle_sum
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/rectangle_sum
 -- #wavelet-matrix-2d
 main :: IO ()
 main = do

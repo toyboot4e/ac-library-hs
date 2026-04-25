@@ -17,7 +17,7 @@ modInt = M.unsafeNew . fromIntegral
 show4 :: (Mint, Mint, Mint, Mint) -> BSB.Builder
 show4 (!a, !b, !c, !d) = unwordsBSB (VU.map M.val (VU.fromListN 4 [a, b, c, d]))
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/unionfind_with_potential_non_commutative_group
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/unionfind_with_potential_non_commutative_group
 main :: IO ()
 main = do
   (!n, !q) <- ints2

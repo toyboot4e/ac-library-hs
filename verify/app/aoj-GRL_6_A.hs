@@ -2,7 +2,7 @@ import AtCoder.MaxFlow qualified as MF
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A
+-- competitive-verifier: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_A
 -- max flow
 main :: IO ()
 main = do

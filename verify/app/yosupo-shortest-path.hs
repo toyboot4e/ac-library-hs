@@ -2,7 +2,7 @@ import AtCoder.Extra.Graph qualified as Gr
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/shortest_path
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/shortest_path
 main :: IO ()
 main = do
   (!n, !m, !src, !sink) <- ints4

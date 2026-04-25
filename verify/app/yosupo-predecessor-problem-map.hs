@@ -6,7 +6,7 @@ import Data.Foldable (for_)
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/predecessor_problem
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/predecessor_problem
 main :: IO ()
 main = do
   (!n, !q) <- ints2

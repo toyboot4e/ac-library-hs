@@ -3,7 +3,7 @@ import Data.ByteString qualified as BS
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/enumerate_primes
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/enumerate_primes
 main :: IO ()
 main = do
   (!n, !a, !b) <- ints3

@@ -3,7 +3,7 @@ import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/point_add_range_sum
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/point_add_range_sum
 main :: IO ()
 main = do
   (!_, !q) <- ints2

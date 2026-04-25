@@ -2,7 +2,7 @@ import Data.ByteString.Char8 qualified as BS
 import Data.Maybe (fromJust)
 import Data.Vector qualified as V
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/addition_of_big_integers
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/addition_of_big_integers
 main :: IO ()
 main = do
   (!t, !_) <- fromJust . BS.readInt <$> BS.getLine

@@ -3,7 +3,7 @@ import Data.ByteString.Builder qualified as BSB
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_B
+-- competitive-verifier: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_B
 main :: IO ()
 main = do
   (!n, !m, !src) <- ints3

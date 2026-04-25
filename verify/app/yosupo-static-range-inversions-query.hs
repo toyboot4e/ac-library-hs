@@ -10,7 +10,7 @@ import Data.Vector.Generic qualified as VG
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/static_range_inversions_query
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/static_range_inversions_query
 main :: IO ()
 main = do
   (!n, !q) <- ints2

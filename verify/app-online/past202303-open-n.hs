@@ -2,7 +2,7 @@ import AtCoder.Convolution qualified as C
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://atcoder.jp/contests/past202203-open/tasks/past202203_n
+-- competitive-verifier: PROBLEM https://atcoder.jp/contests/past202203-open/tasks/past202203_n
 main :: IO ()
 main = do
   n <- int

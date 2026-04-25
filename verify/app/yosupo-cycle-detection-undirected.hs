@@ -3,7 +3,7 @@ import Data.ByteString.Builder qualified as BSB
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/cycle_detection_undirected
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/cycle_detection_undirected
 main :: IO ()
 main = do
   (!n, !m) <- ints2

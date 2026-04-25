@@ -20,7 +20,7 @@ type X = V2.V2 Mint
 
 type F = V2.V2 Mint
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/tree_path_composite_sum
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/tree_path_composite_sum
 main :: IO ()
 main = do
   n <- int

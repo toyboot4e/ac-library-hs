@@ -4,7 +4,7 @@ import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: https://atcoder.jp/contests/abc282/tasks/abc282_d
+-- competitive-verifier: https://atcoder.jp/contests/abc282/tasks/abc282_d
 main :: IO ()
 main = do
   (!n, !m) <- ints2

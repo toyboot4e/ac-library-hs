@@ -8,7 +8,7 @@ import GHC.Stack (HasCallStack)
 import System.IO (stdout)
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/many_aplusb
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/many_aplusb
 main :: IO ()
 main = do
   t <- int

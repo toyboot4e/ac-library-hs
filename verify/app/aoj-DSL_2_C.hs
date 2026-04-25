@@ -7,7 +7,7 @@ import Data.Vector.Algorithms.Intro qualified as VAI
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_C
+-- competitive-verifier: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_C
 main :: IO ()
 main = do
   n <- int

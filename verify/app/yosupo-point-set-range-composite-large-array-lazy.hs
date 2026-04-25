@@ -11,7 +11,7 @@ type Mint = M.ModInt998244353
 modInt :: Int -> Mint
 modInt = M.new
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/point_set_range_composite_large_array
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/point_set_range_composite_large_array
 main :: IO ()
 main = do
   (!n, !q) <- ints2

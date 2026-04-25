@@ -2,7 +2,7 @@ import AtCoder.Math (floorSum)
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_c
+-- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_c
 main :: IO ()
 main = do
   t <- int

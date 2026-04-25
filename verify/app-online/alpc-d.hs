@@ -9,7 +9,7 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_d
+-- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_d
 main :: IO ()
 main = do
   (!h, !w) <- ints2

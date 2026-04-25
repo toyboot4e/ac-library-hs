@@ -5,7 +5,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/point_add_rectangle_sum
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/point_add_rectangle_sum
 main :: IO ()
 main = do
   (!n, !q) <- ints2

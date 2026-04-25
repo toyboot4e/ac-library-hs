@@ -2,7 +2,7 @@ import AtCoder.Dsu qualified as Dsu
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_a
+-- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_a
 main :: IO ()
 main = do
   (!n, !q) <- ints2

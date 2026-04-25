@@ -29,13 +29,13 @@
           with pkgs.python3Packages;
           pkgs.python3Packages.buildPythonApplication {
             name = "competitive-verifier";
-            version = "3.3.1";
+            version = "4.1.1";
             pyproject = true;
             src = pkgs.fetchFromGitHub {
               owner = "competitive-verifier";
               repo = "competitive-verifier";
-              rev = "v3.3.1";
-              sha256 = "sha256-eYm70R+XS2qVY6Rk0irdPSnjqd5PSV/e6OZgip54Su4=";
+              rev = "v4.1.1";
+              sha256 = "sha256-l6yUAwrth1C38xopn2gWKr73U2nzEaVsSFpNLkGN2uM=";
             };
             build-system = [ poetry-core ];
             dependencies = [
@@ -93,7 +93,7 @@
               # Verification
               online-judge-tools
               competitive-verifier
-              online-judge-verify-helper
+
               # Formatting
               treefmtEval.config.build.wrapper
               # CI tools
@@ -130,7 +130,8 @@
               cd verify
               files="$(ls app/*.hs | ${pkgs.fzf}/bin/fzf -m --history .fzf-history)"
               touch $files
-              oj-verify run $files -j $(nproc)
+              competitive-verifier oj-resolve --config .verify-helper/config.toml --include $files > /tmp/cv-resolve.json
+              competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30
             '');
           };
           verify-all = {
@@ -139,7 +140,8 @@
             program = toString (pkgs.writeShellScript "verify-all" ''
               cd verify
               touch app/*
-              oj-verify run app/*.hs -j $(nproc)
+              competitive-verifier oj-resolve --config .verify-helper/config.toml > /tmp/cv-resolve.json
+              competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30
             '');
           };
         };

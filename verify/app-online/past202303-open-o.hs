@@ -66,7 +66,7 @@ freq0 = VU.replicate 11 0
 toFreq :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 toFreq !xs = VU.accumulate (+) freq0 $! VU.map (,1) xs
 
--- verification-helper: PROBLEM https://atcoder.jp/contests/past202303-open/tasks/past202303_o
+-- competitive-verifier: PROBLEM https://atcoder.jp/contests/past202303-open/tasks/past202303_o
 mainImpl :: Int -> Int -> VU.Vector Int -> VU.Vector (Int, Int, Int) -> VU.Vector Int
 mainImpl n q xs0 qs = runST $ do
   let !blockLen = round (sqrt (fromIntegral n) :: Double) :: Int

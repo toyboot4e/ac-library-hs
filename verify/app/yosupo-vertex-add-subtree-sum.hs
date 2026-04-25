@@ -5,7 +5,7 @@ import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/vertex_add_subtree_sum
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/vertex_add_subtree_sum
 main :: IO ()
 main = do
   (!n, !q) <- ints2

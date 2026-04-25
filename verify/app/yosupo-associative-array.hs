@@ -3,7 +3,7 @@ import Data.Maybe (fromMaybe)
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/associative_array
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/associative_array
 main :: IO ()
 main = do
   q <- int

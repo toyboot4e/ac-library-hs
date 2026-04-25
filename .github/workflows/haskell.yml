@@ -152,24 +152,18 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
 
-      - name: Install oj-verify
-        run: |
-          pip3 install -U online-judge-verify-helper
-          pip3 install "setuptools<82" # revert to the version that contains `pkg_resoureces`
+      - name: Install competitive-verifier
+        run: pip3 install -U competitive-verifier
 
       # TODO: cache `~/.cache/online-judge-tools/library-checker-problems/`
       # TODO: cache `.verify-helper/cache/`
 
-      - name: Run oj-verify
+      - name: Run competitive-verifier
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #   YUKICODER_TOKEN: ${{ secrets.YUKICODER_TOKEN }}
         #   GH_PAT: ${{ secrets.GH_PAT }}
         working-directory: verify
         run: |
-          files="$(find app/ -type f | awk 'NR % ${{ env.num-parallel }} == ${{ matrix.parallel-index }}')"
-          echo 'target files:'
-          for f in $files ; do
-            echo "- $f"
-          done
-          oj-verify run $files --tle 30 -j $(nproc)
+          competitive-verifier oj-resolve --config .verify-helper/config.toml > /tmp/cv-resolve.json
+          competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30 --split ${{ env.num-parallel }} --split-index ${{ matrix.parallel-index }}

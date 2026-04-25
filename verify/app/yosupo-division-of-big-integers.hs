@@ -35,7 +35,7 @@ unlinesWithBSB showF = intersperseWithBSB showF endlBSB
 show2 :: (Integer, Integer) -> BSB.Builder
 show2 (!a, !b) = BSB.integerDec a <> wsBSB <> BSB.integerDec b
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/division_of_big_integers
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/division_of_big_integers
 main :: IO ()
 main = do
   (!t, !_) <- fromJust . BS.readInt <$> BS.getLine

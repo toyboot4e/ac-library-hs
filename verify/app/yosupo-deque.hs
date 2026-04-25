@@ -2,7 +2,7 @@ import AtCoder.Internal.Queue qualified as Q
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/deque
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/deque
 main :: IO ()
 main = do
   q <- int

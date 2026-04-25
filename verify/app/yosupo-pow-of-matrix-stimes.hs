@@ -7,7 +7,7 @@ import Data.Semigroup (Semigroup (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/pow_of_matrix
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/pow_of_matrix
 main :: IO ()
 main = do
   (!n, !k) <- ints2

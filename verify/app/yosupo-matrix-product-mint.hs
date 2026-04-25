@@ -8,7 +8,7 @@ import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/matrix_product
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/matrix_product
 main :: IO ()
 main = do
   (!n, !m, !k) <- ints3

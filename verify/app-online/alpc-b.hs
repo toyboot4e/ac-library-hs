@@ -2,7 +2,7 @@ import AtCoder.FenwickTree qualified as FT
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_b
+-- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_b
 main :: IO ()
 main = do
   (!n, !q) <- ints2

@@ -12,7 +12,7 @@ int' = state $ fromJust . BS.readInt . BS.dropSpace
 
 -- somehow bit evalState is slow
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/many_aplusb
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/many_aplusb
 main :: IO ()
 main = do
   bs <- BS.getContents

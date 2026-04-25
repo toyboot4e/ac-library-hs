@@ -5,7 +5,7 @@ import Util
 
 -- not deterministic
 
--- verification-helper: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_4_B
+-- competitive-verifier: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_4_B
 main :: IO ()
 main = do
   (!n, !m) <- ints2

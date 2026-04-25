@@ -3,7 +3,7 @@ import Data.Maybe (fromJust)
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/range_kth_smallest
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/range_kth_smallest
 main :: IO ()
 main = do
   (!n, !q) <- ints2

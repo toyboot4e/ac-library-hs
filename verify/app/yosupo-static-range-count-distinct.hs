@@ -9,7 +9,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/static_range_count_distinct
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/static_range_count_distinct
 -- #wavelet-matrix
 main :: IO ()
 main = do

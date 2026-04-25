@@ -1,12 +1,12 @@
 # verify
 
-Run online judge problems on your local machine with [verification-helper](https://github.com/online-judge-tools/verification-helper).
+Run online judge problems on your local machine with [competitive-verifier](https://github.com/competitive-verifier/competitive-verifier).
 
 ## Setup
 
-You need to install [`verification-helper`](https://github.com/online-judge-tools/verification-helper), [`fzf`](https://github.com/junegunn/fzf) and [`just`](https://github.com/casey/just).
+You need to install [`competitive-verifier`](https://github.com/competitive-verifier/competitive-verifier), [`fzf`](https://github.com/junegunn/fzf) and [`just`](https://github.com/casey/just).
 
-### `verification-helper` installtaion via `venv`
+### `competitive-verifier` installation via `venv`
 
 ```sh
 $ pwd
@@ -17,7 +17,7 @@ $ source .venv/bin/activate        # on bash or zsh
 $ # source .venv/bin/activate.fish # on fish shell
 (.venv) $ which pip3
 /home/tbm/dev/hs/ac-library-hs/verify/.venv/bin/pip3
-(.venv) $ pip3 install online-judge-verify-helper
+(.venv) $ pip3 install competitive-verifier
 (.venv) $ # You're ready!
 ```
 
@@ -38,4 +38,3 @@ Run all the problem solutions:
 ```sh
 $ just verify-all
 ```
-

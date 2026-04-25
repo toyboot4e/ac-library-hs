@@ -3,7 +3,7 @@ import AtCoder.Extra.Tree qualified as Tr
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/tree_diameter
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/tree_diameter
 main :: IO ()
 main = do
   n <- int

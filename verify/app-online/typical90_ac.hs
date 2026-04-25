@@ -5,7 +5,7 @@ import Data.Semigroup (Max (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://atcoder.jp/contests/typical90/tasks/typical90_ac
+-- competitive-verifier: PROBLEM https://atcoder.jp/contests/typical90/tasks/typical90_ac
 main :: IO ()
 main = do
   (!w, !n) <- ints2

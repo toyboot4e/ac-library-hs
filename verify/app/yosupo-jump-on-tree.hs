@@ -4,7 +4,7 @@ import Data.Maybe (fromMaybe)
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- verification-helper: PROBLEM https://judge.yosupo.jp/problem/jump_on_tree
+-- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/jump_on_tree
 main :: IO ()
 main = do
   (!n, !q) <- ints2
