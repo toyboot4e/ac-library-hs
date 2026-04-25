@@ -464,7 +464,7 @@ pathSegmentsInclusive weightPolicy Hld {..} x0 y0 = done $ inner x0 [] y0 []
         phx = parentHld VG.! hx
         phy = parentHld VG.! hy
 
--- | \(O(1)\) Returns a half-open interval of `VertexHld` \([\mathrm{start}, \mathrm{end})\) that
+-- | \(O(1)\) Returns a closed interval of `VertexHld` \([\mathrm{start}, \mathrm{end}]\) that
 -- corresponds to the subtree vertices rooted at the given vertex.
 --
 -- @since 1.1.0.0
