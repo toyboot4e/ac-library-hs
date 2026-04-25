@@ -99,11 +99,11 @@ import GHC.TypeNats (KnownNat, natVal')
 data RollingHash b p = RollingHash
   { -- | The hash value.
     --
-    -- @since 1.1.0.0
+    -- @since 1.6.0.0
     hashRH :: {-# UNPACK #-} !Int,
-    -- | \(b^{\mathrm{length}} \bmod p\).
+    -- | Cumulative product of character values, used as a multiplier in the hash combination.
     --
-    -- @since 1.1.0.0
+    -- @since 1.6.0.0
     nextDigitRH :: {-# UNPACK #-} !Int
   }
   deriving
@@ -130,16 +130,16 @@ unsafeNew h = RollingHash h (fromIntegral (natVal' (proxy# @b)))
 -- | \(O(1)\)
 {-# INLINE calc #-}
 calc :: forall b p. (KnownNat b, KnownNat p) => RollingHash b p -> RollingHash b p -> RollingHash b p
-calc (RollingHash !digit1 !hash1) (RollingHash !digit2 !hash2)
+calc (RollingHash !h1 !d1) (RollingHash !h2 !d2)
   | p < 3037000499 =
-      let !digit' = digit1 * digit2 `rem` p
-          !hash' = addMod p (hash1 * digit2 `rem` p) hash2
-       in RollingHash digit' hash'
+      let !h' = addMod p (h1 * d2 `rem` p) h2
+          !d' = d1 * d2 `rem` p
+       in RollingHash h' d'
   | otherwise =
       -- FIXME: This is slow
-      let !digit' = fromIntegral $! to128 digit1 * to128 digit2 `rem` to128 p
-          !hash' = fromIntegral $! (to128 hash1 * to128 digit2 + to128 hash2) `rem` to128 p
-       in RollingHash digit' hash'
+      let !h' = fromIntegral $! (to128 h1 * to128 d2 + to128 h2) `rem` to128 p
+          !d' = fromIntegral $! to128 d1 * to128 d2 `rem` to128 p
+       in RollingHash h' d'
   where
     !p = fromIntegral $ natVal' (proxy# @p)
     to128 :: Int -> Word128
@@ -157,7 +157,7 @@ instance (KnownNat b, KnownNat p) => Semigroup (RollingHash b p) where
 -- | @since 1.1.0.0
 instance (KnownNat b, KnownNat p) => Monoid (RollingHash b p) where
   {-# INLINE mempty #-}
-  mempty = RollingHash 1 0
+  mempty = RollingHash 0 1
 
 type RHRepr = (Int, Int)
 
