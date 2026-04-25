@@ -6,9 +6,9 @@ import AtCoder.Extra.Pdsu qualified as Pdsu
 import Control.Monad (forM)
 import Control.Monad.ST (runST)
 import Data.Foldable (for_)
+import Data.Maybe (fromJust)
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
-import Data.Maybe (fromJust)
 import Test.Tasty
 import Test.Tasty.QuickCheck as QC
 
@@ -43,7 +43,7 @@ prop_size (QC.Positive n) = do
   pure . QC.conjoin $ runST $ do
     dsu <- Pdsu.new @_ @() n id
     for_ es $ \(!u, !v) -> Pdsu.merge dsu u v ()
-    refSizes <- VU.accumulate (+) (VU.replicate n 0) <$> VU.generateM n (fmap (, 1) . Pdsu.leader dsu)
+    refSizes <- VU.accumulate (+) (VU.replicate n 0) <$> VU.generateM n (fmap (,1) . Pdsu.leader dsu)
     forM [0 .. n - 1] $ \i -> do
       l <- Pdsu.leader dsu i
       s <- Pdsu.size dsu i

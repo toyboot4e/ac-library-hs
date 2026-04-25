@@ -96,7 +96,7 @@ new = stToPrim . newST
 -- | Creates `FenwickTree` with initial values.
 --
 -- ==== Complexity
--- - \(O(n)\)
+-- - \(O(n \log n)\)
 --
 -- @since 1.0.0.0
 {-# INLINE build #-}
