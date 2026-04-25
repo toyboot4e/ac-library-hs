@@ -293,16 +293,14 @@ mergeST dsu@Pdsu {..} v10 v20 !dp0 = inner v10 v20 dp0
         else do
           -- NOTE(perf): Union by size (choose smaller one for root).
           -- Another, more proper optimization would be union by rank (depth).
-          !size1 <- VGM.read potentialPdsu v1
-          !size2 <- VGM.read potentialPdsu v2
+          !size1 <- negate <$> VGM.read parentOrSizePdsu r1
+          !size2 <- negate <$> VGM.read parentOrSizePdsu r2
           if size1 >= size2
             then do
               -- Merge `r1` onto `r2`
 
-              -- Update the size of `r1`
-              !negativeSize1 <- negate {- retrieve size -} <$> VGM.read parentOrSizePdsu r1
-              !negativeSize2 <- negate {- retrieve size -} <$> VGM.read parentOrSizePdsu r2
-              VGM.write parentOrSizePdsu r1 ({- size -} negativeSize1 + negativeSize2)
+              -- Update the size of `r2` (the new root)
+              VGM.write parentOrSizePdsu r2 $! negate (size1 + size2)
 
               -- p(v1) becomes p'(v1) under r2 after merge. p(r1) becomes p'(r1).
               --     p'(v1) = dp <> p(v2)
