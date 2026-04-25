@@ -385,6 +385,11 @@ executable yosupo-static-range-inversions-query
   main-is: yosupo-static-range-inversions-query.hs
   build-depends: verify
 
+executable yosupo-static-rmq
+  import: app-local
+  main-is: yosupo-static-rmq.hs
+  build-depends: verify
+
 executable yosupo-pow-of-matrix
   import: app-local
   main-is: yosupo-pow-of-matrix.hs
