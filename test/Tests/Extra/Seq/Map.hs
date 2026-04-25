@@ -40,6 +40,7 @@ data Query
   | Capacity
   | Size
   | Member !Int
+  | Lookup !Int
   | Adjust !Int !(Sum Int)
   | Insert !Int !(Sum Int)
   | InsertWith !Int !(Sum Int)
@@ -85,6 +86,7 @@ queryGen n = do
       (rare, pure Capacity),
       (rare, pure Size),
       (often, Member <$> keyGen),
+      (often, Lookup <$> keyGen),
       (often, Adjust <$> keyGen <*> valGen),
       (half, Insert <$> keyGen <*> valGen),
       (half, InsertWith <$> keyGen <*> valGen),
@@ -139,6 +141,7 @@ handleRef capacity m q = case q of
   Capacity -> (m, I capacity)
   Size -> (m, I (M.size m))
   Member k -> (m, B (M.member k m))
+  Lookup k -> (m, MS (M.lookup k m))
   Adjust k v -> (M.adjust (+ v) k m, None)
   Insert k v -> (M.insert k v m, None)
   InsertWith k v -> (M.insertWith (+) k v m, None)
@@ -223,6 +226,8 @@ handleAcl m q = case q of
     pure None
   Member k -> do
     B <$> Map.member m k
+  Lookup k -> do
+    MS <$> Map.lookup m k
   LookupLE v -> do
     MKV <$> Map.lookupLE m v
   LookupLT v -> do

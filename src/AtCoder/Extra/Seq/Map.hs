@@ -239,7 +239,8 @@ lookup m@Map {..} k = stToPrim $ do
   if b
     then do
       Raw.splayST seqMap l True
-      Just <$> VGM.read (Seq.vSeq seqMap) 0
+      VGM.write (Seq.unHandle rootMap) 0 l
+      Just <$> VGM.read (Seq.vSeq seqMap) (coerce l)
     else do
       pure Nothing
 
