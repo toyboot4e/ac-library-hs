@@ -243,7 +243,7 @@ newAt :: forall w. (HasCallStack) => Gr.Csr w -> Vertex -> Hld
 newAt tree root
   | n == 1 =
       Hld
-        0
+        root
         (VU.singleton (-1))
         (VU.singleton 0)
         (VU.singleton 0)
@@ -337,6 +337,7 @@ newAt tree root
     !n = Gr.nCsr tree
     !_ = ACIA.runtimeAssert (2 * (Gr.nCsr tree - 1) == Gr.mCsr tree) "AtCoder.Extra.Hld.newAt: not an undirected tree"
     !_ = ACIA.runtimeAssert (n >= 1) "AtCoder.Extra.Hld.newAt: the tree must have at least one vertex"
+    !_ = ACIA.checkVertex "AtCoder.Extra.Tree.Hld.newAt" root n
 
 -- | \(O(\log n)\) Calculates the lowest common ancestor of \(u\) and \(v\).
 --
