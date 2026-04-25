@@ -12,6 +12,9 @@
 -- >>> import Data.Semigroup (Max (..))
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let tbl = Tbl.new @(Max Int) $ VU.fromList [0, 3, 1, 4, 2]
+-- >>> Tbl.prod tbl 0 0
+-- Max {getMax = -9223372036854775808}
+--
 -- >>> Tbl.prod tbl 0 3
 -- Max {getMax = 3}
 --
@@ -20,11 +23,14 @@ module AtCoder.Extra.SparseTable
   ( SparseTable,
     new,
     prod,
+    maxRight,
+    minLeft,
   )
 where
 
 import AtCoder.Internal.Assert qualified as ACIA
 import AtCoder.Internal.Bit qualified as ACIB
+import AtCoder.Extra.Bisect qualified as B
 import Control.Monad.ST (runST)
 import Data.Bits (bit)
 import Data.Foldable (for_)
@@ -69,14 +75,33 @@ new xs = runST $ do
 
 -- | \(O(1)\) Calculates \(\Pi{m_l, .., m_{r_1}}\) for ideomponent monoid.
 prod :: (Monoid a, VU.Unbox a) => SparseTable a -> Int -> Int -> a
-prod SparseTable {..} l r
-  | r - l == 0 = mempty
-  | otherwise =
-      -- The two intervals cover [l, r), maybe making a overlap
-      let !lx = dataSt VG.! logLen VG.! l
-          !rx = dataSt VG.! logLen VG.! (r - len)
-       in lx <> rx
+prod SparseTable {..} l r = case r - l of
+  0 -> mempty
+  1 -> dataSt VG.! l
+  _ ->
+    -- The two intervals cover [l, r), maybe making a overlap
+    let !lx = dataSt VG.! logLen VG.! l
+        !rx = dataSt VG.! logLen VG.! (r - len)
+     in lx <> rx
   where
-    !_ = ACIA.checkInterval "AtCoder.Extra.SparseTable" l r nSt
+    !_ = ACIA.checkInterval "AtCoder.Extra.SparseTable.prod" l r nSt
     logLen = ACIB.floorLog2 (r - l)
     len = bit logLen
+
+-- | \(O(log n)\) Runs a bisection method over a monotonious sequence of ideomponent monoids from
+-- left to right.
+maxRight :: (Monoid a, VU.Unbox a) => SparseTable a -> Int -> (a -> Bool) -> Int
+maxRight SparseTable {..} l p
+  | l == n = n
+  | otherwise = B.maxRight l nSt p
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.SparseTable.maxRight" l nSt
+
+-- | \(O(log n)\) Runs a bisection method over a monotonious sequence of ideomponent monoids from
+-- right to left.
+minLeft :: (Monoid a, VU.Unbox a) => SparseTable a -> Int -> (a -> Bool) -> Int
+minLeft SparseTable {..} r p
+  | r == 0 = 0
+  | otherwise = B.minLeft 0 r p
+  where
+    !_ = ACIA.checkIndex "AtCoder.Extra.SparseTable.minLeft" r nSt
