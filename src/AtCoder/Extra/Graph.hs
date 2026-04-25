@@ -1452,7 +1452,7 @@ trackingFloydWarshall !nVerts !edges !undefW = runST $ do
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let es = VU.fromList [(0, 1, 1 :: Int), (1, 2, 1), (2, 3, 1), (1, 3, 4)]
--- >>> let undefW = -1
+-- >>> let undefW = maxBound `div` 2 :: Int
 -- >>> dist <- Gr.newFloydWarshall 4 es undefW
 -- >>> VGM.read dist (4 * 0 + 3)
 -- 3
@@ -1493,7 +1493,7 @@ newFloydWarshall !nVerts !edges !undefW = stToPrim $ do
 -- >>> import AtCoder.Extra.Graph qualified as Gr
 -- >>> import Data.Vector.Unboxed qualified as VU
 -- >>> let es = VU.fromList [(0, 1, 1 :: Int), (1, 2, 1), (2, 3, 1), (1, 3, 4)]
--- >>> let undefW = -1
+-- >>> let undefW = maxBound `div` 2 :: Int
 -- >>> (!dist, !prev) <- Gr.newTrackingFloydWarshall 4 es undefW
 -- >>> VGM.read dist (4 * 0 + 3)
 -- 3
