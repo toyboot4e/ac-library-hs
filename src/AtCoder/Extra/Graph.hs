@@ -1677,7 +1677,7 @@ updateEdgeFloydWarshallST trackPrev mat prev nVerts undefW a b dw = do
               | w2 == undefW -> w1
               | otherwise -> min w1 w2
 
-        when (wOld /= undefW && w' < wOld) $ do
+        when (w' /= undefW && (wOld == undefW || w' < wOld)) $ do
           VGM.write mat (idx from to) w'
           when trackPrev $ do
             VGM.write prev (idx from to) =<< VGM.read prev (idx b to)
