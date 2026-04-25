@@ -156,7 +156,7 @@ jobs:
         run: pip3 install -U competitive-verifier
 
       # TODO: cache `~/.cache/online-judge-tools/library-checker-problems/`
-      # TODO: cache `.verify-helper/cache/`
+      # TODO: cache `.competitive-verifier/cache/`
 
       - name: Run competitive-verifier
         # env:
@@ -165,5 +165,5 @@ jobs:
         #   GH_PAT: ${{ secrets.GH_PAT }}
         working-directory: verify
         run: |
-          competitive-verifier oj-resolve --config .verify-helper/config.toml > /tmp/cv-resolve.json
+          competitive-verifier oj-resolve --config .competitive-verifier/config.toml > /tmp/cv-resolve.json
           competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30 --split ${{ env.num-parallel }} --split-index ${{ matrix.parallel-index }}

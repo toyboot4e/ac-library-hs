@@ -91,7 +91,6 @@
                   "$@"
               '')
               # Verification
-              online-judge-tools
               competitive-verifier
 
               # Formatting
@@ -130,7 +129,7 @@
               cd verify
               files="$(ls app/*.hs | ${pkgs.fzf}/bin/fzf -m --history .fzf-history)"
               touch $files
-              competitive-verifier oj-resolve --config .verify-helper/config.toml --include $files > /tmp/cv-resolve.json
+              competitive-verifier oj-resolve --config .competitive-verifier/config.toml --include $files > /tmp/cv-resolve.json
               competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30
             '');
           };
@@ -140,7 +139,7 @@
             program = toString (pkgs.writeShellScript "verify-all" ''
               cd verify
               touch app/*
-              competitive-verifier oj-resolve --config .verify-helper/config.toml > /tmp/cv-resolve.json
+              competitive-verifier oj-resolve --config .competitive-verifier/config.toml > /tmp/cv-resolve.json
               competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30
             '');
           };

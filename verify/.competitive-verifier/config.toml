@@ -11,4 +11,3 @@ compile = "./compile {path}"
 execute = "./execute {path}"
 
 verification_file_suffix = ".hs"
-

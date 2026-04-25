@@ -138,7 +138,7 @@ verify:
     cd verify
     file="$(basename "$(ls app/*.hs | fzf --history .fzf-history)")"
     touch "app/$file"
-    competitive-verifier oj-resolve --config .verify-helper/config.toml --include "app/$file" > /tmp/cv-resolve.json
+    competitive-verifier oj-resolve --config .competitive-verifier/config.toml --include "app/$file" > /tmp/cv-resolve.json
     competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30
 
 [private]
@@ -149,7 +149,7 @@ verify-all:
     #!/usr/bin/env bash
     cd verify
     touch app/*
-    competitive-verifier oj-resolve --config .verify-helper/config.toml > /tmp/cv-resolve.json
+    competitive-verifier oj-resolve --config .competitive-verifier/config.toml > /tmp/cv-resolve.json
     competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30
 
 [private]
