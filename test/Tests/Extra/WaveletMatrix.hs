@@ -217,18 +217,29 @@ unit_boundary = testCase "boundary" $ do
   tryRank WM.rank 1
   tryRank WM.rank (-1)
 
--- TODO: test
+  -- lookup variants with over-wide interval (l < 0, r > n, but clamped range is non-empty).
+  -- wm contains [0, 10, 20, 10, 0]
+  let wide = (-5, n + 5)
 
--- (@?= Nothing) $ WM.select wm
--- (@?= Nothing) $ WM.selectKth wm
--- (@?= Nothing) $ WM.selectKthIn wm
+  -- lookupGE: no value >= 999
+  (@?= Nothing) $ WM.lookupGE wm (fst wide) (snd wide) 999
+  -- lookupGE: smallest value >= 0 is 0
+  (@?= Just 0) $ WM.lookupGE wm (fst wide) (snd wide) 0
 
--- (@?= Nothing) $ WM.lookupLE wm
--- (@?= Nothing) $ WM.lookupLT wm
--- (@?= Nothing) $ WM.lookupGE wm
--- (@?= Nothing) $ WM.lookupGT wm
--- (@?= Nothing) $ WM.assocsIn wm
--- (@?= Nothing) $ WM.descAssocsIn wm
+  -- lookupGT: no value > 20
+  (@?= Nothing) $ WM.lookupGT wm (fst wide) (snd wide) 20
+  -- lookupGT: smallest value > 0 is 10
+  (@?= Just 10) $ WM.lookupGT wm (fst wide) (snd wide) 0
+
+  -- lookupLE: no value <= -1
+  (@?= Nothing) $ WM.lookupLE wm (fst wide) (snd wide) (-1)
+  -- lookupLE: largest value <= 10 is 10
+  (@?= Just 10) $ WM.lookupLE wm (fst wide) (snd wide) 10
+
+  -- lookupLT: no value < 0
+  (@?= Nothing) $ WM.lookupLT wm (fst wide) (snd wide) 0
+  -- lookupLT: largest value < 20 is 10
+  (@?= Just 10) $ WM.lookupLT wm (fst wide) (snd wide) 20
 
 tests :: [TestTree]
 tests =

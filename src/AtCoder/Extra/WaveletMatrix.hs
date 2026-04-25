@@ -371,8 +371,8 @@ lookupGE ::
   Maybe Int
 lookupGE wm l r y0
   | r' == l' = Nothing
-  | rank_ >= r - l = Nothing
-  | otherwise = Just $ unsafeKthSmallestIn wm l r rank_
+  | rank_ >= r' - l' = Nothing
+  | otherwise = Just $ unsafeKthSmallestIn wm l' r' rank_
   where
     -- clamp
     l' = max 0 l
