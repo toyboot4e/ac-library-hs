@@ -51,7 +51,7 @@ data SparseTable a = SparseTable
 -- | \(O(n \log n)\) Creates `SparseTable` for a sequence of ideomponent monoid values.
 new :: (Monoid a, VU.Unbox a) => VU.Vector a -> SparseTable a
 new xs
-  | VU.null xs = SparseTable { nSt = 0, dataSt = V.empty}
+  | VU.null xs = SparseTable {nSt = 0, dataSt = V.empty}
 new xs = runST $ do
   let nSt = VU.length xs
   let h = ACIB.ceilingLog2 nSt + 1
