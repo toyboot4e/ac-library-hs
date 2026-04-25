@@ -8,6 +8,7 @@ import AtCoder.Extra.Monoid.Mat2x2 qualified as M
 import AtCoder.Extra.Monoid.RollingHash (RollingHash (..))
 import AtCoder.ModInt qualified as ModInt
 import Data.Bit (Bit (..))
+import Data.List qualified as L
 import Data.Proxy (Proxy (..))
 import Data.Semigroup (Max (..), Min (..), Product (..), Sum (..), stimes)
 import Test.QuickCheck.Classes qualified as QCC
@@ -120,18 +121,15 @@ instance (QC.Arbitrary a, Ord a) => QC.Arbitrary (Top2 a) where
 -- orphan instance
 instance (QC.Arbitrary a, Ord a) => QC.Arbitrary (Top3 a) where
   arbitrary = do
-    a <- QC.arbitrary
-    b <- QC.arbitrary
-    c <- QC.arbitrary
+    xs <- L.sortBy (flip compare) <$> QC.vectorOf 3 QC.arbitrary
+    let (a : b : c : _) = xs
     pure $ Top3 (a, b, c)
 
 -- orphan instance
 instance (QC.Arbitrary a, Ord a) => QC.Arbitrary (Top4 a) where
   arbitrary = do
-    a <- QC.arbitrary
-    b <- QC.arbitrary
-    c <- QC.arbitrary
-    d <- QC.arbitrary
+    xs <- L.sortBy (flip compare) <$> QC.vectorOf 4 QC.arbitrary
+    let (a : b : c : d : _) = xs
     pure $ Top4 (a, b, c, d)
 
 prop_affineZero :: Affine1 (Sum Int) -> QC.Property
@@ -295,7 +293,7 @@ tests =
       ],
     testGroup
       "Top3"
-      [ laws @(Top2 Int)
+      [ laws @(Top3 Int)
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws
@@ -303,7 +301,7 @@ tests =
       ],
     testGroup
       "Top4"
-      [ laws @(Top2 Int)
+      [ laws @(Top4 Int)
           [ QCC.semigroupLaws,
             QCC.monoidLaws,
             QCC.semigroupMonoidLaws

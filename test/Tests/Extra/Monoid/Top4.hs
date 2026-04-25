@@ -60,7 +60,7 @@ prop_concat = QC.testProperty "concat" $ do
 
 tests :: [TestTree]
 tests =
-  [ -- prop_new,
-    prop_insert
-    -- prop_concat
+  [ prop_new,
+    prop_insert,
+    prop_concat
   ]
