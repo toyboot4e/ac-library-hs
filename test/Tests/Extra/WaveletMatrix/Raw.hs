@@ -50,6 +50,7 @@ data Query
   | Rank !(Int, Int) !Int
   | Select !Int
   | SelectKth !Int !Int
+  | SelectIn !(Int, Int) !Int
   | SelectKthIn !(Int, Int) !Int !Int
   | LookupLE !(Int, Int) !Int
   | LookupLT !(Int, Int) !Int
@@ -76,6 +77,7 @@ genQuery n = do
       Rank <$> lr <*> val,
       Select <$> val,
       SelectKth <$> exc <*> val,
+      SelectIn <$> lr <*> val,
       SelectKthIn <$> lr <*> exc <*> val,
       LookupLE <$> lr <*> QC.chooseInt (-1, n),
       LookupLT <$> lr <*> QC.chooseInt (-1, n),
@@ -115,6 +117,7 @@ handleRef xs q = case q of
   Rank (!l, !r) x -> rankBetween l r x (x + 1)
   Select x -> M $ selectKthIn 0 n 0 x
   SelectKth k x -> M $ selectKthIn 0 n k x
+  SelectIn (!l, !r) x -> M $ selectKthIn l r 0 x
   SelectKthIn (!l, !r) k x -> M $ selectKthIn l r k x
   LookupLE (!l, !r) x -> max_ . VU.filter (<= x) . VU.take (r - l) $ VU.drop l xs
   LookupLT (!l, !r) x -> max_ . VU.filter (< x) . VU.take (r - l) $ VU.drop l xs
@@ -170,6 +173,7 @@ handleAcl wm q = case q of
   Rank (!l, !r) x -> I $ WM.rank wm l r x
   Select x -> M $ WM.select wm x
   SelectKth k x -> M $ WM.selectKth wm k x
+  SelectIn (!l, !r) x -> M $ WM.selectIn wm l r x
   SelectKthIn (!l, !r) k x -> M $ WM.selectKthIn wm l r k x
   LookupLE (!l, !r) x -> M $ WM.lookupLE wm l r x
   LookupLT (!l, !r) x -> M $ WM.lookupLT wm l r x

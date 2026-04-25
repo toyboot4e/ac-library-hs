@@ -319,7 +319,7 @@ selectIn ::
   Int ->
   -- | The index of the first \(y\) in \([l, r)\).
   Maybe Int
-selectIn wm = selectKthIn wm 0
+selectIn wm l r = selectKthIn wm l r 0
 
 -- | \(O(\log |S|)\) Given an interval \([l, r)\), it returns the index of the \(k\)-th occurrence
 -- (0-based) of \(y\) in the sequence, or `Nothing` if no such occurrence exists.
