@@ -123,8 +123,8 @@ instance (Ord a) => Semigroup (Top4 a) where
         GT -> Top4 (b1, a1, a2, max a3 b2)
         EQ -> Top4 (b1, a1, a2, b2)
         LT -> Top4 (b1, a1, b2, max a2 b3)
-      -- b1, a1, b2
-      EQ -> Top4 (b1, a1, a2, max a3 b2)
+      -- b1, a1 =b2
+      EQ -> Top4 (b1, a1, b2, max a2 b3)
       -- b1, b2
       LT -> case compare a1 b3 of
         GT -> Top4 (b1, b2, a1, max a2 b3)
