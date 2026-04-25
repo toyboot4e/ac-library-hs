@@ -139,7 +139,7 @@ verify:
     file="$(basename "$(ls app/*.hs | fzf --history .fzf-history)")"
     touch "app/$file"
     competitive-verifier oj-resolve --config .competitive-verifier/config.toml --include "app/$file" > /tmp/cv-resolve.json
-    competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30
+    competitive-verifier verify --check-error --verify-json /tmp/cv-resolve.json --tle 30
 
 [private]
 alias v := verify
@@ -150,7 +150,7 @@ verify-all:
     cd verify
     touch app/*
     competitive-verifier oj-resolve --config .competitive-verifier/config.toml > /tmp/cv-resolve.json
-    competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30
+    competitive-verifier verify --check-error --verify-json /tmp/cv-resolve.json --tle 30
 
 [private]
 alias va := verify-all

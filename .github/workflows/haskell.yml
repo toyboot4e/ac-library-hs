@@ -166,4 +166,4 @@ jobs:
         working-directory: verify
         run: |
           competitive-verifier oj-resolve --config .competitive-verifier/config.toml > /tmp/cv-resolve.json
-          competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30 --split ${{ env.num-parallel }} --split-index ${{ matrix.parallel-index }}
+          competitive-verifier verify --check-error --verify-json /tmp/cv-resolve.json --tle 30 --split ${{ env.num-parallel }} --split-index ${{ matrix.parallel-index }}
