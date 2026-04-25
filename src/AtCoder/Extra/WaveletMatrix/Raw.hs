@@ -506,7 +506,7 @@ lookupLE wm l r x
     -- clamp
     l' = max 0 l
     r' = min (lengthRwm wm) r
-    rank_ = rankBetween wm l r minBound (x + 1)
+    rank_ = rankBetween wm l' r' minBound (x + 1)
 
 -- | \(O(\log a)\) Finds the maximum \(x\) in \([l, r)\) s.t. \(x_{0} \lt x\).
 --
