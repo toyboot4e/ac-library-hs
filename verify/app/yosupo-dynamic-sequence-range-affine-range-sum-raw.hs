@@ -41,7 +41,7 @@ main = do
             -- delete
             rt <- VGM.read root 0
             -- rt' <- Seq.deleteST_ seq rt i
-            rt' <- Seq.detachST seq rt i
+            rt' <- Seq.deleteST seq rt i
             VGM.write root 0 rt'
             pure Nothing
           (2, !l, !r, !_, !_) -> do
