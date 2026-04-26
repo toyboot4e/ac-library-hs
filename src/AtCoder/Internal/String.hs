@@ -30,7 +30,7 @@ saNaive :: (HasCallStack) => VU.Vector Int -> VU.Vector Int
 saNaive s =
   let n = VU.length s
       f l0 r0
-        | l0 == r0 = GT
+        | l0 == r0 = EQ
         | otherwise = inner l0 r0
         where
           inner l r
