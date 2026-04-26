@@ -201,7 +201,9 @@ import Prelude hiding (length, null)
 data Queue s a = Queue
   { -- | Stores [l, r) range in the `vecQ`.
     posQ :: !(VUM.MVector s Int),
-    vecQ :: !(VUM.MVector s a)
+    vecQ :: !(VUM.MVector s a),
+    -- | The initial midpoint position, used by `clear` to reset the queue.
+    midQ :: {-# UNPACK #-} !Int
   }
 
 -- | \(O(n)\) Creates a `Queue` with capacity \(n\).
@@ -215,12 +217,9 @@ new n = stToPrim $ newST n
 -- initialized at \(n\).
 --
 -- @since 1.2.4.0
-{-# INLINEABLE newDeque #-}
+{-# INLINE newDeque #-}
 newDeque :: (PrimMonad m, VU.Unbox a) => Int -> m (Queue (PrimState m) a)
-newDeque n = stToPrim $ do
-  posQ <- VUM.replicate 2 n
-  vecQ <- VUM.unsafeNew (2 * n + 1)
-  pure Queue {..}
+newDeque n = stToPrim $ newDequeST n
 
 -- | \(O(1)\) Returns the array size.
 --
@@ -412,7 +411,8 @@ swapDelete_ que i = stToPrim $ swapDeleteST_ que i
 {-# INLINE clear #-}
 clear :: (PrimMonad m, VU.Unbox a) => Queue (PrimState m) a -> m ()
 clear Queue {..} = do
-  VGM.set posQ 0
+  VGM.unsafeWrite posQ 0 midQ
+  VGM.unsafeWrite posQ 1 midQ
 
 -- | \(O(n)\) Yields an immutable copy of the mutable vector.
 --
@@ -438,6 +438,15 @@ newST :: (VU.Unbox a) => Int -> ST s (Queue s a)
 newST n = do
   posQ <- VUM.replicate 2 (0 :: Int)
   vecQ <- VUM.unsafeNew n
+  let midQ = 0
+  pure Queue {..}
+
+{-# INLINEABLE newDequeST #-}
+newDequeST :: (VU.Unbox a) => Int -> ST s (Queue s a)
+newDequeST n = do
+  let midQ = n
+  posQ <- VUM.replicate 2 midQ
+  vecQ <- VUM.unsafeNew (2 * n + 1)
   pure Queue {..}
 
 {-# INLINEABLE lengthST #-}
