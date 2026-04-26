@@ -172,7 +172,6 @@ verify-all:
     ' /tmp/cv-result-*.json
     jq -s -e '[.[].files[].verifications[] | select(.status == "failure")] | length == 0' /tmp/cv-result-*.json > /dev/null
 
- vap := verify-all-parallel
 [private]
 alias va := verify-all
 
