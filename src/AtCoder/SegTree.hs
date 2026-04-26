@@ -513,7 +513,6 @@ exchangeST :: (HasCallStack, Monoid a, VU.Unbox a) => SegTree s a -> Int -> a ->
 exchangeST self@SegTree {..} p x = do
   let !_ = ACIA.checkIndex "AtCoder.SegTree.exchangeST" p nSt
   ret <- VGM.exchange dSt (p + sizeSt) x
-  VGM.write dSt (p + sizeSt) x
   for_ [1 .. logSt] $ \i -> do
     updateST self ((p + sizeSt) .>>. i)
   pure ret
