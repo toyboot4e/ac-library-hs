@@ -166,11 +166,4 @@ jobs:
         working-directory: verify
         run: |
           competitive-verifier oj-resolve --config .competitive-verifier/config.toml --include "app/" > /tmp/cv-resolve.json
-          split_total=$(( ${{ env.num-parallel }} * 2 ))
-          idx0=$(( ${{ matrix.parallel-index }} * 2 ))
-          idx1=$(( idx0 + 1 ))
-          competitive-verifier download --verify-json /tmp/cv-resolve.json
-          competitive-verifier verify --no-download --verify-json /tmp/cv-resolve.json --tle 30 --split $split_total --split-index $idx0 -o /tmp/cv-result-0.json &
-          competitive-verifier verify --no-download --verify-json /tmp/cv-resolve.json --tle 30 --split $split_total --split-index $idx1 -o /tmp/cv-result-1.json &
-          wait
-          competitive-verifier check /tmp/cv-result-*.json
+          competitive-verifier verify --check-error --verify-json /tmp/cv-resolve.json --tle 30 --split ${{ env.num-parallel }} --split-index ${{ matrix.parallel-index }}
