@@ -1,11 +1,12 @@
 #!/usr/bin/env -S bash
 
 dir="$(basename "$1" .hs)"
-exe="./.main/$dir"
+app="$dir"
+exe="./.main/$app"
 
 rm "$exe" || true
 
-cabal build "$dir"
+cabal build "$app"
 cp "$(cabal list-bin "$dir")" "$exe"
 chmod +x "$exe"
 
