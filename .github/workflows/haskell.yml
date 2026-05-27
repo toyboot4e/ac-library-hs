@@ -11,6 +11,9 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 # Some Haskell tools are preinstalled in: `/usr/local/.ghcup`.
 # There's a symlink: `~/.ghcup` -> `/usr/local/.ghcup`.
 
