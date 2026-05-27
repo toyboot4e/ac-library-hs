@@ -47,9 +47,15 @@ runs:
   - name: Setup GHC path on restore
     if: steps.ghc-cache.outputs.cache-hit == 'true'
     shell: bash
-    run: |
+    env:
+      GHC_VERSION: ${{ inputs.ghc-version }}
+    run: |  # zizmor: ignore[github-env]
+      if [[ ! "$GHC_VERSION" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]]; then
+        echo "::error::invalid ghc-version (rejected by validator)" >&2
+        exit 1
+      fi
       # setup PATH manually (since `haskell-actions/setup` is not run on cache hit)
-      echo "$HOME/.ghcup/ghc/${{ inputs.ghc-version }}/bin" >> "$GITHUB_PATH"
+      echo "$HOME/.ghcup/ghc/$GHC_VERSION/bin" >> "$GITHUB_PATH"
       # inspect preinstalled versions of GHC and Cabal
       ghc --version
       cabal --version
