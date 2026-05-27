@@ -95,10 +95,12 @@
 
               # Formatting
               treefmtEval.config.build.wrapper
+              haskellPackages.cabal-gild
               # CI tools
-              act
+              # act
               action-validator
               actionlint
+              zizmor
             ];
           };
         };

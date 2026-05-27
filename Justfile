@@ -189,3 +189,7 @@ coverage *args:
 # shows where GHC dependencies are installed (are they at `/nix/store`?)
 locate-deps:
     ghc-pkg field '*' library-dirs
+
+# check CI files
+ci-check:
+    zizmor .
