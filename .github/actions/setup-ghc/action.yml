@@ -35,7 +35,7 @@ runs:
 
   # FIXME: The cache is too large. Select only necessary files in `lib/`.
   - name: Restore GHC ${{ inputs.ghc-version }}
-    uses: actions/cache/restore@v4
+    uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
     id: ghc-cache
     with:
       path: |
@@ -63,7 +63,7 @@ runs:
 
   # TODO: we should rather call the `~/.ghcup` by ourselves
   - name: Download GHC ${{ inputs.ghc-version }}
-    uses: haskell-actions/setup@v2
+    uses: haskell-actions/setup@cd0d9bdd65b20557f41bea4dbe43d0b5fbbfe553 # v2
     if: steps.ghc-cache.outputs.cache-hit != 'true'
     id: setup
     with:
@@ -93,7 +93,7 @@ runs:
       cabal path # make sure the cabal store points to `~/.local/state/cabal/store`
 
   - name: Save GHC cache
-    uses: actions/cache/save@v4
+    uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
     if: steps.ghc-cache.outputs.cache-hit != 'true'
     with:
       # It contains unnecessary files though

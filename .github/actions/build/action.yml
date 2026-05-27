@@ -24,7 +24,7 @@ runs:
       # The last step generates dist-newstyle/cache/plan.json for the cache key.
 
   - name: Restore cached dependencies
-    uses: actions/cache/restore@v4
+    uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
     id: deps-cache
     env:
       key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ steps.vars.outputs.cabal-version }}
@@ -40,7 +40,7 @@ runs:
     run: cabal build all --only-dependencies
 
   - name: Save dependency cache
-    uses: actions/cache/save@v4
+    uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
     # If we had an exact cache hit, trying to save the cache would error because of key clash.
     if: steps.deps-cache.outputs.cache-hit != 'true'
     with:
@@ -49,7 +49,7 @@ runs:
 
   # TODO: Maybe clear the cache if it got too fat
   - name: Restore cached ac-lbrary-hs
-    uses: actions/cache/restore@v4
+    uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
     id: lib-cache
     env:
       key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ steps.vars.outputs.cabal-version }}
@@ -64,7 +64,7 @@ runs:
       cabal build lib:ac-library-hs
 
   - name: Save cached ac-library-hs
-    uses: actions/cache/save@v4
+    uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
     if: steps.lib-cache.outputs.cache-hit != 'true'
     env:
       key: ${{ runner.os }}-ghc-${{ matrix.ghc-version }}-cabal-${{ steps.vars.outputs.cabal-version }}
