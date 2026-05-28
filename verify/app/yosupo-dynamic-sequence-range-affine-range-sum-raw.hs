@@ -10,7 +10,7 @@ import Util
 
 type Mint = M.ModInt 998244353
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/dynamic_sequence_range_affine_range_sum
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/dynamic_sequence_range_affine_range_sum
 main :: IO ()
 main = do
   (!n, !q) <- ints2

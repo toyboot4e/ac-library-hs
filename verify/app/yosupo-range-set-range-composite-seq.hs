@@ -45,7 +45,7 @@ type Acc = Dual (Affine1 Mint)
 newtype Op = Op OpRepr deriving newtype (Eq, Ord, Show) ; unOp :: Op -> OpRepr ; unOp (Op x) = x; newtype instance VU.MVector s Op = MV_Op (VU.MVector s OpRepr) ; newtype instance VU.Vector Op = V_Op (VU.Vector OpRepr) ; deriving instance VGM.MVector VUM.MVector Op ; deriving instance VG.Vector VU.Vector Op ; instance VU.Unbox Op ;
 {- ORMOLU_ENABLE -}
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/range_set_range_composite
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/range_set_range_composite
 main :: IO ()
 main = do
   (!n, !q) <- ints2

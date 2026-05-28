@@ -16,7 +16,7 @@ import Iota.Prelude
 import Iota.PrimParser
 import System.IO
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/many_aplusb
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/many_aplusb
 main :: IO ()
 main = runSolver (putBuilder . unlinesB B.intDec) $ do
   t <- int

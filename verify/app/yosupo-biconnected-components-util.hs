@@ -4,7 +4,7 @@ import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/biconnected_components
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/biconnected_components
 main :: IO ()
 main = do
   (!n, !m) <- ints2

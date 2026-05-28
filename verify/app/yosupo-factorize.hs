@@ -2,7 +2,7 @@ import AtCoder.Extra.Math qualified as Math
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/factorize
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/factorize
 main :: IO ()
 main = do
   q <- int

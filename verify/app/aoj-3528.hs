@@ -15,7 +15,7 @@ adjOrtho4 (!y, !x) = VU.map (add2 (y, x)) ortho4
 add2 :: (Int, Int) -> (Int, Int) -> (Int, Int)
 add2 (!y, !x) (!dy, !dx) = (y + dy, x + dx)
 
--- competitive-verifier: PROBLEM https://onlinejudge.u-aizu.ac.jp/problems/3528
+-- verification-helper: PROBLEM https://onlinejudge.u-aizu.ac.jp/problems/3528
 main :: IO ()
 main = do
   bnd0@(!h, !w) <- ints2

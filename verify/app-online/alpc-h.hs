@@ -8,7 +8,7 @@ import Data.Vector.Unboxed qualified as VU
 import System.Exit (exitSuccess)
 import Util
 
--- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_h
+-- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_h
 main :: IO ()
 main = do
   (!n, !d) <- ints2

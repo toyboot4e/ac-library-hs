@@ -5,7 +5,7 @@ import Data.Semigroup (Sum (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- competitive-verifier: PROBLEM https://onlinejudge.u-aizu.ac.jp/problems/DSL_2_I
+-- verification-helper: PROBLEM https://onlinejudge.u-aizu.ac.jp/problems/DSL_2_I
 main :: IO ()
 main = do
   (!n, !q) <- ints2

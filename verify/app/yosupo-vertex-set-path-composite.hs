@@ -12,7 +12,7 @@ type Mint = M.ModInt 998244353
 modInt :: Int -> Mint
 modInt = M.new
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/vertex_set_path_composite
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/vertex_set_path_composite
 main :: IO ()
 main = do
   (!n, !q) <- ints2

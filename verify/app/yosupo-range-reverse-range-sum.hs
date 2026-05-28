@@ -7,7 +7,7 @@ import Data.Vector.Unboxed qualified as VU
 import System.Exit (exitSuccess)
 import Util
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/range_reverse_range_sum
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/range_reverse_range_sum
 main :: IO ()
 main = do
   (!n, !q) <- ints2

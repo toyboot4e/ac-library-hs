@@ -4,7 +4,7 @@ import Data.Semigroup (Min (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/range_add_range_min
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/range_add_range_min
 main :: IO ()
 main = do
   (!_, !q) <- ints2

@@ -2,7 +2,7 @@ import AtCoder.Extra.WaveletMatrix qualified as WM
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/static_range_frequency
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/static_range_frequency
 -- #wavelet-matrix
 main :: IO ()
 main = do

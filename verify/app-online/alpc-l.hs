@@ -46,7 +46,7 @@ instance Monoid X where
   {-# INLINE mempty #-}
   mempty = X (0, 0, 0)
 
--- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_l
+-- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_l
 main :: IO ()
 main = do
   (!_, !q) <- ints2

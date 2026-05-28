@@ -13,7 +13,7 @@ type Mint = ModInt.ModInt998244353
 modInt :: Int -> Mint
 modInt = ModInt.new
 
--- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_k
+-- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_k
 main :: IO ()
 main = do
   (!_, !q) <- ints2

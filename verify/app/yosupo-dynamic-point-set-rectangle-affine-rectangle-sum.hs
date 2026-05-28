@@ -12,7 +12,7 @@ import Util
 
 type Mint = M.ModInt998244353
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/dynamic_point_set_rectangle_affine_rectangle_sum
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/dynamic_point_set_rectangle_affine_rectangle_sum
 main :: IO ()
 main = do
   (!n, !q) <- ints2

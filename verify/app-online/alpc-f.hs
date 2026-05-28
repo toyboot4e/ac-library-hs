@@ -4,7 +4,7 @@ import Data.Proxy (Proxy (..))
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_f
+-- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_f
 main :: IO ()
 main = do
   _ <- BS.getLine

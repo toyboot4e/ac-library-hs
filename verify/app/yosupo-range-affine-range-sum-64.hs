@@ -10,7 +10,7 @@ type Mint = M.ModInt64 998244353
 modInt :: Int -> Mint
 modInt = M.new
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/range_affine_range_sum
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/range_affine_range_sum
 main :: IO ()
 main = do
   (!_, !q) <- ints2

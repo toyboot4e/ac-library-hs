@@ -6,7 +6,7 @@ import Data.Maybe (fromJust)
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/inverse_matrix
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/inverse_matrix
 main :: IO ()
 main = do
   n <- int

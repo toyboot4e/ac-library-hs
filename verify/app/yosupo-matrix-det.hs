@@ -6,7 +6,7 @@ import Data.Maybe (fromJust)
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/matrix_det
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/matrix_det
 main :: IO ()
 main = do
   n <- int

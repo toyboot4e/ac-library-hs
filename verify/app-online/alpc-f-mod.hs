@@ -7,7 +7,7 @@ import Util
 modInt :: Int -> Mint.ModInt998244353
 modInt = Mint.new
 
--- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_f
+-- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_f
 main :: IO ()
 main = do
   _ <- BS.getLine

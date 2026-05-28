@@ -13,7 +13,7 @@ import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 import Util
 
--- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_e
+-- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_e
 main :: IO ()
 main = do
   (!n, !k) <- ints2

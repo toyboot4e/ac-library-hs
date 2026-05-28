@@ -9,7 +9,7 @@ countUniqueSubstringsBS bs = (n * (n + 1)) `div` 2 - VU.sum lcp
     sa = AS.suffixArrayBS bs
     lcp = AS.lcpArrayBS bs sa
 
--- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_i
+-- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_i
 main :: IO ()
 main = do
   s <- BS.getLine

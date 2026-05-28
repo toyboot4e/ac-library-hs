@@ -3,7 +3,7 @@ import Data.Vector qualified as V
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- competitive-verifier: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_g
+-- verification-helper: PROBLEM https://atcoder.jp/contests/practice2/tasks/practice2_g
 main :: IO ()
 main = do
   (!n, !m) <- ints2

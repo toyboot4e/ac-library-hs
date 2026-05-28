@@ -12,7 +12,7 @@ affineP = do
   y <- mintP
   pure $ Affine1.new x y
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/dynamic_tree_vertex_set_path_composite
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/dynamic_tree_vertex_set_path_composite
 main :: IO ()
 main = do
   (!n, !q) <- ints2

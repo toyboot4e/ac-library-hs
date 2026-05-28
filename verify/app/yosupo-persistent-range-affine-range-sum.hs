@@ -16,7 +16,7 @@ modInt = M.new
 capacityFor :: Int -> Int -> Int
 capacityFor n q = 5 * q * max 2 (ceiling (logBase 2 (fromIntegral n) :: Double))
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/persistent_range_affine_range_sum
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/persistent_range_affine_range_sum
 main :: IO ()
 main = do
   (!n, !q) <- ints2

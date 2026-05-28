@@ -2,7 +2,7 @@ import AtCoder.MinCostFlow qualified as MCF
 import Data.Vector.Unboxed qualified as VU
 import Util
 
--- competitive-verifier: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B
+-- verification-helper: PROBLEM https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_6_B
 -- min cost flow
 main :: IO ()
 main = do

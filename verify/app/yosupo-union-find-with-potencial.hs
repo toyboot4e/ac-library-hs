@@ -12,7 +12,7 @@ type Mint = M.ModInt 998244353
 modInt :: Int -> Mint
 modInt = M.unsafeNew . fromIntegral
 
--- competitive-verifier: PROBLEM https://judge.yosupo.jp/problem/unionfind_with_potential
+-- verification-helper: PROBLEM https://judge.yosupo.jp/problem/unionfind_with_potential
 main :: IO ()
 main = do
   (!n, !q) <- ints2
