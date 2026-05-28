@@ -25,36 +25,6 @@
           inherit (haskellNix) config;
         };
 
-        competitive-verifier =
-          with pkgs.python3Packages;
-          pkgs.python3Packages.buildPythonApplication {
-            name = "competitive-verifier";
-            version = "4.1.1";
-            pyproject = true;
-            src = pkgs.fetchFromGitHub {
-              owner = "competitive-verifier";
-              repo = "competitive-verifier";
-              rev = "v4.1.1";
-              sha256 = "sha256-l6yUAwrth1C38xopn2gWKr73U2nzEaVsSFpNLkGN2uM=";
-            };
-            build-system = [ poetry-core ];
-            dependencies = [
-              poetry-core
-            ];
-            propagatedBuildInputs = [
-              colorlog
-              colorama
-              pydantic
-              pyyaml
-              importlab
-              charset-normalizer
-              tomli
-              requests
-              appdirs
-              beautifulsoup4
-            ];
-          };
-
         treefmtEval = treefmt-nix.lib.evalModule pkgs {
           projectRootFile = "flake.nix";
           programs = {
@@ -91,7 +61,8 @@
                   "$@"
               '')
               # Verification
-              competitive-verifier
+              online-judge-tools
+              online-judge-verify-helper
 
               # Formatting
               treefmtEval.config.build.wrapper
@@ -131,8 +102,7 @@
               cd verify
               files="$(ls app/*.hs | ${pkgs.fzf}/bin/fzf -m --history .fzf-history)"
               touch $files
-              competitive-verifier oj-resolve --config .competitive-verifier/config.toml --include $files > /tmp/cv-resolve.json
-              competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30
+              oj-verify run $files --tle 30 -j $(nproc)
             '');
           };
           verify-all = {
@@ -141,8 +111,7 @@
             program = toString (pkgs.writeShellScript "verify-all" ''
               cd verify
               touch app/*
-              competitive-verifier oj-resolve --config .competitive-verifier/config.toml > /tmp/cv-resolve.json
-              competitive-verifier verify --verify-json /tmp/cv-resolve.json --tle 30
+              oj-verify run app/*.hs --tle 30 -j $(nproc)
             '');
           };
         };

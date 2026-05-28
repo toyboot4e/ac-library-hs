@@ -162,18 +162,28 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
 
-      - name: Install competitive-verifier
-        run: pip3 install -U competitive-verifier
+      - name: Install oj-verify
+        run: |
+          pip3 install -U online-judge-verify-helper
+          pip3 install "setuptools<82" # the version with `pkg_resources`
 
       # TODO: cache `~/.cache/online-judge-tools/library-checker-problems/`
-      # TODO: cache `.competitive-verifier/cache/`
+      # TODO: cache `.verify-helper/cache/`
 
-      - name: Run competitive-verifier
+      - name: Run oj-verify
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #   YUKICODER_TOKEN: ${{ secrets.YUKICODER_TOKEN }}
         #   GH_PAT: ${{ secrets.GH_PAT }}
         working-directory: verify
+        env:
+          NUM_PARALLEL: ${{ env.num-parallel }}
+          PARALLEL_INDEX: ${{ matrix.parallel-index }}
         run: |
-          competitive-verifier oj-resolve --config .competitive-verifier/config.toml --include "app/" > /tmp/cv-resolve.json
-          competitive-verifier verify --check-error --verify-json /tmp/cv-resolve.json --tle 30 --split ${{ env.num-parallel }} --split-index ${{ matrix.parallel-index }}
+          # Shard the verify files across the matrix; -j $(nproc) parallelizes within the shard.
+          files="$(find app/ -type f | awk -v n="$NUM_PARALLEL" -v i="$PARALLEL_INDEX" 'NR % n == i')"
+          echo 'target files:'
+          for f in $files ; do
+            echo "- $f"
+          done
+          oj-verify run $files --tle 30 -j "$(nproc)"

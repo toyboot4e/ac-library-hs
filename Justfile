@@ -132,45 +132,20 @@ touch:
 [private]
 alias to := touch
 
-# runs local test for a online judge problem
+# runs local test for selected online judge problems
 verify:
     #!/usr/bin/env bash
     cd verify
-    file="$(basename "$(ls app/*.hs | fzf --history .fzf-history)")"
-    touch "app/$file"
-    competitive-verifier oj-resolve --config .competitive-verifier/config.toml --include "app/$file" > /tmp/cv-resolve.json
-    competitive-verifier verify --check-error --verify-json /tmp/cv-resolve.json --tle 30
+    files="$(ls app/*.hs | fzf -m --history .fzf-history)"
+    touch $files
+    oj-verify run $files --tle 30 -j $(nproc)
 
 [private]
 alias v := verify
 
 # runs local test for all of the online judge problems
 verify-all:
-    #!/usr/bin/env bash
-    cd verify
-    touch app/*
-    rm /tmp/cv-result-*.json
-    competitive-verifier oj-resolve --config .competitive-verifier/config.toml --include "app/" > /tmp/cv-resolve.json
-    # Download test cases sequentially (parallel verify uses --no-download)
-    competitive-verifier download --verify-json /tmp/cv-resolve.json
-    # Run in parallel
-    n=$(nproc)
-    for i in $(seq 0 $((n-1))); do
-      competitive-verifier verify --no-download --verify-json /tmp/cv-resolve.json --tle 30 \
-        --split $n --split-index $i -o /tmp/cv-result-$i.json &
-    done
-    wait
-    # Print summary and failed cases
-    jq -s --raw-output '
-      [.[].files | to_entries[] | {key, status: .value.verifications[].status}] as $all |
-      ($all | group_by(.status) | map({(.[0].status): length}) | add // {}) as $c |
-      ($all | map(select(.status == "failure") | .key) | unique) as $failed |
-      "success: \($c.success // 0) / failure: \($c.failure // 0) / skipped: \($c.skipped // 0)",
-      if ($failed | length) > 0 then
-        "Failed:", ($failed[] | "  " + .)
-      else empty end
-    ' /tmp/cv-result-*.json
-    jq -s -e '[.[].files[].verifications[] | select(.status == "failure")] | length == 0' /tmp/cv-result-*.json > /dev/null
+    cd verify && touch app/* && oj-verify run app/*.hs --tle 30 -j $(nproc)
 
 [private]
 alias va := verify-all
