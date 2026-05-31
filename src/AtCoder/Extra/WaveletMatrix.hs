@@ -90,7 +90,7 @@ data WaveletMatrix = WaveletMatrix
 {-# INLINE build #-}
 build :: VU.Vector Int -> WaveletMatrix
 build ys =
-  let !yDictWm = VU.uniq $ VU.modify (VAI.sortBy compare) ys
+  let !yDictWm = VU.uniq $ VU.modify VAI.sort ys
       !ys' = VU.map (lowerBound yDictWm) ys
       !rawWm = Rwm.build (VG.length ys) ys'
    in WaveletMatrix {..}

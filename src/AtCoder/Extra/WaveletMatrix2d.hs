@@ -123,9 +123,9 @@ new ::
   m (WaveletMatrix2d (PrimState m) a)
 new invWm2d xys = stToPrim $ do
   let n = VG.length xys
-  let xyDictWm2d = VU.uniq . VU.modify (VAI.sortBy compare) $ xys
+  let xyDictWm2d = VU.uniq . VU.modify VAI.sort $ xys
   let (!_, !ys) = VU.unzip xys
-  let yDictWm2d = VU.uniq $ VU.modify (VAI.sortBy compare) ys
+  let yDictWm2d = VU.uniq $ VU.modify VAI.sort ys
   -- REMARK: Be sure to use `n + 1` because the product function cannot handle the case
   --         `yUpper` is `2^{height}`.
   let (!_, !ysInput) = VU.unzip xyDictWm2d
