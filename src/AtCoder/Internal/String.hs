@@ -145,7 +145,7 @@ saIsImpl naiveThreshold doublingThreshold s upper = VU.create $ do
             i <- VGM.read buf $ s VG.! d
             VGM.write buf (s VG.! d) $ i + 1
             VGM.write sa i d
-        VU.iforM_ sumL (VGM.write buf)
+        VU.copy buf sumL
         do
           i <- VGM.read buf $ s VG.! (n - 1)
           VGM.write buf (s VG.! (n - 1)) $ i + 1
@@ -158,7 +158,7 @@ saIsImpl naiveThreshold doublingThreshold s upper = VU.create $ do
               j <- VGM.read buf $ s VG.! (v - 1)
               VGM.write buf (s VG.! (v - 1)) $ j + 1
               VGM.write sa j $ v - 1
-        VU.iforM_ sumL (VGM.write buf)
+        VU.copy buf sumL
         -- TODO: try foldr
         for_ [n - 1, n - 2 .. 0] $ \i -> do
           v <- VGM.read sa i

@@ -275,13 +275,11 @@ convolutionFft a_ b_ = {- VU.force $ -} VU.create $ do
   let m = VU.length b_
   let z = ACIB.bitCeil (n + m - 1)
   a <- VUM.replicate z 0
-  VU.iforM_ a_ $ \i ai -> do
-    VGM.write a i ai
+  VU.copy (VUM.take n a) a_
   info <- newInfo @_ @p
   butterfly info a
   b <- VUM.replicate z 0
-  VU.iforM_ b_ $ \i bi -> do
-    VGM.write b i bi
+  VU.copy (VUM.take m b) b_
   butterfly info b
   VUM.iforM_ b $ \i bi -> do
     VGM.modify a (* bi) i

@@ -264,8 +264,7 @@ buildST vec = do
 
   -- copy the base matrix in [w, 2w) \times [h, 2h):
   V.iforM_ vec $ \y vs -> do
-    VU.iforM_ vs $ \x v -> do
-      VGM.write dataDst (idx wDst (hDst + y) (wDst + x)) v
+    VU.copy (VUM.slice (idx wDst (hDst + y) wDst) wDst dataDst) vs
 
   -- extend the row (y >= h) as a segment tree's internal vector:
   for_ [hDst .. 2 * hDst - 1] $ \y -> do

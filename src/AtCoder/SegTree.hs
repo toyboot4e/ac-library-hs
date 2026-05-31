@@ -485,8 +485,7 @@ buildST vs = do
   let sizeSt = ACIBIT.bitCeil nSt
   let logSt = countTrailingZeros sizeSt
   dSt <- VUM.replicate (2 * sizeSt) mempty
-  VU.iforM_ vs $ \i v -> do
-    VGM.write dSt (sizeSt + i) v
+  VU.copy (VUM.slice sizeSt nSt dSt) vs
   let segtree = SegTree {..}
   for_ [sizeSt - 1, sizeSt - 2 .. 1] $ \i -> do
     updateST segtree i

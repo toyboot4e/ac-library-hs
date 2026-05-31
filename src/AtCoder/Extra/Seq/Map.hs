@@ -164,7 +164,7 @@ build n kvs = stToPrim $ do
   kMap <- VUM.unsafeNew n
   -- note that `unzip` is O(1) for tuples:
   let (!ks, !vs) = VU.unzip $ VU.modify (VAI.sortBy (comparing fst)) kvs
-  VU.iforM_ ks $ VGM.write kMap
+  VU.copy (VUM.take (VU.length ks) kMap) ks
   rootMap <- Seq.newSeq seqMap vs
   pure Map {..}
 

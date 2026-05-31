@@ -692,8 +692,7 @@ buildST vs = do
   let logLst = countTrailingZeros sizeLst
   dLst <- VUM.replicate (2 * sizeLst) mempty
   lzLst <- VUM.replicate sizeLst mempty
-  VU.iforM_ vs $ \i v -> do
-    VGM.write dLst (sizeLst + i) v
+  VU.copy (VUM.slice sizeLst nLst dLst) vs
   let segtree = LazySegTree {..}
   for_ [sizeLst - 1, sizeLst - 2 .. 1] $ \i -> do
     updateST segtree i

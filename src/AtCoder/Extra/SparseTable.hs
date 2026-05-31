@@ -66,9 +66,7 @@ build xs = SparseTable {..}
     !dataSt = V.unfoldrExactN h (VU.splitAt nSt) $ VU.create $ do
       vecData <- VUM.replicate (h * nSt) mempty
       let vec = V.unfoldrExactN h (VUM.splitAt nSt) vecData
-      -- TODO: use VUM.copy
-      VU.iforM_ xs $ \i x -> do
-        VGM.write (vec VG.! 0) i x
+      VU.copy (vec VG.! 0) xs
       VG.izipWithM_
         ( \i row1 row2 -> do
             let len = bit i
