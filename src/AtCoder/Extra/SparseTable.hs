@@ -1,7 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
--- | Sparse table is a data structure that allows you to obtain monoid product of a ideomponent
--- monoids in an interval in \(O(1)\) time after \(O(n \log n)\) time setup.
+-- | Sparse table is a data structure that allows you to obtain monoid product over a sequence of
+-- __ideomponent__ monoid values in an interval in \(O(1)\) time after \(O(n \log n)\) time setup.
+-- Prefer @DisjointSparseTable@, because it allows a wider variety of monoids; this module is here
+-- just for comparison, not for practical use.
 --
 -- In practice, Fenwick tree or segment tree can be faster, but if you need to process so many
 -- monoid product queries, `SparseTable` can have better time complexity.
@@ -18,7 +20,7 @@
 -- >>> Tbl.prod tbl 0 3
 -- Max {getMax = 3}
 --
--- @1.6.0.0
+-- @since 1.6.0.0
 module AtCoder.Extra.SparseTable
   ( SparseTable (..),
     new,
@@ -36,15 +38,24 @@ import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
 
+-- | Sparse table.
+--
+-- @since 1.6.0.0
 data SparseTable a = SparseTable
   { -- | The length of the sequence.
+    --
+    -- @since 1.6.0.0
     nSt :: {-# UNPACK #-} !Int,
     -- | data[i][j] stores monoid product of length 2^i at j.
+    --
+    -- @since 1.6.0.0
     dataSt :: !(V.Vector (VU.Vector a))
   }
   deriving (Show, Eq)
 
--- | \(O(n \log n)\) Creates `SparseTable` for a sequence of ideomponent monoid values.
+-- | \(O(n \log n)\) Creates a `SparseTable` over a sequence of __ideomponent__ monoid values.
+--
+-- @since 1.6.0.0
 new :: (Monoid a, VU.Unbox a) => VU.Vector a -> SparseTable a
 new xs
   | VU.null xs = SparseTable {nSt = 0, dataSt = V.empty}
@@ -72,7 +83,7 @@ new xs = SparseTable {..}
         (V.tail vec)
       pure vecData
 
--- | \(O(1)\) Calculates \(\Pi_{i \in [l, r)} {m_i}\) for ideomponent monoid.
+-- | \(O(1)\) Calculates \(\Pi_{i \in [l, r)} {m_i}\) for the sequence of __ideomponent__ monoid values.
 prod :: (Monoid a, VU.Unbox a) => SparseTable a -> Int -> Int -> a
 prod SparseTable {..} l r = case r - l of
   0 -> mempty
