@@ -28,7 +28,7 @@ prop_randomTest :: Init -> QC.Property
 prop_randomTest Init {..} = Tbl.prod tbl l r QC.=== f l r
   where
     (!l, !r) = lr
-    tbl = Tbl.new xs
+    tbl = Tbl.build xs
     f l r = VU.foldl' (<>) mempty . VU.take (r - l) $ VU.drop l xs
 
 tests :: [TestTree]

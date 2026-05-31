@@ -13,7 +13,7 @@
 -- >>> import AtCoder.Extra.SparseTable qualified as Tbl
 -- >>> import Data.Semigroup (Max (..))
 -- >>> import Data.Vector.Unboxed qualified as VU
--- >>> let tbl = Tbl.new @(Max Int) $ VU.fromList [0, 3, 1, 4, 2]
+-- >>> let tbl = Tbl.build @(Max Int) $ VU.fromList [0, 3, 1, 4, 2]
 -- >>> Tbl.prod tbl 0 0
 -- Max {getMax = -9223372036854775808}
 --
@@ -23,7 +23,7 @@
 -- @since 1.6.0.0
 module AtCoder.Extra.SparseTable
   ( SparseTable (..),
-    new,
+    build,
     prod,
   )
 where
@@ -56,10 +56,10 @@ data SparseTable a = SparseTable
 -- | \(O(n \log n)\) Creates a `SparseTable` over a sequence of __ideomponent__ monoid values.
 --
 -- @since 1.6.0.0
-new :: (Monoid a, VU.Unbox a) => VU.Vector a -> SparseTable a
-new xs
+build :: (Monoid a, VU.Unbox a) => VU.Vector a -> SparseTable a
+build xs
   | VU.null xs = SparseTable {nSt = 0, dataSt = V.empty}
-new xs = SparseTable {..}
+build xs = SparseTable {..}
   where
     !nSt = VU.length xs
     !h = ACIB.ceilingLog2 nSt + 1
