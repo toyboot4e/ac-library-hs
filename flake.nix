@@ -60,6 +60,7 @@
                   "-package-db=$(ghc --print-global-package-db)" \
                   "$@"
               '')
+
               # Verification
               online-judge-tools
               online-judge-verify-helper
@@ -67,10 +68,9 @@
               # Formatting
               treefmtEval.config.build.wrapper
               haskellPackages.cabal-gild
+
               # CI tools
-              # act
-              action-validator
-              actionlint
+              pinact
               zizmor
             ];
           };

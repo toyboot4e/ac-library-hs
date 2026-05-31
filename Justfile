@@ -37,6 +37,10 @@ doc *args:
 [private]
 alias d := doc
 
+[private]
+do *args:
+    cabal haddock --open {{args}}
+
 # runs doctest
 doctest *args:
     cabal repl --with-ghc=doctest --repl-options='-w -Wdefault' {{args}}
@@ -68,6 +72,9 @@ format:
 
 [private]
 alias fmt := format
+
+[private]
+alias f := format
 
 # runs cabal-gild
 format-cabal:
@@ -167,4 +174,5 @@ locate-deps:
 
 # check CI files
 ci-check:
-    zizmor .
+    pinact run -update
+    zizmor . --fix=all
