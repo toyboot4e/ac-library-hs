@@ -4,7 +4,6 @@
   inputs = {
     haskellNix.url = "github:input-output-hk/haskell.nix";
     nixpkgs.follows = "haskellNix/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
     treefmt-nix.url = "github:numtide/treefmt-nix";
   };
 
@@ -13,27 +12,35 @@
       self,
       nixpkgs,
       haskellNix,
-      flake-utils,
       treefmt-nix,
     }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs {
+    let
+      inherit (nixpkgs) lib;
+      systems = lib.systems.flakeExposed;
+      pkgsFor = lib.genAttrs systems (
+        system:
+        import nixpkgs {
           inherit system;
           overlays = [ haskellNix.overlay ];
           inherit (haskellNix) config;
-        };
+        }
+      );
+      forEachSystem = f: lib.genAttrs systems (system: f pkgsFor.${system});
 
-        treefmtEval = treefmt-nix.lib.evalModule pkgs {
+      treefmtEval = forEachSystem (
+        pkgs:
+        treefmt-nix.lib.evalModule pkgs {
           projectRootFile = "flake.nix";
           programs = {
             cabal-gild.enable = true;
             ormolu.enable = true;
           };
-        };
+        }
+      );
 
-        project = pkgs.haskell-nix.cabalProject' {
+      projectFor = forEachSystem (
+        pkgs:
+        pkgs.haskell-nix.cabalProject' {
           src = ./.;
           compiler-nix-name = "ghc984";
           # Be sure to install our versions of test/benchmark dependencies
@@ -66,7 +73,7 @@
               online-judge-verify-helper
 
               # Formatting
-              treefmtEval.config.build.wrapper
+              treefmtEval.${pkgs.stdenv.hostPlatform.system}.config.build.wrapper
               haskellPackages.cabal-gild
 
               # CI tools
@@ -74,27 +81,54 @@
               zizmor
             ];
           };
-        };
+        }
+      );
 
-        flake = project.flake { };
-      in
-      {
-        packages = (flake.packages or { }) // {
+      flakeFor = forEachSystem (pkgs: projectFor.${pkgs.stdenv.hostPlatform.system}.flake { });
+    in
+    {
+      packages = forEachSystem (
+        pkgs:
+        let
+          flake = flakeFor.${pkgs.stdenv.hostPlatform.system};
+        in
+        (flake.packages or { })
+        // {
           default = flake.packages."ac-library-hs:lib:ac-library-hs" or null;
-          format = treefmtEval.config.build.wrapper;
-        };
-        checks = (flake.checks or { }) // {
-          formatting = treefmtEval.config.build.check self;
-          cabal-check = pkgs.runCommand "cabal-check" {
-            src = self;
-            nativeBuildInputs = [ project.pkg-set.config.ghc.package pkgs.cabal-install ];
-          } ''
-            cd $src
-            cabal check
-            touch $out
-          '';
-        };
-        apps = (flake.apps or { }) // {
+          format = treefmtEval.${pkgs.stdenv.hostPlatform.system}.config.build.wrapper;
+        }
+      );
+
+      checks = forEachSystem (
+        pkgs:
+        let
+          flake = flakeFor.${pkgs.stdenv.hostPlatform.system};
+          project = projectFor.${pkgs.stdenv.hostPlatform.system};
+        in
+        (flake.checks or { })
+        // {
+          formatting = treefmtEval.${pkgs.stdenv.hostPlatform.system}.config.build.check self;
+          cabal-check =
+            pkgs.runCommand "cabal-check"
+              {
+                src = self;
+                nativeBuildInputs = [
+                  project.pkg-set.config.ghc.package
+                  pkgs.cabal-install
+                ];
+              }
+              ''
+                cd $src
+                cabal check
+                touch $out
+              '';
+        }
+      );
+
+      apps = forEachSystem (
+        pkgs:
+        (flakeFor.${pkgs.stdenv.hostPlatform.system}.apps or { })
+        // {
           verify = {
             type = "app";
             meta = { };
@@ -114,9 +148,13 @@
               oj-verify run app/*.hs --tle 30 -j $(nproc)
             '');
           };
-        };
-        devShells.default = project.shell;
-        formatter = treefmtEval.config.build.wrapper;
-      }
-    );
+        }
+      );
+
+      devShells = forEachSystem (pkgs: {
+        default = projectFor.${pkgs.stdenv.hostPlatform.system}.shell;
+      });
+
+      formatter = forEachSystem (pkgs: treefmtEval.${pkgs.stdenv.hostPlatform.system}.config.build.wrapper);
+    };
 }
