@@ -31,7 +31,7 @@ jobs:
         #     ghc-version: '9.8'
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup GHC
         uses: ./.github/actions/setup-ghc
@@ -59,7 +59,7 @@ jobs:
         #     ghc-version: '9.8'
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Restore GHC
         uses: ./.github/actions/setup-ghc
@@ -107,7 +107,7 @@ jobs:
         #     ghc-version: '9.8'
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Restore GHC
         uses: ./.github/actions/setup-ghc
@@ -138,7 +138,7 @@ jobs:
         ghc-version: ['9.8.4']
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Restore GHC
         uses: ./.github/actions/setup-ghc
