@@ -34,17 +34,17 @@ jobs:
         #     ghc-version: '9.8'
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@v6.0.2
         with:
           persist-credentials: false
 
       - name: Setup GHC
-        uses: ./.github/actions/setup-ghc
+        uses: $/.github/actions/setup-ghc
         with:
           ghc-version: ${{ matrix.ghc-version }}
 
       - name: Build the library
-        uses: ./.github/actions/build
+        uses: $/.github/actions/build
 
   test:
     needs: build
@@ -64,17 +64,17 @@ jobs:
         #     ghc-version: '9.8'
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@v6.0.2
         with:
           persist-credentials: false
 
       - name: Restore GHC
-        uses: ./.github/actions/setup-ghc
+        uses: $/.github/actions/setup-ghc
         with:
           ghc-version: ${{ matrix.ghc-version }}
 
       - name: Restore the library build artifacts
-        uses: ./.github/actions/build
+        uses: $/.github/actions/build
 
       - name: Build check
         # As a test, build all the components in `ac-library-hs.cabal` (TODO: automate this)
@@ -114,17 +114,17 @@ jobs:
         #     ghc-version: '9.8'
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@v6.0.2
         with:
           persist-credentials: false
 
       - name: Restore GHC
-        uses: ./.github/actions/setup-ghc
+        uses: $/.github/actions/setup-ghc
         with:
           ghc-version: ${{ matrix.ghc-version }}
 
       - name: Restore the library build artifacts
-        uses: ./.github/actions/build
+        uses: $/.github/actions/build
 
       - name: Run doctest
         run: |
@@ -147,20 +147,20 @@ jobs:
         ghc-version: ['9.8.4']
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@v6.0.2
         with:
           persist-credentials: false
 
       - name: Restore GHC
-        uses: ./.github/actions/setup-ghc
+        uses: $/.github/actions/setup-ghc
         with:
           ghc-version: ${{ matrix.ghc-version }}
 
       - name: Restore the library build artifacts
-        uses: ./.github/actions/build
+        uses: $/.github/actions/build
 
       - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        uses: actions/setup-python@v6.2.0
 
       - name: Install oj-verify
         run: |

@@ -1,0 +1,4 @@
+# See https://docs.zizmor.sh/configuration/
+rules:
+  unpinned-uses:
+    disable: true # prefer `actions.lock`
