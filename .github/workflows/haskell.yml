@@ -160,7 +160,7 @@ jobs:
         uses: $/.github/actions/build
 
       - name: Setup Python
-        uses: actions/setup-python@v6.2.0
+        uses: actions/setup-python@v7.1.0
 
       - name: Install oj-verify
         run: |
